@@ -1876,9 +1876,17 @@ def _parse_effect_template_parse6(r: BinReader, *, thunderspy: bool = False) -> 
     - **Name is a single inline string in Parse6**, not a string_array
       (despite the descriptor labeling it 0x500009). Empirically verified
       by hand-decoding multiple records.
-    - **No DurationExpr/MagnitudeExpr**. Those are HC additions for
-      expression-based magnitudes; Parse6 has Duration immediately
-      followed by Magnitude.
+    - **DurationExpr/MagnitudeExpr ARE present**, as string_arrays between
+      Duration and Magnitude — same as Parse7, NOT an HC-only addition. They
+      are empty for ~99% of templates but carry real RPN token lists for
+      expression-scaled magnitudes: 900 Rebirth templates carry a
+      magnitude_expression (Brute Fury's `Rage_Buff` → `kRage source> .02 *`,
+      Possession's HP-differential scaling, Inner Will's mez protection, …) and
+      8 carry a duration_expression. A prior version read-and-DISCARDED both
+      arrays behind a "always empty in Parse6" comment, which zeroed every
+      Rebirth expression magnitude (most visibly leaving Brute Fury underivable
+      — DATA-GAP-REGISTER INHERENT-2). The byte consumption was already correct;
+      only the value was thrown away.
 
     The downstream `EffectTemplate` shape is HC-shaped, so we map Parse6
     fields into the closest HC equivalents and fill the rest with
@@ -1982,15 +1990,21 @@ def _parse_effect_template_parse6(r: BinReader, *, thunderspy: bool = False) -> 
     # Duration + DurationExpr + Magnitude + MagnitudeExpr.
     #
     # The depth=1 descriptor at `0x1408e8a10` lists *Expr fields between
-    # Duration and Magnitude. Parse6 keeps writing them as empty
-    # string_arrays (count=0, 4 bytes each) even though the older
-    # binary never carries an actual expression payload — the empty
-    # count is part of the layout and must be consumed.
+    # Duration and Magnitude — RPN token string_arrays, empty (count=0,
+    # 4 bytes each) for ~99% of templates but NON-EMPTY for
+    # expression-scaled magnitudes. They must be READ (not just skipped):
+    # the value is real. 900 Rebirth templates carry a magnitude_expression
+    # (Brute Fury's `Rage_Buff` → `kRage source> .02 *`, i.e. 2%
+    # damage-Strength per point of the kRage meter; DATA-GAP INHERENT-2) and
+    # 8 carry a duration_expression. Joined with spaces to match the
+    # group-level requires_expression representation, exactly as the Parse7
+    # path does.
     #
     # Hand-decoded against Suffocate (Dominator/Water_Control): mag=3
     # (Mag-3 hold) lives at the byte that the previous parser was
-    # reading as a different field, off by 8 bytes. Adding the two
-    # empty string_array reads here aligns it correctly.
+    # reading as a different field, off by 8 bytes. Consuming the two
+    # string_array reads here aligns it correctly (alignment was always
+    # right; a prior version discarded the decoded value).
     #
     # For mez attribs (Held, Immobilized, Sleep, Stunned, …), Parse6
     # uses **Scale as the base duration in seconds** and Magnitude as
@@ -1998,9 +2012,9 @@ def _parse_effect_template_parse6(r: BinReader, *, thunderspy: bool = False) -> 
     # multiplier with Magnitude=0 (typical). Downstream converters
     # already understand both conventions.
     duration = r.read_f4()
-    r.read_string_array()  # DurationExpr (always empty in Parse6)
+    dur_expr = " ".join(r.read_string_array())  # DurationExpr (RPN tokens; usually empty)
     magnitude = r.read_f4()
-    r.read_string_array()  # MagnitudeExpr (always empty in Parse6)
+    mag_expr = " ".join(r.read_string_array())  # MagnitudeExpr (RPN tokens; usually empty)
 
     # Tail: RadiusInner/Outer, Suppress, ContinuingFX, ConditionalFX,
     # Power, Reward, Params, EntityDef, PriorityList[Passive], display-
@@ -2029,6 +2043,8 @@ def _parse_effect_template_parse6(r: BinReader, *, thunderspy: bool = False) -> 
         duration=duration,
         magnitude=magnitude,
         delay=delay,
+        duration_expression=dur_expr,
+        magnitude_expression=mag_expr,
         application_period=app_period,
         tick_chance=chance,
         jit_requires=jit_requires,
