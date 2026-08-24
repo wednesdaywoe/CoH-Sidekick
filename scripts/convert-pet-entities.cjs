@@ -10,6 +10,16 @@ const path = require('path');
 const { parseDatasetArg, dataPath, datasetPath } = require('./_dataset-paths.cjs');
 const { isPvpOnlyGroup: isPvpOnlyByRequires } = require('./_pv-scope.cjs');
 const { gateText } = require('./_gate-tokens.cjs');
+// The atomizer: the same collectors + encoder the powerset converter runs, so a pet
+// ability's atoms are minted by the identical code path (window_slots' pet-merge census
+// grades the atom side against the PetEffect rows it already ships). Requiring the
+// powerset converter is side-effect-free past its dataset reads (require.main-guarded
+// main), and it shares this script's parseDatasetArg, so the dataset is the same.
+const {
+  _readPowerFile: readGatedPowerFile,
+  collectAtomTemplates,
+  encodeAtomsForEmit,
+} = require('./convert-powerset.cjs');
 
 const datasetId = parseDatasetArg();
 
@@ -401,6 +411,22 @@ const BUFF_DEF_TYPE_MAP = {
   psionic: 'psionic', toxic: 'toxic',
 };
 
+// The AGGREGATE defence attrib, which names no vector: the game raises defence against
+// everything, and the twin publishes it as a scalar `effects.defenseBuff` beside its own
+// positional map (`convert-powerset.cjs`'s BASE_DEFENSE special handling). It is absent from
+// BUFF_DEF_TYPE_MAP because that map answers "which vector is this", and the answer here is
+// "all of them" — so every branch consulting the map declined the row, and the name-keyed
+// DEBUFF_ATTRIBS caught the ally-facing ones while the self-facing ones fell out entirely
+// (ENT-18).
+//
+// Spelled out as every vector rather than left implicit. This route's consumer keys per
+// vector — `buff_pets::aura_keys` maps `defenseTypes` through `defense_key` — so a row naming
+// no type writes nothing at all, and an absent list would ship an inert row rather than an
+// "all" one. Derived from the positional map's own values so the two cannot drift; it is the
+// same eleven vectors `defense_key` resolves.
+const AGGREGATE_DEFENSE_ATTRIBS = new Set(['base_defense', 'defense']);
+const ALL_DEFENSE_TYPES = [...new Set(Object.values(BUFF_DEF_TYPE_MAP))];
+
 // Resistance-buff attribs arrive as damage-type `*_Dmg` names on a resistance
 // aspect; normalize to the calc's res sub-type key (resSmashing/resLethal/…).
 const BUFF_RES_TYPE_MAP = {
@@ -546,6 +572,13 @@ function extractSelfBuff(template) {
         const key = BUFF_DEF_TYPE_MAP[a];
         if (key && !defenseTypes.includes(key)) defenseTypes.push(key);
       }
+      // The aggregate attrib names every vector — Moment of Glory's `Base_Defense 9.5` was
+      // dropped whole here while its resistance half at the same scale published seven rows.
+      if (attribsLower.some(a => AGGREGATE_DEFENSE_ATTRIBS.has(a))) {
+        for (const ty of ALL_DEFENSE_TYPES) {
+          if (!defenseTypes.includes(ty)) defenseTypes.push(ty);
+        }
+      }
       if (defenseTypes.length > 0) {
         out.push({ type: 'SelfDefense', scale, table, defenseTypes });
       }
@@ -636,11 +669,26 @@ function extractBuffAura(template) {
 
   // Defense buff: `*_Buff_Def` table (aspect Current). Collect every def sub-type.
   // The leading underscore + debuff guard keeps `*_Debuff_Def` (a foe -Def) out.
-  if (/_buff_def$/.test(tableLower) && isBuffTable) {
+  //
+  // The aggregate attrib rides whatever table its power uses rather than a `*_Buff_Def` one
+  // (Seductive Song's is `Melee_Ones`), so it answers to the same "not a debuff table" rule
+  // the self-buff branch already applies to Lore's Evasion. The positional path keeps its
+  // tighter table gate: whether a positional attrib on a bare Ones table is an ally buff is a
+  // separate question with its own population, and widening it here would answer it silently.
+  if (isBuffTable) {
     const defenseTypes = [];
+    if (/_buff_def$/.test(tableLower)) {
+      for (const a of attribsLower) {
+        const key = BUFF_DEF_TYPE_MAP[a];
+        if (key && !defenseTypes.includes(key)) { defenseTypes.push(key); consumed.add(a); }
+      }
+    }
     for (const a of attribsLower) {
-      const key = BUFF_DEF_TYPE_MAP[a];
-      if (key && !defenseTypes.includes(key)) { defenseTypes.push(key); consumed.add(a); }
+      if (!AGGREGATE_DEFENSE_ATTRIBS.has(a)) continue;
+      for (const ty of ALL_DEFENSE_TYPES) {
+        if (!defenseTypes.includes(ty)) defenseTypes.push(ty);
+      }
+      consumed.add(a);
     }
     if (defenseTypes.length > 0) {
       out.push({ type: 'DefenseBuff', scale, table: template.table, defenseTypes });
@@ -1246,12 +1294,38 @@ function processPetPower(powerFilePath, powerData) {
   const rechargeUnaffected = (powerData.strengths_disallowed || [])
     .some(s => s.toLowerCase() === 'rechargetime');
 
+  // Atom side (job 4): mint this ability's atoms through the powerset converter's
+  // collectors so the window_slots pet-merge census can grade the atom path against
+  // the PetEffect rows above. Read through the gated reader — the powerset pipeline
+  // applies applyVariantGates at load, and a pet ability's atoms must carry the same
+  // gates or the census compares two different sources.
+  //
+  // A caller with no file to re-read mints no atoms. That is the classification tests,
+  // which hand-build a powerData to grade one row's face and pass no path; the pipeline
+  // itself always has one, since readJsonFile would have returned null otherwise. The
+  // throw below is scoped to a path that WAS given and still failed, so the invariant
+  // stays loud where it is real instead of firing on a caller that never had a file.
+  let atoms;
+  if (powerFilePath) {
+    try {
+      const gated = readGatedPowerFile(powerFilePath);
+      const templates = collectAtomTemplates(gated.effects);
+      atoms = encodeAtomsForEmit(templates, templates, powerData.name);
+    } catch (err) {
+      throw new Error(`[pet-atoms] ${powerData.name}: atom emission failed: ${err.message}`);
+    }
+  }
+
   return {
     name: powerData.name,
     displayName: powerData.display_name || powerData.name.replace(/_/g, ' '),
     type: powerData.type, // Click, Auto, Toggle
     damage,
     effects: effects.length > 0 ? effects : undefined,
+    // The ability's atoms, minted by the powerset converter's collectors (job 4). The
+    // EncodedAtom[] wire form is the same shape Power.atoms ships; the window_slots
+    // pet-merge census runs these through bag_slots and grades them against `effects`.
+    atoms,
     recharge: powerData.recharge_time || 0,
     castTime: powerData.activation_time || 0,
     activatePeriod: powerData.activate_period || undefined,
@@ -1835,6 +1909,7 @@ function abilityLines(ability, indent) {
   field('type', JSON.stringify(ability.type));
   field('damage', JSON.stringify(ability.damage));
   if (ability.effects) field('effects', JSON.stringify(ability.effects));
+  if (ability.atoms) field('atoms', JSON.stringify(ability.atoms));
   field('recharge', ability.recharge);
   field('castTime', ability.castTime);
   if (ability.activatePeriod) field('activatePeriod', ability.activatePeriod);
@@ -1908,6 +1983,10 @@ function generateTypeScript(entities) {
   lines.push(`  type: 'Click' | 'Auto' | 'Toggle';`);
   lines.push(`  damage: PetDamageEntry[];`);
   lines.push(`  effects?: PetEffect[];`);
+  lines.push(`  /** The ability's atoms, minted by the powerset converter's collectors (job 4).`);
+  lines.push(`   *  Same EncodedAtom[] wire form as Power.atoms; the window_slots pet-merge`);
+  lines.push(`   *  census runs these through bag_slots and grades them against effects. */`);
+  lines.push(`  atoms?: unknown[];`);
   lines.push(`  recharge: number;`);
   lines.push(`  castTime: number;`);
   lines.push(`  activatePeriod?: number;`);

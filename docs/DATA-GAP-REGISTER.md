@@ -19,7 +19,7 @@ each leg can see is in [gaps/audit-legs.md](gaps/audit-legs.md), the method note
 
 ## Current frontier
 
-**0 open, of 212 entries.** When an entry is open it is listed here with what it's waiting on.
+**0 open, of 215 entries.** When an entry is open it is listed here with what it's waiting on.
 Closed entries keep their narrative in [docs/gaps/](gaps/); this section stays a pointer list and
 doesn't accumulate closure prose.
 
@@ -84,8 +84,9 @@ guards and their mutations) lives in its [gaps/](gaps/) file, not here.
 
 ## Parser + binary fidelity
 
-[Full detail](gaps/parser-fidelity.md) — 36 of 37 closed
+[Full detail](gaps/parser-fidelity.md) — 38 of 38 closed
 
+- [x] **PARSE6-3** — WITHDRAWN, no defect: the Parse6 `tags` census counted a label, and the mechanic is a gate. Containment is a mez-gated damage twin and is comparably populated on all four forks (377/325/326/377); Domination reaches the UI on all four. The Parse6 field is `AttribModTemplate.pchName`, read correctly. Gated by `mechanic_gates_survive_every_fork.rs`
 - [x] **STACK-5** — the encoder dropped `StackByAttribAndKey`, so the converter's per-target regen skip had no wire spelling and the mirror's keyed-row proxy misfired on Reactive Regeneration's keyless `Stack` rows; the flag now rides slot 44 and the mirror asks it
 - [x] **LIFETIME-1** — the power's usage-limit/lifetime block (parse-table fields 56–65) was decoded and discarded on both layouts, so a granted charge's authored decay (`Combo_Level_1: LifeTime 6`, Energy Focus 15s) read as immortal; now exported sparsely with a def-oracle gate
 - [x] **MAXBOOST-1** — a stated `max_boosts: 0` is literal and absence is a stamped 6; the binary has no third state, and all three converters now read it that way
@@ -128,7 +129,7 @@ guards and their mutations) lives in its [gaps/](gaps/) file, not here.
 
 ## Pets + summoned entities
 
-[Full detail](gaps/pets-entities.md) — 16 of 16 closed
+[Full detail](gaps/pets-entities.md) — 18 of 18 closed
 
 - [x] **ENT-1** — Rebirth pet commandability was guessed from the class name
 - [x] **ENT-2** — the villaindef level element was read at Homecoming's width on both forks
@@ -145,6 +146,15 @@ guards and their mutations) lives in its [gaps/](gaps/) file, not here.
 - [x] **ENT-14** — the wire `EntCreate` atom carries neither the pet lifespan nor an entity key; `summonWindow` now says which row IS the power's window
 - [x] **ENT-16** — a summon whose `EntCreate` states redirect powers rather than an `entity_def` was walked by nothing; the converter now resolves it to the entity that declares exactly those powers
 - [x] **ENT-15** — the `activation_effects` buff-dedup filter dropped a summon's create-entity rows before they could become atoms
+- [x] **ENT-18** — the aggregate `base_defense` attrib names no vector, so it was missing from the
+  converter's positional defence map and every branch reading that map declined it: the ally path
+  published a pet's +Def to its owner as a DEBUFF, the self path dropped it whole; it now expands
+  to the eleven vectors `defense_key` resolves
+- [x] **ENT-19** — a `Heal`-attrib heal has two display homes: the powerset converter routes it into
+  `damage` for `display_effects`'s `healing_from_damage` transform and writes no bag key, while the
+  pet converter emits a `Heal` row the merge publishes as `healing`; adjudicated on the ground that
+  `damage` is an `EXECUTION_STATS` def field no atom router writes, scoped to the bag→atom direction
+  because the key's `MaxHp` half is atom-projected and disjoint, and pinned by a staleness assert
 - [x] **ENT-17** — the inline pseudo-pet route classified an ally +Defense, +Absorb or scalar
   +Regen/+Recovery/+ToHit/+Recharge aura as nothing at all, where its entity-route twin has read all
   four families since ENT-9, so a buff a summon delivers reached no total and left no trace to
