@@ -57,18 +57,18 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 263 entries.** PROD6B-BETA-PARITY — the parity file is green (63/63) after the 980
-   real rows closed 2026-09-08. Left open are its two sibling suites, `supportModifierReach` (4)
-   and `adjuster-contribution` (1). The beta's remaining red assertions are rostered per file in
-   [strip1-beta-port](streams/strip1-beta-port.md).
+**0 open, of 263 entries.** PROD6B-BETA-PARITY closed 2026-09-08, the last open row. The beta's
+   remaining red assertions are rostered per file in
+   [strip1-beta-port](streams/strip1-beta-port.md), and the carried residuals below are where the
+   named work now lives — the `+ extra instance` hint is the one this closure added.
 
-**Carried residuals — named work inside closed entries.** Seven items were scoped out of a closure
+**Carried residuals — named work inside closed entries.** Eight items were scoped out of a closure
 and recorded there rather than reopened. They are not `[ ]` rows: their hosts *are* closed with
 guards, and nothing leaves this file as less.
 
 They are listed in the next section so a session sees them without reading four narratives first.
 
-The seven residuals are downstream of a faithful parse, and the parse itself is still clean.
+The eight residuals are downstream of a faithful parse, and the parse itself is still clean.
 
 ---
 
@@ -76,6 +76,23 @@ The seven residuals are downstream of a faithful parse, and the parse itself is 
 
 Open work that lives inside a closed entry. Each names its host; the host's narrative is where the
 measurement went, and where a closure for the residual belongs too.
+
+- **The `+ extra instance` hint reports no collision anywhere** — host **PROD6B-BETA-PARITY**
+  ([pipeline-provenance](gaps/pipeline-provenance.md)). `describeAdjusterContribution` asks
+  `k in power.effects` whether an additive conditional's key collides with the base — the bag
+  STRIP-1 emptied — so every key reads as NEW and the hint has stopped rendering. A stance that
+  casts a second simultaneous instance is described as adding a new effect. Same starved probe as
+  the 980 rows and `applyActiveConditionals`' own merge; the beta cannot ask the atom-projected
+  base surface because it has no router for it, and `ContributionHint` is handed no projection.
+  **Goal** — the hint's collision test asks a base surface the strip did not empty, so it names a
+  second instance where the game stacks one.
+  **Done when** — the base-presence probe reads an atom-derived surface on both sides (the hint and
+  `applyActiveConditionals`); a census names the collisions per fork; and
+  `adjuster-contribution.test.ts`'s stated skip has flipped back to its real assertion by its own
+  precondition rather than by hand.
+  **Check** — `npx vitest run --testTimeout=120000 src/components/info/adjuster-contribution.test.ts`
+  in `../CoH-Sidekick` passes today through the skip. Falsified if it passes with
+  `withAuthoredBase.length > 0`, which would mean the bag returned and the assertion did not flip.
 
 - **Absorb fold + stack pre-scan** — host **ABSORB-4** ([stat-routing](gaps/stat-routing.md)).
   `absorbValue` reproduces the shield's value but not the converter's absorb-stack pre-scan, which
@@ -613,7 +630,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 55 of 56 closed
+[Full detail](gaps/pipeline-provenance.md) — 56 of 56 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -831,22 +848,11 @@ measurement went, and where a closure for the residual belongs too.
 - [x] **STACKINFO-1** — the targets-hit slider reached NO power on any fork, and its per-foe growth was dead in the engine beside it: both readers asked the AUTHORED bag what STRIP-1 had emptied. Closed 2026-09-07 — both arms read `per_target` / `stack_cap` now; 33/33/36/32 per-foe + 343/376/313/317 stack sliders back, engine rows up 46/38/29/46%. Guards mutation-checked.
   verify: file:CoH-Sidekick/src/components/info/stackingSlider.test.ts
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
-- [ ] **PROD6B-BETA-PARITY** — the suite graded the engine against a resolver whose authored input
-  STRIP-1 removed. Five sub-classes closed, **36 red -> 0 in the parity file**: class 1 (20,613 of
-  21,603 hard rows were an unwitnessed side), STACKINFO-1, class 4, `Power_Surge.hold`, and the
-  980 real rows (2026-09-08 — one cause, not two families: both merges decline a colliding key in
-  `additive` mode, but the beta's collision test asks the bag STRIP-1 emptied, so every entry's
-  copy filled in and the resolver read the CONDITIONAL's atom for a key the power's own atoms
-  carry; adjudicated structurally, 609 rows pinned by value per fork). Left open:
-  `supportModifierReach` (4) and `adjuster-contribution` (1), measured 2026-09-07, neither
-  diagnosed.
-  **Goal** — the two sibling suites diagnosed and settled by the side the export supports.
-  **Done when** — each is adjudicated with a guard that pins the recovered value; no arm accepts a
-  row because the other side lacks the key.
-  **Check** — `npx vitest run src/components/info/supportModifierReach.test.ts
-  src/components/info/adjuster-contribution.test.ts` in `../CoH-Sidekick`; **4 + 1** failures on
-  committed HEAD, and `powerProjectionParity.test.ts` is **63/63**. Falsified if the parity file is
-  red again, or if either sibling's red is not in the file this key names.
+- [x] **PROD6B-BETA-PARITY** — the suite graded the engine against a resolver whose authored input
+  STRIP-1 removed. Closed 2026-09-08, **36 red -> 0** across six sub-classes; the last was one
+  starved collision test standing behind both remaining families, and the two sibling suites' five
+  reds were anti-vacuity floors reporting a population of zero. Residual: the `+ extra instance`
+  hint.
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 - [x] **KB-INFO** — the `_Info` display-damage resolution's knockback half (Remote Bomb's
   scale-4 PvE KB, the "not doubled" claim) had its ONLY home in the retired

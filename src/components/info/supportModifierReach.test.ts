@@ -27,8 +27,9 @@ import { getAllPowerPools } from '@/data/power-pools';
 import { getAllEpicPools } from '@/data/epic-pools';
 import { getArchetypeIds, STANDARD_ARCHETYPE_IDS } from '@/data/archetypes';
 import { resolvePowerMagnitudes } from './resolvePowerMagnitudes';
+import { buildDisplayEffects } from './buildDisplayEffects';
 import { EFFECT_RESOLUTION } from '@/data/generated/effect-registry.generated';
-import type { PowerEffects } from '@/types';
+import type { Power, PowerEffects } from '@/types';
 
 const SERVERS = ['homecoming', 'rebirth', 'thunderspy', 'brainstorm'] as const;
 
@@ -139,8 +140,14 @@ describe('PROD6B-2b: archetype-name support modifier reachability', () => {
       for (const [setId, set] of allPowerSources()) {
         for (const archetypeId of archetypesFor(setId, allArchetypes)) {
           for (const power of set.powers) {
-            const effects = power.effects;
-            if (!effects) continue;
+            // The bag the DISPLAY resolves, not the authored one. This walked `power.effects`
+            // until 2026-09-08, and STRIP-1 emptied that for every power on every fork — so the
+            // sweep resolved nothing and both floors below went to zero while the invariant they
+            // guard stayed green on a population of none. The surfaces have never resolved the
+            // authored bag; reading the built one is what this file's own header claims ("no
+            // reimplementation of the resolution to disagree with what the display actually
+            // runs"), and it is where the `accuracy` rows the original finding was ABOUT live.
+            const effects = buildDisplayEffects(power as unknown as Power);
             powersProbed++;
             const result = probe(effects, archetypeId);
             capableRows += result.capableRows;
@@ -164,21 +171,40 @@ describe('PROD6B-2b: archetype-name support modifier reachability', () => {
           `  reached by set: ${top(byPrefix, 12)}\n  reached by effect key: ${top(byEffectKey, 12)}`,
       );
       if (archetypeOwnedReached.length) {
+        // Expected since the input moved to the display bag — an AT-owned power's `accuracy` is
+        // minted there where the authored bag never carried it. Reported, not failed: the axis
+        // under test is the KEY, asserted below.
         // eslint-disable-next-line no-console
-        console.error(`\n[PROD6B-2b] ${server} AT-OWNED (${archetypeOwnedReached.length}):\n    ${archetypeOwnedReached.slice(0, 40).join('\n    ')}`);
+        console.warn(`[PROD6B-2b] ${server}: ${archetypeOwnedReached.length} of the reached rows are archetype-owned, e.g.\n    ${archetypeOwnedReached.slice(0, 3).join('\n    ')}`);
       }
 
-      // "Nothing archetype-owned" is only evidence if the sweep resolved rows that could
-      // have, and actually drove some of them onto the fallback.
+      // "Nothing reaches it" is only evidence if the sweep resolved rows that could, and drove
+      // some of them onto the fallback.
       expect(capableRows, `${server}: sweep resolved no modifier-capable row`).toBeGreaterThan(0);
       expect(reachedAll.length, `${server}: sweep reached the fallback on no row`).toBeGreaterThan(0);
 
-      // The invariant that keeps the retired rule retired. An AT-owned set is the only kind
-      // that can carry a `defender`/`controller` prefix, so as long as none of them falls
-      // through, no support modifier could apply even if one were still computed. This also
-      // guards the Rebirth Guardian class of bug (see at-table-archetype-coverage.test.ts):
-      // an AT-owned row landing here means its modifier table stopped resolving.
-      expect(archetypeOwnedReached, `${server}: an archetype-owned powerset fell through to the table-less fallback`).toEqual([]);
+      // The invariant that keeps the retired rule retired, re-cut 2026-09-08 onto the axis the
+      // measurement actually supports: the KEY, not the powerset prefix.
+      //
+      // PROD6B-2b recorded that the fallback is reached only by `accuracy` on POOL and EPIC
+      // powers, and that no AT-owned row falls through at all. The first half holds. The second
+      // was an artefact of the input: this sweep read `power.effects`, where an AT-owned power's
+      // accuracy never lived (it is on `stats`; only `transformPoolPower` puts execution stats in
+      // the bag). Against the bag the display resolves, AT-owned rows fall through too — 3339 /
+      // 2806 / 2798 / 3420 per fork — and every one of them is still `accuracy`. So the retired
+      // rule WOULD have scaled a Defender's accuracy had it survived, which makes its deletion
+      // more necessary than the "it could never fire" note claimed, not less.
+      //
+      // What the rule's scope actually needs is that no BUFF/DEBUFF row is table-less, and that
+      // is what this pins: the reached population is exactly the execution keys. A buff key
+      // appearing here means a modifier table stopped resolving (the Rebirth Guardian class of
+      // bug — see at-table-archetype-coverage.test.ts), and it names the key rather than leaving
+      // it inside a count.
+      const reachedNonExecution = [...byEffectKey.keys()].filter(
+        (key) => (EFFECT_RESOLUTION[key] as { category?: string } | undefined)?.category !== 'execution',
+      );
+      expect(reachedNonExecution, `${server}: a non-execution key fell through to the table-less fallback`).toEqual([]);
+      expect([...byEffectKey.keys()].sort(), `${server}: the reached key set moved`).toEqual(['accuracy']);
     }, 120000);
   });
 });
