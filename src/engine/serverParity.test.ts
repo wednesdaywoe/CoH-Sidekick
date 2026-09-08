@@ -333,6 +333,50 @@ suite('PROD5 — engine vs legacy dashboard parity, per server', () => {
     const legacy = legacyCalculateCharacterTotals(build, false, undefined, {});
     const engine = engineResult(server, build);
 
+    // BPORT13 floor: the oracle's ACTIVE-POWERS PASS has to have contributed. The fixture
+    // guard above says the build selected powers; it says nothing about whether the oracle
+    // then read them, and that is the failure this file actually had. BPORT7 emptied
+    // `power.effects`, an `if (!power.effects) continue;` at the head of that pass turned from
+    // a skip for atom-less legacy powers into a skip for every power on every fork, and the
+    // oracle stopped grading anything. It went red only because the engine did not — had both
+    // sides gone quiet together this would have reported a clean parity between two empty
+    // results. A comparison needs a floor under each arm, not just under its input.
+    //
+    // "Non-zero totals" is too weak a floor to catch it: set bonuses, accolades and incarnates
+    // are computed in other passes and keep the result non-zero with every power skipped. So
+    // the floor is differential — the same build with its powers removed must produce a
+    // DIFFERENT answer. That is the pass contributing, stated so it cannot be satisfied by any
+    // other one.
+    const stripped = buildFor(server);
+    stripped.primary = { ...stripped.primary, powers: [] };
+    stripped.secondary = { ...stripped.secondary, powers: [] };
+    stripped.pools = [];
+    stripped.epicPool = null;
+    const legacyStripped = legacyCalculateCharacterTotals(stripped, false, undefined, {});
+    const contributed = Object.entries({ ...legacy.stats, ...legacy.globalBonuses })
+      .filter(([key]) => !UNMAPPED.has(key) && !ADJUDICATED[server].has(key.toLowerCase()))
+      .filter(([key, v]) => {
+        const w = ({ ...legacyStripped.stats, ...legacyStripped.globalBonuses } as Record<string, unknown>)[key];
+        return typeof v === 'number' && typeof w === 'number' && Math.abs(v - w) > F32_TOLERANCE;
+      });
+    expect(
+      contributed.length,
+      `${server}: the legacy oracle's active-powers pass contributed nothing — it is not grading the engine`,
+    ).toBeGreaterThan(0);
+
+    // What this floor does NOT catch, stated because a floor whose reach is assumed is worse
+    // than none. It was written for the BPORT7 regression and it does not detect it: with the
+    // guard reinstated, `contributed` is still non-empty, because part of the pass runs ABOVE
+    // the point the guard stood at — enhancement folding, toggle end costs, per-power set-bonus
+    // collection — and that half keeps contributing while every buff arm below is skipped.
+    // Measured, not assumed: reinstating the `continue` reds 11 of these 12 tests and this
+    // assertion is not one of them.
+    //
+    // So the diff below remains the guard that catches a starved oracle, and this floor covers
+    // only the stronger failure of the pass going wholly silent. A floor scoped to the buff
+    // arms alone would be the right shape and needs a fixture that resolves inside the oracle's
+    // own power lookup rather than the engine's — filed rather than guessed at.
+
     // Hard invariants: the per-serverId load path returned real, sane numbers.
     expect(engine.errors, `${server}: engine returned errors`).toEqual([]);
     for (const [key, value] of Object.entries({ ...engine.stats, ...engine.global })) {

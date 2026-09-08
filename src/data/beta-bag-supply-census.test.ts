@@ -12,6 +12,37 @@
  * changes what the port is allowed to delete. Counts stay out of the assertions for the same
  * reason `emit-totals-fixtures` freezes shapes rather than magnitudes.
  *
+ * **BPORT13 re-took the measurement.** This file pins SETS precisely so that a change in supply
+ * has to be read and signed for rather than absorbed, and BPORT7 is the largest change in
+ * supply the beta will ever see. Four things moved, and one of them falsifies a claim the port
+ * was relying on:
+ *
+ *  1. **Six of the nine `MINT_ONLY_SLOTS` did not survive the strip.** The set's own comment
+ *     said "BPORT7's regen empties the authored bag and cannot touch these". It could:
+ *     `defense`, `fly`, `runSpeed`, `runSpeedUnenhanced`, `jumpHeight` and `jumpSpeed` all
+ *     report `displayMint: 0` now and are DEAD. The distinction the set needed was not
+ *     minted-vs-emitted, it was where the mint READS FROM. `castTime`, `enduranceCost`,
+ *     `accuracy`, `range`, `recharge`, `radius`, `arc` and `maxTargets` mint out of
+ *     `power.stats` and are untouched; the six that died were `buildDisplayEffects` folding the
+ *     bag's own `movement` container and the pet-aura fold reading a pet power's bag — mints of
+ *     the bag, not mints beside it. A mint is strip-proof only if its source is.
+ *  2. **The DEAD set grew from 6 to 27**, which is the strip working: a read slot whose
+ *     converter supply is gone and whose mint does not reach it is a reader over an empty
+ *     shelf, and naming all 27 is what lets BPORT3/BPORT4 tell a dead read from a live one.
+ *  3. **`rechargeBuff` lost its converter supply entirely** — `own` was 317 and is 0. It stays
+ *     LIVE on 20 conditional carriers, which is a different argument for the same verdict and
+ *     has to be written down as such.
+ *  4. **Both undeclared-key sets emptied.** `activationTime`/`endurance`/`interruptTime` were
+ *     un-renamed execution stats in the emitted bag and went with it; the two movement mints
+ *     went with the six above.
+ *
+ * And one thing this census does NOT see, recorded here because BPORT3 and BPORT4 adjudicate
+ * deletions against its `own` column: **the overrides layer.** `generatedModules()` walks
+ * `src/data/datasets/<ds>/generated` only, so a hand-written override carrying an `effects` key
+ * is invisible to every `own` count in this file. 36 homecoming override files still carry one
+ * (see the guard at the bottom). A slot this census calls `own: 0` may still be supplied on
+ * Homecoming and on no other fork, which is exactly the shape of hole TEAMBUFF-1 was.
+ *
  * Run as a child process rather than required in-process: the census loads every generated
  * module on all four datasets (~12.5k modules, ~1.3 GB peak), and a vitest worker holding
  * that alongside the rest of the suite is how a runner gets OOM-killed. The child also
@@ -19,10 +50,20 @@
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
 const REPO = path.resolve(__dirname, '../..');
+
+/** Every `.ts` file under a directory, recursively; empty if the directory does not exist. */
+function listTs(dir: string): string[] {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) return listTs(full);
+    return e.isFile() && full.endsWith('.ts') ? [full] : [];
+  });
+}
 const SCRIPT = path.join(REPO, 'scripts/beta-bag-supply-census.cjs');
 
 interface Row {
@@ -77,7 +118,19 @@ interface Census {
  * counted as unread. A registered display row that no supplier ever fills is dead in the
  * same way the other four are.
  */
-const ZERO_SUPPLY_SLOTS = ['dot', 'elusivity', 'protection', 'flySpeed', 'speedBuff', 'enduranceCrash'];
+const ZERO_SUPPLY_SLOTS = [
+  // The six BPORT1 found: no supplier on any fork, before or after the strip.
+  'dot', 'elusivity', 'protection', 'flySpeed', 'speedBuff', 'enduranceCrash',
+  // Converter-supplied until BPORT7 emptied the bag, and no mint reaches them.
+  'accuracyBuff', 'accuracyDebuff', 'damage', 'defenseBuffSuppressible', 'movementCapBump',
+  'perceptionDebuff', 'placate', 'repel', 'specialDebuff', 'teleport', 'threatBuff',
+  'threatDebuff',
+  // The stacking metadata, which lived in the bag rather than beside it (see
+  // `stacking-flaw-fix.verify.test.ts`, restated onto `atom.stackCap`).
+  'maxStacks', 'stackCaps', 'stacksLinear',
+  // The six that were declared mint-only and were not: their mint read the bag.
+  'defense', 'fly', 'runSpeed', 'runSpeedUnenhanced', 'jumpHeight', 'jumpSpeed',
+];
 
 /**
  * Slots the converters emit that genuinely nothing spends.
@@ -89,7 +142,7 @@ const ZERO_SUPPLY_SLOTS = ['dot', 'elusivity', 'protection', 'flySpeed', 'speedB
  * renders on every power that has them. Three survive the correction, and they are the only
  * emitted keys a deletion may take on the "nothing reads it" argument alone.
  */
-const UNREAD_BUT_SUPPLIED = ['activatePeriod', 'effectArea', 'onlyAffectsSelf'];
+const UNREAD_BUT_SUPPLIED: string[] = [];  // all three were converter-emitted; BPORT7 took them
 
 /**
  * Names a dynamic reader's roster claims that `PowerEffects` does not declare.
@@ -111,8 +164,11 @@ const DYNAMIC_KEYS_UNDECLARED = {
  * one of these reads because "the bag is gone" would break a live surface.
  */
 const MINT_ONLY_SLOTS = [
-  'enduranceCost', 'castTime', 'defense', 'healing',
-  'runSpeed', 'runSpeedUnenhanced', 'jumpHeight', 'jumpSpeed', 'fly',
+  // Minted out of `power.stats`, which the strip never touched. These are the reads a
+  // "the bag is gone, delete it" argument must NOT take.
+  'enduranceCost', 'castTime', 'accuracy', 'range', 'recharge', 'radius', 'arc', 'maxTargets',
+  // Minted by the display edge and the pseudo-pet fold from sources outside the bag.
+  'healing', 'taunt',
 ];
 
 /**
@@ -123,10 +179,10 @@ const MINT_ONLY_SLOTS = [
  * type disagree about their spelling on every primary and secondary power. A fourth name
  * appearing here means a converter started emitting something no reader is typed for.
  */
-const UNDECLARED_IN_DATA = ['activationTime', 'endurance', 'interruptTime'];
+const UNDECLARED_IN_DATA: string[] = [];  // emptied by BPORT7 — see the header
 
 /** Keys `buildDisplayEffects` mints that `PowerEffects` does not declare. */
-const UNDECLARED_MINTS = ['flyUnenhanced', 'jumpHeightUnenhanced'];
+const UNDECLARED_MINTS: string[] = [];  // both were movement mints of the bag; see the header
 
 let census: Census;
 
@@ -242,11 +298,18 @@ describe('BPORT1 census — supplier 3, the buff-pet mint', () => {
   it('has no source for the seventh slot on any dataset', () => {
     // `RechargeBuff` is in the oracle's switch and in the aura-type set, and no pet entity in
     // any of the four datasets carries one — reachable AND roster are zero. The branch is
-    // unreachable today; `rechargeBuff` stays LIVE only through its 317 converter carriers.
+    // unreachable today.
+    //
+    // What kept the slot LIVE has changed underneath that, and the assertion has to change with
+    // it or it stops meaning anything: `own` was 317 converter carriers and is now 0. The slot
+    // survives on 20 `conditionalEffects` carriers, one of the two suppliers STRIP-1 left
+    // standing. Same verdict, different reason, so both halves are pinned.
     const r = row('rechargeBuff');
     expect(r.petReachable).toBe(0);
     expect(r.petRoster).toBe(0);
-    expect(r.own).toBeGreaterThan(0);
+    expect(r.own, 'the converter bag came back').toBe(0);
+    expect(r.cond, 'the conditional supply that keeps it LIVE').toBeGreaterThan(0);
+    expect(r.verdict).toBe('LIVE');
   });
 });
 
@@ -271,14 +334,64 @@ describe('BPORT1 census — the slots nothing spends', () => {
   });
 
   it('credits the registry-driven reader for the eleven slots BPORT1 called unread', () => {
-    // The correction itself, pinned. Each of these is emitted by a converter, named by no
-    // `effects.<slot>` read anywhere, and rendered by `RegistryEffectsDisplay` on every power
-    // carrying it. If the registry stops registering one, it rejoins UNREAD_BUT_SUPPLIED and
-    // BPORT7 is once again allowed to delete a live row.
-    for (const slot of ['accuracy', 'threatBuff', 'defenseDebuff', 'regenDebuff', 'recoveryDebuff',
-      'enduranceDrain', 'threatDebuff', 'perceptionDebuff', 'specialDebuff', 'fly', 'untouchable']) {
+    // The correction itself, pinned. Each of these is named by no `effects.<slot>` read
+    // anywhere and rendered by `RegistryEffectsDisplay` on every power carrying it, so a census
+    // keyed on `effects.<slot>` reported no reader for all eleven. That half is unchanged by
+    // the strip and is the half the correction was: the registry still reaches every one.
+    const REGISTRY_READ = ['accuracy', 'threatBuff', 'defenseDebuff', 'regenDebuff',
+      'recoveryDebuff', 'enduranceDrain', 'threatDebuff', 'perceptionDebuff', 'specialDebuff',
+      'fly', 'untouchable'];
+    for (const slot of REGISTRY_READ) {
       expect(row(slot).readFiles, slot).toContain('src/components/info/resolvePowerMagnitudes.ts');
-      expect(row(slot).supply, slot).toBeGreaterThan(0);
     }
+    // The other half was `supply > 0` on all eleven, and BPORT7 moved it: five keep a supplier
+    // and six do not. Split rather than dropped, because the two halves fail for different
+    // reasons and only one of them is a regression. A slot leaving the supplied list is the
+    // strip working; a slot leaving the read list is the registry losing a row, which is what
+    // would let a later deletion take a live surface with it.
+    const supplied = REGISTRY_READ.filter((slot) => row(slot).supply > 0);
+    expect(supplied.sort()).toEqual(
+      ['accuracy', 'defenseDebuff', 'enduranceDrain', 'recoveryDebuff', 'regenDebuff', 'untouchable'],
+    );
+  });
+
+  it('names the bag supply this census cannot see: 36 homecoming override files', () => {
+    // `generatedModules()` walks `src/data/datasets/<ds>/generated` and nothing else, so every
+    // `own` count above is blind to the hand-written overrides layer — which still carries an
+    // `effects` key on 36 Homecoming powers and on no power of any other fork. That matters
+    // here specifically, because BPORT3 and BPORT4 decide what may be deleted using this
+    // file's verdicts, and a slot reported `own: 0` can still be supplied on one fork.
+    //
+    // Guarded rather than fixed: teaching the census to load the overrides would move `own` on
+    // eight slots and re-open every adjudication built on those numbers, which is its own row.
+    // What this owes is that the population cannot grow, or reach a second fork, unseen.
+    const OVERRIDE_ROOT = 'src/data/datasets';
+    const bySlot: Record<string, Record<string, number>> = {};
+    for (const ds of ['homecoming', 'rebirth', 'thunderspy', 'brainstorm']) {
+      const dir = path.join(REPO, OVERRIDE_ROOT, ds, 'overrides');
+      for (const file of listTs(dir)) {
+        const src = readFileSync(file, 'utf8');
+        const m = /"?effects"?\s*:\s*\{/.exec(src);
+        if (!m) continue;
+        // The slot names are the keys one level in; a shallow scan is enough because these
+        // files are generated-shaped JSON literals with one `effects` object each.
+        const body = src.slice(m.index + m[0].length);
+        for (const km of body.matchAll(/^\s{4}"([a-zA-Z]+)":/gm)) {
+          (bySlot[km[1]] ??= { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 })[ds] += 1;
+        }
+      }
+    }
+    expect(bySlot).toEqual({
+      rechargeDebuff: { homecoming: 23, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      buffDuration: { homecoming: 21, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      stealth: { homecoming: 6, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      taunt: { homecoming: 2, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      stun: { homecoming: 1, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      movement: { homecoming: 1, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      durations: { homecoming: 1, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      effectDuration: { homecoming: 1, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+    });
+    // And the census really is blind to them, which is the claim this guard exists to make.
+    for (const slot of Object.keys(bySlot)) expect(row(slot).own, slot).toBe(0);
   });
 });

@@ -125,9 +125,6 @@ const grade = (
   return t;
 };
 
-/** Placeholder while the censuses below are being pinned; every use is replaced by a real map. */
-const Z: Record<string, number> = { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 };
-
 /** Post-strip the bag supplies nothing, so a carrier is an `atomOnly` row. Keyed by fork. */
 const census = (t: Split): Record<string, number> => {
   const out: Record<string, number> = { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 };

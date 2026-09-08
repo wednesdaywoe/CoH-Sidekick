@@ -537,16 +537,16 @@ function applyActivePowerBonuses(
     // incarnates) have been aggregated — so the divisor formula sees the
     // complete picture in one pass instead of needing a post-hoc rescale.
 
-    if (!power.effects) continue;
-
-    // The deref that used to back every `?? effects.slot` seam in this pass is gone: absorb was
-    // the last family still reading it and BPORT11's carry took it (BPORT7 A2). Every arm now
-    // reads the atom-native readers, or the named synthetic channel ({@link syntheticEffects})
-    // for a contribution the totals built for itself.
+    // BPORT13 retired an `if (!power.effects) continue;` that stood here.
     //
-    // The `continue` above outlived it and is now the whole of this oracle's post-strip
-    // behaviour — no power carries `effects`, so the pass skips every one and the parity it
-    // feeds diffs against nothing. Retiring that guard is BPORT13's remedy, not a typecheck fix.
+    // The deref it guarded is gone: absorb was the last family in this pass still reading the
+    // bag and BPORT11's carry took it (BPORT7 A2). Every arm below now reads the atom-native
+    // readers, or the named synthetic channel ({@link syntheticEffects}) for a contribution the
+    // totals built for itself. The guard outlived its subject, and once BPORT7 emptied the bag
+    // it stopped being a skip for atom-less legacy powers and became a skip for ALL of them —
+    // this oracle contributed nothing to any total, and `serverParity` diffed the engine
+    // against zeros on all four forks. A frozen oracle is still allowed to lose a dead guard;
+    // what it may not do is gain a feature, and removing this adds none.
     // BPORT11's stacking selector, for the families that have crossed. The atoms carry the
     // depth a family self-stacks to, so `stackCapOf` answers with one number what the retired
     // `stacksLinear` / `maxStacks` / `stackCaps` triple answered from three bag slots:

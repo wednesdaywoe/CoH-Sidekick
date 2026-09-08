@@ -42,7 +42,6 @@
 import { describe, it, expect } from 'vitest';
 import { movementBuffValue, selfSlowValue, selfMovementCapDebuffValue } from '@/data/core/atom-query';
 import { ATOM_TUPLE_FIELDS } from '@/data/core/atomic-effect';
-import { isSelfDirectedEffect } from '@/types';
 import { mezSourceFor, carries_combat_debuff } from './character-totals';
 import { MODULAR_POWERSETS as HC } from '@/data/datasets/homecoming/powersets';
 import { MODULAR_POWERSETS as RB } from '@/data/datasets/rebirth/powersets';
@@ -187,12 +186,6 @@ describe('BPORT11 cluster 4 — the movement cluster, censused off the atoms', (
     // the failure this whole comparison exists to catch.
     const selfAxes = (rows: { axis: string; scale: number }[] | undefined) =>
       (rows ?? []).filter((e) => ROUTED.has(e.axis)).map((e) => `${e.axis}=${e.scale}`).sort().join(',');
-    const bagSelfAxes = (m: unknown) => {
-      if (!m || typeof m !== 'object') return '';
-      return Object.entries(m as Record<string, unknown>)
-        .filter(([k, v]) => ROUTED.has(k) && isSelfDirectedEffect(v))
-        .map(([k, v]) => `${k}=${(v as { scale: number }).scale}`).sort().join(',');
-    };
     // The recovery, restated on the reader. The bag entry these were lost to carried no
     // recipient tag, so a self-directed read skipped them; the atom arms stamp `toWho: 'Self'`
     // because they have already answered the recipient question. Asserted by name and by axis

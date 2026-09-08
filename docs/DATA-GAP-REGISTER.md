@@ -62,13 +62,14 @@ because it reads data trees the beta does not carry.
    [strip1-beta-port](streams/strip1-beta-port.md), and the carried residuals below are where the
    named work now lives — the `+ extra instance` hint is the one this closure added.
 
-**Carried residuals — named work inside closed entries.** Eight items were scoped out of a closure
+**Carried residuals — named work inside closed entries.** Nine items were scoped out of a closure
 and recorded there rather than reopened. They are not `[ ]` rows: their hosts *are* closed with
 guards, and nothing leaves this file as less.
 
 They are listed in the next section so a session sees them without reading four narratives first.
 
-The eight residuals are downstream of a faithful parse, and the parse itself is still clean.
+The nine residuals are downstream of a faithful parse, and the parse itself is still clean. The
+ninth is BPORT13's: a bag supplier on one fork that the supply census cannot see.
 
 ---
 
@@ -76,6 +77,22 @@ The eight residuals are downstream of a faithful parse, and the parse itself is 
 
 Open work that lives inside a closed entry. Each names its host; the host's narrative is where the
 measurement went, and where a closure for the residual belongs too.
+
+- **The supply census is blind to the overrides layer** — host **PROD6B-BETA-PARITY**
+  ([pipeline-provenance](gaps/pipeline-provenance.md), BPORT13). STRIP-1 named five bag suppliers
+  and missed a sixth: 36 files under `src/data/datasets/homecoming/overrides/` still carry an
+  `effects` key across eight slots, and no other fork has one. `beta-bag-supply-census.cjs` cannot
+  see them — `generatedModules()` walks `generated/` and nothing else — so every `own` count it
+  reports is blind to the layer. BPORT3 and BPORT4 decide what may be DELETED from those verdicts,
+  so `own: 0` can still mean supplied on Homecoming alone, the shape of hole TEAMBUFF-1 was.
+  Nothing is wrong today; the exposure is prospective, which is why this is a residual.
+  **Goal** — an `own: 0` verdict means unsupplied on all four forks, not unsupplied in `generated/`.
+  **Done when** — the census loads the overrides layer as a named supplier with its own column; the
+  eight affected slots are re-adjudicated against the moved counts in BPORT3/BPORT4; and each
+  surviving override is retired into the converter or recorded as the parser gap it stands in for.
+  **Check** — `npx vitest run --testTimeout=120000 src/data/beta-bag-supply-census.test.ts` in
+  `../CoH-Sidekick` pins the census per slot per fork and asserts `own === 0` for all eight, so it
+  reds if the population grows, reaches a second fork, or the census starts seeing it.
 
 - **The `+ extra instance` hint reports no collision anywhere** — host **PROD6B-BETA-PARITY**
   ([pipeline-provenance](gaps/pipeline-provenance.md)). `describeAdjusterContribution` asks
