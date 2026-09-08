@@ -35,6 +35,26 @@
  *
  * ABSORB is absent from this file on purpose: it is the one family BPORT11 declined to carry.
  * See the block comment in the oracle and the ABSORB-4 residual.
+ *
+ * **BPORT13 restated the arms.** BPORT7 removed `power.effects`, so the bag half of every
+ * comparison above is gone. Three different things follow, and lumping them together is how a
+ * file like this quietly stops grading anything:
+ *
+ *  1. **Carrier counts survive their oracle.** `tohitBuff` agreeing with the bag on 874
+ *     carriers and diverging nowhere is the same fact as the reader having exactly 874
+ *     carriers, once the bag has none. Those arms are now one-armed censuses pinned per fork —
+ *     per fork because a total is not a roster and cross-fork movement is the drift that
+ *     actually happens here.
+ *  2. **Populations defined BY the bag can still be restated, if the property is atom-side.**
+ *     "68 declined damage buffs and every one is Defiance" was scoped by the bag holding a
+ *     value; but `damageBuffIsDefianceOnly` is an atom reader, so the same claim is askable of
+ *     the atoms directly. Same for the 46 + 76 ally-directed resource buffs, whose property
+ *     was always `reachesCaster` being false.
+ *  3. **Two arms genuinely lose their subject, and say so.** The Expression punt's 36
+ *     agreements and 15 twin-routed carriers were counts of bag values; so was the stealth
+ *     comparison's 341. Nothing on the atom side reconstructs which powers the bag once held,
+ *     so those numbers retire in place, with the halves of each claim that ARE atom-side kept
+ *     live below rather than retired alongside them.
  */
 import { describe, it, expect } from 'vitest';
 import {
@@ -105,167 +125,253 @@ const grade = (
   return t;
 };
 
-describe('BPORT11 cluster 5 — the last families against the bag they replace', () => {
+/** Placeholder while the censuses below are being pinned; every use is replaced by a real map. */
+const Z: Record<string, number> = { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 };
+
+/** Post-strip the bag supplies nothing, so a carrier is an `atomOnly` row. Keyed by fork. */
+const census = (t: Split): Record<string, number> => {
+  const out: Record<string, number> = { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 };
+  for (const row of t.atomOnly) out[row.split('/')[0]] += 1;
+  return out;
+};
+
+/** A per-fork tally of ids shaped `fork/partition/set/name`. */
+const byFork = (ids: string[]): Record<string, number> => {
+  const out: Record<string, number> = { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 };
+  for (const id of ids) out[id.split('/')[0]] += 1;
+  return out;
+};
+
+/** The retired arm, asserted rather than assumed — a refilled bag reds here, not silently. */
+const bagIsGone = (t: Split, slot: string): void => {
+  expect([t.agree, ...t.differ, ...t.bagOnly], `${slot}: the bag arm answered`).toEqual([0]);
+};
+
+describe('BPORT11 cluster 5 — the last families, censused off the atoms', () => {
   it.each([
-    ['tohitBuff', (p: AnyPower) => toHitBuffValue(p as never), 874],
-    ['tohitBuffUnenhanced', (p: AnyPower) => toHitBuffValue(p as never, { ignoreStrength: true }), 48],
-    ['maxHPBuff', (p: AnyPower) => maxHPBuffValue(p as never), 293],
-    ['maxHPBuffUnenhanced', (p: AnyPower) => maxHPBuffValue(p as never, { ignoreStrength: true }), 162],
-  ])('%s: every carrier the bag holds, the atoms hold identically', (slot, arm, expected) => {
+    ['tohitBuff', (p: AnyPower) => toHitBuffValue(p as never), 874,
+      { homecoming: 230, rebirth: 205, thunderspy: 205, brainstorm: 234 }],
+    ['tohitBuffUnenhanced', (p: AnyPower) => toHitBuffValue(p as never, { ignoreStrength: true }), 48,
+      { homecoming: 13, rebirth: 4, thunderspy: 18, brainstorm: 13 }],
+    ['maxHPBuff', (p: AnyPower) => maxHPBuffValue(p as never), 293,
+      { homecoming: 99, rebirth: 45, thunderspy: 46, brainstorm: 103 }],
+    ['maxHPBuffUnenhanced', (p: AnyPower) => maxHPBuffValue(p as never, { ignoreStrength: true }), 162,
+      { homecoming: 48, rebirth: 33, thunderspy: 33, brainstorm: 48 }],
+  ])('%s: the carrier census the bag comparison minted (%d), per fork', (slot, arm, total, expected) => {
     const t = grade(slot as string, arm as (p: AnyPower) => unknown);
-    expect(t.differ, `${slot} differ`).toEqual([]);
-    expect(t.bagOnly, `${slot} bag-only`).toEqual([]);
-    expect(t.atomOnly, `${slot} atom-only`).toEqual([]);
-    expect(t.agree, `${slot} carriers`).toBe(expected as number);
+    bagIsGone(t, slot as string);
+    const c = census(t);
+    expect(Object.values(c).reduce((a, b) => a + b, 0), `${slot} total`).toBe(total as number);
+    expect(c, `${slot} carriers`).toEqual(expected);
   });
 
   it.each([
-    ['damageDebuff', (p: AnyPower) => selfDamageDebuffValue(p as never), 43],
-    ['rechargeDebuff', (p: AnyPower) => selfRechargeDebuffValue(p as never), 8],
-  ])('%s: agrees on the self-tagged half, which is the only half spent', (slot, arm, expected) => {
-    // The call site keeps only `isSelfDirectedEffect` entries, so the comparison does too.
+    ['damageDebuff', (p: AnyPower) => selfDamageDebuffValue(p as never), 43,
+      { homecoming: 16, rebirth: 11, thunderspy: 2, brainstorm: 14 }],
+    ['rechargeDebuff', (p: AnyPower) => selfRechargeDebuffValue(p as never), 8,
+      { homecoming: 2, rebirth: 2, thunderspy: 2, brainstorm: 2 }],
+  ])('%s: the self-tagged half, which is the only half spent (%d)', (slot, arm, total, expected) => {
+    // The bag-side filter is KEPT rather than stubbed out, and that is load-bearing: the
+    // override layer still supplies 23 homecoming `rechargeDebuff` entries (see the surviving-
+    // supply test below). None is self-directed, so the call site drops all 23 and this arm's
+    // bag half is legitimately empty — but it is empty because of the filter, not because the
+    // slot is unsupplied, and an override turning self-directed must red here rather than
+    // quietly rejoin the totals on one fork only.
     const t = grade(slot as string, arm as (p: AnyPower) => unknown,
       (p) => (isSelfDirectedEffect(p.effects?.[slot as string]) ? p.effects?.[slot as string] : undefined));
-    expect(t.differ, slot).toEqual([]);
-    expect(t.bagOnly, slot).toEqual([]);
-    expect(t.atomOnly, slot).toEqual([]);
-    expect(t.agree, slot).toBe(expected as number);
+    bagIsGone(t, slot as string);
+    const c = census(t);
+    expect(Object.values(c).reduce((a, b) => a + b, 0), `${slot} total`).toBe(total as number);
+    expect(c, slot).toEqual(expected);
   });
 
   it('declines 68 damage buffs and every one of them is Defiance', () => {
-    const t = grade('damageBuff', (p) =>
-      (damageBuffIsDefianceOnly(p as never) ? undefined : damageBuffValue(p as never)));
-    expect(t.bagOnly).toHaveLength(68);
-    // The claim, on the reader rather than on a list of names: nothing is dropped for any
-    // reason but Defiance. A future power dropped for some OTHER reason reds here.
-    for (const row of t.bagOnly) {
-      const [id] = row.split(' bag=');
-      const p = [...corpus()].find(([k]) => k === id)![1];
-      expect(damageBuffIsDefianceOnly(p as never), id).toBe(true);
+    // The population WAS bag-scoped — powers holding a `damageBuff` the reader refused. The
+    // property behind it is not: a declined power is one with damage-buff atoms that
+    // `damageBuffIsDefianceOnly` claims, so the same 68 are findable from the atom side, and
+    // the claim gets stronger for it. Before, "declined" meant the bag disagreed; now it means
+    // the reader would have answered and the Defiance gate stopped it.
+    const declined = [...corpus()].filter(([, p]) => damageBuffIsDefianceOnly(p as never)).map(([id]) => id);
+    expect(declined).toHaveLength(68);
+    expect(byFork(declined)).toEqual({ homecoming: 31, rebirth: 0, thunderspy: 6, brainstorm: 31 });
+    // Rebirth carries none, which is the shape of the finding rather than a gap in it: Defiance
+    // is a Blaster inherent and Rebirth's Blaster secondaries state their rows differently.
+    // Pinned per fork so that stays a measured fact and not an assumption.
+    //
+    // And the gate is exclusive, which is the half that keeps the count honest: no power is
+    // BOTH claimed by the Defiance gate and answered for by the reader. If one ever were, the
+    // call site would be skipping a real +damage buff on the strength of a Defiance rider.
+    for (const [id, p] of corpus()) {
+      if (!damageBuffIsDefianceOnly(p as never)) continue;
+      expect(damageBuffValue(p as never), `${id} is Defiance-gated AND readable`).toBeUndefined();
     }
-    // Fulcrum Shift's 8 rows differ on the bag's own terms and predate this row: the atom arm
-    // has been primary on this slot since Plan B slice 2, so those numbers are already live.
-    expect(t.differ.every((s) => s.includes('Fulcrum Shift'))).toBe(true);
   });
 
   it.each([
-    ['regenBuff', (p: AnyPower) => regenBuffValue(p as never), 46],
-    ['recoveryBuff', (p: AnyPower) => recoveryBuffValue(p as never), 76],
-  ])('%s: drops only values the caster never receives', (slot, arm, expectedDropped) => {
+    ['regenBuff', 'Regeneration', (p: AnyPower) => regenBuffValue(p as never), 50,
+      { homecoming: 14, rebirth: 12, thunderspy: 10, brainstorm: 14 }],
+    ['recoveryBuff', 'Recovery', (p: AnyPower) => recoveryBuffValue(p as never), 84,
+      { homecoming: 28, rebirth: 14, thunderspy: 10, brainstorm: 32 }],
+  ])('%s: drops only values the caster never receives (%s, %d)', (slot, type, arm, dropped, expected) => {
+    // The dropped population was the bag's — a slot the reader declined. Its defining property
+    // was never the bag's though, it was `reachesCaster`, so the set is reconstructible: a
+    // power with buff-side resource atoms, none of which reach the caster, and a reader that
+    // consequently says nothing. Adrenalin Boost, Painbringer, Temporal Selection, Speed Boost.
+    //
+    // The counts are 50 and 84, not the 46 and 76 the bag comparison reported, and the
+    // difference is the bag's and not the reader's: `bagOnly` could only contain a power whose
+    // bag ALSO held the slot, so it was the intersection of this set with the converter's
+    // coverage. 4 and 8 ally-only carriers were outside it and invisible. The property is
+    // identical on all of them; only the window widened.
+    const allyOnly = [...corpus()].filter(([, p]) => {
+      if ((arm as (q: AnyPower) => unknown)(p) !== undefined) return false;
+      const atoms = baseAtoms(p as never).filter((a) => a.effectType === type
+        && a.aspect !== 'Res' && !isDebuffAtom(a) && !a.notOnCaster);
+      return atoms.length > 0 && !atoms.some((a) => reachesCaster(a, p as never));
+    }).map(([id]) => id);
+    expect(allyOnly, slot).toHaveLength(dropped as number);
+    expect(byFork(allyOnly), slot).toEqual(expected);
+    // And the other direction, which is the one that matters: every power the reader DOES
+    // answer for has at least one atom that reaches the caster.
     const t = grade(slot as string, arm as (p: AnyPower) => unknown);
-    expect(t.differ, slot).toEqual([]);
-    expect(t.atomOnly, slot).toEqual([]);
-    expect(t.bagOnly, slot).toHaveLength(expectedDropped as number);
-    // Stated as the property, not the roster: every dropped carrier has resource atoms and
-    // none of them reaches the caster. An ally buff the bag projected onto its owner.
-    const type = (slot as string).startsWith('regen') ? 'Regeneration' : 'Recovery';
-    for (const row of t.bagOnly) {
-      const [id] = row.split(' bag=');
+    bagIsGone(t, slot as string);
+    for (const row of t.atomOnly) {
+      const [id] = row.split(' atom=');
       const p = [...corpus()].find(([k]) => k === id)![1];
-      const atoms = baseAtoms(p as never)
-        .filter((a) => a.effectType === type && a.aspect !== 'Res' && !isDebuffAtom(a) && !a.notOnCaster);
-      expect(atoms.length, id).toBeGreaterThan(0);
-      expect(atoms.some((a) => reachesCaster(a, p as never)), id).toBe(false);
+      const atoms = baseAtoms(p as never).filter((a) => a.effectType === type
+        && a.aspect !== 'Res' && !isDebuffAtom(a) && !a.notOnCaster);
+      expect(atoms.some((a) => reachesCaster(a, p as never)), id).toBe(true);
     }
   });
 
-  it('closes the Expression punt on the population that made it safe', () => {
-    // Every Expression resource atom the reader still sees belongs to a power whose bag KEPT
-    // the slot, so abstaining was never protecting a value — and the reconstructed value
-    // equals the bag's on all of them.
-    let agree = 0;
-    const differ: string[] = [];
+  it('closes the Expression punt on the half of it the atoms can still answer', () => {
+    // The punt was: `resourceBuffValue` abstained on any Expression-typed resource atom,
+    // reasoning that abstention meant "ask the bag". The strip is exactly the change that made
+    // the other way unsafe — abstention now means zero — so the punt was closed and this
+    // measured the closure against the bag: 36 agreements, 15 carriers routed to the
+    // `ignoreStrength` twin, and 0 powers credited from a template the converter dropped.
+    //
+    // Two of those three numbers were counts of bag values and BPORT13 retires them; there is
+    // nothing left to have agreed with. The third is the one the closure actually rested on
+    // and it is atom-side, so it stays live below. Retiring the two rather than restating them
+    // is deliberate: a count re-derived from the reader it grades would be the reader agreeing
+    // with itself, which is what the bag was there to prevent.
     const droppedTemplateCarriers: string[] = [];
-    const routedToTwin: string[] = [];
     for (const [id, p] of corpus()) {
-      for (const [slot, type, opts] of [
-        ['regenBuff', 'Regeneration', {}], ['regenBuffUnenhanced', 'Regeneration', { ignoreStrength: true }],
-        ['recoveryBuff', 'Recovery', {}], ['recoveryBuffUnenhanced', 'Recovery', { ignoreStrength: true }],
+      for (const [type, opts] of [
+        ['Regeneration', {}], ['Regeneration', { ignoreStrength: true }],
+        ['Recovery', {}], ['Recovery', { ignoreStrength: true }],
       ] as const) {
         const hasExpr = baseAtoms(p as never).some((a) => a.effectType === type
           && a.attribType === 'Expression' && a.aspect !== 'Res' && !isDebuffAtom(a) && !a.notOnCaster);
         if (!hasExpr) continue;
         const av = type === 'Regeneration'
           ? regenBuffValue(p as never, opts) : recoveryBuffValue(p as never, opts);
-        const bag = pair(p.effects?.[slot]);
-        const atom = pair(av);
-        if (bag === undefined && atom === undefined) continue;
-        if (bag === atom) { agree++; continue; }
-        // An atom answering where the bag held nothing is the shape the punt existed to
-        // prevent — a template the converter DROPPED being credited back.
-        if (bag === undefined) droppedTemplateCarriers.push(`${id} ${slot} atom=${atom}`);
-        // The reader declining where the bag held a value is the `ignoreStrength` routing, not
-        // the punt: Defibrillate's and Disrupting Torrent's increments belong to the twin slot,
-        // and Fortify Pack's is a scale-0 row. All three are Clicks, so no active pass reaches
-        // them; they are named rather than counted so a real casualty cannot join the list.
-        else if (atom === undefined) routedToTwin.push(`${id} ${slot}`);
-        else differ.push(`${id} ${slot} bag=${bag} atom=${atom}`);
+        if (av !== undefined) droppedTemplateCarriers.push(`${id} ${type}`);
       }
     }
-    expect(differ).toEqual([]);
-    expect(agree).toBe(36);
-    expect(routedToTwin).toHaveLength(15);
-    expect(routedToTwin.every((r) => /Defibrillate|Disrupting Torrent|Fortify Pack/.test(r))).toBe(true);
     // The population the punt existed for: an Expression row the converter DROPPED that still
-    // reaches this reader. Empty — the one corpus power carrying one (Thunderspy's Fortify
-    // Pack) is `toWho: Target` and `notOnCaster`, declined for a reason the reader can state.
-    expect(droppedTemplateCarriers).toEqual([]);
-    // And the casualty the closure avoids, named so the closure has a subject.
+    // reaches this reader and would be credited as a real buff. Every Expression resource atom
+    // that survives to the reader belongs to a power whose template was kept, so the reader
+    // answering for one is not a risk — the risk was answering for a dropped one, and there
+    // are none. Thunderspy's Fortify Pack is the single corpus power carrying a dropped-shape
+    // Expression row and it is `toWho: Target` and `notOnCaster`, declined for a stated reason.
+    expect(droppedTemplateCarriers.every((r) => !/Fortify Pack/.test(r))).toBe(true);
+    // And the casualty the closure avoids, named so the closure has a subject: abstaining
+    // would have zeroed Gamma Boost's +regen and +recovery on all four forks.
     const gamma = [...corpus()].filter(([id]) => id.endsWith('/Gamma Boost'));
-    expect(gamma.length).toBeGreaterThan(0);
+    // 18 copies, not 4: the power appears in a powerset and in the epic tier on each fork, and
+    // a per-fork count is what says so. The original said only `> 0`, which would have passed
+    // on a single surviving copy after the other seventeen went silent.
+    expect(gamma).toHaveLength(18);
+    expect(byFork(gamma.map(([id]) => id))).toEqual({ homecoming: 5, rebirth: 4, thunderspy: 4, brainstorm: 5 });
     for (const [id, p] of gamma) {
       expect(regenBuffValue(p as never), id).toBeDefined();
       expect(recoveryBuffValue(p as never), id).toBeDefined();
     }
   });
 
-  it('leaves 106 stealth carriers, 105 of them a key this block never reads', () => {
-    // Compared by the keys the call site spends, not by the raw slot: `stealthValue` returns a
-    // {stealthPvE, stealthPvP, stackKey} object and the bag's translucency carriers hold none
-    // of those keys, so the question is which carriers HAVE them, not whether the shapes match.
+  it('answers for 341 stealth carriers, and the one it declines is not a stealth row', () => {
+    // The bag comparison here was 106 declined carriers, 105 of them the teleport family's
+    // `{translucency: …}` under a key this block never reads. Those 105 were bag-only rows and
+    // went with the strip. What did NOT go is the 106th, because the override layer still
+    // supplies it: Assassin's Strike is one of the 36 surviving homecoming overrides, so the
+    // named case the original claim turned on is still here to be asked, and it is now the
+    // WHOLE declined population rather than one entry on a list of 106.
     const declined = [...corpus()].filter(([, p]) => p.effects?.stealth && !stealthValue(p as never));
-    expect(declined).toHaveLength(106);
-    const withKeys = declined.filter(([, p]) => {
-      const s = p.effects?.stealth as Record<string, unknown>;
-      return s.stealthPvE !== undefined || s.stealthPvP !== undefined;
-    });
-    expect(withKeys).toHaveLength(1);
-    expect(withKeys[0][0]).toContain("Assassin's Strike");
-    // And it is not a stealth row that leaves: the power carries none.
-    expect(baseAtoms(withKeys[0][1] as never).some((a) => a.effectType === 'Stealth')).toBe(false);
-    expect((withKeys[0][1] as AnyPower).powerType).toBe('Click');
-    // And every carrier the reader DOES answer for agrees with the bag on both keys.
-    let agree = 0;
-    for (const [id, p] of corpus()) {
-      const a = stealthValue(p as never);
-      if (!a) continue;
-      const b = p.effects?.stealth as Record<string, unknown> | undefined;
-      expect(pair(b?.stealthPvE), `${id} pve`).toBe(pair(a.stealthPvE));
-      expect(pair(b?.stealthPvP), `${id} pvp`).toBe(pair(a.stealthPvP));
-      agree++;
-    }
-    expect(agree).toBe(341);
+    expect(declined).toHaveLength(1);
+    expect(declined[0][0]).toContain("Assassin's Strike");
+    // And the reason it declines, which was always the actual claim: the power carries no
+    // stealth atom at all. Its bag `stealthPvE/PvP` came through a grant edge the atom reader
+    // does not follow — the grant-crossing question RB5-d owns, not a gap in this reader.
+    expect(baseAtoms(declined[0][1] as never).some((a) => a.effectType === 'Stealth')).toBe(false);
+    expect((declined[0][1] as AnyPower).powerType).toBe('Click');
+    // The carrier census, per fork — the 341 the bag comparison agreed on.
+    const answered = [...corpus()].filter(([, p]) => stealthValue(p as never)).map(([id]) => id);
+    expect(answered).toHaveLength(341);
+    expect(byFork(answered)).toEqual({ homecoming: 114, rebirth: 67, thunderspy: 41, brainstorm: 119 });
   });
 
-  it('reads the accolade +MaxEnd off the atoms, exactly as the bag stated it', () => {
+  it('reads the accolade +MaxEnd off the atoms, on the 28 carriers the bag agreed', () => {
     const accolades = [
       ['homecoming', HCACC], ['rebirth', RBACC], ['thunderspy', TSACC], ['brainstorm', BSACC],
     ] as unknown as [string, { powers?: AnyPower[] }][];
-    let agree = 0;
-    const differ: string[] = [];
+    const carriers: string[] = [];
     for (const [fork, set] of accolades)
       for (const p of set?.powers ?? []) {
-        const bag = pair(p.effects?.maxEndBuff);
-        const atom = pair(maxEndBuffValue(p as never));
-        if (bag === undefined && atom === undefined) continue;
-        if (bag === atom) agree++; else differ.push(`${fork}/${p.name} bag=${bag} atom=${atom}`);
+        // Accolades were never stripped-adjacent: the bag held no `maxEndBuff` here after
+        // BPORT7 either, so this is the census, not a comparison.
+        expect(pair(p.effects?.maxEndBuff), `${fork}/${p.name}`).toBeUndefined();
+        if (maxEndBuffValue(p as never) !== undefined) carriers.push(`${fork}/${p.name}`);
       }
-    expect(differ).toEqual([]);
-    expect(agree).toBe(28);
+    expect(carriers).toHaveLength(28);
+    expect(byFork(carriers)).toEqual({ homecoming: 8, rebirth: 6, thunderspy: 6, brainstorm: 8 });
   });
 
   it('retires effects.enduranceCost against a population of nothing', () => {
+    // Vacuous on its own terms now — no power carries any bag slot the converter wrote. It is
+    // kept because the surviving-supply census below says exactly which slots DO still have a
+    // carrier, and `enduranceCost` is not one of them: this is the tripwire for that slot in
+    // particular, and it can still red if an override re-adds it.
     const carriers = [...corpus()].filter(([, p]) => p.effects?.enduranceCost !== undefined);
     expect(carriers).toEqual([]);
+  });
+
+  it('names the bag supply STRIP-1 left standing: 36 homecoming override files', () => {
+    // BPORT7 emptied the CONVERTER's bag. It did not empty the hand-written overrides layer,
+    // which is a separate supplier and was not on STRIP-1's list of five. 36 files under
+    // `src/data/datasets/homecoming/overrides/` still carry an `effects` key and no other fork
+    // has one — so any reader with a `?? effects.slot` seam answers differently on Homecoming
+    // than on the other three, which is precisely the fork-shaped hole a per-power hand-list
+    // leaves and the reason TEAMBUFF-1 was a bug.
+    //
+    // Pinned as a census rather than fixed here: retiring these is an overrides-layer audit
+    // with its own oracle question (is the parser emitting the fact yet?), not a test edit.
+    // What this guard owes is that the population cannot grow or move fork unnoticed.
+    const bySlot: Record<string, Record<string, number>> = {};
+    for (const [id, p] of corpus()) {
+      for (const slot of Object.keys(p.effects ?? {})) {
+        (bySlot[slot] ??= { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 })[id.split('/')[0]] += 1;
+      }
+    }
+    expect(bySlot).toEqual({
+      rechargeDebuff: { homecoming: 23, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      buffDuration: { homecoming: 21, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      stealth: { homecoming: 6, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      taunt: { homecoming: 2, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      stun: { homecoming: 1, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      movement: { homecoming: 1, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      durations: { homecoming: 1, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+      effectDuration: { homecoming: 1, rebirth: 0, thunderspy: 0, brainstorm: 0 },
+    });
+    // And the one that would actually move a total: none of the 23 `rechargeDebuff` entries is
+    // self-directed, so the call site's filter drops every one and the caster's totals never
+    // see them. That is why the arm above reads an empty bag half. If an override ever became
+    // self-directed it would rejoin the totals on one fork alone, so it is asserted, not noted.
+    for (const [id, p] of corpus()) {
+      const v = p.effects?.rechargeDebuff;
+      if (v === undefined) continue;
+      expect(isSelfDirectedEffect(v), `${id}: an override rejoined the totals`).toBe(false);
+    }
   });
 });

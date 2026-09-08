@@ -35,9 +35,16 @@
  *
  * Corpus-wide equality vs the bag is proven separately by
  * `scripts/planb-shadow-resources.cjs`; this pins the headline cases in CI.
+ *
+ * **BPORT13.** Two assertions here were bag reads and they failed in opposite directions, which
+ * is the reason the row exists at all. Icy Bastion's "the bag now agrees on both halves" threw,
+ * loudly. Equip Thugs' `expect(effects?.recoveryBuff).toBeUndefined()` did not: it went GREEN,
+ * because an emptied bag is undefined for every slot, and a guard that passes for the wrong
+ * reason reports nothing — it is not in the 71 reds this row was sized from. Both are restated
+ * on the atoms below, the second asserting the `notOnCaster` stamp that was always its subject.
  */
 import { describe, it, expect } from 'vitest';
-import { regenBuffValue, recoveryBuffValue } from '@/data/core/atom-query';
+import { regenBuffValue, recoveryBuffValue, atomsOf } from '@/data/core/atom-query';
 import { ConsumePsyche } from '@/data/datasets/homecoming/generated/powersets/brute/secondary/psionic-armor/consume-psyche';
 import { InstantRegeneration } from '@/data/datasets/homecoming/generated/powersets/scrapper/secondary/regeneration/instant-regeneration';
 import { MetabolicAcceleration } from '@/data/datasets/homecoming/generated/powersets/blaster/secondary/atomic-manipulation/metabolic-acceleration';
@@ -98,9 +105,16 @@ describe('atom-native resources — Metabolic Acceleration (the enhanceable/Igno
 
 describe('atom-native resources — Equip Thugs (the Thunderspy target-trap)', () => {
   it('excludes the pet-directed _Ones buffs from the CASTER via the notOnCaster stamp', () => {
-    // The bag DELETES these slots (guardThunderspyOnesBuffs); the atom path must agree,
-    // or the Mastermind silently gains its henchmen's +Recovery.
-    expect(EquipThugs.effects?.recoveryBuff).toBeUndefined();
+    // The readers decline — but "declines" is also what a power with no atoms at all does, and
+    // an atom-less power is the failure this whole file guards against, so the row is asserted
+    // present first. The +Recovery EXISTS, aimed at the henchmen, and is kept off the caster by
+    // the converter's `notOnCaster` stamp rather than by being absent. Drop the stamp and the
+    // Mastermind silently gains its pets' +Recovery; drop the atom and this still reads green
+    // on the old assertion, which is exactly what it did after the strip.
+    const recovery = atomsOf(EquipThugs).filter((a) => a.effectType === 'Recovery');
+    expect(recovery).toHaveLength(1);
+    expect(recovery[0].toWho).toBe('Target');
+    expect(recovery[0].notOnCaster).toBe(true);
     expect(recoveryBuffValue(EquipThugs)).toBeUndefined();
     expect(regenBuffValue(EquipThugs)).toBeUndefined();
   });
@@ -121,12 +135,21 @@ describe('atom-native resources — Icy Bastion (the StackByAttribAndKey burst/t
   it('sums recovery the same way (+4), the half that was always right', () => {
     expect(recoveryBuffValue(IcyBastion)!.scale).toBeCloseTo(4); // 2 + 2
   });
-  it('reconstructs rather than punting — the bag now agrees on both halves', () => {
+  it('reconstructs rather than punting — both halves are summed from two rows, not one', () => {
     // Regression pin for the converter fix: the regen routing used to skip
     // `StackByAttribAndKey` outright, dropping the lingering +4 and reporting +6 while
     // recovery (no such skip) summed to +4. Reading the flag as "ignore me" rather than
     // "refresh, don't stack" was the bug; regen and recovery must never diverge again.
-    expect((IcyBastion.effects?.regenBuff as { scale: number }).scale).toBeCloseTo(10);
-    expect((IcyBastion.effects?.recoveryBuff as { scale: number }).scale).toBeCloseTo(4);
+    //
+    // The bag was the witness that both halves survived. The atoms are a better one, because
+    // they show the two rows the sum is made of: a dropped lingering half is not a number that
+    // looks slightly off here, it is one of these rows disappearing and the pair going to 1.
+    for (const [type, total] of [['Regeneration', 10], ['Recovery', 4]] as const) {
+      const rows = atomsOf(IcyBastion).filter((a) => a.effectType === type && a.toWho === 'Self');
+      expect(rows, type).toHaveLength(2);
+      // The toggle-refreshed burst at 0.75s and the 30s lingering half applied OnActivate.
+      expect(rows.map((a) => a.duration).sort((x, y) => (x ?? 0) - (y ?? 0)), type).toEqual([0.75, 30]);
+      expect(rows.reduce((n, a) => n + (a.scale ?? 0), 0), type).toBeCloseTo(total);
+    }
   });
 });

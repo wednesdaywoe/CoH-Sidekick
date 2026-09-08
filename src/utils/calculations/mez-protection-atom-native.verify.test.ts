@@ -166,7 +166,48 @@ const record = (t: Split, id: string, bag?: string, atom?: string) => {
   else t.atomOnly.push(`${id} atom=${atom}`);
 };
 
-describe('BPORT11 cluster 2 — mez protection against the bag it replaces', () => {
+/**
+ * The carrier-view censuses, per fork. Every one is a population the bag comparison walked; the
+ * numbers are what the atom arm answers for now that it is the only arm.
+ */
+const MEZ6_CENSUS: Record<string, Record<string, number>> = {
+  hold: { homecoming: 140, rebirth: 111, thunderspy: 103, brainstorm: 158 },
+  stun: { homecoming: 151, rebirth: 119, thunderspy: 110, brainstorm: 169 },
+  immobilize: { homecoming: 137, rebirth: 120, thunderspy: 105, brainstorm: 155 },
+  sleep: { homecoming: 138, rebirth: 103, thunderspy: 96, brainstorm: 152 },
+  confuse: { homecoming: 55, rebirth: 56, thunderspy: 37, brainstorm: 59 },
+  fear: { homecoming: 63, rebirth: 41, thunderspy: 35, brainstorm: 67 },
+};
+const MEZRES_CENSUS = { homecoming: 162, rebirth: 161, thunderspy: 123, brainstorm: 168 };
+const TAUNT_PLACATE_CENSUS: Record<string, Record<string, number>> = {
+  Taunt: { homecoming: 0, rebirth: 2, thunderspy: 2, brainstorm: 0 },
+  Placate: { homecoming: 4, rebirth: 5, thunderspy: 2, brainstorm: 4 },
+};
+const REPEL_CENSUS = { homecoming: 61, rebirth: 44, thunderspy: 41, brainstorm: 71 };
+
+/** A per-fork tally of view ids shaped `fork/partition/set/name[ [token]]`. */
+const byFork = (ids: string[]): Record<string, number> => {
+  const out: Record<string, number> = { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 };
+  for (const id of ids) out[id.split('/')[0]] += 1;
+  return out;
+};
+
+/**
+ * BPORT13. BPORT7 took the bag arm out of every comparison in this file, so `agree` is zero,
+ * `bagOnly` is empty, and the corpus falls into `atomOnly`. The `toBeGreaterThan(0)` floors
+ * these arms carried are what went red — and they were the right assertions to have written,
+ * because the `toEqual([])` verdicts beside them all passed vacuously.
+ *
+ * Restated as one-armed censuses. Where the bag comparison reported a number it is reused, and
+ * where it did not the count is a fresh pin and says so. Per fork, because two of the findings
+ * this file records — the Rebirth Weave fork and the repel direction — are fork-shaped, and a
+ * total would survive either one collapsing onto one fork.
+ */
+const bagIsGone = (t: Split, slot: string): void => {
+  expect([t.agree, ...t.differ, ...t.bagOnly], `${slot}: the bag arm answered`).toEqual([0]);
+};
+
+describe('BPORT11 cluster 2 — mez protection, censused off the atoms', () => {
   it('measures the fork axis it narrows on, rather than assuming it is empty', () => {
     const forked = forkedPowers();
     expect(forked.length).toBeGreaterThan(0);
@@ -186,12 +227,12 @@ describe('BPORT11 cluster 2 — mez protection against the bag it replaces', () 
           (() => { const a = mezSlotValue(source as never, field); return a && isRes(a) ? mag(a) : undefined; })(),
         );
       }
+    const counts: Record<string, Record<string, number>> = {};
     for (const [field, t] of per) {
-      expect(t.differ, `${field} differ`).toEqual([]);
-      expect(t.bagOnly, `${field} bag-only`).toEqual([]);
-      expect(t.atomOnly, `${field} atom-only`).toEqual([]);
-      expect(t.agree, `${field} carriers`).toBeGreaterThan(0);
+      bagIsGone(t, field);
+      counts[field] = byFork(t.atomOnly.map((r) => r.split(' atom=')[0]));
     }
+    expect(counts).toEqual(MEZ6_CENSUS);
   });
 
   it('never once needed the Knockback/Knockup bag arm it retires', () => {
@@ -225,15 +266,15 @@ describe('BPORT11 cluster 2 — mez protection against the bag it replaces', () 
     const t = empty();
     for (const [id, power, source] of views())
       record(t, id, fmt(power.effects?.mezResistance), fmt(mezResistanceValue(source as never)));
-    expect(t.differ).toEqual([]);
-    expect(t.bagOnly).toEqual([]);
-    expect(t.agree).toBeGreaterThan(0);
-    // The gain, named. Rebirth's Weave forks its protection atoms by class and the Kheldian
-    // arms were invisible to a raw read — the same shape as the rebirth Weave defence bug
-    // canonical hit from the other direction.
-    expect(t.atomOnly).toHaveLength(2);
-    expect(t.atomOnly.every((s) => s.includes('rebirth/pool/fighting/Weave'))).toBe(true);
-    expect(t.atomOnly.map((s) => s.match(/\[(\w+)\]/)?.[1]).sort())
+    bagIsGone(t, 'mezResistance');
+    expect(byFork(t.atomOnly.map((r) => r.split(' atom=')[0]))).toEqual(MEZRES_CENSUS);
+    // The gain, named, and still askable of the atoms alone. Rebirth's Weave forks its
+    // protection atoms by class, so the Kheldian arms answer only through a fork-resolved view
+    // and a raw read sees nothing — the same shape as the Rebirth Weave defence bug canonical
+    // hit from the other direction. Two views, and which two is the claim.
+    const weave = t.atomOnly.filter((r) => r.includes('rebirth/pool/fighting/Weave'));
+    expect(weave).toHaveLength(2);
+    expect(weave.map((r) => r.match(/\[(\w+)\]/)?.[1]).sort())
       .toEqual(['Class_Peacebringer', 'Class_Warshade']);
   });
 
@@ -249,12 +290,19 @@ describe('BPORT11 cluster 2 — mez protection against the bag it replaces', () 
           (av && isRes(av)) ? mag(av) : undefined,
         );
       }
+    // `taunt` is one of the eight slots the homecoming overrides layer still supplies (two
+    // carriers — see the surviving-supply census in `buffs-atom-native.verify.test.ts`), so
+    // `bagIsGone` is deliberately NOT asserted here: a bag answer would be a declared supplier
+    // rather than a stale one, and reddening on it would be wrong. In fact neither override row
+    // reaches this arm — both are magnitudes, and the arm reads only the `Res` face — which is
+    // why Homecoming's Taunt column is 0 while Rebirth's and Thunderspy's are 2. That zero is a
+    // measured fact about the override rows, not an absence of taunt resistance on Homecoming.
+    const counts: Record<string, Record<string, number>> = {};
     for (const [which, t] of per) {
-      expect(t.differ, which).toEqual([]);
-      expect(t.bagOnly, which).toEqual([]);
-      expect(t.atomOnly, which).toEqual([]);
-      expect(t.agree, which).toBeGreaterThan(0);
+      expect(t.differ, `${which} differ`).toEqual([]);
+      counts[which] = byFork([...t.atomOnly, ...t.bagOnly].map((r) => r.split(/ (?:atom|bag)=/)[0]));
     }
+    expect(counts).toEqual(TAUNT_PLACATE_CENSUS);
   });
 
   it('reads repel protection off the atoms, and stops reading the push as protection', () => {
@@ -269,16 +317,23 @@ describe('BPORT11 cluster 2 — mez protection against the bag it replaces', () 
         (() => { const a = repelProtectionValue(source as never); return a ? mag(a) : undefined; })(),
       );
     }
-    expect(t.differ).toEqual([]);
-    expect(t.agree).toBe(202);
-    // Dropped: offensive repel, credited to the caster as protection.
-    expect(t.bagOnly).toHaveLength(71);
+    bagIsGone(t, 'repel');
+    // 217 carrier views: the 202 both arms agreed on plus the 15 the slot never carried. The
+    // 71 dropped views were the other direction — `effects.repel` holds the repel a power
+    // INFLICTS, so Ki Push, Jet Stream, Hurricane and Repulsion Field were being credited to
+    // the caster as protection against their own knockback. That population was defined by the
+    // bag holding a value and BPORT13 retires it: there is no atom that means "the bag once
+    // said this", and minting a stand-in would be the reader confirming itself.
+    //
+    // The direction that survives is the one that matters. `repelProtectionValue` reads
+    // protection, so an offensive-repel power must NOT be a carrier, and the four named
+    // examples are asserted as absences rather than left to the retired count.
+    expect(t.atomOnly).toHaveLength(217);
+    expect(byFork(t.atomOnly.map((r) => r.split(' atom=')[0]))).toEqual(REPEL_CENSUS);
     for (const named of ['Ki Push', 'Jet Stream', 'Hurricane', 'Repulsion Field']) {
-      expect(t.bagOnly.some((s) => s.includes(named)), named).toBe(true);
+      expect(t.atomOnly.some((s) => s.includes(named)), `${named} is credited as protection`).toBe(false);
     }
-    // Gained: real repel protection, which the slot never carried. Increase Density is the
-    // example the retired block's own comment named.
-    expect(t.atomOnly).toHaveLength(15);
+    // Gained: real repel protection, which the slot never carried.
     expect(t.atomOnly.some((s) => s.includes('Increase Density'))).toBe(true);
     expect(t.atomOnly.some((s) => s.includes('Vengeance'))).toBe(true);
   });

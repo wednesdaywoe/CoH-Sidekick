@@ -17,6 +17,14 @@
  * This pins the two things that must not regress:
  *   1. pool/epic powers carry atoms, and the atom-native helpers reconstruct them;
  *   2. epic Soul Drain's per-foe scaling, a REAL user-facing bug this uncovered.
+ *
+ * **BPORT13.** The redirect block below asked its question of `power.effects.damage` and the
+ * Cross Punch case of `power.effects.tohitBuff*`. Neither was a bag question in substance —
+ * damage is a top-level field on the power object (`power.damage`, the same shape the bag key
+ * mirrored) and the ToHit halves have had atom readers since Plan B. So these are re-reads,
+ * the same lift `effects.summon` → `power.summon` took in BPORT12, not restatements: every
+ * value asserted below is unchanged. Teleport is the one that moves, because `effects.teleport`
+ * had no top-level twin; it is restated on the `Mez/Teleport` atom that put the key there.
  */
 import { describe, it, expect } from 'vitest';
 import { regenBuffValue, recoveryBuffValue, toHitBuffValue, damageBuffValue, atomsOf } from '@/data/core/atom-query';
@@ -65,10 +73,13 @@ describe('pool powers carry atoms (the Phase 3 prerequisite)', () => {
     // 5-target Cone as a per-foe increment: it minted a bogus perTarget AND a `tohitBuff`
     // slot duplicating the existing `tohitBuffUnenhanced`, double-counting the buff.
     const cp = findPower(POWER_POOLS_RAW, 'Cross Punch');
-    expect(cp.effects.tohitBuff).toBeUndefined();
-    expect((cp.effects.tohitBuffUnenhanced as { scale: number }).scale).toBeCloseTo(0.05);
     expect(toHitBuffValue(cp)).toBeUndefined(); // enhanceable half: nothing
-    expect(toHitBuffValue(cp, { ignoreStrength: true })!.perTarget ?? 0).toBe(0);
+    const unenh = toHitBuffValue(cp, { ignoreStrength: true })!;
+    expect(unenh.scale).toBeCloseTo(0.05);
+    // The `perTarget` half is the whole point: a bogus per-foe stamp here would read the
+    // Self-targeted Stack template in a 5-target Cone as an increment and scale the buff by
+    // however many foes were hit. Zero, not absent — an undefined would also pass a `?? 0`.
+    expect(unenh.perTarget ?? 0).toBe(0);
   });
 });
 
@@ -117,14 +128,14 @@ describe('redirect-only pool/epic powers resolve their redirect chain', () => {
     ['Moonbeam', 'Negative', 4.5],
   ])('%s deals %s damage (was: none at all)', (name, type, scale) => {
     const p = findPower(EPIC_POOLS_RAW, name as string);
-    const d = p.effects.damage;
+    const d = p.damage;
     expect(d, `${name} has no damage`).toBeDefined();
     expect(d.type).toBe(type);
     expect(d.scale).toBeCloseTo(scale as number);
   });
 
   it('LRM Rocket deals its Smashing + Lethal split', () => {
-    const d = findPower(EPIC_POOLS_RAW, 'LRM Rocket').effects.damage;
+    const d = findPower(EPIC_POOLS_RAW, 'LRM Rocket').damage;
     expect(d.map((x: any) => x.type)).toEqual(['Smashing', 'Lethal']);
     expect(d[0].scale).toBeCloseTo(1);
     expect(d[1].scale).toBeCloseTo(1.49);
@@ -135,7 +146,7 @@ describe('redirect-only pool/epic powers resolve their redirect chain', () => {
     // chance 0.0 — the engine flips it to 1 only while Fiery Embrace is up). It must not
     // land as unconditional damage on a Cold/Energy/Negative attack.
     for (const n of ['Frozen Spear', 'Zapp', 'Moonbeam', 'Mace Beam']) {
-      const d = findPower(EPIC_POOLS_RAW, n).effects.damage;
+      const d = findPower(EPIC_POOLS_RAW, n).damage;
       const types = (Array.isArray(d) ? d : [d]).map((x: any) => x.type);
       expect(types, `${n} shipped the FE bonus`).not.toContain('Fire');
     }
@@ -143,16 +154,25 @@ describe('redirect-only pool/epic powers resolve their redirect chain', () => {
 
   it('Aid Other resolves its heal through the redirect, matching its powerset twin', () => {
     // Empathy's Heal Other is the oracle: same 1.96 / Ranged_Heal.
-    const d = findPower(POWER_POOLS_RAW, 'Aid Other').effects.damage;
+    const d = findPower(POWER_POOLS_RAW, 'Aid Other').damage;
     expect(d.type).toBe('Heal');
     expect(d.scale).toBeCloseTo(1.96);
     expect(d.table).toBe('Ranged_Heal');
   });
 
   it('Teleport and Teleport Target recover their effects', () => {
+    // `effects.teleport` was the only claim here with no top-level twin, so it is restated on
+    // the atom that minted the key: a `Mez` row with the `Teleport` sub-type. Both powers are
+    // redirect-only, which is what made them the bug — an unresolved chain leaves the atom list
+    // empty and this reads as a power that does nothing.
     for (const n of ['Teleport', 'Teleport Target']) {
       const p = findPower(POWER_POOLS_RAW, n);
-      expect(Object.keys(p.effects), `${n} has an empty bag`).toContain('teleport');
+      const atoms = atomsOf(p);
+      expect(atoms.length, `${n} resolved no redirect`).toBeGreaterThan(0);
+      expect(
+        atoms.some((a) => a.effectType === 'Mez' && a.subType === 'Teleport'),
+        `${n} has no teleport row`,
+      ).toBe(true);
     }
   });
 });

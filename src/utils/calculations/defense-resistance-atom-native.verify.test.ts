@@ -115,19 +115,42 @@ const record = (t: Split, id: string, bag?: string, atom?: string) => {
   else t.atomOnly.push(`${id} atom=${atom}`);
 };
 
-describe('BPORT11 cluster 3 — defence and resistance against the bag they replace', () => {
+/** A per-fork tally of view ids shaped `fork/partition/set/name[ [token]]`. */
+const byFork = (ids: string[]): Record<string, number> => {
+  const out: Record<string, number> = { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 };
+  for (const id of ids) out[id.split('/')[0]] += 1;
+  return out;
+};
+
+/**
+ * BPORT13. The bag half of every comparison in this file is gone, so `agree`, `differ` and
+ * `bagOnly` are all structurally zero and the whole population falls into `atomOnly`. Two of
+ * those three passed vacuously and one went red, which is the worst possible split: the arm
+ * that reported was not the arm that had stopped grading.
+ *
+ * Each arm is now a one-armed census pinned to the carrier count its own comparison produced
+ * while the bag still answered — the bag was the oracle that minted these numbers, and a number
+ * outlives its oracle. Per fork, because a total is not a roster and cross-fork movement is
+ * where this corpus drifts. `bagIsGone` keeps the retired half asserted rather than assumed.
+ */
+const bagIsGone = (t: Split, slot: string): void => {
+  expect([t.agree, ...t.differ, ...t.bagOnly], `${slot}: the bag arm answered`).toEqual([0]);
+};
+
+describe('BPORT11 cluster 3 — defence and resistance, censused off the atoms', () => {
   it.each([
-    ['resistance', RES_KEYS, (src: AnyPower) => resistanceBuffValue(src as never), 1606],
-    ['debuffResistance', DEBUFF_RES_KEYS, (src: AnyPower) => debuffResistanceValue(src as never), 1319],
-  ])('%s: every carrier view the bag holds, the atoms hold identically', (slot, keys, arm, expected) => {
+    ['resistance', RES_KEYS, (src: AnyPower) => resistanceBuffValue(src as never), 1606,
+      { homecoming: 439, rebirth: 360, thunderspy: 321, brainstorm: 486 }],
+    ['debuffResistance', DEBUFF_RES_KEYS, (src: AnyPower) => debuffResistanceValue(src as never), 1319,
+      { homecoming: 383, rebirth: 277, thunderspy: 224, brainstorm: 435 }],
+  ])('%s: the carrier-view census the bag comparison minted (%d)', (slot, keys, arm, total, expected) => {
     const t = empty();
     for (const [id, power, source] of views())
       record(t, id, fmtMap(power.effects?.[slot as string], keys as Set<string>),
         fmtMap((arm as (s: AnyPower) => unknown)(source), keys as Set<string>));
-    expect(t.differ, `${slot} differ`).toEqual([]);
-    expect(t.bagOnly, `${slot} bag-only`).toEqual([]);
-    expect(t.atomOnly, `${slot} atom-only`).toEqual([]);
-    expect(t.agree, `${slot} carriers`).toBe(expected as number);
+    bagIsGone(t, slot as string);
+    expect(t.atomOnly, `${slot} total`).toHaveLength(total as number);
+    expect(byFork(t.atomOnly.map((r) => r.split(' atom=')[0])), `${slot} carriers`).toEqual(expected);
   });
 
   it('keeps only the self-tagged half of the -Res penalty, as the call site does', () => {
@@ -145,10 +168,9 @@ describe('BPORT11 cluster 3 — defence and resistance against the bag they repl
     for (const [id, power, source] of views())
       record(t, id, selfOnly(power.effects?.resistanceDebuff),
         selfOnly(resistanceSelfDebuffValue(source as never)));
-    expect(t.differ).toEqual([]);
-    expect(t.bagOnly).toEqual([]);
-    expect(t.atomOnly).toEqual([]);
-    expect(t.agree).toBe(17);
+    bagIsGone(t, 'resistanceDebuff');
+    expect(t.atomOnly).toHaveLength(17);
+    expect(byFork(t.atomOnly.map((r) => r.split(' atom=')[0]))).toEqual({ homecoming: 5, rebirth: 4, thunderspy: 3, brainstorm: 5 });
   });
 
   it('agrees on defence, and declines five maps of zeros the bag credited', () => {
@@ -162,18 +184,14 @@ describe('BPORT11 cluster 3 — defence and resistance against the bag they repl
       const atomArm = teamOnly ? undefined : defenseBuffValue(source as never);
       record(t, id, fmtMap(bagArm, DEF_KEYS), fmtMap(atomArm, DEF_KEYS));
     }
-    expect(t.differ).toEqual([]);
-    expect(t.atomOnly).toEqual([]);
-    expect(t.agree).toBe(1143);
-    // Every bag-only view is a map of zeros, so the arithmetic is unchanged and only an
-    // all-zero breakdown row disappears. Asserted on the VALUES rather than on the names: a
-    // future non-zero carrier landing in this bucket is a real loss and must not pass as one
-    // more entry on a list.
-    expect(t.bagOnly).toHaveLength(5);
-    for (const row of t.bagOnly) {
-      const values = row.slice(row.indexOf('bag=') + 4).split(',').map((s) => s.split('=')[1]);
-      expect(values.every((v) => v.startsWith('0@')), row).toBe(true);
-    }
+    // The five bag-only views this arm used to report were all-zero breakdown maps, so the
+    // arithmetic never changed and only an empty row disappeared. That population was defined
+    // by the bag holding a value and BPORT13 retires it rather than re-deriving it: the atom
+    // side cannot know which powers the converter once minted a zeros map for, and inventing a
+    // stand-in would be the reader agreeing with itself.
+    bagIsGone(t, 'defense');
+    expect(t.atomOnly).toHaveLength(1143);
+    expect(byFork(t.atomOnly.map((r) => r.split(' atom=')[0]))).toEqual({ homecoming: 289, rebirth: 352, thunderspy: 203, brainstorm: 299 });
   });
 
   it('recovers Personal Force Field, whose suppressible defence two forks never carried', () => {
@@ -181,17 +199,31 @@ describe('BPORT11 cluster 3 — defence and resistance against the bag they repl
     for (const [id, power] of views())
       record(t, id, fmtMap(power.effects?.defenseBuffSuppressible, DEF_KEYS),
         fmtMap(defenseBuffSuppressibleValue(power as never), DEF_KEYS));
-    expect(t.differ).toEqual([]);
-    expect(t.bagOnly).toEqual([]);
-    expect(t.agree).toBe(97);
-    expect(t.atomOnly).toHaveLength(12);
-    expect(t.atomOnly.every((s) => s.includes('Personal Force Field'))).toBe(true);
-    expect(t.atomOnly.every((s) => s.startsWith('rebirth/') || s.startsWith('thunderspy/'))).toBe(true);
+    // 109 carrier views: the 97 both arms agreed on plus the 12 Personal Force Field views the
+    // bag never held on two forks. Post-strip they are one population and the fork split is
+    // what keeps the recovery visible — PFF is why this arm exists, and a per-fork count is the
+    // only shape that reds if it silently goes back to being a homecoming-only reader.
+    bagIsGone(t, 'defenseBuffSuppressible');
+    expect(t.atomOnly).toHaveLength(109);
+    expect(byFork(t.atomOnly.map((r) => r.split(' atom=')[0]))).toEqual({ homecoming: 37, rebirth: 22, thunderspy: 12, brainstorm: 38 });
+    // 24 PFF views, not the 12 the old arm reported: `atomOnly` used to mean "the bag lacked
+    // this" and now means "a carrier", so the 12 views the bag DID hold on Homecoming and
+    // Brainstorm join the 12 it never held on Rebirth and Thunderspy. The recovery is therefore
+    // stated as the fork split rather than as a total — the claim was always that two forks
+    // carried none, and a bare 24 would survive all of them moving to one fork.
+    const pff = byFork(t.atomOnly.filter((r) => r.includes('Personal Force Field'))
+      .map((r) => r.split(' atom=')[0]));
+    expect(pff).toEqual({ homecoming: 6, rebirth: 6, thunderspy: 6, brainstorm: 6 });
   });
 
   it('leaves effects.defense with no supplier but the pet-aura fold', () => {
     // The fact the re-key rests on. If a converter ever writes this slot again, reading only
     // `defenseBuff` starts dropping it and this is where that shows up.
+    //
+    // Vacuous on the converter's bag now, and kept anyway, because the converter is no longer
+    // the only writer: 36 homecoming override files still carry an `effects` key (censused in
+    // `buffs-atom-native.verify.test.ts`). `defense` is not among the eight slots they carry,
+    // and this is the assertion that says so for this one.
     const carriers: string[] = [];
     for (const { fork, trees } of FORKS)
       for (const [label, tree] of trees)

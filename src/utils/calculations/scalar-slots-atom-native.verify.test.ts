@@ -1,8 +1,32 @@
 /**
- * BPORT11 cluster 1 — the seven scalar families, read off the atoms, graded against the bag
- * they replace while the bag still answers.
+ * BPORT11 cluster 1 — the seven scalar families, read off the atoms.
  *
- * This is the comparison BPORT7 destroys. The regen that empties `power.effects` also empties
+ * **BPORT13 restated it.** This was a two-armed comparison and BPORT7 removed one arm: with
+ * `power.effects` gone every `bagOnly` is empty, every `agree` is zero, and the whole corpus
+ * falls into `atomOnly`. Three of the four buckets therefore passed vacuously while the other
+ * two went red — the worse half being the ones that stayed green.
+ *
+ * What survives is not nothing. The bag was the oracle that MINTED these carrier counts, and a
+ * number outlives the oracle that established it: `accuracyBuff` agreeing on 56 carriers and
+ * nothing else is the same fact as `accuracyBuff` having exactly 56 atom carriers, once the
+ * bag holds none. So each arm below is now a one-armed census pinned to the count its own
+ * comparison produced, plus a floor asserting the bag arm really is empty — which keeps the
+ * retired half honest rather than assumed, and reds if a supplier ever refills it.
+ *
+ * The counts are pinned PER FORK rather than as a total. A total is not a roster: it survives a
+ * power moving between forks, and cross-fork movement is where this corpus actually drifts.
+ *
+ * That restatement immediately earned itself. `rechargeBuff` was documented as 309 agreements
+ * plus 25 Thunderspy-only gains, so the census should read 334; it reads 309. The 25 left when
+ * `atom-query.ts` was ported wholesale from canonical (STACK-7, 2026-08-27) and arrived
+ * carrying `slowIsDebuff`, ten days before the strip. They were never a recovery: Time Wall,
+ * the named example, states its −recharge as a `Ranged_Slow` row at `toWho: Target`, and the
+ * pre-port reader credited the CASTER with a foe's debuff — the identical defect this file's
+ * own header describes for `maxEndBuffValue` two paragraphs down, in a sibling family, found
+ * the same way. The port fixed it and nothing said so, because the comparison that would have
+ * said so was already red for a different reason. The 25 are recorded here as falsified.
+ *
+ * This was the comparison BPORT7 destroys. The regen that empties `power.effects` also empties
  * the shadow oracle every one of these arms was checked against, so a carry landing after the
  * strip can only be checked against itself. Canonical hit exactly that on `shouldShowToggle`
  * and had to re-derive the roster from a pre-strip checkout. The order here is the lesson:
@@ -17,10 +41,13 @@
  *    Rust counterpart (`coh_math::appliers::resources::max_endurance_buff_value`) has carried
  *    the recipient test since ATOM8; the TypeScript half never grew it, and nothing compared
  *    the two until this carry. Fixed in `atom-query.ts`, pinned below.
- *  - **`rechargeBuffValue` answers for 25 powers the Thunderspy bag never held.** Atoms
- *    carrying MORE than the bag is the migration working, not a divergence — and here it also
- *    closes an oracle-vs-engine gap, because Rust has read this family from atoms since ATOM9
- *    while this oracle read a slot Thunderspy's converter never wrote.
+ *  - **`rechargeBuffValue` answered for 25 powers the Thunderspy bag never held.** Recorded
+ *    at the time as the migration working. It was not — see the BPORT13 note above; those 25
+ *    were foe `*_Slow` rows credited to the caster, and `slowIsDebuff` has since declined them.
+ *    1,039 powers carry such a row and 1,042 of the atoms are `toWho: Target`. The nine that
+ *    are not all belong to Reaction Time, a PBAoE whose every foe row has an exact negative
+ *    twin aimed at `Self` — the caster's carve-out from its own field, not a caster buff — so
+ *    declining the family whole is right on both populations.
  *
  * The seventh is `elusivity`, which BPORT1 filed as zero-supply. Both arms confirm it from
  * their own side: no power on any fork carries the bag entry, and no power carries an atom the
@@ -99,40 +126,67 @@ function grade(
   return out;
 }
 
-describe('BPORT11 cluster 1 — the scalar families against the bag they replace', () => {
+/** Post-strip the bag supplies nothing, so a carrier is an `atomOnly` row. Keyed by fork. */
+function census(g: Split): Record<string, number> {
+  const out: Record<string, number> = { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 };
+  for (const row of g.atomOnly) out[row.split('/')[0]] += 1;
+  return out;
+}
+
+/**
+ * The retired arm, asserted rather than assumed. Every bucket that needs the bag to be
+ * populated must be empty; if one is not, a supplier has come back and the census below is
+ * silently comparing against a half-filled oracle again.
+ */
+function bagIsGone(g: Split, slot: string): void {
+  expect([...g.agree, ...g.differ, ...g.bagOnly], `${slot}: the bag arm answered`).toEqual([]);
+}
+
+describe('BPORT11 cluster 1 — the scalar families, censused off the atoms', () => {
   it.each([
-    ['accuracyBuff', (p: AnyPower) => accuracyBuffValue(p as never), undefined, 56],
-    ['enduranceDiscount', (p: AnyPower) => enduranceDiscountValue(p as never), undefined, 103],
-    ['perceptionBuff', (p: AnyPower) => perceptionBuffValue(p as never), undefined, 256],
+    ['accuracyBuff', (p: AnyPower) => accuracyBuffValue(p as never), undefined,
+      { homecoming: 15, rebirth: 17, thunderspy: 9, brainstorm: 15 }],
+    ['enduranceDiscount', (p: AnyPower) => enduranceDiscountValue(p as never), undefined,
+      { homecoming: 28, rebirth: 25, thunderspy: 18, brainstorm: 32 }],
+    ['perceptionBuff', (p: AnyPower) => perceptionBuffValue(p as never), undefined,
+      { homecoming: 72, rebirth: 56, thunderspy: 47, brainstorm: 81 }],
     // The oracle only credits a `rangeBuff` on a Self-target power (the Fast Snipe range bump
     // is not a persistent caster buff), so the comparison runs under the same gate — grading
     // an arm on a population its call site never reaches proves nothing about the call site.
     ['rangeBuff', (p: AnyPower) => rangeBuffValue(p as never),
-      (p: AnyPower) => p.targetType?.toLowerCase() === 'self', 45],
-    ['maxEndBuff', (p: AnyPower) => maxEndBuffValue(p as never), undefined, 48],
-  ])('%s: every carrier the bag holds, the atoms hold identically', (slot, arm, gate, expected) => {
+      (p: AnyPower) => p.targetType?.toLowerCase() === 'self',
+      { homecoming: 21, rebirth: 1, thunderspy: 2, brainstorm: 21 }],
+    ['maxEndBuff', (p: AnyPower) => maxEndBuffValue(p as never), undefined,
+      { homecoming: 13, rebirth: 6, thunderspy: 16, brainstorm: 13 }],
+  ])('%s: the carrier census the bag comparison minted, per fork', (slot, arm, gate, expected) => {
     const g = grade(slot as string, arm as (p: AnyPower) => unknown, gate as ((p: AnyPower) => boolean) | undefined);
-    expect(g.differ, `${slot} differ`).toEqual([]);
-    expect(g.bagOnly, `${slot} bag-only`).toEqual([]);
-    expect(g.atomOnly, `${slot} atom-only`).toEqual([]);
-    expect(g.agree.length, `${slot} carriers`).toBe(expected);
+    bagIsGone(g, slot as string);
+    expect(census(g), `${slot} carriers`).toEqual(expected);
   });
 
-  it('recovers 25 Thunderspy recharge buffs the bag never held, and matches on the rest', () => {
+  it('reads recharge off 309 carriers, and declines the foe slow it used to credit', () => {
     const g = grade('rechargeBuff', (p) => rechargeBuffValue(p as never));
-    expect(g.differ).toEqual([]);
-    // Nothing is LOST: every bag carrier is also an atom carrier. That is the direction that
-    // matters — the other one is a value the migration would drop.
-    expect(g.bagOnly).toEqual([]);
-    expect(g.agree).toHaveLength(309);
-    // The gains are Thunderspy's alone, which is what a converter gap looks like from the atom
-    // side: the templates are on the wire, the bag slot was never written from them.
-    expect(g.atomOnly).toHaveLength(25);
-    expect(g.atomOnly.every((s) => s.startsWith('thunderspy/'))).toBe(true);
-    expect(g.atomOnly.some((s) => s.includes('Time Wall'))).toBe(true);
+    bagIsGone(g, 'rechargeBuff');
+    expect(census(g)).toEqual({ homecoming: 96, rebirth: 58, thunderspy: 46, brainstorm: 109 });
+    // The falsified half, kept as a live claim rather than a struck-out comment. Time Wall's
+    // −recharge is a `Ranged_Slow` row aimed at the target on every fork that carries it; the
+    // caster's own recharge reader must not answer for it, and `slowIsDebuff` is what makes
+    // that true. This is the assertion the pre-port reader failed.
+    const timeWalls = [...corpus()].filter(([, p]) => p.name === 'Time Wall');
+    expect(timeWalls.length).toBeGreaterThan(0);
+    for (const [where, p] of timeWalls) {
+      const slow = baseAtoms(p as never)
+        .filter((a) => a.effectType === 'RechargeTime' && (a.modifierTable ?? '').toLowerCase().includes('slow'));
+      expect(slow.length, where).toBeGreaterThan(0);
+      expect(slow.every((a) => a.toWho === 'Target'), where).toBe(true);
+      expect(rechargeBuffValue(p as never), where).toBeUndefined();
+    }
   });
 
-  it('leaves elusivity empty from both sides, which is why the reader stays', () => {
+  it('leaves elusivity empty on the arm that still has a side, which is why the reader stays', () => {
+    // The one arm the strip did not weaken. It was empty from both sides before and the atom
+    // side is still empty now, so the claim is unchanged rather than restated: no power on any
+    // fork carries an atom this reader would answer for.
     const g = grade('elusivity', (p) => elusivityValue(p as never));
     expect(g).toEqual({ agree: [], differ: [], bagOnly: [], atomOnly: [] });
   });

@@ -153,13 +153,28 @@ const GAINS: Record<string, number> = { 'Team Teleport': 3 };
 
 describe('the toggle roster survives the bag', () => {
   it('agrees with the retired bag predicate everywhere but the 85 adjudicated powers', () => {
-    const populated = [...corpus()].filter(([, p]) => Object.keys((p.effects ?? {}) as object).length > 0);
-    if (populated.length === 0) {
-      // Stated rather than silent. After BPORT7 the bag is empty on every power, the shadow
-      // oracle answers false for all of them, and this leg has nothing left to compare — it
-      // is scoped to the pre-strip corpus by construction. The two legs below are the ones
-      // that outlive the strip.
-      expect(populated.length, 'bag already stripped — this leg is pre-strip only').toBe(0);
+    // BPORT13. The scope test used to be "does any power still have a non-empty bag", and after
+    // BPORT7 that is still TRUE — 36 homecoming powers keep an `effects` key, because the strip
+    // emptied the converter's bag and not the hand-written overrides layer. So the skip never
+    // fired and the leg ran against a shadow oracle with 36 rows in it, which is neither a
+    // comparison nor a skip. The question the guard actually needs is narrower: does the bag
+    // still supply any key THIS PREDICATE READS. It does not — the eight slots the overrides
+    // still carry (`rechargeDebuff`, `buffDuration`, `stealth`, `taunt`, `stun`, `movement`,
+    // `durations`, `effectDuration`) are disjoint from `CASTER_BUFF_KEYS`, so `bagPredicate`
+    // answers false for all 14,249 powers and has nothing to say about any of them.
+    const supplying = [...corpus()].filter(([, p]) => {
+      const effects = p.effects as Record<string, unknown> | undefined;
+      return !!effects && CASTER_BUFF_KEYS.some((k) => k in effects);
+    });
+    if (supplying.length === 0) {
+      // Stated rather than silent, and stated about the right population. The two legs below
+      // are the ones that outlive the strip; this one is scoped to a converter-supplied bag by
+      // construction and says so instead of grading 14,164 vacuous agreements as a pass.
+      expect(supplying, 'bag no longer supplies a key this predicate reads').toEqual([]);
+      // The floor that keeps the skip from becoming permanent cover: the ATOM side must still
+      // answer. A skip whose sibling has also gone quiet is not a scoped guard, it is a dead
+      // file, and this is the one assertion that can tell the two apart.
+      expect([...corpus()].filter(([, p]) => shouldShowToggle(p)).length).toBeGreaterThan(2_000);
       return;
     }
     const lost: Record<string, number> = {};

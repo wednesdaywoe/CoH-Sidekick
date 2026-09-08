@@ -100,7 +100,24 @@ function* views(): Generator<[string, AnyPower, AnyPower]> {
  *  deliberately unmapped; `movementControl` / `movementFriction` have no global at all. */
 const ROUTED = new Set(['runSpeed', 'flySpeed', 'jumpHeight', 'jumpSpeed']);
 
-describe('BPORT11 cluster 4 — the movement cluster against the bag it replaces', () => {
+/** A per-fork tally of view ids shaped `fork/partition/set/name[ [token]]`. */
+const byFork = (ids: string[]): Record<string, number> => {
+  const out: Record<string, number> = { homecoming: 0, rebirth: 0, thunderspy: 0, brainstorm: 0 };
+  for (const id of ids) out[id.split('/')[0]] += 1;
+  return out;
+};
+
+/**
+ * BPORT13. Every arm below was a two-armed comparison and BPORT7 took one arm away. Three of
+ * the four arms here were scoped BY the bag — "powers whose `effects.movement` routes an axis",
+ * "powers carrying `movementCapDebuff`" — so post-strip they iterate an empty set and the loop
+ * body never runs. That is a silent pass, not a skip, and it is the reason this row exists.
+ *
+ * Restated on the atom side, where each claim's actual subject always was. The counts are the
+ * ones the bag comparison established while it could still be asked; the populations are now
+ * defined by the reader rather than by the slot.
+ */
+describe('BPORT11 cluster 4 — the movement cluster, censused off the atoms', () => {
   it('retires five scalar slots that no power on any fork carries', () => {
     const carriers: Record<string, string[]> = {};
     for (const [id, p] of powers())
@@ -109,44 +126,58 @@ describe('BPORT11 cluster 4 — the movement cluster against the bag it replaces
     expect(carriers).toEqual({});
   });
 
-  it('leaves the axis map with no data carrier once the fork is resolved', () => {
-    // Two facts, and the second is the one that closes the branch. The reader returning an
-    // empty array is NOT the same as returning undefined: `??` keeps the empty array, so the
-    // bag branch was already unreachable for every power that has a movement atom at all.
-    let undefinedReaders = 0;
-    const strandedRaw: string[] = [];
+  it('answers the movement axis for every carrier once the fork is resolved', () => {
+    // The old arm scoped itself by `effects.movement` routing an axis, which is now an empty
+    // set on every power — the loop body stopped executing and the test stayed green. The
+    // claim it was making is still askable of the atoms: `movementBuffValue` must answer for a
+    // power that carries a routed axis, and the one power it could not answer for RAW was the
+    // forked one, which resolves only when a class token is supplied.
+    //
+    // Acrobatics is the case the whole arm turns on, so it is asserted by name rather than
+    // left to a count. Rebirth forks its atoms by archetype; read without a token the reader
+    // has no fork to resolve and declines, and read per class it answers — which is exactly
+    // why a raw sweep would have called it a hole.
+    const carriers: string[] = [];
     const strandedResolved: string[] = [];
+    let acrobaticsRawDeclines = 0;
+    let acrobaticsResolved = 0;
     for (const { fork, trees, tokens } of FORKS)
       for (const [label, tree] of trees)
         for (const [setId, set] of Object.entries(tree))
           for (const p of set?.powers ?? []) {
             const id = `${fork}/${label}/${setId}/${p.name}`;
-            const routed = Object.keys(p.effects?.movement ?? {}).filter((k) => ROUTED.has(k));
-            if (movementBuffValue(p as never) === undefined) {
-              undefinedReaders++;
-              if (routed.length) strandedRaw.push(id);
-            }
-            if (!routed.length) continue;
-            // Fork-resolved, as the call site reads it: every class view must answer.
             const views_ = isForked(p) ? tokens.map((t) => mezSourceFor(p as never, t)) : [p as never];
-            if (views_.some((v) => movementBuffValue(v) === undefined)) strandedResolved.push(id);
+            const answers = views_.filter((v) => movementBuffValue(v) !== undefined);
+            if (answers.length) carriers.push(id);
+            if (id === 'rebirth/pool/leaping/Acrobatics') {
+              if (movementBuffValue(p as never) === undefined) acrobaticsRawDeclines++;
+              acrobaticsResolved = answers.length;
+              if (answers.length !== views_.length) strandedResolved.push(id);
+            }
           }
-    expect(undefinedReaders).toBeGreaterThan(0); // the branch was reachable in principle
-    // Raw: one power, and it is the forked one. Stated so the fix is attributed, not assumed.
-    expect(strandedRaw).toHaveLength(1);
-    expect(strandedRaw[0]).toBe('rebirth/pool/leaping/Acrobatics');
-    // Resolved: none. That is what retires the data branch.
-    expect(strandedResolved).toEqual([]);
+    // NOTE on provenance: the 2100 below is a fresh census, not a number the bag ever
+    // confirmed — the old arm counted `undefinedReaders`, not carriers, so there is nothing to
+    // check it against. It is pinned as a movement tripwire and no more; the claims this test
+    // actually rests on are the three Acrobatics assertions, which are the fork behaviour.
+    expect(acrobaticsRawDeclines, 'Acrobatics answered without a fork to resolve').toBe(1);
+    expect(acrobaticsResolved, 'Acrobatics answered for no class view').toBeGreaterThan(0);
+    expect(strandedResolved, 'a class view of the forked power went unanswered').toEqual([]);
+    expect(carriers, 'movementBuffValue carriers').toHaveLength(2100);
+    expect(byFork(carriers)).toEqual({ homecoming: 585, rebirth: 462, thunderspy: 447, brainstorm: 606 });
   });
 
   it('swaps the combat-debuff gate without swapping its verdict', () => {
-    const disagree: string[] = [];
-    for (const [id, p] of views()) {
-      const bagGate = p.effects?.tohitDebuff === undefined && p.effects?.damageDebuff === undefined;
-      if (bagGate === !carries_combat_debuff(p as never)) continue;
-      disagree.push(id);
-    }
-    expect(disagree).toEqual([]);
+    // The retired gate was `effects.tohitDebuff === undefined && effects.damageDebuff ===
+    // undefined`, and with the bag empty it answers "no debuff" for all 14,249 powers — so the
+    // comparison agreed with `carries_combat_debuff` everywhere it disagreed with reality and
+    // reported a clean pass. The atom gate is the one the call site spends, so it is censused
+    // directly: the population is real, non-empty, and fork-shaped.
+    // 1624 is likewise a fresh census — the old arm asserted only that the two gates agreed,
+    // and never said on how many. Pinned so the gate cannot go quiet the way its bag twin did.
+    const carrying = [...views()].filter(([, p]) => carries_combat_debuff(p as never)).map(([id]) => id);
+    expect(carrying, 'carries_combat_debuff answered for nothing').not.toHaveLength(0);
+    expect(carrying).toHaveLength(1624);
+    expect(byFork(carrying)).toEqual({ homecoming: 433, rebirth: 387, thunderspy: 361, brainstorm: 443 });
   });
 
   it('restores the jump root two forks lost to an untagged bag entry', () => {
@@ -162,26 +193,24 @@ describe('BPORT11 cluster 4 — the movement cluster against the bag it replaces
         .filter(([k, v]) => ROUTED.has(k) && isSelfDirectedEffect(v))
         .map(([k, v]) => `${k}=${(v as { scale: number }).scale}`).sort().join(',');
     };
-    const gained: string[] = [];
-    const lost: string[] = [];
-    for (const [id, p] of powers()) {
-      const bag = bagSelfAxes(p.effects?.slow);
-      const atom = selfAxes(selfSlowValue(p as never) as { axis: string; scale: number }[] | undefined);
-      if (bag === atom) continue;
-      const bagSet = new Set(bag ? bag.split(',') : []);
-      const atomSet = new Set(atom ? atom.split(',') : []);
-      for (const a of atomSet) if (!bagSet.has(a)) gained.push(`${id} +${a}`);
-      for (const b of bagSet) if (!atomSet.has(b)) lost.push(`${id} -${b}`);
-    }
-    // Nothing is dropped: every self-tagged bag axis is also an atom axis.
-    expect(lost).toEqual([]);
-    // Eight are Granite Armor and Rooted's jump root on rebirth and Thunderspy; three are Team
-    // Teleport's own flight suppression, which is a click and so never reaches an active pass.
-    expect(gained.filter((g) => g.includes('jumpHeight=500'))).toHaveLength(8);
-    for (const named of ['Granite Armor', 'Rooted']) {
-      expect(gained.some((g) => g.includes(named)), named).toBe(true);
-    }
-    expect(gained.every((g) => /Granite Armor|Rooted|Team Teleport/.test(g))).toBe(true);
+    // The recovery, restated on the reader. The bag entry these were lost to carried no
+    // recipient tag, so a self-directed read skipped them; the atom arms stamp `toWho: 'Self'`
+    // because they have already answered the recipient question. Asserted by name and by axis
+    // value, because a silent change of population here is the failure the comparison existed
+    // to catch and a bare count would not see a swap.
+    const rooted = [...powers()]
+      .filter(([id]) => /Granite Armor|Rooted/.test(id))
+      .map(([id, p]) => [id, selfAxes(selfSlowValue(p as never) as { axis: string; scale: number }[] | undefined)] as const)
+      .filter(([, axes]) => axes.includes('jumpHeight=500'));
+    expect(rooted, 'the jump root the untagged bag entry lost').toHaveLength(8);
+    // Rebirth and Thunderspy only, which is the recovery stated as the shape it actually has.
+    expect(byFork(rooted.map(([id]) => id))).toEqual({ homecoming: 0, rebirth: 4, thunderspy: 4, brainstorm: 0 });
+    // And the whole self-directed slow population, so a gain elsewhere cannot hide behind it.
+    const selfSlow = [...powers()]
+      .filter(([, p]) => selfAxes(selfSlowValue(p as never) as { axis: string; scale: number }[] | undefined))
+      .map(([id]) => id);
+    expect(selfSlow).toHaveLength(36);
+    expect(byFork(selfSlow)).toEqual({ homecoming: 4, rebirth: 16, thunderspy: 12, brainstorm: 4 });
   });
 
   it('gives the Maximum face of the penalty a reader for the first time', () => {
@@ -189,20 +218,13 @@ describe('BPORT11 cluster 4 — the movement cluster against the bag it replaces
     // out of `slow` by ENT-5 and only the Current-face read was ever written here. Nothing
     // moves today — only 4 views are self-tagged and both arms agree on all 4 — but the axis
     // now has a reader on both faces, which is what stops the next cap debuff being silent.
-    const slotCarriers = [...powers()].filter(([, p]) => p.effects?.movementCapDebuff !== undefined);
-    expect(slotCarriers.length).toBe(312);
-    const differ: string[] = [];
-    let agree = 0;
-    for (const [id, p] of powers()) {
-      const bag = Object.entries((p.effects?.movementCapDebuff ?? {}) as Record<string, unknown>)
-        .filter(([k, v]) => ROUTED.has(k) && isSelfDirectedEffect(v))
-        .map(([k, v]) => `${k}=${(v as { scale: number }).scale}`).sort().join(',');
-      const atom = (selfMovementCapDebuffValue(p as never) ?? [])
-        .filter((e) => ROUTED.has(e.axis)).map((e) => `${e.axis}=${e.scale}`).sort().join(',');
-      if (!bag && !atom) continue;
-      if (bag === atom) agree++; else differ.push(`${id} bag=[${bag}] atom=[${atom}]`);
-    }
-    expect(differ).toEqual([]);
-    expect(agree).toBe(4);
+    // The 312 `movementCapDebuff` slot carriers were the bag's and are gone; what the arm was
+    // for is that the Maximum face now HAS a reader, and only the self-tagged rows reach the
+    // caster. Four of them, which both arms agreed on while there were two arms.
+    const carriers = [...powers()]
+      .filter(([, p]) => (selfMovementCapDebuffValue(p as never) ?? []).some((e) => ROUTED.has(e.axis)))
+      .map(([id]) => id);
+    expect(carriers).toHaveLength(4);
+    expect(byFork(carriers)).toEqual({ homecoming: 2, rebirth: 0, thunderspy: 0, brainstorm: 2 });
   });
 });
