@@ -60,7 +60,7 @@ import { describe, it, expect } from 'vitest';
 import {
   toHitBuffValue, damageBuffValue, damageBuffIsDefianceOnly, selfDamageDebuffValue,
   selfRechargeDebuffValue, regenBuffValue, recoveryBuffValue, maxHPBuffValue, stealthValue,
-  maxEndBuffValue, baseAtoms, reachesCaster, isDebuffAtom,
+  maxEndBuffValue, baseAtoms, atomsOf, reachesCaster, isDebuffAtom,
 } from '@/data/core/atom-query';
 import { isSelfDirectedEffect } from '@/types';
 import { MODULAR_POWERSETS as HC } from '@/data/datasets/homecoming/powersets';
@@ -241,50 +241,70 @@ describe('BPORT11 cluster 5 — the last families, censused off the atoms', () =
     }
   });
 
-  it('closes the Expression punt on the half of it the atoms can still answer', () => {
-    // The punt was: `resourceBuffValue` abstained on any Expression-typed resource atom,
-    // reasoning that abstention meant "ask the bag". The strip is exactly the change that made
-    // the other way unsafe — abstention now means zero — so the punt was closed and this
-    // measured the closure against the bag: 36 agreements, 15 carriers routed to the
-    // `ignoreStrength` twin, and 0 powers credited from a template the converter dropped.
+  it('declines every Expression resource atom, and names every power carrying one', () => {
+    // BPORT11 closed the Expression punt here and EXPRPUNT-1 reopened it, because the engine
+    // had closed the same punt the other way and the two verdicts met in the oracle fixtures.
+    // This block is that guard re-cut onto the verdict that won.
     //
-    // Two of those three numbers were counts of bag values and BPORT13 retires them; there is
-    // nothing left to have agreed with. The third is the one the closure actually rested on
-    // and it is atom-side, so it stays live below. Retiring the two rather than restating them
-    // is deliberate: a count re-derived from the reader it grades would be the reader agreeing
-    // with itself, which is what the bag was there to prevent.
-    const droppedTemplateCarriers: string[] = [];
+    // The closure rested on two measurements and both were wrong. "36 agreements with the bag"
+    // agreed with an admission ticket: apply.rs records that this slot's scale never reached a
+    // total and its table only fed the Res_Boolean guard, and what the reader returns for an
+    // HP-scaling row is `{scale: 1, table: 'Melee_Ones'}` — `@StdResult`, the program's INPUT.
+    // Spent as a magnitude it reads +100% at every health level where the program says 5%
+    // regen / 36% recovery at full health and 105% regen at zero. And "0 powers credited from
+    // a dropped template" was a census over BASE atoms, which is where the population hid.
+    //
+    // So: every Expression resource atom is declined, and the roster of powers carrying one is
+    // pinned by name. A count would not do it — the arm this replaces was
+    // `droppedTemplateCarriers.every(...)`, which the punt makes vacuously true, and an empty
+    // roster reads exactly like a dead arm.
+    const carriers = new Map<string, Set<string>>();
     for (const [id, p] of corpus()) {
-      for (const [type, opts] of [
-        ['Regeneration', {}], ['Regeneration', { ignoreStrength: true }],
-        ['Recovery', {}], ['Recovery', { ignoreStrength: true }],
-      ] as const) {
-        const hasExpr = baseAtoms(p as never).some((a) => a.effectType === type
-          && a.attribType === 'Expression' && a.aspect !== 'Res' && !isDebuffAtom(a) && !a.notOnCaster);
-        if (!hasExpr) continue;
-        const av = type === 'Regeneration'
-          ? regenBuffValue(p as never, opts) : recoveryBuffValue(p as never, opts);
-        if (av !== undefined) droppedTemplateCarriers.push(`${id} ${type}`);
+      for (const type of ['Regeneration', 'Recovery'] as const) {
+        // ALL atoms, not just base: the 18 `gated` Rebirth toggle markers — Stealth, Tough,
+        // Weave, Combat Jumping, the Kheldian and Stone shields — are the chance-0 phantoms
+        // the punt was written for, and walking base atoms is precisely how BPORT11 missed
+        // them. They reach the reader through no arm today, which is a fact about `gated` and
+        // not about them being safe.
+        for (const a of atomsOf(p as never)) {
+          if (a.effectType !== type || a.attribType !== 'Expression') continue;
+          const key = id.slice(id.lastIndexOf('/') + 1);
+          if (!carriers.has(key)) carriers.set(key, new Set());
+          carriers.get(key)!.add(type);
+        }
+        for (const opts of [{}, { ignoreStrength: true }] as const) {
+          const hasExpr = baseAtoms(p as never).some((a) => a.effectType === type
+            && a.attribType === 'Expression' && a.aspect !== 'Res' && !isDebuffAtom(a) && !a.notOnCaster);
+          if (!hasExpr) continue;
+          const av = type === 'Regeneration'
+            ? regenBuffValue(p as never, opts) : recoveryBuffValue(p as never, opts);
+          expect(av, `${id} ${type}`).toBeUndefined();
+        }
       }
     }
-    // The population the punt existed for: an Expression row the converter DROPPED that still
-    // reaches this reader and would be credited as a real buff. Every Expression resource atom
-    // that survives to the reader belongs to a power whose template was kept, so the reader
-    // answering for one is not a risk — the risk was answering for a dropped one, and there
-    // are none. Thunderspy's Fortify Pack is the single corpus power carrying a dropped-shape
-    // Expression row and it is `toWho: Target` and `notOnCaster`, declined for a stated reason.
-    expect(droppedTemplateCarriers.every((r) => !/Fortify Pack/.test(r))).toBe(true);
-    // And the casualty the closure avoids, named so the closure has a subject: abstaining
-    // would have zeroed Gamma Boost's +regen and +recovery on all four forks.
+    // The whole live population, by name: four genuine-shaped powers over seven distinct
+    // programs, plus the 18 gated phantom markers. A twenty-third name here is a data change
+    // that has to be adjudicated, not absorbed.
+    expect([...carriers.keys()].sort()).toEqual([
+      'Acrobatics', 'Brimstone Armor', 'Combat Jumping', 'Crystal Armor', 'Defibrillate',
+      'Disrupting Torrent', 'Fortify Pack', 'Gamma Boost', 'Gravity Shield', 'Inky Aspect',
+      'Minerals', 'Penumbral Shield', 'Quantum Shield', 'Rock Armor', 'Shadow Cloak',
+      'Shining Shield', 'Solar Glide', 'Stealth', 'Thermal Shield', 'Tough', 'Twilight Shield',
+      'Weave',
+    ]);
+    // Gamma Boost is the one whose Expression IS a caster magnitude, and the only one the punt
+    // costs anything. 18 copies, not 4: the power appears in a powerset and in the epic tier on
+    // each fork, and a per-fork count is what says so. The value it loses is not lost — it is
+    // computed by `coh_math::appliers::hp_scaling_resource`, which evaluates the program
+    // against current-HP% and is what every shipped total is drawn from. This reader has no
+    // combat state to evaluate it with, and `{scale, table}` could not carry the answer if it
+    // did.
     const gamma = [...corpus()].filter(([id]) => id.endsWith('/Gamma Boost'));
-    // 18 copies, not 4: the power appears in a powerset and in the epic tier on each fork, and
-    // a per-fork count is what says so. The original said only `> 0`, which would have passed
-    // on a single surviving copy after the other seventeen went silent.
     expect(gamma).toHaveLength(18);
     expect(byFork(gamma.map(([id]) => id))).toEqual({ homecoming: 5, rebirth: 4, thunderspy: 4, brainstorm: 5 });
     for (const [id, p] of gamma) {
-      expect(regenBuffValue(p as never), id).toBeDefined();
-      expect(recoveryBuffValue(p as never), id).toBeDefined();
+      expect(regenBuffValue(p as never), id).toBeUndefined();
+      expect(recoveryBuffValue(p as never), id).toBeUndefined();
     }
   });
 

@@ -1049,29 +1049,47 @@ export function maxHPBuffValue(
  *      and maxHP (Replace-collapsed), a resource slot RAW-SUMS its same-table entries and
  *      RESETS on a table change (Obscure Sustenance's recovery: 0.6+0.38+0.1 = 1.08).
  *
- * ONE PUNT used to remain here and BPORT11 closed it, because the thing that made it safe
- * was the bag. **Any `Expression`-typed resource atom** returned `undefined`: the converter's
- * RESOURCES guard drops `Expression` templates whose `tick_chance` is 0 and keeps the rest
- * (Gamma Boost, Defibrillate), `tick_chance` is not on the wire, and `Expression ⟺ dropped`
- * is FALSE — so the verdict is genuinely unrecoverable and abstaining was right while there
- * was something to abstain TO. The stated reason was "safe either way: if the bag kept it we
- * fall back to the bag's value", and the beta's bag strip is exactly the change that makes
- * the other way unsafe. Abstention stops meaning "ask the bag" and starts meaning zero.
+ * ONE PUNT lives here, BPORT11 closed it, and EXPRPUNT-1 reopened it: **any
+ * `Expression`-typed resource atom returns `undefined`.** The converter's RESOURCES guard
+ * drops `Expression` templates whose effect-group `Chance` is 0 — a marker the game never
+ * fires — and keeps the rest, but it CONSUMES that discriminator: `templatesToAtoms` writes
+ * a clamped `baseProbability: 1` onto the phantom and the genuine row alike, so the wire
+ * cannot tell them apart. That was the original punt's reason and it is still true.
  *
- * Measured over all four forks before closing it. Every Expression resource atom that reaches
- * this reader — after its own `aspect !== 'Res'`, `!isDebuffAtom` and `!notOnCaster` filters —
- * belongs to a power whose bag KEPT the slot, and the reconstructed value equals the bag's on
- * all 36 of them with no divergence. The single corpus power carrying an Expression resource
- * atom with no bag slot is Thunderspy's Fortify Pack, whose row is `toWho: Target` and
- * `notOnCaster`, so the reader had already declined it for a reason it can still state. The
- * powers the punt named as dropped (Rebirth's Gravity/Penumbral armour toggles) carry no
- * Expression resource atom in the shipped data at all.
+ * BPORT11 closed it on two measurements, and both were wrong:
  *
- * What the closure costs if the data changes: a future export shipping a caster-reaching
- * Expression row the converter drops would be credited here. That is a smaller and louder
- * error than the one abstention now guarantees — Gamma Boost's +regen and +recovery reading 0
- * on all four forks — and `resources-expression-punt` in the verify test pins the population
- * while the bag is still there to pin it against.
+ *  1. **"The reconstructed value equals the bag's on all 36."** It does, and that proves
+ *     nothing, because the slot it equals is an ADMISSION TICKET. The engine's comment on
+ *     the same seam says it outright — "its scale never reached the total, and its table
+ *     only fed the `Res_Boolean` guard". What this helper returns for an HP-scaling row is
+ *     `{scale: 1, table: 'Melee_Ones'}`, and that is `@StdResult`: the expression's INPUT,
+ *     not its output. Spent as a magnitude it reads +100% at every health level, where the
+ *     program says 5% regen / 36% recovery at full health and 105% regen at zero.
+ *  2. **"Every Expression resource atom that reaches this reader..."** The census walked
+ *     BASE atoms, so it never saw the 18 `gated` Rebirth toggle markers — Stealth, Tough,
+ *     Weave, Combat Jumping, the Kheldian and Stone shields — which are the phantoms the
+ *     punt was written for and the @Redlynne "+100% Recovery (2s)" report it answers
+ *     (`converter-recovery-marker.test.ts`). They carry `baseProbability: 1` like everything
+ *     else and are held out of this reader by `gated` alone: an unrelated axis, and a
+ *     coincidence rather than a discriminator.
+ *
+ * The whole live population, measured over all four forks, is seven programs:
+ * Gamma Boost's two `kHitPoints% source>` rows (4 forks each, the only genuine
+ * caster-facing pair), Defibrillate's `magnitudeExpression: null` / `scale: 30` row — a
+ * DURATION multiplier in a magnitude slot, held out only by `toWho: Target` — Fortify Pack's
+ * and Disrupting Torrent's target-side reads, and the 18 gated `endurancecost
+ * power.boosted>` markers. One of seven is a number this reader could spend, and its shape
+ * is not `scale × table`.
+ *
+ * So an Expression atom owes this helper NOTHING, and the answer it does owe has a
+ * different shape and a different home: `coh_math::appliers::hp_scaling_resource`
+ * evaluates `magnitudeExpression` against the caster's current-HP%, admits only the
+ * `kHitPoints% source>` + `@StdResult` readers, and returns Indeterminate — never a
+ * fabricated number — for the other six programs. That reader is where Gamma Boost's
+ * magnitude is computed, and the engine is what every shipped total is drawn from; the
+ * TS totals paths are oracles that carry no current-HP% state to spend it with. The
+ * population above is pinned by `resources-expression-punt` in the verify test, which is
+ * the tripwire BPORT11's note claimed and never wrote.
  *
  * A SECOND punt used to live here, on the `StackByAttribAndKey` burst/tail family (Icy
  * Bastion), because the bag answered that shape two different ways: regen's routing
@@ -1086,9 +1104,11 @@ export function maxHPBuffValue(
  * power's own `display_help`. The lesson generalizes — a punt that exists to dodge an
  * inconsistency is a bug report, not a design.
  *
- * Returns `undefined` for a power with no such atom, or for the Expression punt → bag
- * fallback (see {@link atomsOf}). Verified bag-equal corpus-wide for every value it DOES
- * return by `scripts/planb-shadow-resources.cjs` (punts are reported, not gated).
+ * Returns `undefined` for a power with no such atom, and for the Expression punt. Neither
+ * is a fallback any more: the bag it used to abstain TO is stripped on both sides, so an
+ * abstention here is a stated decline, and the caller that needs the number reads it from
+ * the engine. Verified bag-equal corpus-wide for every value it DOES return by
+ * `scripts/planb-shadow-resources.cjs` (punts are reported, not gated).
  */
 function resourceBuffValue(
   power: AtomSource,
@@ -1100,7 +1120,11 @@ function resourceBuffValue(
     (a) => a.aspect !== 'Res' && !isDebuffAtom(a) && !a.notOnCaster,
   );
   if (!atoms.length) return undefined;
-  // The Expression punt closed at BPORT11 — see the note above for what was measured.
+  // PUNT: an Expression magnitude is an RPN program, and `{scale, table}` cannot hold one —
+  // what this helper would return is `@StdResult`, the program's input. The converter's
+  // chance-0 phantom marker and the genuine row are indistinguishable on the wire besides.
+  // The magnitude lives in `coh_math::appliers::hp_scaling_resource`; see the note above.
+  if (atoms.some((a) => a.attribType === 'Expression')) return undefined;
 
   const increments = atoms.filter((a) => a.perTarget);
   // The flat base must LAND ON THE CASTER to count toward his own totals — the resources

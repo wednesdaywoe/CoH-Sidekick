@@ -1117,11 +1117,18 @@ function applyActivePowerBonuses(
     // Skip Res_Boolean tables — those are regen debuff resistance, not regen buffs
     //
     // Plan B Slice 6: sourced from the atom list (`regenBuffValue`), falling back to
-    // the bag for an atom-less power AND for the two shapes the helper deliberately
-    // PUNTS on — an Expression-typed resource template, and the StackByAttribAndKey
-    // burst/tail family whose bag value is a suspected latent bug (see atom-query.ts).
-    // Each half falls back independently; the shadow gate proves every value the
-    // helper DOES return equals the bag's, so a mixed atom/bag pair still sums right.
+    // the bag for an atom-less power AND for the ONE shape the helper deliberately PUNTS
+    // on — an Expression-typed resource template (the StackByAttribAndKey burst/tail punt
+    // is gone, fixed at the converter; see atom-query.ts). Each half falls back
+    // independently; the shadow gate proves every value the helper DOES return equals the
+    // bag's, so a mixed atom/bag pair still sums right.
+    // EXPRPUNT-1: with the bag stripped the punt no longer falls back to anything, so this
+    // total reads 0 for the one power whose Expression IS a caster magnitude — Gamma Boost's
+    // HP-scaling regen and recovery. That is stated rather than silently patched: the
+    // magnitude is a function of current-HP%, this path holds no combat state to evaluate it
+    // with, and `coh_math::appliers::hp_scaling_resource` — which does, and which every
+    // shipped total is drawn from — computes it. Crediting `scale × table` here instead would
+    // spend the program's INPUT as its output, +100% at every health level.
     // BPORT11: synthetic arms kept on BOTH halves, and the unenhanced one is the larger —
     // 95 credited mints against the enhanceable half's 20, every one a Bio Armor stance
     // (Inexhaustible in Rested Adaptation). Canonical dropped that half and lost all 95.

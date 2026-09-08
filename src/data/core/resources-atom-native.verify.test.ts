@@ -44,12 +44,17 @@
  * on the atoms below, the second asserting the `notOnCaster` stamp that was always its subject.
  */
 import { describe, it, expect } from 'vitest';
-import { regenBuffValue, recoveryBuffValue, atomsOf } from '@/data/core/atom-query';
+import { regenBuffValue, recoveryBuffValue, atomsOf, baseAtoms } from '@/data/core/atom-query';
 import { ConsumePsyche } from '@/data/datasets/homecoming/generated/powersets/brute/secondary/psionic-armor/consume-psyche';
 import { InstantRegeneration } from '@/data/datasets/homecoming/generated/powersets/scrapper/secondary/regeneration/instant-regeneration';
 import { MetabolicAcceleration } from '@/data/datasets/homecoming/generated/powersets/blaster/secondary/atomic-manipulation/metabolic-acceleration';
 import { IcyBastion } from '@/data/datasets/homecoming/generated/powersets/scrapper/secondary/ice-armor/icy-bastion';
 import { EquipThugs } from '@/data/datasets/thunderspy/generated/powersets/mastermind/primary/thugs/equip-thugs';
+import { GammaBoost } from '@/data/datasets/homecoming/generated/powersets/brute/secondary/radiation-armor/gamma-boost';
+import { Defibrillate } from '@/data/datasets/homecoming/generated/powersets/controller/secondary/electrical-affinity/defibrillate';
+import { FortifyPack } from '@/data/datasets/homecoming/generated/powersets/mastermind/primary/beast-mastery/fortify-pack';
+import { DisruptingTorrent } from '@/data/datasets/rebirth/generated/powersets/dominator/secondary/kinetic-assault/disrupting-torrent';
+import { RockArmor } from '@/data/datasets/rebirth/generated/powersets/brute/secondary/stone-armor/rock-armor';
 
 const unenh = { ignoreStrength: true } as const;
 
@@ -151,5 +156,85 @@ describe('atom-native resources — Icy Bastion (the StackByAttribAndKey burst/t
       expect(rows.map((a) => a.duration).sort((x, y) => (x ?? 0) - (y ?? 0)), type).toEqual([0.75, 30]);
       expect(rows.reduce((n, a) => n + (a.scale ?? 0), 0), type).toBeCloseTo(total);
     }
+  });
+});
+
+/**
+ * `resources-expression-punt` — the tripwire BPORT11's closure note claimed and never wrote,
+ * and the one EXPRPUNT-1 needed to see that the closure was wrong.
+ *
+ * The punt declines every `Expression`-typed resource atom. Its whole live population is seven
+ * programs over four forks, and this pins each one with the reason it is declined, because the
+ * two BPORT11 got wrong were "what the value means" and "who is in the population".
+ */
+describe('atom-native resources — the Expression punt (EXPRPUNT-1)', () => {
+  const exprAtoms = (power: Parameters<typeof atomsOf>[0], effectType: string) =>
+    atomsOf(power).filter((a) => a.effectType === effectType && a.attribType === 'Expression');
+
+  it('declines the HP-scaling pair, whose scale×table is the program INPUT', () => {
+    // `75 kHitPoints% source> - 30 + 100 / @StdResult *` → (105 − H)/100 × @StdResult, and
+    // `1.2 kHitPoints% source> * 100 / .3 * @StdResult *` → 1.2·H/100 × 0.3 × @StdResult.
+    // The atom's own `scale × table` IS `@StdResult` — 1 × Melee_Ones = 1.0 — so returning it
+    // as the magnitude reads +100% at every health level where the programs say 5% regen and
+    // 36% recovery at full health, 105% regen at zero. That is what BPORT11 measured as
+    // "equals the bag on all 36": the bag slot here is an admission ticket whose scale never
+    // reached a total, so agreeing with it was agreement about a placeholder.
+    const regen = exprAtoms(GammaBoost, 'Regeneration');
+    const recovery = exprAtoms(GammaBoost, 'Recovery');
+    expect(regen).toHaveLength(1);
+    expect(recovery).toHaveLength(1);
+    for (const a of [...regen, ...recovery]) {
+      expect(a.aspect).toBe('Cur');
+      expect(a.toWho).toBe('Self');
+      expect(a.scale).toBe(1);
+      expect(a.modifierTable).toBe('Melee_Ones');
+      expect(a.magnitudeExpression?.length).toBeGreaterThan(0);
+    }
+    expect(regenBuffValue(GammaBoost)).toBeUndefined();
+    expect(recoveryBuffValue(GammaBoost)).toBeUndefined();
+    expect(regenBuffValue(GammaBoost, unenh)).toBeUndefined();
+    expect(recoveryBuffValue(GammaBoost, unenh)).toBeUndefined();
+  });
+
+  it('cannot tell a genuine row from a chance-0 phantom, which is why the punt exists', () => {
+    // The converter drops `Expression` resource templates whose effect-group `Chance` is 0 —
+    // markers the game never fires, the @Redlynne "+100% Recovery (2s)" report — and CONSUMES
+    // the discriminator doing it: `templatesToAtoms` writes a clamped `baseProbability: 1` onto
+    // the phantom and the genuine row alike. This is the assertion the punt rests on. If a
+    // later parse ever lands the un-clamped chance on the atom, this goes red and the punt can
+    // be retired on a discriminator instead of on a coincidence.
+    const phantom = exprAtoms(RockArmor, 'Recovery');
+    expect(phantom).toHaveLength(1);
+    expect(phantom[0].baseProbability).toBe(1);
+    expect(exprAtoms(GammaBoost, 'Recovery')[0].baseProbability).toBe(1);
+
+    // And the axis actually holding the 18 markers out of the reader today is `gated`, which
+    // has nothing to do with being a phantom. BPORT11's census walked BASE atoms, so it never
+    // saw them at all and reported a population of one power's worth of rows.
+    expect(phantom[0].gated).toBe(true);
+    expect(baseAtoms(RockArmor).filter((a) => a.attribType === 'Expression')).toHaveLength(0);
+    expect(recoveryBuffValue(RockArmor)).toBeUndefined();
+  });
+
+  it('declines the four programs that are not magnitudes at all', () => {
+    // Defibrillate: `Expression` with NO program and `scale: 30` — a DURATION multiplier
+    // sitting in a magnitude slot. Spent as one it reports +3000% recovery, which is the
+    // reading the engine's own comment records the bag arm producing.
+    const defib = exprAtoms(Defibrillate, 'Recovery');
+    expect(defib).toHaveLength(1);
+    expect(defib[0].magnitudeExpression ?? undefined).toBeUndefined();
+    expect(defib[0].scale).toBe(30);
+    expect(recoveryBuffValue(Defibrillate)).toBeUndefined();
+
+    // Fortify Pack (`cur.kMeter source> 2 * 1 + @Strength *`) and Disrupting Torrent
+    // (`… source.ownPowerNum? -.08 * .1 - @StdResult *`) read state no self-totals context
+    // holds. Both are `toWho: Target` besides, so the recipient filter declines them with or
+    // without the punt: these arms pin the POPULATION, and only the HP-scaling arm above
+    // reports when the punt is removed. Measured — that is the one that went red on the
+    // mutant, and saying which arm carries the report is the point of writing them apart.
+    expect(exprAtoms(FortifyPack, 'Regeneration')).toHaveLength(1);
+    expect(exprAtoms(DisruptingTorrent, 'Regeneration')).toHaveLength(1);
+    expect(regenBuffValue(FortifyPack)).toBeUndefined();
+    expect(regenBuffValue(DisruptingTorrent)).toBeUndefined();
   });
 });
