@@ -229,7 +229,14 @@ describe('BPORT4 census — what the strip costs, per seam', () => {
     // 6 until BPORT5. The sixth was the oracle, and it was never beta-only — canonical kept
     // the same file under the name PROD7 renamed away from on this side. BPORT7's crossing
     // dropped `proc-potential` — its two summon reads were its only bag seams.
-    expect(b.betaOnly).toHaveLength(4);
+    // 5 since PROD6B-BETA-PARITY's closure added `powerProjectionFillPin`, whose only `.effects`
+    // is in the prose explaining which bag the beta's collision test asks — the same
+    // sweep-sees-a-read / finder-sees-no-slot asymmetry `character-totals.ts` carries above, and
+    // pinned the same way, as a pair. A REAL reader entering this bucket has seams and still
+    // trips the count.
+    expect(b.betaOnly).toHaveLength(5);
+    expect(b.betaOnly).toContain('src/engine/powerProjectionFillPin.ts');
+    expect(bagSeams('src/engine/powerProjectionFillPin.ts')).toHaveLength(0);
     expect(b.renamed).toEqual([ORACLE]);
   });
 
