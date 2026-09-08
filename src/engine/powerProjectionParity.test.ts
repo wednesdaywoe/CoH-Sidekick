@@ -56,6 +56,7 @@ import { buildDisplayEffects, getStackingInfo, withPseudoPetEffects, withTargets
 import { resolveEffectivePower, effectiveGlobalAdjusters, isCasterHidden, currentToHitFraction, type EffectivePowerState } from '@/components/info/resolveEffectivePower';
 import { selectableModes } from '@/utils/mode-suppression';
 import { toCharacterStateJson, type AdapterCalcContext } from './characterStateAdapter';
+import { BASE_ROW_OVER_ADDITIVE_FILL } from './powerProjectionFillPin';
 import { mapGlobal, mapOnePowerProjection, mapPowerProjection, projectionKey, type EnginePowerProjection, type EngineTotals, type GrantedMagnitude, type PowerProjection } from './engineTotalsMap';
 import type { Build } from '@/types/build';
 import type { Power, PowerEffects, SelectedPower } from '@/types/power';
@@ -921,7 +922,71 @@ type MagnitudeDiff = {
   unwitnessed: string[];
   witnessed: boolean;
   underlayOutranked: { key: string; own: number; underlay: number }[];
+  additiveFilled: { key: string; base: number; filled: number }[];
 };
+
+/** The bag keys the beta holds only because an ADDITIVE conditional filled them into a base bag
+ *  STRIP-1 emptied — [`additiveFillIns`]' subject, keyed effectKey -> the entry that filled it. */
+type AdditiveFillIns = ReadonlyMap<string, string>;
+
+/** Which of a power's bag keys arrived by an active additive conditional filling an EMPTY base
+ *  slot, and from which entry.
+ *
+ *  Both merges implement one rule, and they wrote it down the same way: an `additive` conditional
+ *  contributes only keys the base LACKS, because a colliding key means two simultaneous instances
+ *  and overwriting the base with one of them would display a single misleadingly stronger effect.
+ *  The beta records the loser as an `extraInstance` for its own row; `mode: 'replace'` is the
+ *  mutually-exclusive case and overwrites on both sides, which is why it is skipped here.
+ *
+ *  They differ in one place only: what they ask for base PRESENCE. The engine asks the
+ *  atom-projected base surface (`window_slots`, `effective.rs`' `conditional_delta`); the beta
+ *  asks `power.effects`, which STRIP-1 emptied for every power on every fork. So the beta's
+ *  collision test is universally false, every additive entry's copy fills in, and the resolver is
+ *  handed the CONDITIONAL's atom for a key the power's own atoms carry.
+ *
+ *  That is class 1's shape one layer down, and it is why the rows below are not a value dispute:
+ *  the two sides read different atoms. Measured 2026-09-08 over the four combat-state bodies —
+ *  every one of the 980 rows is `off=undefined` (the base states nothing), an exact-value carrier,
+ *  and `additive`; not one is a `replace` entry or a base-authored slot. Rebirth's
+ *  `Greater_Psi_Blade` is the control: its `psionic_melee_insight` is `replace` on that fork
+ *  alone, both sides overwrite, and it is the one fork with no row for that power.
+ *
+ *  `offBag` is the same power's bag with every toggle off, which is the base surface the beta CAN
+ *  still see. A key absent there and present here is the fill-in; requiring the value to equal the
+ *  entry's own authored copy is what keeps this from swallowing a genuine contribution.
+ *
+ *  Two of the four legs are not gradeable by this corpus, and saying so is the point of writing it
+ *  down (mutation sweep 2026-09-08 — deleting either leaves the suite green):
+ *
+ *  * the `offBag` presence test can only fire where the toggles-off bag holds the key, and
+ *    STRIP-1 left it holding none — every subject measures `baseBagKeys=0`. It is oriented to
+ *    NARROW as the bag comes back, which is what keeps it from becoming the universally-true
+ *    guard it exists to compensate for; until then the corpus cannot violate it.
+ *  * the exact-value test decides WHICH entry is named, never whether the row routes: where two
+ *    active entries claim one key (Dual Pistols' ammo clocks — `iceammo` 10s and `toxicammo` 8s
+ *    on one `buffDuration`) the loser fails it and the winner still sets the key. Dropping it
+ *    changes the adjudication string and nothing else.
+ *
+ *  Deleting the `replace` skip, or the detection itself, does go red — the routing legs are
+ *  graded. */
+function additiveFillIns(
+  power: SelectedPower,
+  offBag: Record<string, unknown>,
+  onBag: Record<string, unknown>,
+): AdditiveFillIns {
+  const out = new Map<string, string>();
+  for (const conditional of power.conditionalEffects ?? []) {
+    if (conditional.mode === 'replace') continue;
+    const from = conditional.effects as Record<string, unknown> | undefined;
+    if (!from) continue;
+    for (const [key, value] of Object.entries(from)) {
+      if (offBag[key] !== undefined) continue;
+      if (JSON.stringify(onBag[key]) !== JSON.stringify(value)) continue;
+      out.set(key, conditional.id);
+    }
+  }
+  return out;
+}
 
 /** The slots `mezSlotValue` reads — the beta's own atom-native reader for a power's OWN
  *  control / protection row, which is the reader the display bag lost at STRIP-1. */
@@ -1026,11 +1091,13 @@ function magnitudeDeltas(
   betaEffects: Record<string, unknown> | undefined,
   engineEffects?: Record<string, unknown>,
   ownPower?: Power | SelectedPower,
+  fillIns?: AdditiveFillIns,
 ): MagnitudeDiff {
   const out: string[] = [];
   const adjudicated: string[] = [];
   const unwitnessed: string[] = [];
   const underlayOutranked: MagnitudeDiff['underlayOutranked'] = [];
+  const additiveFilled: MagnitudeDiff['additiveFilled'] = [];
   const witnessed = bagCarriesAuthoredEffects(betaEffects);
   const engineByKey = new Map(engineRows.map((row) => [row.rowKey, row]));
   // Rows the engine typed off effect keys the beta's own bag lacks — the evidence an untyped
@@ -1122,6 +1189,21 @@ function magnitudeDeltas(
       underlayOutranked.push({ key, own: engine.value.base, underlay: beta.tiers.base });
       continue;
     }
+    // The beta resolved an ADDITIVE conditional's own copy of a key the power's base atoms
+    // carry — [`additiveFillIns`]. Its own merge rule declines exactly this, and only its
+    // starved base probe let the copy through, so the two rows describe different atoms and
+    // there is nothing here to compare. Graded like the pet underlay above: the engine's row
+    // is carried out by VALUE and pinned by the body, never accepted as a string.
+    const filledBy = fillIns?.get(effectKey);
+    if (filledBy !== undefined) {
+      adjudicated.push(
+        `${key}: beta resolved ${filledBy}'s own additive copy (${beta.tiers.base}) for a key the `
+        + `power's base atoms carry; its merge declines a colliding key and only the emptied base `
+        + `bag let this one fill in — engine ${engine.label} ${engine.value.base}`,
+      );
+      additiveFilled.push({ key: effectKey, base: engine.value.base, filled: beta.tiers.base });
+      continue;
+    }
     // PROD6C-3b's per-target SHAPE adjudication is gone (PROD6C-3j): the engine's converter now
     // exports the per-foe increment for a MaxHP-fraction absorb too, so the two shapes agree
     // under a dragged slider as they always did at one target. A row that grows on one side
@@ -1164,7 +1246,7 @@ function magnitudeDeltas(
       }
     }
   }
-  return { real: out, adjudicated, unwitnessed, witnessed, underlayOutranked };
+  return { real: out, adjudicated, unwitnessed, witnessed, underlayOutranked, additiveFilled };
 }
 
 /** A bypass slice no Alpha authors — the whole bonus bypassing ED — for probing whether the split
@@ -2440,6 +2522,10 @@ suite('PROD6B-1 — engine per-power projection vs beta calculators, per server'
     let castMoved = 0;
     let hiddenMoved = 0;
     const refused: string[] = [];
+    // The keys the beta answered from an additive conditional's fill-in where the engine answered
+    // from the power's own base atoms, with both values — graded against
+    // [`BASE_ROW_OVER_ADDITIVE_FILL`].
+    const additiveFilled: Record<string, { base: number; filled: number }> = {};
 
     for (const atId of STANDARD_ARCHETYPE_IDS) {
       // Build from the sets that CAN grade this: the 6B fixture's first-set pick reaches almost no
@@ -2499,6 +2585,10 @@ suite('PROD6B-1 — engine per-power projection vs beta calculators, per server'
           const engine = projection.get(key);
           if (!engine) continue;
           const { projection: beta, magnitudes, bag } = betaReference(power, build, atId, rawGlobal, { ctx });
+          // The same power with every toggle off — the base surface the beta can still see, and
+          // the input [`additiveFillIns`] reads for the collision its own merge could not run.
+          const offBag = displayBag(power, 0, shownPower(power, build, atId, plainRawGlobal));
+          const fillIns = additiveFillIns(power, offBag, bag);
           // The engine's OWN copy under the SAME toggle state (6C-3h evidence, extended by the
           // 2026-08-19 re-cut) — resolved through the same effective-power transform, so a
           // conditional-merged row still compares authored-to-authored.
@@ -2509,7 +2599,17 @@ suite('PROD6B-1 — engine per-power projection vs beta calculators, per server'
             magnitudes,
             bag,
             enginePower ? displayBag(enginePower as unknown as Power, 0, shownPower(enginePower as unknown as Power, build, atId, rawGlobal, ctx)) : undefined,
+            // No `ownPower`: the pet-underlay adjudication is graded in its own body, and
+            // enabling it here would fold two verdicts into one roster.
+            undefined,
+            fillIns,
           ));
+          for (const row of mags.additiveFilled) {
+            additiveFilled[`${atId}/${power.internalName}.${row.key}`] = {
+              base: Number(row.base.toFixed(2)),
+              filled: Number(row.filled.toFixed(2)),
+            };
+          }
           deltas.push(...mags.real);
           adjudicated.push(...mags.adjudicated.map((d) => `${atId}/${power.internalName}@${tag}.${d}`));
           deltas.push(
@@ -2529,7 +2629,6 @@ suite('PROD6B-1 — engine per-power projection vs beta calculators, per server'
           if (tag === 'engaged') {
             const before = plain.get(key)?.castTime;
             if (before && engine.castTime && Math.abs(before.base - engine.castTime.base) > TOLERANCE) castMoved += 1;
-            const offBag = displayBag(power, 0, shownPower(power, build, atId, plainRawGlobal));
             const changed = [...new Set([...Object.keys(offBag), ...Object.keys(bag)])].filter(
               (bagKey) => JSON.stringify(offBag[bagKey]) !== JSON.stringify(bag[bagKey]),
             );
@@ -2595,6 +2694,8 @@ suite('PROD6B-1 — engine per-power projection vs beta calculators, per server'
       witness.witnessed,
       witnessLine(server, 'the shown power drives the projection under every combat state', witness),
     ).toBeGreaterThan(0);
+    // The base-row-over-fill-in keys, by value: see [`BASE_ROW_OVER_ADDITIVE_FILL`].
+    expect(additiveFilled, `${server}: base row vs additive fill-in`).toEqual(BASE_ROW_OVER_ADDITIVE_FILL[server] ?? {});
     expect(deltas).toEqual([]);
   }, 300000);
 

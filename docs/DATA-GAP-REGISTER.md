@@ -57,10 +57,9 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 263 entries.** PROD6B-BETA-PARITY — class 1, STACKINFO-1, class 4 and
-   `Power_Surge.hold` closed 2026-09-07 (36 red -> 4); the 985 real rows remain, in two magnitude
-   bodies and four combat-state ones. FORK-5 closed the same day; the beta's 179 red assertions
-   are rostered per file, 34 of them to BPORT12/BPORT13 in
+**1 open, of 263 entries.** PROD6B-BETA-PARITY — the parity file is green (63/63) after the 980
+   real rows closed 2026-09-08. Left open are its two sibling suites, `supportModifierReach` (4)
+   and `adjuster-contribution` (1). The beta's remaining red assertions are rostered per file in
    [strip1-beta-port](streams/strip1-beta-port.md).
 
 **Carried residuals — named work inside closed entries.** Seven items were scoped out of a closure
@@ -833,23 +832,21 @@ measurement went, and where a closure for the residual belongs too.
   verify: file:CoH-Sidekick/src/components/info/stackingSlider.test.ts
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 - [ ] **PROD6B-BETA-PARITY** — the suite graded the engine against a resolver whose authored input
-  STRIP-1 removed. Four sub-classes closed 2026-09-07, **36 red -> 4**: class 1 (20,613 of 21,603
-  hard rows were an unwitnessed side — a third bucket, plus an engine-side floor on the five
-  bodies grading zero authored bags), STACKINFO-1 (`grantsStrength` and `getStackingInfo` returned
-  green having graded NOTHING off the emptied bag), class 4 (the `MIRROR_BLIND` absence
-  roster emptied at the BPORT8 re-vendor — re-pinned by the window each tag recovered), and
-  `Power_Surge.hold` (two atoms on one key: the caster's own Held protection on the engine, the
-  crash pet's EM Pulse hold under the beta's emptied slot — adjudicated by the own atom's shape,
-  both values pinned). Left open: the 985 real rows (`buffDuration` 366, mez mag 48 `.mag` rows
-  plus tiers), and `supportModifierReach` / `adjuster-contribution`.
-  **Goal** — the suite green on the canonical-true rows, each remaining family settled by the side
-  the export supports.
-  **Done when** — the two families are adjudicated with the side the export supports and a guard
-  that pins it; no arm accepts a row because the other side lacks the key.
-  **Check** — `npx vitest run src/engine/powerProjectionParity.test.ts` in `../CoH-Sidekick`; 4
-  failures on committed HEAD (measured 2026-09-07 after `Power_Surge.hold` — the 6 this key
-  carried predated it). Falsified if a starved arm grades zero powers without saying so, or if
-  the four are not the four combat-state bodies.
+  STRIP-1 removed. Five sub-classes closed, **36 red -> 0 in the parity file**: class 1 (20,613 of
+  21,603 hard rows were an unwitnessed side), STACKINFO-1, class 4, `Power_Surge.hold`, and the
+  980 real rows (2026-09-08 — one cause, not two families: both merges decline a colliding key in
+  `additive` mode, but the beta's collision test asks the bag STRIP-1 emptied, so every entry's
+  copy filled in and the resolver read the CONDITIONAL's atom for a key the power's own atoms
+  carry; adjudicated structurally, 609 rows pinned by value per fork). Left open:
+  `supportModifierReach` (4) and `adjuster-contribution` (1), measured 2026-09-07, neither
+  diagnosed.
+  **Goal** — the two sibling suites diagnosed and settled by the side the export supports.
+  **Done when** — each is adjudicated with a guard that pins the recovered value; no arm accepts a
+  row because the other side lacks the key.
+  **Check** — `npx vitest run src/components/info/supportModifierReach.test.ts
+  src/components/info/adjuster-contribution.test.ts` in `../CoH-Sidekick`; **4 + 1** failures on
+  committed HEAD, and `powerProjectionParity.test.ts` is **63/63**. Falsified if the parity file is
+  red again, or if either sibling's red is not in the file this key names.
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 - [x] **KB-INFO** — the `_Info` display-damage resolution's knockback half (Remote Bomb's
   scale-4 PvE KB, the "not doubled" claim) had its ONLY home in the retired
