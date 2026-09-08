@@ -3,7 +3,7 @@ import { loadDataset } from '@/data/dataset';
 import { getTableValue } from '@/data/at-tables';
 import { getCombatModifier } from '@/data/purple-patch';
 import { Dominate } from '@/data/datasets/homecoming/generated/powersets/dominator/primary/mind-control/dominate';
-import { isMezEffect } from '@/data/core/effect-registry';
+import { mezSlotValue } from '@/data/core/atom-query';
 
 /**
  * Enemy-level (purple patch) scaling of MEZ DURATION.
@@ -20,6 +20,9 @@ import { isMezEffect } from '@/data/core/effect-registry';
  * These lock: (a) the curve is a no-op at even con, (b) a +4 cuts a hold's
  * displayed duration to ~48%, mirroring `SharedPowerComponents`'
  * `finalDuration = baseDuration * durCombatMod`.
+ *
+ * The hold read is atom-native (`mezSlotValue(Dominate,'hold')`) — the retired
+ * `effects.hold` bag slot no longer exists (STRIP-1).
  */
 describe('mez duration scales with enemy level (purple patch)', () => {
   beforeAll(async () => {
@@ -36,8 +39,9 @@ describe('mez duration scales with enemy level (purple patch)', () => {
   });
 
   it("Dominate's hold duration shrinks against higher-con enemies", () => {
-    const hold = (Dominate.effects as { hold?: unknown })?.hold;
-    expect(hold && isMezEffect(hold)).toBe(true);
+    const hold = mezSlotValue(Dominate, 'hold');
+    expect(hold).toBeDefined();
+    expect(hold!.attribType).toBe('Duration');
     const mez = hold as { scale: number; table: string };
 
     // Mirror the SharedPowerComponents render: baseDuration = |scale × tableVal|,

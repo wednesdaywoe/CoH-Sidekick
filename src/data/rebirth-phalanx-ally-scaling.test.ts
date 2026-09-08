@@ -27,10 +27,24 @@ const PHALANX = [
 ] as const;
 
 describe('Rebirth Phalanx Fighting per-ally defense scaling (is_pvp ally pattern)', () => {
+  // The per-ally increment no longer reaches the generated file as a bag key
+  // (`"perTarget"` was `effects` slot, stripped 2026-08 — STRIP-1). It now lives as
+  // the atom stream's own `per_target` stamp, the wire field at tuple index 24
+  // (atom-reference §2). So the guard scans the emitted ATOMS for the increment
+  // rather than the retired bag shape, keeping the claim: the PvE classifier must
+  // not drop the ally-counting Self-buff.
   it.each(PHALANX)('%s Phalanx defenseBuff carries perTarget ally scaling', (_at, file) => {
     const text = fs.readFileSync(`${RB}/${file}`, 'utf8');
-    // Every defense vector of the ally increment scales at perTarget 0.3.
-    const perTargets = [...text.matchAll(/"perTarget":\s*0\.3\b/g)];
-    expect(perTargets.length).toBe(3); // melee, ranged, area
+    // The per-ally increments are Defense atoms with scale 0.3 (slot 2) whose per-foe
+    // stamp (slot 24) is also 0.3, and they are gated (the `player eq` self-exclusion is
+    // a live gate, slot 23 = true). Match the whole atom row: scale 0.3, then the
+    // `true` gate, then per_target 0.3 at the tail. This is the increment row, distinct
+    // from the always-on 0.5 base rows (which are ungated, per_target null).
+    const perTargetRows = text.matchAll(/"Defense","(Melee|Ranged|AoE)",0\.3,.*?,true,0\.3,/g);
+    const vectors = new Set([...perTargetRows].map((m) => m[1]));
+    // Every vector (melee, ranged, area) of the ally increment must carry the per-foe
+    // stamp — scale 0.3, gated true, per_target 0.3 in the same row. Seeing all three
+    // keeps the claim from going green by the power losing its scaling.
+    expect(vectors.size).toBe(3); // melee, ranged, area
   });
 });

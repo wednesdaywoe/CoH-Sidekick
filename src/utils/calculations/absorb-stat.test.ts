@@ -3,6 +3,7 @@ import { loadDataset } from '@/data/dataset';
 import { createEmptyBuild } from '@/types/build';
 import { calculateCharacterTotals } from './character-totals';
 import { getBaselineHealth } from './stats';
+import { absorbMaxHPFractionValue } from '@/data/core/atom-query';
 import { WildBastion } from '@/data/datasets/homecoming/powersets/corruptor/secondary/nature-affinity/wild-bastion';
 
 /**
@@ -35,11 +36,11 @@ describe('Absorb character total (homecoming)', () => {
     return b;
   }
 
-  it('converter recovered Wild Bastion as a 25%-of-MaxHP absorb', () => {
-    expect(WildBastion.effects?.absorb).toBeDefined();
-    const ab = WildBastion.effects!.absorb as { maxHPFraction?: number; appliesStrength?: boolean };
-    expect(ab.maxHPFraction).toBeCloseTo(0.25, 5);
-    expect(ab.appliesStrength).toBe(true);
+  it('recovers Wild Bastion as a 25%-of-MaxHP absorb (atom-native)', () => {
+    // The bag's `effects.absorb.maxHPFraction` is gone with the strip (STRIP-1); the
+    // fraction now lives on the Expression atom, evaluated by the atom-native reader
+    // that mirrors Rust's `absorb_max_hp_fraction_value` (ATOM10).
+    expect(absorbMaxHPFractionValue(WildBastion as never)).toBeCloseTo(0.25, 5);
   });
 
   it('Wild Bastion active contributes 25% of the build Max HP as absorb', () => {

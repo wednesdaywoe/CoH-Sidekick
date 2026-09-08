@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import type { Power, MezEffect } from '@/types';
-import { isMezEffect } from '@/types/power';
+import { mezSlotValue } from '@/data/core/atom-query';
+import type { MezEffect, Power } from '@/types';
 import { Dominate } from './datasets/homecoming/powersets/dominator/primary/mind-control/dominate';
 import { TotalFocus } from './datasets/homecoming/powersets/dominator/secondary/energy-assault/total-focus';
 import { CryoFreezeRay } from './datasets/homecoming/powersets/dominator/primary/arsenal-control/cryo-freeze-ray';
@@ -19,21 +19,32 @@ import { FRTDominate } from './datasets/homecoming/powersets/arachnos-widow/epic
  * boosts tagged ASSAULT powers the category gate missed, and leaves untagged
  * control effects (e.g. epic/patron holds) alone.
  *
+ * STRIP-1 restated the base-mez read onto the atom stream: the generated power
+ * carries `atoms`, not an `effects` bag, so `power.effects.hold` (what this
+ * file's `mez()` helper read) no longer exists. The base hold is now
+ * `mezSlotValue(power, 'hold')`. The OTHER read — the Domination bolt-on inside
+ * `power.conditionalEffects` — is NOT atomized: the strip left the
+ * conditional-effects tree (id + nested effects bag) intact, so the old
+ * `domBonus()` helper keeps working unchanged against it.
+ *
  * See HOMECOMING_PARSER.md "attrib-118 misdecode" → Domination correction, and
  * DEDUCTIVE_SCHEMA_HARNESS.md DSH6b (domination bolt-on retirement).
  */
 
-const mez = (power: Power, key: string): MezEffect | undefined => {
-  const v = (power.effects as unknown as Record<string, unknown> | undefined)?.[key];
-  return isMezEffect(v as never) ? (v as MezEffect) : undefined;
-};
+/** The base mez for `key`, atom-native. */
+const mez = (power: Power, key: 'hold' | 'stun'): MezEffect | undefined =>
+  mezSlotValue(power, key) as MezEffect | undefined;
 
 /** The Domination bonus mez for `key`, from the power's `domination` conditional. */
 const domBonus = (power: Power, key: string): MezEffect | undefined => {
   const dom = power.conditionalEffects?.find((c) => c.id === 'domination');
   const v = (dom?.effects as unknown as Record<string, unknown> | undefined)?.[key];
-  return isMezEffect(v as never) ? (v as MezEffect) : undefined;
+  return isMezEffect(v) ? (v as MezEffect) : undefined;
 };
+
+function isMezEffect(v: unknown): v is MezEffect {
+  return !!v && typeof v === 'object' && 'scale' in (v as object) && 'table' in (v as object);
+}
 
 describe('Domination per-effect bonus (data-driven, shared conditional)', () => {
   it('Dominate carries its Domination hold bonus (base 3/12 → +3/18 = mag 6, ×1.5 dur)', () => {

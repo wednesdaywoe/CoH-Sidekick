@@ -52,7 +52,8 @@ describe('summoned damage stops at the damage-strength cap', () => {
   const ABSURD_BUFF = 100; // +10,000%
 
   describe('synthesized pseudo-pet (Burn) — the summoner\'s cap', () => {
-    const flames = BruteBurn.effects!.summon!.resolvedEntities![0];
+    // `summon` is top-level since the writer-side strip lifted it out of the bag (BPORT7).
+    const flames = BruteBurn.summon!.resolvedEntities![0];
     // Lazily — the dataset is not loaded while the describe body runs.
     const bruteCap = () => getArchetype('brute')!.stats.damageCap!;
 

@@ -143,7 +143,7 @@ describe('patch proc rolls', () => {
 
   describe('the powers, end to end', () => {
     it('reads Sleet as two 17.9% rolls', () => {
-      expect(resolveProcPatchDuration(0, HC(Sleet).effects?.summon)).toBe(15);
+      expect(resolveProcPatchDuration(0, HC(Sleet).summon)).toBe(15);
       const p = getProcPotential(HC(Sleet))!;
       expect({ rolls: p.rolls, recharge: p.recharge, radius: p.radius, fromPseudoPet: p.fromPseudoPet })
         .toEqual({ rolls: 2, recharge: 10, radius: 20, fromPseudoPet: true });
@@ -196,7 +196,7 @@ describe('patch proc rolls', () => {
             baseRecharge: HC(power).stats?.recharge ?? 0,
             castTime: HC(power).stats?.castTime ?? 0,
             patchDuration: resolveProcPatchDuration(
-              HC(power).stats?.radius ?? 0, HC(power).effects?.summon),
+              HC(power).stats?.radius ?? 0, HC(power).summon),
           }),
           getProcPotential(HC(power))!.radius,
           360,
@@ -239,10 +239,12 @@ describe('patch proc rolls', () => {
       // pin to the 90% ceiling there (the stragglers are the 1–2 PPM utility
       // procs, which even 62s cannot rescue through a ÷3.25 area tax), against
       // a 6-slot ceiling. That is the badge users were shown.
+      // `summon` is top-level now (the writer lifts it out of the bag — BPORT7), so the
+      // "what if this were a plain click" fixture drops it there.
       const asClick = {
         ...HC(Sleet),
         stats: { ...HC(Sleet).stats, radius: 20 },
-        effects: { ...HC(Sleet).effects, summon: undefined },
+        summon: undefined,
       } as Power;
       const p = getProcPotential(asClick)!;
       expect(p.rolls).toBe(1);

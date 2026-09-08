@@ -21,31 +21,27 @@ import { calculatePetDamage, synthesizePseudoPetEffects } from '@/utils/calculat
 /**
  * Thunderspy pet / pseudo-pet summon recovery — the DATA-DRIVEN fix.
  *
- * Thunderspy's Parse6-derived AttribMod schema does NOT carry Create_Entity as a
- * template front attrib the way HC/Rebirth do. Instead it packs the EntCreate list
- * into a NESTED struct-array inside a single effect element, each pet sub-entry
- * leading with the byte-granular raw marker 465 ( = Create_Entity: Rebirth's -1 index
- * shift + HC's byte-granular +1 sub-index) and carrying its own EntityDef / PriorityList
- * offsets. The element's *front* attrib is a bare `Ones`/`Level` summon shell. The
- * single-template parser only surfaced that shell, so EVERY Thunderspy summon lost its
- * pet linkage: Umbra Beast / Phantasm / MM henchmen / rains / chain-jump & teleport-strike
- * pseudo-pets (Lightning Rod, Shield Charge, Savage Leap, Disintegrate spread) all
- * exported as a bare shell with no `params.entity_def`, so the converter's Create_Entity
- * handler no-opped and the info panel showed nothing.
+ * A Thunderspy effect element is HC's EffectGroup: one header over a struct-array of
+ * AttribMods, one per pet. The parser long read only the first, so EVERY Thunderspy
+ * summon lost its pet linkage: Umbra Beast / Phantasm / MM henchmen / rains / chain-jump
+ * & teleport-strike pseudo-pets (Lightning Rod, Shield Charge, Savage Leap, Disintegrate
+ * spread) all exported as a bare shell with no `params.entity_def`, so the converter's
+ * Create_Entity handler no-opped and the info panel showed nothing.
  *
- * The fix (`_extract_thunderspy_summons` in `_powers.py`) splits the element at each 465
- * marker and emits one Create_Entity template per pet with
- * `params:{type:'EntCreate', entity_def, priority_list?, redirects?}` — matching HC's
- * one-template-per-pet shape so the existing converter/display path
- * (`params.entity_def` → PET_ENTITIES) works unchanged. Verified: 465-marker count ==
- * pet count (Haunt 2 shades, Summon Wolves 3, Rally 6, Hell on Earth 10); 809 player
- * summon sub-entries, 0 missing EntityDef.
+ * Each pet's AttribMod carries an `EntCreate` payload in its Params union naming the
+ * EntityDef and PriorityList, which is what these assertions read
+ * (`params.entity_def` → PET_ENTITIES). Recovering it took two passes: the sibling walk
+ * that surfaced the per-pet AttribMods at all (TSPY-4), then the Params union itself
+ * (WRAP-1). In between, the pets were reconstructed by scanning the element's raw bytes
+ * for entity-def-SHAPED strings — which is why Illusion Control's Mirage used to summon
+ * `MirageAttackerHit`, a message key. Choosing by shape rather than by field is the
+ * failure `test_thunderspy_entcreate_attach.py` now pins.
  *
  * These re-read the recovered shape from the committed dataset (GAME-DATA-PRINCIPLES §9).
  */
 describe('Thunderspy pet / pseudo-pet summon recovery (data-driven)', () => {
   it('Umbra Beast links to its Pets_Umbra_Beast entity (single pet)', () => {
-    expect(UmbraBeast.effects?.summon?.entity).toBe('Pets_Umbra_Beast');
+    expect(UmbraBeast.summon?.entity).toBe('Pets_Umbra_Beast');
     // The entity_def is the verbatim PET_ENTITIES key — getPetEntity resolves it.
     const ent = PET_ENTITIES['Pets_Umbra_Beast'];
     expect(ent).toBeDefined();
@@ -53,7 +49,7 @@ describe('Thunderspy pet / pseudo-pet summon recovery (data-driven)', () => {
   });
 
   it('Shadow Field (location pseudo-pet) links to Pets_Shadow_Field_Controller', () => {
-    expect(ShadowField.effects?.summon?.entity).toBe('Pets_Shadow_Field_Controller');
+    expect(ShadowField.summon?.entity).toBe('Pets_Shadow_Field_Controller');
     const ent = PET_ENTITIES['Pets_Shadow_Field_Controller'];
     expect(ent).toBeDefined();
     // The field's actual Hold rides the entity's auto-pulse ability, not the summon shell.
@@ -62,8 +58,8 @@ describe('Thunderspy pet / pseudo-pet summon recovery (data-driven)', () => {
   });
 
   it('Haunt counts BOTH shades (465-marker count == pet count)', () => {
-    expect(Haunt.effects?.summon?.entity).toBe('Pets_Shade');
-    expect(Haunt.effects?.summon?.entityCount).toBe(2);
+    expect(Haunt.summon?.entity).toBe('Pets_Shade');
+    expect(Haunt.summon?.entityCount).toBe(2);
     expect(PET_ENTITIES['Pets_Shade']).toBeDefined();
   });
 
@@ -78,7 +74,7 @@ describe('Thunderspy pet / pseudo-pet summon recovery (data-driven)', () => {
   });
 
   it('a plain single-target Hold gains NO phantom summon (no false positive)', () => {
-    expect(DarkGrasp.effects?.summon).toBeUndefined();
+    expect(DarkGrasp.summon).toBeUndefined();
   });
 
   // --- TSPY9: pet ABILITY extraction (generic tspy `Damage` attrib) -----------
@@ -128,7 +124,7 @@ describe('Thunderspy pseudo-pet debuff recovery (TSPY10)', () => {
     (PET_ENTITIES[key]?.abilities || []).flatMap(a => a.effects || []);
 
   it('Sleet: player power → Pets_Sleet_Defender carrying -Res, -Def and -Speed', () => {
-    expect(Sleet.effects?.summon?.entity).toBe('Pets_Sleet_Defender');
+    expect(Sleet.summon?.entity).toBe('Pets_Sleet_Defender');
     const types = new Set(entityEffects('Pets_Sleet_Defender').map(e => e.type));
     expect(types).toContain('ResistanceDebuff');
     expect(types).toContain('DefenseDebuff');
@@ -136,7 +132,7 @@ describe('Thunderspy pseudo-pet debuff recovery (TSPY10)', () => {
   });
 
   it('Tar Patch: its -Resistance (the point of the power) is on the pet', () => {
-    expect(TarPatch.effects?.summon?.entity).toBe('Pets_TarPatch');
+    expect(TarPatch.summon?.entity).toBe('Pets_TarPatch');
     const res = entityEffects('Pets_TarPatch').find(e => e.type === 'ResistanceDebuff');
     expect(res).toBeDefined();
     expect(res!.scale).toBeGreaterThan(0);
@@ -144,7 +140,7 @@ describe('Thunderspy pseudo-pet debuff recovery (TSPY10)', () => {
   });
 
   it('Caltrops: surfaces its -Speed slow, and NO phantom -Res/-Def', () => {
-    expect(Caltrops.effects?.summon?.entity).toBe('Pets_Caltrops');
+    expect(Caltrops.summon?.entity).toBe('Pets_Caltrops');
     const types = new Set(entityEffects('Pets_Caltrops').map(e => e.type));
     expect(types).toContain('Slow');
     expect(types.has('ResistanceDebuff')).toBe(false);
@@ -175,7 +171,7 @@ describe('Thunderspy pseudo-pet debuff recovery (TSPY10)', () => {
   // own control/debuff, not just a Summons chip). Before TSPY10 the -ToHit (tspy
   // `DeBuff_ToHit`) was unmapped, so only the Hold surfaced; now both do.
   it('Shadow Field hoists BOTH its Hold control and -ToHit debuff to Power Effects', () => {
-    const synth = synthesizePseudoPetEffects(ShadowField.effects?.summon);
+    const synth = synthesizePseudoPetEffects(ShadowField.summon);
     expect(synth).not.toBeNull();
     // Control: the location hold surfaces as the power's own mez (Mag 3).
     expect(synth!.hold).toBeDefined();
@@ -195,8 +191,8 @@ describe('Thunderspy pseudo-pet debuff recovery (TSPY10)', () => {
   // hoisted control/debuff show unless Domination is toggled on.
   it('Dominator Shadow Field surfaces its BASE summon by default (Domination off)', () => {
     // Base summon shown by default → the pet block + hoist fire with Domination off.
-    expect(DominatorShadowField.effects?.summon?.entity).toBe('Pets_Shadow_Field_Dominator');
-    const synth = synthesizePseudoPetEffects(DominatorShadowField.effects?.summon);
+    expect(DominatorShadowField.summon?.entity).toBe('Pets_Shadow_Field_Dominator');
+    const synth = synthesizePseudoPetEffects(DominatorShadowField.summon);
     expect(synth?.hold).toBeDefined();
     expect(synth?.tohitDebuff).toBeDefined();
     // The Domination-boosted variant is preserved as a conditional, not lost.

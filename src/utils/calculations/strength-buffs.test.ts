@@ -1,6 +1,12 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { collectStrengthBuffs } from './character-totals';
-import { legacyCalculateCharacterTotals as calculateCharacterTotals } from './legacy-totals.oracle';
+import { collectStrengthBuffs, calculateCharacterTotals } from './character-totals';
+// The beta imported `legacyCalculateCharacterTotals` here, for cases that fed the calc
+// SYNTHETIC power definitions the engine cannot resolve. That justification no longer matches
+// a call site in this file: every `calculateCharacterTotals` call goes through `buildWith`,
+// whose Hover and Power Boost are both REAL dataset powers. Post-strip the oracle skips them
+// at its `if (!power.effects) continue` (BPORT13), so three of this block's four tests were
+// passing on zeros. The synthetic powers in this file go to `collectStrengthBuffs`, which is
+// unaffected. Carrying canonical's live reader is what makes the block grade again.
 import { loadDataset } from '@/data/dataset';
 import { getEpicPool } from '@/data/epic-pools';
 import { createEmptyBuild } from '@/types/build';
@@ -10,7 +16,8 @@ import { getPowerset } from '@/data/powersets';
 import { getTableValue } from '@/data/at-tables';
 import { encodeAtom, type AtomicEffect } from '@/data/core/atomic-effect';
 import {
-  atomsOf, specialBuffValue, damageBuffValue, defenseBuffValue, toHitBuffValue,
+  atomsOf, baseAtoms, specialBuffValue, damageBuffValue, defenseBuffValue,
+  toHitBuffValue, mezSlotValue,
 } from '@/data/core/atom-query';
 
 /**
@@ -209,11 +216,24 @@ describe('Power Boost data integrity + endurance regression (rebirth)', () => {
     expect(toHitBuffValue(pb!)).toBeUndefined();
   });
 
-  it('Power Boost (a Click) costs ~9.75 end, not the doubled 19.5', () => {
+  it('Power Boost (a Click) costs ~9.75 end, and no per-second division doubles it', () => {
     const pool = getEpicPool('primal_forces_mastery');
     const pb = pool!.powers.find(p => p.internalName === 'Power_Boost');
-    const endCost = (pb!.effects as { enduranceCost?: number }).enduranceCost;
-    expect(endCost).toBeCloseTo(9.75, 5);
+    // The bag's pre-divided `effects.enduranceCost` is gone with the strip; the raw cost now
+    // rides `stats`, and the toggle-vs-click division moved to the end-drain pass.
+    expect(pb!.powerType).toBe('Click');
+    expect(pb!.stats?.endurance).toBeCloseTo(9.75, 5);
+  });
+
+  it('a Click contributes nothing to the toggle end-drain pass', () => {
+    // The other half of the 19.5 regression, and the half that can still recur: the doubling
+    // only ever came from dividing a flat click cost by the 0.5s tick period. The pass now
+    // gates on powerType at its loop head, so an ACTIVE Power Boost must charge zero — a
+    // guard on the gate, not on the arithmetic behind it.
+    const on = calculateCharacterTotals(
+      buildWith({ pool: false, powerBoostActive: true }), false, undefined, { combatMode: true },
+    );
+    expect(on.globalBonuses.toggleEndCost).toBe(0);
   });
 });
 
@@ -234,12 +254,22 @@ function buildWith(powers: { pool?: boolean; powerBoostActive?: boolean }): any 
   b.level = 50;
   b.archetype = { id: 'controller', name: 'Controller', stats: null, inherent: null } as any;
   if (powers.pool) {
-    b.pools = [{ id: 'leaping', name: 'Leaping', powers: [
-      { internalName: 'Combat_Jumping', name: 'Combat Jumping', isActive: true, slots: [] },
+    // Hover, not Combat Jumping: on Rebirth every one of Combat Jumping's defence atoms
+    // is archetype-forked, and these bag-view readers deliberately hold no build to
+    // resolve a fork against, so it contributes nothing here (AT-FORK-1 — the Rust
+    // gather is the reader that resolves it). Hover carries the same shape — a self
+    // defence toggle, unforked on every fork — which keeps this test about Power Boost.
+    b.pools = [{ id: 'flight', name: 'Flight', powers: [
+      // `powerSet` and `level` are the beta's, not carried from canonical: here
+      // `calculateCharacterTotals` IS the engine, and the engine resolves a selected power from
+      // its own contract bundle by (powerSet, internalName). A fixture power with no `powerSet`
+      // resolves to nothing and contributes zero — which is how three of this block's four tests
+      // passed while the fourth asked for a positive number.
+      { internalName: 'Combat_Flight', name: 'Hover', powerSet: 'flight', level: 1, isActive: true, slots: [] },
     ] }] as any;
   }
   b.epicPool = { id: 'primal_forces_mastery', name: 'Primal Forces Mastery', powers: [
-    { internalName: 'Power_Boost', name: 'Power Boost', isActive: !!powers.powerBoostActive, slots: [] },
+    { internalName: 'Power_Boost', name: 'Power Boost', powerSet: 'primal_forces_mastery', level: 1, isActive: !!powers.powerBoostActive, slots: [] },
   ] } as any;
   return b;
 }
@@ -252,7 +282,7 @@ describe('Power Boost integration — General totals (rebirth, controller)', () 
   it('multiplies an active defense power’s contribution when Power Boost is ON', () => {
     const off = calculateCharacterTotals(buildWith({ pool: true, powerBoostActive: false }), false, undefined, { combatMode: true });
     const on = calculateCharacterTotals(buildWith({ pool: true, powerBoostActive: true }), false, undefined, { combatMode: true });
-    // Combat Jumping alone provides positive melee defense...
+    // Hover alone provides positive melee defense...
     expect(off.globalBonuses.defMelee).toBeGreaterThan(0);
     // ...and Power Boost (a strong +Strength buff, ~+120%) roughly doubles it.
     expect(on.globalBonuses.defMelee).toBeGreaterThan(off.globalBonuses.defMelee);
@@ -281,7 +311,16 @@ describe('Mez duration surfacing — prefer PvE template over PvP (homecoming)',
   // Homecoming holds carry both a PvE template (e.g. Ranged_Immobilize) and a
   // PvP one (Ranged_PvPMez). The PvP table has no PvE AT-table entry, so if the
   // converter's "higher magnitude wins" rule picked it, the mez duration
-  // (scale × table) silently vanished. The fix prefers the PvE template.
+  // (scale × table) silently vanished.
+  //
+  // The guard SITE moved with the bag strip, and the test states the new one. The converter
+  // no longer picks a template at all — both rows survive as atoms, and the PvP row is
+  // stamped `gated`, so `baseAtoms` drops it before `mezSlotValue` ever compares magnitudes.
+  // That matters for what this test is allowed to assert: `expect(table).not.toMatch(/pvp/i)`
+  // is vacuous on its own, since no PvP row can reach the reader to fail it. So each case
+  // also pins the input that WOULD land — a gated PvP row at a strictly higher magnitude
+  // than the PvE row that wins. Without `gated` doing the work, higher-magnitude-wins picks
+  // it and the duration vanishes again.
   const cases: Array<[string, string, string]> = [
     ['controller/mind-control', 'Dominate', 'hold'],
     ['controller/mind-control', 'Total_Domination', 'hold'],
@@ -294,14 +333,22 @@ describe('Mez duration surfacing — prefer PvE template over PvP (homecoming)',
       expect(ps, `powerset ${psId}`).toBeTruthy();
       const power = ps!.powers.find(p => p.internalName === internalName);
       expect(power, internalName).toBeTruthy();
-      const mez = (power!.effects as Record<string, { scale: number; table: string; mag?: number }>)[mezKey];
+      const mez = mezSlotValue(power!, mezKey as Parameters<typeof mezSlotValue>[1]);
       expect(mez, `${internalName}.${mezKey}`).toBeTruthy();
       // Not the PvP table…
-      expect(mez.table).not.toMatch(/pvp/i);
+      expect(mez!.table).not.toMatch(/pvp/i);
       // …and the AT table resolves, so duration = scale × table is computable & positive.
-      const tableVal = getTableValue('controller', mez.table, 50);
-      expect(tableVal, `table ${mez.table} resolves`).toBeGreaterThan(0);
-      expect(mez.scale * (tableVal as number)).toBeGreaterThan(0);
+      const tableVal = getTableValue('controller', mez!.table, 50);
+      expect(tableVal, `table ${mez!.table} resolves`).toBeGreaterThan(0);
+      expect(mez!.scale * (tableVal as number)).toBeGreaterThan(0);
+
+      // The axis: a PvP row for this same mez kind exists, outranks the surfaced row on
+      // magnitude, and is kept out by `gated` alone.
+      const pvp = atomsOf(power!).filter(a => /pvp/i.test(a.modifierTable ?? '') && a.effectType === 'Mez');
+      expect(pvp.length, `${internalName} has a PvP mez row`).toBeGreaterThan(0);
+      expect(pvp.every(a => a.gated), `${internalName} PvP rows are gated`).toBe(true);
+      expect(Math.max(...pvp.map(a => a.magnitude))).toBeGreaterThan(mez!.mag);
+      expect(baseAtoms(power!).some(a => /pvp/i.test(a.modifierTable ?? ''))).toBe(false);
     });
   }
 });
@@ -332,9 +379,9 @@ describe('damage-buff AT tables (Melee/Ranged_Buff_Dmg)', () => {
     const ps = getPowerset('tanker/battle-axe');
     const buildUp = ps?.powers.find(p => p.internalName === 'Build_Up');
     expect(buildUp, 'Build_Up').toBeTruthy();
-    const dmgBuff = (buildUp!.effects as Record<string, { scale: number; table: string }>).damageBuff;
+    const dmgBuff = damageBuffValue(buildUp!);
     expect(dmgBuff?.table).toBe('Melee_Buff_Dmg');
-    const resolved = dmgBuff.scale * (getTableValue('tanker', dmgBuff.table, 50) as number);
+    const resolved = dmgBuff!.scale * (getTableValue('tanker', dmgBuff!.table, 50) as number);
     expect(resolved).toBeCloseTo(0.70, 2);
   });
 });

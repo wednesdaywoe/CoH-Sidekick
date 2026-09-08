@@ -4,6 +4,7 @@ import { getPowerset } from '@/data/powersets';
 import { createEmptyBuild } from '@/types/build';
 import { calculateCharacterTotals } from './character-totals';
 import { getBaselineHealth } from './stats';
+import { absorbValue, absorbMaxHPFractionValue, atomsOf } from '@/data/core/atom-query';
 import type { Power } from '@/types';
 
 /**
@@ -34,6 +35,30 @@ const PARASITIC_ATS: ReadonlyArray<readonly [string, string]> = [
 
 const ABLATIVE_ATS = [...PARASITIC_ATS, ['sentinel/bio-armor', 'Sentinel'] as const];
 
+/** The ATs whose Parasitic Aura carries ONLY the Max-face Expression, so the per-foe increment
+ *  has no atom to read — the ABSORB-4 residual's population on this power, pinned by name. */
+const EXPRESSION_ONLY_PARASITIC: ReadonlySet<string> = new Set(['brute/bio-armor']);
+
+/** The per-foe stamp on a power's Current-face absorb GRANT, or `undefined` when it authors
+ *  only the Max-face ceiling. Read off the atom rather than through `absorbValue`, which folds
+ *  the group to a scale/table and does not carry the stamp for this shape. */
+function perFoeAbsorbStamp(pw: Power): number | undefined {
+  for (const a of atomsOf(pw)) {
+    if (a.effectType === 'Absorb' && a.aspect === 'Cur' && a.perTarget != null) return a.perTarget;
+  }
+  return undefined;
+}
+
+/** The Max-face Expression program behind a power's absorb ceiling, or `undefined`. */
+function absorbCeilingProgram(pw: Power): string[] | undefined {
+  for (const a of atomsOf(pw)) {
+    if (a.effectType === 'Absorb' && a.aspect === 'Max' && a.attribType === 'Expression') {
+      return a.magnitudeExpression as unknown as string[] | undefined;
+    }
+  }
+  return undefined;
+}
+
 function power(setId: string, internalName: string): Power | undefined {
   return getPowerset(setId)?.powers.find((p) => p.internalName === internalName);
 }
@@ -45,15 +70,29 @@ describe('Bio Armor absorb + targets-hit fixes (homecoming)', () => {
 
   // --- #1a Ablative Carapace ---------------------------------------------
   describe('Ablative Carapace absorb = 30% of MaxHP (not 100%)', () => {
-    it.each(ABLATIVE_ATS)('%s recovers maxHPFraction 0.3, no stale scale:1', (setId) => {
-      const ab = power(setId, 'Ablative_Carapace')?.effects?.absorb as
-        | { scale?: number; maxHPFraction?: number; appliesStrength?: boolean }
-        | undefined;
-      expect(ab).toBeDefined();
-      expect(ab!.maxHPFraction).toBeCloseTo(0.3, 5);
-      expect(ab!.appliesStrength).toBe(true);
-      // The stale override pinned a bare scale:1 (= 100% MaxHP). Gone now.
-      expect(ab!.scale).toBeUndefined();
+    // Read off the ATOMS: `effects.absorb` went with the writer-side strip (BPORT7), and the
+    // fraction's real home was always the Max-face Expression the bag was projecting.
+    // `absorbMaxHPFractionValue` evaluates that program — the same reader `absorb-stat` spends
+    // and the mirror of Rust's `absorb_max_hp_fraction_value`.
+    it.each(ABLATIVE_ATS)('%s recovers maxHPFraction 0.3, no stale bare scale', (setId) => {
+      const pw = power(setId, 'Ablative_Carapace');
+      expect(pw).toBeDefined();
+      expect(absorbMaxHPFractionValue(pw!)).toBeCloseTo(0.3, 5);
+      // `appliesStrength` was the bag's word for the strength term in that program; assert the
+      // term itself. The export spells it two ways and both mean the caster's strength applies:
+      // `@Strength` as an explicit multiplier with the fraction as a program literal, and
+      // Sentinel's `@StdResult`, which IS the strength-applied standard result with the fraction
+      // on the atom's own `scale`. Accepting either is the read; requiring one would have made
+      // the Sentinel row a false red, which is how this assertion first failed.
+      const ceiling = absorbCeilingProgram(pw!);
+      expect(ceiling, `${setId} Ablative_Carapace ceiling program`).toBeDefined();
+      expect(
+        ceiling!.some((t) => t === '@Strength' || t === '@StdResult'),
+        `${setId} ceiling applies strength (${ceiling!.join(' ')})`,
+      ).toBe(true);
+      // The stale override pinned a bare scale:1 (= 100% MaxHP). There is no bare-scale absorb
+      // row at all on this power, which is the atom-side spelling of the same claim.
+      expect(absorbValue(pw!)).toBeUndefined();
     });
   });
 
@@ -66,16 +105,28 @@ describe('Bio Armor absorb + targets-hit fixes (homecoming)', () => {
     // exactly 0.10 × base HP per foe — so this asserts the FRACTION, not the encoding, and
     // still pins the defect it was written for (the summed cap-twin placeholder, 1.1).
     it.each(PARASITIC_ATS)('%s base absorb is 10%% of Max HP per foe', (setId) => {
-      const ab = power(setId, 'Parasitic_Aura')?.effects?.absorb as
-        | { scale?: number; perTarget?: number; maxHPFraction?: number; maxHPFractionPerTarget?: number; table?: string }
-        | undefined;
-      expect(ab).toBeDefined();
-      const fraction = ab!.maxHPFraction ?? ab!.scale;
-      const perTarget = ab!.maxHPFractionPerTarget ?? ab!.perTarget;
+      const pw = power(setId, 'Parasitic_Aura');
+      expect(pw).toBeDefined();
+      // The FRACTION is uniform across the ATs on the atoms — a stronger statement than the bag
+      // could make, since the two spellings the old comment describes were a bag artefact.
+      const fraction = absorbMaxHPFractionValue(pw!);
       expect(fraction).toBeCloseTo(0.1, 5);
-      expect(perTarget).toBeCloseTo(0.1, 5);
       // Never the summed cap-twin placeholder (1.1).
-      expect(fraction).toBeLessThan(1);
+      expect(fraction!).toBeLessThan(1);
+
+      // The PER-FOE increment is a different matter, and the difference is measured rather
+      // than smoothed over. Three of the four ATs author the grant as a Current/Magnitude atom
+      // that carries `perTarget`; Brute authors ONLY the Max-face Expression, whose per-foe half
+      // has no atom source — the ABSORB-4 carried residual ("the MaxHP-FRACTION half has no atom
+      // source at all"), which the bag's `maxHPFractionPerTarget` used to paper over. Stated as
+      // a partition so neither side can drift silently: an AT leaving the Expression-only set
+      // reds here, and so does one joining it.
+      const perTarget = perFoeAbsorbStamp(pw!);
+      if (EXPRESSION_ONLY_PARASITIC.has(setId)) {
+        expect(perTarget, `${setId}: gained a per-foe atom — ABSORB-4's residual may be closed`).toBeUndefined();
+      } else {
+        expect(perTarget, `${setId}: lost its per-foe atom`).toBeCloseTo(0.1, 5);
+      }
     });
   });
 

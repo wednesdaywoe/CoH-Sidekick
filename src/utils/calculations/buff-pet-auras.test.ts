@@ -40,11 +40,11 @@ describe('Buff-pet auras (homecoming)', () => {
   const key = (internalName: string) => ({ mechanicAdjusters: { [`${internalName}:buffpet`]: true } });
 
   it('detects the named buff-pets and ignores non-buff summons', () => {
-    expect(summonIsBuffPet(ForceFieldGenerator.effects?.summon)).toBe(true);
-    expect(summonIsBuffPet(Wellspring.effects?.summon)).toBe(true);
-    expect(summonIsBuffPet(TriageBeacon.effects?.summon)).toBe(true);
+    expect(summonIsBuffPet(ForceFieldGenerator.summon)).toBe(true);
+    expect(summonIsBuffPet(Wellspring.summon)).toBe(true);
+    expect(summonIsBuffPet(TriageBeacon.summon)).toBe(true);
 
-    const ffg = getBuffPetSources(ForceFieldGenerator.effects?.summon);
+    const ffg = getBuffPetSources(ForceFieldGenerator.summon);
     expect(ffg[0].auras.some((a) => a.type === 'DefenseBuff')).toBe(true);
     // Force Field Generator is a non-commandable drone.
     expect(ffg[0].displayName.toLowerCase()).toContain('force field');

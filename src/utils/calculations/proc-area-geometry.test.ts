@@ -27,7 +27,7 @@ describe('proc area-factor geometry (summon-shell AoEs)', () => {
   it('Burn borrows its inline pseudo-pet radius (resolvedEntities)', () => {
     const burn = findPower('blaster/fire-manipulation', 'Burn');
     expect(burn).toBeTruthy();
-    const geom = getPseudoPetAoEGeometry(burn!.effects?.summon);
+    const geom = getPseudoPetAoEGeometry(burn!.summon);
     expect(geom).toEqual({ radius: 15, arcDegrees: 360 });
   });
 
@@ -37,7 +37,7 @@ describe('proc area-factor geometry (summon-shell AoEs)', () => {
     // Parent is Location with no radius — geometry comes from the real pet.
     const direct = rof!.stats?.radius ?? rof!.effects?.radius ?? 0;
     expect(direct).toBe(0);
-    const geom = resolveProcAreaGeometry(direct, undefined, rof!.effects?.summon);
+    const geom = resolveProcAreaGeometry(direct, undefined, rof!.summon);
     expect(geom.radius).toBe(25);
   });
 
@@ -62,7 +62,7 @@ describe('proc area-factor geometry (summon-shell AoEs)', () => {
     expect(fb).toBeTruthy();
     const direct = fb!.stats?.radius ?? fb!.effects?.radius ?? 0;
     expect(direct).toBeGreaterThan(0);
-    const geom = resolveProcAreaGeometry(direct, 360, fb!.effects?.summon);
+    const geom = resolveProcAreaGeometry(direct, 360, fb!.summon);
     expect(geom.radius).toBe(direct);
   });
 });

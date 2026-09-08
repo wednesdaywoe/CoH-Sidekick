@@ -11,13 +11,14 @@ import {
   MOVEMENT_CAPS,
   MPH_PER_SCALE,
 } from '@/data/core/movement-constants';
-import type { MovementEffect } from '@/types/power';
+import { movementCapBumpValue, movementBuffValue } from '@/data/core/atom-query';
 
 /**
  * Travel-speed correctness guards (bug report 2026-07-12):
  *
  *   1. Hurdle's JumpingSpeed (0.5 × Melee_SpeedJumping = +124.5% @50) was
- *      silently dropped — FITNESS_POWER_EFFECTS listed only jumpHeight.
+ *      silently dropped by the (since-retired) fitness silo, whose hand table
+ *      listed only jumpHeight; Hurdle now derives both from its Movement atoms.
  *   2. TravelBuff suppression: CJ / SJ / SS-momentum / Fly / Ninja Run share
  *      the binary kTravelBuff suppress group — only the strongest applies per
  *      stat. They all stacked additively before.
@@ -169,11 +170,16 @@ describe('travel-speed fixes (HC)', () => {
   // ---- 4. Data-driven movement caps ----------------------------------------
   it('generated Super Speed carries the cap raise in movementCapBump, unsuppressible', () => {
     const ss = getPowerPool('speed')!.powers.find((p) => p.internalName === 'Super_Speed')!;
-    const bump = (ss.effects?.movementCapBump as { runSpeed?: MovementEffect })?.runSpeed;
+    // Read off the ATOMS, not the bag: the pool partition lost `effects` with the writer-side
+    // strip, and these are the readers the movement block in `character-totals` already resolves
+    // both through. The PAIR is the point — Super Speed's cap raise and its speed buff are the
+    // `Max` and `Cur` faces of one axis, and asserting them together is what keeps the aspect
+    // split from collapsing again (the +200% Fly bug).
+    const bump = movementCapBumpValue(ss)?.find((e) => e.axis === 'runSpeed');
     expect(bump?.scale).toBeCloseTo(1.938, 3);
     expect(bump?.suppressible).toBeUndefined(); // SS's cap raise persists in combat
-    // And the movement buff slot holds the REAL buff.
-    const move = (ss.effects?.movement as { runSpeed?: MovementEffect })?.runSpeed;
+    // And the movement buff itself holds the REAL buff.
+    const move = movementBuffValue(ss)?.find((e) => e.axis === 'runSpeed');
     expect(move?.scale).toBeCloseTo(1.0, 3);
     expect(move?.table).toBe('Melee_SpeedRunning');
     expect(move?.stackKey).toBe('TravelBuff');
@@ -209,7 +215,7 @@ describe('travel-speed fixes (HC)', () => {
 
   it('Super Jump\'s cap raise IS combat-suppressible (unlike Super Speed\'s)', () => {
     const sj = getPowerPool('leaping')!.powers.find((p) => p.internalName === 'Long_Jump')!;
-    const bump = (sj.effects?.movementCapBump as { jumpSpeed?: MovementEffect })?.jumpSpeed;
+    const bump = movementCapBumpValue(sj)?.find((e) => e.axis === 'jumpSpeed');
     expect(bump?.scale).toBeCloseTo(1.65, 3);
     expect(bump?.suppressible).toBe(true);
     expect(bump?.stackKey).toBe('TravelMaxBuff');

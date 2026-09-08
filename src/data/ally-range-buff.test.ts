@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { loadDataset } from '@/data/dataset';
 import { getPowerset } from '@/data';
+import { rangeBuffValue } from '@/data/core/atom-query';
 
 /**
  * Regression guard for ally/team +Range buffs.
@@ -38,15 +39,17 @@ describe('Ally/team +Range buff — homecoming', () => {
   });
 
   for (const setId of POTD_SETS) {
-    it(`${setId}: Power of the Depths emits its +37.5% rangeBuff`, () => {
+    it(`${setId}: Power of the Depths surfaces its +37.5% rangeBuff via the atom stream`, () => {
       const potd = powerBy(setId, 'Call_Depths');
       expect(potd, `${setId} Call_Depths`).toBeTruthy();
-      const rangeBuff = potd!.effects?.rangeBuff;
+      // The bag (`effects.rangeBuff`) no longer reaches powerset powers (STRIP-1);
+      // the +Range now lives on the power's own Range atom. `rangeBuffValue` is the
+      // atom-native reader the totals pass spends (character-totals.ts:2140), so the
+      // guard pins that reader recovering PotD's +Range rather than a retired bag slot.
+      const rangeBuff = rangeBuffValue(potd!);
       expect(rangeBuff, `${setId} rangeBuff`).toBeTruthy();
       // 0.375 scale == +37.5% Range. targetType Self → self-applies in calc.
-      // rangeBuff is NumberOrScaled; PotD's is always the ScaledEffect form.
-      expect(typeof rangeBuff).toBe('object');
-      expect((rangeBuff as { scale: number }).scale).toBeCloseTo(0.375, 3);
+      expect(rangeBuff!.scale).toBeCloseTo(0.375, 3);
       expect(potd!.targetType?.toLowerCase()).toBe('self');
     });
   }

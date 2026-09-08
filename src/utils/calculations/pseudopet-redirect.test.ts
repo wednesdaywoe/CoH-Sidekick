@@ -26,6 +26,13 @@ import type { ResolvedPseudoPet } from '@/types/power';
  *   - Storm Cell lightning: 5.12 energy / tick   (0.5 × Ranged_Damage(blaster,1))
  *   - Category Five storm:  0.08 cold, 0.82 smashing / tick
  *   - Category Five Eye:    5.12 energy / tick (lightning)
+ *
+ * STRIP-1 restatement: every `X.effects!.summon!` read moved to `X.summon!`. The strip
+ * retired the power-level `effects` bag, and ENT-22 (2026-08-29) hoisted the summon verdict
+ * to top-level `power.summon` (`src/types/power.ts:1211`) so pets survive the bag's
+ * removal — one writer, one address, on every partition. The nested `ability.effects`
+ * trees inside `summon.resolvedEntities` are NOT bag reads: the strip left the resolved
+ * payload intact, so those reads are unchanged.
  */
 describe('pseudo-pet redirect resolution', () => {
   beforeAll(async () => {
@@ -42,7 +49,7 @@ describe('pseudo-pet redirect resolution', () => {
   };
 
   describe('Storm Cell', () => {
-    const summon = StormCell.effects!.summon!;
+    const summon = StormCell.summon!;
     const pets = summon.resolvedEntities!;
 
     it('resolves a single pseudo-pet (60s) with Tempest + Lightning', () => {
@@ -151,7 +158,7 @@ describe('pseudo-pet redirect resolution', () => {
   });
 
   describe('Category Five', () => {
-    const summon = CategoryFive.effects!.summon!;
+    const summon = CategoryFive.summon!;
     const pets = summon.resolvedEntities!;
 
     it('resolves TWO pseudo-pets — the 20s storm and the 17s Eye (collapse fix)', () => {
@@ -189,7 +196,7 @@ describe('pseudo-pet redirect resolution', () => {
 
   describe('Tar Patch (typed resistance debuff capture)', () => {
     it('captures the -resistance debuff (all-types template at aspect=Resistance)', () => {
-      const pets = TarPatch.effects!.summon!.resolvedEntities!;
+      const pets = TarPatch.summon!.resolvedEntities!;
       const effs = pets.flatMap(p => p.abilities).flatMap(a => a.effects ?? []);
       const res = effs.find(e => e.type === 'ResistanceDebuff');
       expect(res).toBeDefined();
@@ -201,7 +208,7 @@ describe('pseudo-pet redirect resolution', () => {
 
   describe('named shells (Meteor — nested Create_Entity hop)', () => {
     it('resolves damage one Create_Entity hop deep (the spawned MeteorHit)', () => {
-      const pets = Meteor.effects!.summon!.resolvedEntities!;
+      const pets = Meteor.summon!.resolvedEntities!;
       const dmg = pets.flatMap(p => p.abilities).flatMap(a => a.damage);
       const types = new Set(dmg.map(d => d.damageType));
       expect(types.has('Fire')).toBe(true);
@@ -210,7 +217,7 @@ describe('pseudo-pet redirect resolution', () => {
   });
 
   describe('Oil Slick Arrow (ignited conditional entity)', () => {
-    const summon = OilSlickArrow.effects!.summon!;
+    const summon = OilSlickArrow.summon!;
 
     it('base summon is the inert oil slick; the burn patch is a conditional entity', () => {
       expect(summon.entity).toBe('Pets_OilSlickOil'); // inert: KB/Slow/-Def, no damage
@@ -244,19 +251,19 @@ describe('pseudo-pet redirect resolution', () => {
     // counted. The 0.063 FE component is kept (not stripped) because Fiery Aura is
     // a genuine fire-themed set — see _filterFieryEmbraceBonus's fire-set bypass.
     it('normalizes the "Burn" chassis to the generic shell so the pet path finds nothing', () => {
-      expect(BlasterBurn.effects!.summon!.entity).toBe('PL_StaticObject');
+      expect(BlasterBurn.summon!.entity).toBe('PL_StaticObject');
       expect(getPetEntity('PL_StaticObject')).toBeUndefined(); // no double-count
     });
 
     it('Blaster Fire-Manipulation Burn resolves the BASE patch variant (Fire 0.14 / 0.8s), not the stale 0.06 entity', () => {
-      const ab = BlasterBurn.effects!.summon!.resolvedEntities![0].abilities[0];
+      const ab = BlasterBurn.summon!.resolvedEntities![0].abilities[0];
       expect(ab.name).toBe('Burn');
       expect(ab.activatePeriod).toBe(0.8);
       expect(ab.damage).toEqual([{ damageType: 'Fire', scale: 0.14, table: 'Melee_Damage' }]);
     });
 
     it('Fiery-Aura armor Burns resolve the FE-active variant (Fire 0.14 + FE 0.063), consistent across the 5 armor ATs', () => {
-      const tank = TankerBurn.effects!.summon!.resolvedEntities![0].abilities[0];
+      const tank = TankerBurn.summon!.resolvedEntities![0].abilities[0];
       expect(tank.damage).toEqual([
         { damageType: 'Fire', scale: 0.14, table: 'Melee_Damage' },
         { damageType: 'Fire', scale: 0.063, table: 'Melee_Damage' },
@@ -266,7 +273,7 @@ describe('pseudo-pet redirect resolution', () => {
     it('does NOT collapse the Fiery-Embrace bonus patch into the base count', () => {
       // scrapper Burn carries a chance:0 Fiery-Embrace duplicate EntCreate sharing
       // the base signature — it must not bump count to 2 (a conditional variant).
-      const re = BlasterBurn.effects!.summon!.resolvedEntities![0];
+      const re = BlasterBurn.summon!.resolvedEntities![0];
       expect(re.count).toBeUndefined(); // i.e. count === 1
     });
   });
@@ -276,7 +283,7 @@ describe('pseudo-pet redirect resolution', () => {
     // priority_list and the payload in Pets.* redirects. SHELL-1 (fixed):
     // the resolver falls back to priority_list for the effective entity, so
     // these summons carry resolvedEntities + the shell name as entity.
-    const re = () => FreezingRain.effects!.summon!.resolvedEntities![0];
+    const re = () => FreezingRain.summon!.resolvedEntities![0];
     const fr = () => re().abilities.find(a => a.name === 'FreezingRain')!;
 
     it('surfaces the signature -res / -def / -rech / slow debuff kit', () => {
@@ -296,7 +303,7 @@ describe('pseudo-pet redirect resolution', () => {
   });
 
   describe('Voltaic Sentinel (PL_Untargetable_FightPreferRanged shell, permanent pet)', () => {
-    const summon = VoltaicSentinel.effects!.summon!;
+    const summon = VoltaicSentinel.summon!;
     const re = () => summon.resolvedEntities![0];
 
     it('resolves the bolt (Energy damage + EndDrain) off the generic mobile shell', () => {
@@ -321,7 +328,7 @@ describe('pseudo-pet redirect resolution', () => {
   });
 
   describe('Sentinel Rain of Fire (inherent-damage split, no double-count)', () => {
-    const re = () => SentinelRainOfFire.effects!.summon!.resolvedEntities![0];
+    const re = () => SentinelRainOfFire.summon!.resolvedEntities![0];
 
     it('keeps both Melee_Damage and Melee_InherentDamage entries in the data', () => {
       const fr = re().abilities.find(a => a.name === 'RainofFire')!;
@@ -347,7 +354,7 @@ describe('pseudo-pet redirect resolution', () => {
     // resolves as a shell (entity = PL_StaticObject + resolvedEntities), NOT
     // via the getPetEntity('Sleet') pet-entity fallback the beta used.
     it('Sleet summon resolves the shell so its damage/effects surface', () => {
-      const summon = Sleet.effects!.summon!;
+      const summon = Sleet.summon!;
       expect(summon.entity).toBe('PL_StaticObject');
       expect(getPetEntity(summon.entity!)).toBeUndefined(); // no double-count
       const re = summon.resolvedEntities![0];
