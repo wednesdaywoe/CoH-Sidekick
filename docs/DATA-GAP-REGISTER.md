@@ -57,10 +57,10 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 264 entries.** EXPRPUNT-1, opened 2026-09-08 when canonical's pipeline job ran for
-   the first time since 2026-09-07: the TS reader and the Rust engine hold opposite verdicts on
-   Expression-typed resource atoms, and the oracle fixtures sit stale between them.
-   [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9.
+**0 open, of 264 entries.** EXPRPUNT-1 opened and closed on 2026-09-08, the first day canonical's
+   pipeline job could report; the engine's verdict won.
+   [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9. The frontier is
+   clear, so [REBUILD-PROGRESS](REBUILD-PROGRESS.md) is next.
 
 **Carried residuals — named work inside closed entries.** Nine items were scoped out of a closure
 and recorded there rather than reopened. They are not `[ ]` rows: their hosts *are* closed with
@@ -647,7 +647,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 56 of 57 closed
+[Full detail](gaps/pipeline-provenance.md) — 57 of 57 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -862,24 +862,9 @@ measurement went, and where a closure for the residual belongs too.
   verify: file:CoH-Sidekick/src/components/info/magnitudesFromProjection.ts
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 - [x] **ENGLAG-2** — a mez row states its magnitude and not its duration; the `durations` map was in the bag STRIP-1 took and the engine row carried none. Closed 2026-09-06: `GrantedMagnitude` gained `duration: Option<f64>` (the atom's, `None` on a `MezDuration` row whose tier IS the seconds), the beta rows/wasm carry it, the render reads `group.item.duration` not `effects.durations`. Guard: `[ENGLAG-1 adapter]` census + `mez_row_duration`; 281 app tests green.
-- [ ] **EXPRPUNT-1** — the TS reader and the Rust engine took OPPOSITE decisions on the same punt,
-  and the oracle fixtures are stale between them. Gamma Boost's regen/recovery are
-  `attribType: Expression` atoms whose magnitude is an RPN program over the caster's current HP%.
-  BPORT11 closed the TS punt, so `regenBuffValue` returns the flat `{scale:1, table:'Melee_Ones'}`
-  on the argument that it "equals the bag on all 36". `apply.rs` punts on Expression atoms BY
-  DESIGN and evaluates `magnitude_expression` in `hp_scaling_resource_value` instead — 5% regen /
-  36% recovery at full health — and its comment calls the flat form the bag PLACEHOLDER, whose
-  "scale never reached the total". So BPORT11 validated against a number that was never used as a
-  number: an admission ticket, not a magnitude. Nothing user-facing is wrong — totals come from the
-  engine, and the reader's one display consumer spends it as a predicate. But
-  `fixtures/oracle/*/resources.jsonl` still holds the pre-BPORT11 nulls, so `regen-diff` reds on 36
-  entries x 2 appliers and regenerating them reds `oracle_gate` instead: two gates in direct
-  contradiction, invisible while the pipeline job could not run.
-  **Goal** — one verdict on what an Expression atom owes `regenBuffValue`, held by both
-  implementations. **Done when** — the reader and `apply.rs` agree, the fixtures are regenerated
-  behind that decision, and `regen-diff` and `oracle_gate` are green together.
-  **Check** — `cargo test -p coh_math --test oracle_gate` plus `node scripts/emit-oracle-fixtures.cjs
-  && git diff --exit-code -- fixtures/`.
+- [x] **EXPRPUNT-1** — the TS reader and the engine closed one punt opposite ways, fixtures between them, behind a job 12 days dead. Closed 2026-09-08 the engine's way: an `Expression` magnitude is an RPN program, `{scale, table}` cannot hold one, and the reader was returning `@StdResult` — the INPUT, +100% at any health. BPORT11's census walked BASE atoms, excluding its own subject: 18 gated phantoms.
+  verify: file:src/utils/calculations/buffs-atom-native.verify.test.ts
+  story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 - [x] **STACKINFO-1** — the targets-hit slider reached NO power on any fork, and its per-foe growth was dead in the engine beside it: both readers asked the AUTHORED bag what STRIP-1 had emptied. Closed 2026-09-07 — both arms read `per_target` / `stack_cap` now; 33/33/36/32 per-foe + 343/376/313/317 stack sliders back, engine rows up 46/38/29/46%. Guards mutation-checked.
   verify: file:CoH-Sidekick/src/components/info/stackingSlider.test.ts
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
