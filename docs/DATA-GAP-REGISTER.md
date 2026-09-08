@@ -57,10 +57,10 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 263 entries.** PROD6B-BETA-PARITY closed 2026-09-08, the last open row. The beta's
-   remaining red assertions are rostered per file in
-   [strip1-beta-port](streams/strip1-beta-port.md), and the carried residuals below are where the
-   named work now lives — the `+ extra instance` hint is the one this closure added.
+**0 open, of 263 entries.** PROD6B-BETA-PARITY closed 2026-09-08, the last open row.
+   [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9: the beta has no
+   red assertions left to roster (264 files, 2604 tests), and the shared surface carries one
+   declared fork, SLOT-3's. The carried residuals below are where the named work now lives.
 
 **Carried residuals — named work inside closed entries.** Nine items were scoped out of a closure
 and recorded there rather than reopened. They are not `[ ]` rows: their hosts *are* closed with
