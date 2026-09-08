@@ -280,6 +280,16 @@ describe('BPORT4 census — what the strip costs, per seam', () => {
     const domination = roster.filter((s) => s.binding === 'roster:DOMINATION_MEZ_KEYS');
     expect(domination.map((s) => s.slot).sort())
       .toEqual(['confuse', 'fear', 'hold', 'immobilize', 'sleep', 'stun']);
+    if (!census.buckets) {
+      // Stated rather than silent, and placed HERE rather than at the top so the two claims
+      // above — that roster seams exist at all, and that DOMINATION_MEZ_KEYS mints exactly the
+      // six — stay live without a sibling. Only the verdict below needs one. This repo's CI
+      // checks out this repo alone and canonical is private, so `sibling` is undefined there
+      // and the assertion cannot be measured; the place it IS measured is canonical's
+      // `shared-pipeline-surface` job, which runs this suite with both trees present.
+      expect(existsSync(SIBLING)).toBe(false);
+      return;
+    }
     for (const seam of domination) expect(seam.sibling, seam.slot ?? undefined).toBe('reads-too');
   });
 
