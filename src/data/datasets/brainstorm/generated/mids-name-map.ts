@@ -11,10 +11,10 @@
  * below carries those pairs so a reader holding the .mbd's own path can reach the same row.
  *
  * Source: Mids Reborn homecoming database 2026.5.1337 (sha256 7568ff37f3a6…) — Mids ships no brainstorm build, so a brainstorm .mbd carries homecoming's namespace
- * Powersets paired with the export: 3561 of 3653. Remapped names: 83.
- * Reverse rows for the writer: 83, plus 0 the display join could only reach with its separators stripped.
- * Powerset paths for the writer: 3561
- * Mids powersets with no counterpart here: 92 — listed by the generator on stderr.
+ * Powersets paired with the export: 3582 of 3653. Remapped names: 94.
+ * Reverse rows for the writer: 94, plus 0 the display join could only reach with its separators stripped.
+ * Powerset paths for the writer: 3582
+ * Mids powersets with no counterpart here: 71 — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset brainstorm
  */
@@ -52,6 +52,10 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "controller_buff.marine_affinity": {
     "power_of_the_depths": "Call_Depths"
   },
+  "controller_buff.shock_therapy": {
+    "defibrilate": "Defibrillate",
+    "galvanic_sentinel": "Discharge"
+  },
   "controller_control.arsenal_control": {
     "tri_cannon": "Gun_Drone"
   },
@@ -60,6 +64,10 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   },
   "corruptor_buff.marine_affinity": {
     "power_of_the_depths": "Call_Depths"
+  },
+  "corruptor_buff.shock_therapy": {
+    "defibrilate": "Defibrillate",
+    "galvanic_sentinel": "Discharge"
   },
   "corruptor_ranged.seismic_blast": {
     "seismic_shockwaves": "Shockwaves"
@@ -98,6 +106,22 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "dominator_control.pyrotechnic_control": {
     "sparkling_chain": "Sparkling_Field"
   },
+  "epic.controller_dark_mastery": {
+    "midnight_grasp": "Gather_Shadows",
+    "umbral_torrent": "Torrent"
+  },
+  "epic.defender_ice_mastery": {
+    "build_up": "Ice_Slick"
+  },
+  "epic.dominator_dark_mastery": {
+    "umbral_torrent": "Torrent"
+  },
+  "epic.sentinel_electricity_mastery": {
+    "havoc_punch": "Havok_Punch"
+  },
+  "epic.sentinel_leviathan_mastery": {
+    "chum_spray": "Arctic_Breath"
+  },
   "mastermind_buff.kinetics": {
     "kinetic_transfer": "Fulcrum_Shift"
   },
@@ -108,6 +132,9 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
     "emp_pulse": "EM_Pulse",
     "enervating__field": "Enervating_Field",
     "radiation_emission": "Radiant_Aura"
+  },
+  "mastermind_buff.shock_therapy": {
+    "defibrilate": "Defibrillate"
   },
   "mastermind_pets.protector_3": {
     "seeker drones": "Seeker_Drones"
@@ -240,6 +267,14 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
  * this; a reader that starts from our own powers (the matcher) already holds the map's key.
  */
 export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {
+  "controller_buff.electrical_affinity": "controller_buff.shock_therapy",
+  "corruptor_buff.electrical_affinity": "corruptor_buff.shock_therapy",
+  "epic.dark_mastery_controller": "epic.controller_dark_mastery",
+  "epic.dark_mastery_dominator": "epic.dominator_dark_mastery",
+  "epic.ice_mastery_defcorr": "epic.defender_ice_mastery",
+  "epic.sentinel_elec_mastery": "epic.sentinel_electricity_mastery",
+  "epic.sentinel_lev_mastery": "epic.sentinel_leviathan_mastery",
+  "mastermind_buff.electrical_affinity": "mastermind_buff.shock_therapy",
   "redirects.arsenal_assault": "mission_maker_attacks.arsenal_assault"
 };
 
@@ -290,6 +325,10 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "controller_buff.marine_affinity": {
     "call_depths": "Power_of_the_Depths"
   },
+  "controller_buff.shock_therapy": {
+    "defibrillate": "Defibrilate",
+    "discharge": "Galvanic_Sentinel"
+  },
   "controller_control.arsenal_control": {
     "gun_drone": "Tri_Cannon"
   },
@@ -298,6 +337,10 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   },
   "corruptor_buff.marine_affinity": {
     "call_depths": "Power_of_the_Depths"
+  },
+  "corruptor_buff.shock_therapy": {
+    "defibrillate": "Defibrilate",
+    "discharge": "Galvanic_Sentinel"
   },
   "corruptor_ranged.seismic_blast": {
     "shockwaves": "Seismic_Shockwaves"
@@ -336,6 +379,22 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "dominator_control.pyrotechnic_control": {
     "sparkling_field": "Sparkling_Chain"
   },
+  "epic.controller_dark_mastery": {
+    "gather_shadows": "Midnight_Grasp",
+    "torrent": "Umbral_Torrent"
+  },
+  "epic.defender_ice_mastery": {
+    "ice_slick": "Build_Up"
+  },
+  "epic.dominator_dark_mastery": {
+    "torrent": "Umbral_Torrent"
+  },
+  "epic.sentinel_electricity_mastery": {
+    "havok_punch": "Havoc_Punch"
+  },
+  "epic.sentinel_leviathan_mastery": {
+    "arctic_breath": "Chum_Spray"
+  },
   "mastermind_buff.kinetics": {
     "fulcrum_shift": "Kinetic_Transfer"
   },
@@ -346,6 +405,9 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
     "em_pulse": "EMP_Pulse",
     "enervating_field": "Enervating__Field",
     "radiant_aura": "Radiation_Emission"
+  },
+  "mastermind_buff.shock_therapy": {
+    "defibrillate": "Defibrilate"
   },
   "mastermind_pets.protector_3": {
     "seeker_drones": "Seeker Drones"
@@ -523,6 +585,7 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "blaster_support.radiation_manipulation": "Blaster_Support.Radiation_Manipulation",
   "blaster_support.sonic_manipulation": "Blaster_Support.Sonic_Manipulation",
   "blaster_support.tactical_arrow": "Blaster_Support.Tactical_Arrow",
+  "blaster_support.time_manipulation": "Blaster_Support.Temporal_Manipulation",
   "boosts.attuned_achilles_heel_a": "Boosts.Attuned_Achilles_Heel_A",
   "boosts.attuned_achilles_heel_b": "Boosts.Attuned_Achilles_Heel_B",
   "boosts.attuned_achilles_heel_c": "Boosts.Attuned_Achilles_Heel_C",
@@ -3142,6 +3205,7 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "controller_buff.pain_domination": "Controller_Buff.Pain_Domination",
   "controller_buff.poison": "Controller_Buff.Poison",
   "controller_buff.radiation_emission": "Controller_Buff.Radiation_Emission",
+  "controller_buff.shock_therapy": "Controller_Buff.Electrical_Affinity",
   "controller_buff.sonic_debuff": "Controller_Buff.Sonic_Debuff",
   "controller_buff.storm_summoning": "Controller_Buff.Storm_Summoning",
   "controller_buff.thermal_radiation": "Controller_Buff.Thermal_Radiation",
@@ -3170,6 +3234,7 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "corruptor_buff.pain_domination": "Corruptor_Buff.Pain_Domination",
   "corruptor_buff.poison": "Corruptor_Buff.Poison",
   "corruptor_buff.radiation_emission": "Corruptor_Buff.Radiation_Emission",
+  "corruptor_buff.shock_therapy": "Corruptor_Buff.Electrical_Affinity",
   "corruptor_buff.sonic_resonance": "Corruptor_Buff.Sonic_Resonance",
   "corruptor_buff.storm_summoning": "Corruptor_Buff.Storm_Summoning",
   "corruptor_buff.thermal_radiation": "Corruptor_Buff.Thermal_Radiation",
@@ -3249,6 +3314,7 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "dominator_control.pyrotechnic_control": "Dominator_Control.Pyrotechnic_Control",
   "dominator_control.symphony_control": "Dominator_Control.Symphony_Control",
   "epic.arctic_mastery": "Epic.Arctic_Mastery",
+  "epic.blaster_dark_mastery": "Epic.Dark_Mastery_Blaster",
   "epic.blaster_mace_mastery": "Epic.Blaster_Mace_Mastery",
   "epic.blaster_mu_mastery": "Epic.Blaster_Mu_Mastery",
   "epic.blaze_mastery": "Epic.Blaze_Mastery",
@@ -3261,13 +3327,18 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "epic.charge_mastery": "Epic.Charge_Mastery",
   "epic.chill_mastery": "Epic.Chill_Mastery",
   "epic.cold_mastery": "Epic.Cold_Mastery",
+  "epic.controller_dark_mastery": "Epic.Dark_Mastery_Controller",
   "epic.controller_mace_mastery": "Epic.Controller_Mace_Mastery",
+  "epic.corruptor_fire_mastery": "Epic.Corr_Flame_Mastery",
   "epic.corruptor_leviathan_mastery": "Epic.Corruptor_Leviathan_Mastery",
   "epic.corruptor_mace_mastery": "Epic.Corruptor_Mace_Mastery",
   "epic.corruptor_mu_mastery": "Epic.Corruptor_Mu_Mastery",
   "epic.corruptor_soul_mastery": "Epic.Corruptor_Soul_Mastery",
   "epic.dark_mastery": "Epic.Dark_Mastery",
   "epic.darkness_mastery": "Epic.Darkness_Mastery",
+  "epic.defender_fire_mastery": "Epic.Def_Flame_Mastery",
+  "epic.defender_ice_mastery": "Epic.Ice_Mastery_DefCorr",
+  "epic.dominator_dark_mastery": "Epic.Dark_Mastery_Dominator",
   "epic.dominator_leviathan_mastery": "Epic.Dominator_Leviathan_Mastery",
   "epic.dominator_mace_mastery": "Epic.Dominator_Mace_Mastery",
   "epic.dominator_mu_mastery": "Epic.Dominator_Mu_Mastery",
@@ -3285,10 +3356,12 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "epic.heat_mastery_stalker": "Epic.Heat_Mastery_Stalker",
   "epic.ice_mastery": "Epic.Ice_Mastery",
   "epic.ice_mastery_dominator": "Epic.Ice_Mastery_Dominator",
+  "epic.mastermind_dark_mastery": "Epic.Dark_Mastery_Mastermind",
   "epic.mastermind_leviathan_mastery": "Epic.Mastermind_Leviathan_Mastery",
   "epic.mastermind_mace_mastery": "Epic.Mastermind_Mace_Mastery",
   "epic.mastermind_mu_mastery": "Epic.Mastermind_Mu_Mastery",
   "epic.mastermind_soul_mastery": "Epic.Mastermind_Soul_Mastery",
+  "epic.melee_psionic_mastery": "Epic.Psionic_Mastery_ScrapStalk",
   "epic.munitions_mastery": "Epic.Munitions_Mastery",
   "epic.power_mastery": "Epic.Power_Mastery",
   "epic.primal_forces_mastery": "Epic.Primal_Forces_Mastery",
@@ -3297,18 +3370,24 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "epic.psionic_mastery_domingator": "Epic.Psionic_Mastery_Domingator",
   "epic.psychic_mastery": "Epic.Psychic_Mastery",
   "epic.pyre_mastery": "Epic.Pyre_Mastery",
+  "epic.scrapper_ice_mastery": "Epic.Ice_Mastery_ScrapStalk",
   "epic.sentinel_dark_mastery": "Epic.Sentinel_Dark_Mastery",
+  "epic.sentinel_electricity_mastery": "Epic.Sentinel_Elec_Mastery",
   "epic.sentinel_fire_mastery": "Epic.Sentinel_Fire_Mastery",
   "epic.sentinel_ice_mastery": "Epic.Sentinel_Ice_Mastery",
+  "epic.sentinel_leviathan_mastery": "Epic.Sentinel_Lev_Mastery",
   "epic.sentinel_mace_mastery": "Epic.Sentinel_Mace_Mastery",
   "epic.sentinel_mu_mastery": "Epic.Sentinel_Mu_Mastery",
   "epic.sentinel_ninja_mastery": "Epic.Sentinel_Ninja_Mastery",
+  "epic.sentinel_psionic_mastery": "Epic.Sentinel_Psi_Mastery",
   "epic.sentinel_soul_mastery": "Epic.Sentinel_Soul_Mastery",
   "epic.stalker_leviathan_mastery": "Epic.Stalker_Leviathan_Mastery",
   "epic.stalker_mace_mastery": "Epic.Stalker_Mace_Mastery",
   "epic.stalker_mu_mastery": "Epic.Stalker_Mu_Mastery",
   "epic.stalker_soul_mastery": "Epic.Stalker_Soul_Mastery",
   "epic.stone_mastery": "Epic.Stone_Mastery",
+  "epic.tank_dark_mastery": "Epic.Dark_Mastery_TankBrute",
+  "epic.tank_psionic_mastery": "Epic.Psionic_Mastery_TankBrute",
   "epic.veat_leviathan_mastery": "Epic.VEAT_Leviathan_Mastery",
   "epic.veat_mace_mastery": "Epic.VEAT_Mace_Mastery",
   "epic.veat_mu_mastery": "Epic.VEAT_Mu_Mastery",
@@ -3428,6 +3507,7 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "mastermind_buff.pain_domination": "Mastermind_Buff.Pain_Domination",
   "mastermind_buff.poison": "Mastermind_Buff.Poison",
   "mastermind_buff.radiation_emission": "Mastermind_Buff.Radiation_Emission",
+  "mastermind_buff.shock_therapy": "Mastermind_Buff.Electrical_Affinity",
   "mastermind_buff.sonic_resonance": "Mastermind_Buff.Sonic_Resonance",
   "mastermind_buff.storm_summoning": "Mastermind_Buff.Storm_Summoning",
   "mastermind_buff.thermal_radiation": "Mastermind_Buff.Thermal_Radiation",
@@ -3494,6 +3574,7 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "mastermind_pets.protector": "Mastermind_Pets.Protector",
   "mastermind_pets.protector_2": "Mastermind_Pets.Protector_2",
   "mastermind_pets.protector_3": "Mastermind_Pets.Protector_3",
+  "mastermind_pets.repair_drone": "Mastermind_Pets.Maintenance_Bot",
   "mastermind_pets.skeleton": "Mastermind_Pets.Skeleton",
   "mastermind_pets.skeleton_2": "Mastermind_Pets.Skeleton_2",
   "mastermind_pets.skeleton_3": "Mastermind_Pets.Skeleton_3",
@@ -3599,6 +3680,7 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "pets.enflame": "Pets.Enflame",
   "pets.epic_freezingrain": "Pets.Epic_FreezingRain",
   "pets.epic_icestorm": "Pets.Epic_IceStorm",
+  "pets.epic_lrmrocket": "Redirects.Epic",
   "pets.epic_quicksand": "Pets.Epic_Quicksand",
   "pets.experimentation_corrosive_vial": "Pets.Experimentation_Corrosive_Vial",
   "pets.faerieresists": "Pets.FaerieResists",
@@ -3795,6 +3877,7 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "redirects.kinetics": "Redirects.Kinetics",
   "redirects.marine_affinity": "Redirects.Marine_Affinity",
   "redirects.mind_control": "Redirects.Mind_Control",
+  "redirects.pool_leaping": "Redirects.Spring_Attack",
   "redirects.pyrotechnic_control": "Redirects.Pyrotechnic_Control",
   "redirects.sonic": "Redirects.Sonic",
   "redirects.sonic_melee": "Redirects.Sonic_Melee",

@@ -401,9 +401,12 @@ describe('Mids .mbd export — the reverse name table', () => {
         `${fork}: a forward row with no reverse — the generator withdrew one as ambiguous`)
         .toBe(Object.values(map).reduce((n, rows) => n + Object.keys(rows).length, 0));
     }
-    // 83 + 36 + 54 + 83 as generated. A table that stopped being emitted would leave every
-    // loop above unentered and every assertion in it unexecuted.
-    expect(graded).toBe(256);
+    // 95 + 37 + 86 + 94 as generated. A table that stopped being emitted would leave every
+    // loop above unentered and every assertion in it unexecuted. The four grew by 56 at
+    // MBDEXPORT-9, when the roster pass reached the powersets whose two spellings share
+    // nothing — a powerset with no pair carries no rows, so its rotations were invisible
+    // rather than absent.
+    expect(graded).toBe(312);
   });
 
   it('keeps the spelling the forward key throws away', () => {
@@ -484,27 +487,36 @@ describe('Mids .mbd export — the powerset path table', () => {
         graded++;
       }
     }
-    // 3574 + 3459 + 0 + 3561 as generated. Thunderspy is the zero and it is not a bug:
+    // 3596 + 3470 + 0 + 3582 as generated. Thunderspy is the zero and it is not a bug:
     // its names dump predates this table and carries folded powerset keys, so Mids' own
     // spelling is not in it and the generator refuses to invent one.
-    expect(graded).toBe(10594);
+    expect(graded).toBe(10648);
     expect(Object.keys(THUNDERSPY_PATHS)).toEqual([]);
   });
 
   it('covers every set a build can hold, or reports the ones it cannot', async () => {
     // The measurement, pinned. An unpaired set is not silent any more — the writer warns
     // and sends ours — but it is still a set whose powers Mids will not bind, so the
-    // count is held to what was measured on 2026-09-09 and moves only on purpose.
+    // count is held to what was measured and moves only on purpose.
     const unpaired: Record<string, number> = {};
     for (const fork of ['homecoming', 'rebirth', 'thunderspy', 'brainstorm'] as const) {
       await loadDataset(fork);
       unpaired[fork] = [...ourSetKeys()].filter((k) => !midsPowersetPathForExport(k)).length;
     }
     await loadDataset('homecoming');
-    // MBDEXPORT-9 owns the three live forks' residual: mostly epic pools, where Mids
-    // spells the set for the archetypes that share it (`Epic.Dark_Mastery_TankBrute` for
-    // our `Epic.Tank_Dark_Mastery`) and the pairing's segment join cannot see it.
-    expect(unpaired).toEqual({ homecoming: 19, rebirth: 17, thunderspy: 386, brainstorm: 28 });
+    // 19 / 17 / 28 on the three live forks before MBDEXPORT-9's roster pass. What is left
+    // is attributed rather than merely counted, and the census next to this file
+    // (`scripts/keys/mbdexport9-powerset-pairing-census.cjs`) is where each one's reason
+    // is: Mids holds a copy per archetype and our key names none (Rebirth's Frost and
+    // Inferno Mastery), Mids merges two of ours into one set (its Martial Mastery), Mids'
+    // database predates the fork (Brainstorm's Light Affinity and Sonic Aura), or the one
+    // Mids set that holds the roster is already another powerset of ours (`Pool.Fitness`,
+    // whose four powers live at Mids' `Inherent.Fitness` — where our own `Inherent.Fitness`
+    // already is).
+    //
+    // Thunderspy's 386 is every set it has and is not this row's: no Mids database for
+    // that fork has ever been read, so the path table is withheld whole (MBDEXPORT-2).
+    expect(unpaired).toEqual({ homecoming: 1, rebirth: 6, thunderspy: 386, brainstorm: 10 });
   }, 600000);
 
   it('says whether a fork has a Mids namespace at all, rather than reading absence as loss', () => {
@@ -524,6 +536,133 @@ describe('Mids .mbd export — the powerset path table', () => {
     expect(midsPowersetPathForExport('Guardian_Comp.Atmospheric_Composition'))
       .toBe('Guardian_Composition.Atmospheric_Composition');
     await loadDataset('homecoming');
+  });
+});
+
+/**
+ * MBDEXPORT-9 — the pairs the two spellings do not argue for at all.
+ *
+ * The first two passes both agree on the SET segment: the exact `group.set` key, then the
+ * segment alone. A pair whose set segments differ therefore came from the third, the one
+ * that matches on the roster — Mids' set holds exactly our powers and nothing besides —
+ * and no part of the two names supports it.
+ *
+ * So the pairs are pinned in full rather than counted. A count would go on reading the
+ * same while a widened rule quietly swapped which Mids set an epic pool goes to, and the
+ * whole risk of a roster join lives in exactly that swap.
+ */
+describe('Mids .mbd export — the pairs matched on the roster (MBDEXPORT-9)', () => {
+  /** Mids' set segment folded the way the pairing folds it, for comparison with ours. */
+  const segment = (key: string) =>
+    key.split('.').slice(1).join('.').trim().replace(/[\s_-]+/g, '_').toLowerCase();
+
+  const REKEYED: Record<string, [string, string][]> = {
+    homecoming: [
+      ['blaster_support.time_manipulation', 'Blaster_Support.Temporal_Manipulation'],
+      ['controller_buff.shock_therapy', 'Controller_Buff.Electrical_Affinity'],
+      ['corruptor_buff.shock_therapy', 'Corruptor_Buff.Electrical_Affinity'],
+      ['epic.blaster_dark_mastery', 'Epic.Dark_Mastery_Blaster'],
+      ['epic.controller_dark_mastery', 'Epic.Dark_Mastery_Controller'],
+      ['epic.corruptor_fire_mastery', 'Epic.Corr_Flame_Mastery'],
+      ['epic.defender_fire_mastery', 'Epic.Def_Flame_Mastery'],
+      ['epic.defender_ice_mastery', 'Epic.Ice_Mastery_DefCorr'],
+      ['epic.dominator_dark_mastery', 'Epic.Dark_Mastery_Dominator'],
+      ['epic.mastermind_dark_mastery', 'Epic.Dark_Mastery_Mastermind'],
+      ['epic.melee_psionic_mastery', 'Epic.Psionic_Mastery_ScrapStalk'],
+      ['epic.scrapper_ice_mastery', 'Epic.Ice_Mastery_ScrapStalk'],
+      ['epic.sentinel_electricity_mastery', 'Epic.Sentinel_Elec_Mastery'],
+      ['epic.sentinel_leviathan_mastery', 'Epic.Sentinel_Lev_Mastery'],
+      ['epic.sentinel_psionic_mastery', 'Epic.Sentinel_Psi_Mastery'],
+      ['epic.tank_dark_mastery', 'Epic.Dark_Mastery_TankBrute'],
+      ['epic.tank_psionic_mastery', 'Epic.Psionic_Mastery_TankBrute'],
+      ['mastermind_buff.shock_therapy', 'Mastermind_Buff.Electrical_Affinity'],
+      ['mastermind_pets.repair_drone', 'Mastermind_Pets.Maintenance_Bot'],
+      ['pets.epic_lrmrocket', 'Redirects.Epic'],
+      ['pets.traps_seeker', 'Mastermind_Pets.Seeker_Drone'],
+      ['redirects.pool_leaping', 'Redirects.Spring_Attack'],
+    ],
+    rebirth: [
+      ['epic.guardian_fire_mastery', 'Epic.Fire_Mastery_Guardian'],
+      ['epic.guardian_ice_mastery', 'Epic.Ice_Mastery_Guardian'],
+      ['epic.guardian_leviathan_mastery', 'Epic.Leviathan_Mastery_Guardian'],
+      ['epic.guardian_mace_mastery', 'Epic.Mace_Mastery_Guardian'],
+      ['epic.guardian_mu_mastery', 'Epic.Mu_Mastery_Guardian'],
+      ['epic.guardian_munitions_mastery', 'Epic.Munitions_Mastery_Guardian'],
+      ['epic.guardian_primal_forces_mastery', 'Epic.Primal_Forces_Mastery_Guardian'],
+      ['epic.guardian_psionic_mastery', 'Epic.Psionic_Mastery_Guardian'],
+      ['epic.guardian_soul_mastery', 'Epic.Soul_Mastery_Guardian'],
+      ['guardian_comp.reconstructive_healing', 'Guardian_Composition.Reconstructive_Composition'],
+      ['guardian_comp.temporal_reaction', 'Guardian_Composition.Temporal_Composition'],
+    ],
+    brainstorm: [
+      ['blaster_support.time_manipulation', 'Blaster_Support.Temporal_Manipulation'],
+      ['controller_buff.shock_therapy', 'Controller_Buff.Electrical_Affinity'],
+      ['corruptor_buff.shock_therapy', 'Corruptor_Buff.Electrical_Affinity'],
+      ['epic.blaster_dark_mastery', 'Epic.Dark_Mastery_Blaster'],
+      ['epic.controller_dark_mastery', 'Epic.Dark_Mastery_Controller'],
+      ['epic.corruptor_fire_mastery', 'Epic.Corr_Flame_Mastery'],
+      ['epic.defender_fire_mastery', 'Epic.Def_Flame_Mastery'],
+      ['epic.defender_ice_mastery', 'Epic.Ice_Mastery_DefCorr'],
+      ['epic.dominator_dark_mastery', 'Epic.Dark_Mastery_Dominator'],
+      ['epic.mastermind_dark_mastery', 'Epic.Dark_Mastery_Mastermind'],
+      ['epic.melee_psionic_mastery', 'Epic.Psionic_Mastery_ScrapStalk'],
+      ['epic.scrapper_ice_mastery', 'Epic.Ice_Mastery_ScrapStalk'],
+      ['epic.sentinel_electricity_mastery', 'Epic.Sentinel_Elec_Mastery'],
+      ['epic.sentinel_leviathan_mastery', 'Epic.Sentinel_Lev_Mastery'],
+      ['epic.sentinel_psionic_mastery', 'Epic.Sentinel_Psi_Mastery'],
+      ['epic.tank_dark_mastery', 'Epic.Dark_Mastery_TankBrute'],
+      ['epic.tank_psionic_mastery', 'Epic.Psionic_Mastery_TankBrute'],
+      ['mastermind_buff.shock_therapy', 'Mastermind_Buff.Electrical_Affinity'],
+      ['mastermind_pets.repair_drone', 'Mastermind_Pets.Maintenance_Bot'],
+      ['pets.epic_lrmrocket', 'Redirects.Epic'],
+      ['redirects.pool_leaping', 'Redirects.Spring_Attack'],
+    ],
+  };
+
+  it('mints exactly these, at every fork that has a path table', () => {
+    const tables = {
+      homecoming: HOMECOMING_PATHS, rebirth: REBIRTH_PATHS, brainstorm: BRAINSTORM_PATHS,
+    } as const;
+    for (const [fork, paths] of Object.entries(tables)) {
+      const rekeyed = Object.entries(paths).filter(([ourKey, midsPath]) =>
+        segment(ourKey) !== segment(midsPath));
+      expect(rekeyed, fork).toEqual(REKEYED[fork]);
+    }
+    // Thunderspy's twelve are real and invisible here: its dump predates MBDEXPORT-6, so
+    // the fork has no path table to read them out of. The generator lists them on stderr.
+    expect(Object.keys(THUNDERSPY_PATHS)).toEqual([]);
+  });
+
+  it('sends two archetypes that share a roster to two different Mids sets', () => {
+    // The tie-break, which is the only place the roster join consults the NAME. Mids
+    // spells the Defender's and the Corruptor's Fire Mastery `Def_Flame_Mastery` and
+    // `Corr_Flame_Mastery` and puts the same five powers in both, so nothing but the
+    // truncated archetype separates them. A rule that gave up here would send both to one
+    // — and one of the two builds would carry another archetype's powerset path.
+    expect(midsPowersetPathForExport('epic.defender_fire_mastery')).toBe('Epic.Def_Flame_Mastery');
+    expect(midsPowersetPathForExport('epic.corruptor_fire_mastery')).toBe('Epic.Corr_Flame_Mastery');
+  });
+
+  it('carries the names inside a rekeyed set, not just the path to it', () => {
+    // A pair is only worth having if the powers inside it bind, and an unpaired set had
+    // no rows at all — so these rotations were invisible rather than absent. Ours displays
+    // "Build Up" under the internal name `Ice_Slick`, and Mids' `Build_Up` displays the
+    // same: exactly the MBDIMPORT-2 shape, in a powerset the pairing could not see.
+    expect(midsPowersetPathForExport('epic.defender_ice_mastery')).toBe('Epic.Ice_Mastery_DefCorr');
+    expect(midsNameForExport('epic.defender_ice_mastery', 'Ice_Slick')).toBe('Build_Up');
+    expect(midsNameRemap('epic.defender_ice_mastery', 'Build_Up')).toBe('Ice_Slick');
+  });
+
+  it('leaves Fitness alone, because Mids has one home for it and ours already has it', () => {
+    // The decision the row asked for. `Pool.Fitness` and `Inherent.Fitness` are the same
+    // four powers here, Mids keeps only `Inherent.Fitness`, and our `inherent.fitness`
+    // pairs with it on the exact key. Awarding the pool copy the same path would be a
+    // second key onto one Mids set, so the pool copy gets none and the writer reports it.
+    //
+    // Nothing is lost by that: `Pool.Fitness.Quick` carries `requires: ['Inherent.Fitness.Swift', '!']`
+    // in the export, so the pool version is unpickable while the inherent is granted.
+    expect(midsPowersetPathForExport('pool.fitness')).toBeUndefined();
+    expect(midsPowersetPathForExport('inherent.fitness')).toBe('Inherent.Fitness');
   });
 });
 

@@ -57,8 +57,8 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**3 open, of 276 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
-parse, and all found by the same thing: seven real `.mbd` files and a working Mids
+**2 open, of 276 entries.** Both opened 2026-09-09, both Mids-interop defects downstream of a
+clean parse, and both found by the same thing: seven real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
 Reading a `.mbd`: MBDIMPORT-5 drops a refused power's enhancements out of both tallies. MBDIMPORT-7
@@ -78,20 +78,31 @@ the fifth kind, a fork Mids has never had.
 All four closed the same day, and the first changed what the other three were. MBDEXPORT-6 made
 both segments of the path a read of Mids' database instead of a composition from an icon, which
 took the Guardian and the Night Widow from 70 lost enhancements to none — and it un-blinded the
-census itself, which had been folding those two segments to lower case and could not see a
-wrong-CASE path. MBDEXPORT-7 then cost one function, because an incarnate's name goes out through
-the same two lookups; MBDEXPORT-5 took the Warshade's 36 back with one more, once the corpus file
-showed that a `.mbd` is read positionally and the name was half the fix; and MBDEXPORT-8's census
-said one name across all four datasets would reach Mids only through a wider join, and nothing
-false would, so the widening cost a second writer-side table and no judgement call.
+census itself, which had been folding those two segments to lower case.
+
+The other three rode on that. MBDEXPORT-7 cost one function, because an incarnate's name goes out
+through the same two lookups; MBDEXPORT-5 took the Warshade's 36 back with one more, once the
+corpus file showed that a `.mbd` is read positionally and the name was half the fix; MBDEXPORT-8's
+census said one name in four datasets would reach Mids only through a wider join, nothing false.
 
 **All seven corpus builds now bind whole** — every `PowerName` in every file resolves against its
-fork's own Mids database. What the first closure left behind is MBDEXPORT-9, its own residual,
-measured: 19 Homecoming sets the pairing cannot reach, mostly epic pools Mids names the other way
-round. With MBDEXPORT-2's fork Mids has never had, that is the writing side.
+fork's own Mids database.
+
+What that closure left behind went the same day, as MBDEXPORT-9. The pairing joined on the set
+segment, which Mids respells for a whole class of set; a third pass matches on the ROSTER instead,
+and 19 / 17 / 28 unpaired sets became 1 / 6 / 10, each survivor attributed.
+
+The 56 name rotations that came with those paths are the part to remember: an unpaired set carries
+no name rows either, so its rotations were invisible rather than absent.
+
+That leaves MBDEXPORT-2's fork Mids has never had, on the writing side.
 
 The silence is going too. A powerset the writer cannot name in Mids' namespace says so on every
 fork, and Thunderspy's fourteen are the first warnings that build has ever produced.
+
+One defect surfaced on the way: the generator's `--pairs` output, which two censuses read, wrote
+to a piped stdout and then called `process.exit`. Node does not flush that, so the pairing
+truncated at whatever the pipe took — differently each run. `fs.writeSync` now.
 
 The parser frontier itself is clear — EXPRPUNT-1 opened and closed on 2026-09-08, and
 [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9 — so
@@ -682,7 +693,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 62 of 68 closed
+[Full detail](gaps/pipeline-provenance.md) — 67 of 69 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -736,70 +747,42 @@ measurement went, and where a closure for the residual belongs too.
   table, not an inversion, because the forward map folds away the case and the trailing space that
   Mids' `PiDFromUidPower` compares on — and a corpus-wide census against Mids' own `.mhd` grades
   every name we write
-- [x] **MBDEXPORT-6** — `buildPowersetPath` composed Mids' `group.set` from `AT_TABLES` plus the
-  powerset's ICON filename, so the Rebirth Guardian went out as `Guardian_Comp.Electric_Armor`
-  where Mids holds `Guardian_Composition.Atmospheric_Composition` with our nine power names already
-  correct inside it, and the Night Widow wrote the Blood Widow's real sets for hers — 70 of 86
-  enhancements across the two, `warnings: []`; both segments are a generated lookup now
-  (`MIDS_POWERSET_PATH`, minted by the pairing that already answered the name half), the oracle
-  keeps Mids' literal case because none of `Epic.VEAT_Mace_Mastery`, `Pool.Force_of_Will` or
-  `Guardian_Composition.Stone Composition` survives title-casing, each power resolves the set that
-  actually holds it rather than the one the build picked from — Mids' own file spreads a Night
-  Widow across four — and an unpaired set is reported instead of going out in silence
-- [ ] **MBDEXPORT-9** — MBDEXPORT-6's reading is only as wide as the pairing behind it, and
-  `pairPowersets` joins on the set segment, which Mids spells the other way round for an epic pool:
-  ours is `Epic.Blaster_Dark_Mastery` where Mids has `Epic.Dark_Mastery_Blaster`, contracted to
-  `Epic.Dark_Mastery_TankBrute` where archetypes share it and dropped entirely for
-  `Epic.Electricity_Mastery`. 19 sets on Homecoming, 17 on Rebirth, 28 on Brainstorm, 386 on
-  Thunderspy (that fork's own, MBDEXPORT-2's). Reported, no longer silent, still unbindable
-  **Goal** — a set a build can hold either resolves to Mids' own path or is a set Mids demonstrably
-  does not have.
-  **Done when** — the qualifier inversion is closed by a rule derived from Mids' naming rather than
-  a table of pairs, corroborated by a shared power the way the segment pass already is, with the
-  pairs it mints listed; `Pool.Fitness` against Mids' `Inherent.Fitness` is decided or declared the
-  inherent writer's business; and every set still unpaired is attributed — Mids' database lags the
-  fork (Shock Therapy is Defender-only there), or the fork has no Mids database — so what stands is
-  a roster, not a remainder.
-  **Check** — `npx vitest run src/utils/mids-import/name-map.test.ts` pins the four counts at
-  19 / 17 / 386 / 28. A count falling while this row is open means the pairing widened without the
-  mints being reviewed, which is the join MBDIMPORT-2's header argues at length against.
-- [x] **MBDEXPORT-7** — every incarnate exported as a bare slug: `processIncarnateEntry` read Mids'
-  `Incarnate.Alpha.Musculature_Radial_Paragon` and stored `powerName: power.id`, and the writer
-  emitted that verbatim under a comment asserting the field "is already Mids' own
-  `Incarnate.<Slot>.<Power>`" — three per Stalker corpus build, no dots, nothing to resolve, and 0
-  enhancements at risk, which is why a hunt counting lost enhancements walked past it; the name
-  comes from the roster now and goes out through MBDEXPORT-6's two lookups. The comment was half
-  true and that is what hid it: the `.skif` reader stores a full path in `powerName` and the `.mbd`
-  importer stores a slug, so the writer takes the roster first and a stored path second
+- [x] **MBDEXPORT-6** — `buildPowersetPath` composed Mids' `group.set` out of `AT_TABLES` and the
+  powerset's ICON filename, so a Rebirth Guardian went out as `Guardian_Comp.Electric_Armor` where
+  Mids holds `Guardian_Composition.Atmospheric_Composition` with our nine power names already right
+  inside it, and a Night Widow got the Blood Widow's sets — 70 of 86 enhancements, `warnings: []`.
+  Both segments are a generated lookup now, resolved per power rather than per build, and an
+  unpaired set is reported instead of going out in silence
+- [x] **MBDEXPORT-9** — the powerset pairing joined on the set segment, and Mids respells exactly
+  that segment for a whole class of set: `Epic.Dark_Mastery_Blaster` for our
+  `Epic.Blaster_Dark_Mastery`, `Epic.Sentinel_Elec_Mastery`, and Electrical Affinity for the set HC
+  renamed Shock Therapy, which shares no string with it at all. 19 sets on Homecoming, 17 on
+  Rebirth, 28 on Brainstorm, every power in one arriving as a blank row; 1 / 6 / 10 now, each
+  survivor attributed, and 56 name rotations came with the paths
+- [x] **MBDEXPORT-7** — every incarnate exported as a bare slug: `processIncarnateEntry` read
+  Mids' `Incarnate.Alpha.Musculature_Radial_Paragon` and stored `powerName: power.id`, and the
+  writer emitted that under a comment asserting the field was already Mids' own — three per Stalker
+  corpus build, no dots, nothing to resolve, and 0 enhancements at risk, which is why a hunt
+  counting lost enhancements walked past it. The comment was half true: two producers write that
+  field and it described the one it was tested against
 - [x] **MBDEXPORT-8** — the name map's display join folds separator runs to one space and no
   further, so a rename that only moved a separator minted no row: Rebirth's `Moonbeam` against
-  Mids' `Moon_Beam`. The tightness is right for the IMPORT reader, which resolves that pair on its
-  own all-separators-stripped ladder and logs it; the writer has one lookup and no ladder, so ours
-  went out under a name Mids answers with a blank row. Measured before widening anything
-  ([`mbdexport8-separator-census.cjs`](../scripts/keys/mbdexport8-separator-census.cjs)): **1
-  reachable name across all four datasets, 0 ambiguous** — so the risk the tightness defends
-  against does not materialise at this width. Closed as a SECOND table, `MIDS_NAME_REVERSE_LOOSE`,
-  read only where the tight one answers nothing, which keeps "every reverse row inverts a forward
-  row" holdable as an invariant. The old `Check` was vacuous — it asserted `undefined` under the
-  Homecoming dataset, where that powerset does not exist; the census stayed, and exits 1 if a
-  reachable name ever goes unminted
+  Mids' `Moon_Beam`. That tightness is right for the IMPORT reader, which has its own
+  all-separators-stripped ladder; the writer has one lookup and none. Measured before widening
+  anything — **1 reachable name across four datasets, 0 ambiguous** — then closed as a second,
+  writer-only table so "every reverse row inverts a forward row" stays holdable
 - [x] **MBDEXPORT-4** — the exporter wrote `Grade: enh.tier`, so an origin enhancement read in as
   Mids' `SingleO` went back out as our `SO`, a token MBDIMPORT-6 had proved that day no Mids
   writes; `Enum.Parse` threw inside `LoadBuild` and Mids refused **the whole build** — three
   origin pieces in 86 cost all 86. `MIDS_ORIGIN_TIER` is now exported and read backwards by the
   writer, an unmapped tier warns instead of writing, and `mbd-roundtrip.test.ts` grades every
   corpus file's output against Mids' vocabulary rather than against ours
-- [x] **MBDEXPORT-5** — a Kheldian's ten form sub-powers exported at their powerset path
-  (`Warshade_Offensive.Umbral_Blast.Dark_Nova_Blast`) where Mids both writes and expects
-  `Inherent.Inherent.Dark_Nova_Blast` — ten blank rows holding the file's own empty slots, **36 of
-  86 enhancements gone**, `warnings: []`, while the importer had read them from that prefix all
-  along; the writer takes the prefix from `GRANTED_POWER_GROUPS`' `slottable` flag plus
-  `isAutoGranted`, the reader's own rule and not a list of Kheldian names (Thunderspy's Primalist
-  forms ride the same line). **The name was half of it**: a `.mbd` is read positionally around
-  `LastPower`, Mids files all ten in the auto-granted tail at the parent form's level, and fixing
-  the prefix alone would have bound them into ten picks the author never made. Graded on both
-  halves against files Mids wrote; the row also asked for a manual open in Mids, and that ran
-  without an error dialog but could not be screenshotted here — see the gaps entry
+- [x] **MBDEXPORT-5** — a Kheldian's ten form sub-powers exported at their powerset path where
+  Mids both writes and expects `Inherent.Inherent.Dark_Nova_Blast` — ten blank rows holding the
+  file's own empty slots, **36 of 86 enhancements gone**, `warnings: []`, while the importer had
+  read them from that prefix all along. The name was half of it: a `.mbd` is read positionally, so
+  a prefix fix alone would have turned ten granted powers into ten picks nobody made. The rule is
+  the reader's own flag, not a list of Kheldian names
 - [x] **MBDEXPORT-1** — the .mbd exporter built Mids' enhancement UIDs out of set display names, and
   Mids answers a UID it does not know by leaving the slot empty with no error: a user's exported
   build arrived missing 13 of 63 enhancements, all four Fitness inherents and the uniques in them,
@@ -811,15 +794,15 @@ measurement went, and where a closure for the residual belongs too.
   The vendored `Thunderspy/EnhDB.mhd` the UID emitter reads is byte-identical to Mids' **Generic**
   database while the emitter says "Thunderspy ships its own"; the exporter stamps
   `Database: 'Homecoming'` on every build that is not Rebirth; and `|| 'Class_Blaster'` makes an
-  archetype Mids never had indistinguishable from a real Blaster. `thunderpy-primalist.skif`
-  exports as a Homecoming Blaster with powersets no HC database holds, and `warnings: []`
+  archetype Mids never had look like a real Blaster. `thunderpy-primalist.skif` exports as a
+  Homecoming Blaster with powersets no HC database holds
   **Goal** — a build this planner cannot honestly express as a `.mbd` says so, rather than
   arriving in Mids as a different character.
   **Done when** — the Thunderspy EnhDB's real provenance is stated wherever it is read; an
   archetype with no `Class_` token warns instead of defaulting; the `Database` string is decided
   for a fork Mids does not carry rather than falling into the Homecoming else-branch; and the three
-  Thunderspy sets with no Mids UID (`kb` and the two Primalist ATOs) are reported on export rather
-  than shipped as empty slots.
+  Thunderspy sets with no Mids UID (`kb` and the two Primalist ATOs) are reported rather than
+  shipped as empty slots.
   **Check** — `npx vitest run src/utils/mids-export-thunderspy.test.ts` pins today's behaviour on a
   real Thunderspy build. Pins, not approval: closing this row changes them deliberately, and any
   other movement reds. One of the four moved already — MBDEXPORT-6 made the writer report the seven

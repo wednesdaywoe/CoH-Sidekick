@@ -11,10 +11,10 @@
  * below carries those pairs so a reader holding the .mbd's own path can reach the same row.
  *
  * Source: Mids Reborn rebirth database 2023.7.445 (sha256 d4c0b142ba76…)
- * Powersets paired with the export: 3459 of 3547. Remapped names: 36.
- * Reverse rows for the writer: 36, plus 1 the display join could only reach with its separators stripped.
- * Powerset paths for the writer: 3459
- * Mids powersets with no counterpart here: 88 — listed by the generator on stderr.
+ * Powersets paired with the export: 3470 of 3547. Remapped names: 37.
+ * Reverse rows for the writer: 37, plus 1 the display join could only reach with its separators stripped.
+ * Powerset paths for the writer: 3470
+ * Mids powersets with no counterpart here: 77 — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset rebirth
  */
@@ -45,6 +45,9 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   },
   "dominator_control.water_control": {
     "tidal wave": "Tidal_Wave"
+  },
+  "epic.guardian_leviathan_mastery": {
+    "chum_spray": "Bile_Spray"
   },
   "epic.martial_mastery": {
     "shukuchi": "Shukuchi",
@@ -121,6 +124,7 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
  * this; a reader that starts from our own powers (the matcher) already holds the map's key.
  */
 export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {
+  "epic.leviathan_mastery_guardian": "epic.guardian_leviathan_mastery",
   "guardian_composition.atmospheric_composition": "guardian_comp.atmospheric_composition",
   "guardian_composition.fiery_composition": "guardian_comp.fiery_composition",
   "guardian_composition.force_composition": "guardian_comp.force_composition",
@@ -167,6 +171,9 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   },
   "dominator_control.water_control": {
     "tidal_wave": "Tidal Wave"
+  },
+  "epic.guardian_leviathan_mastery": {
+    "bile_spray": "Chum_Spray"
   },
   "epic.martial_mastery": {
     "shukuchi": "Shukuchi ",
@@ -2995,6 +3002,15 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "epic.fire_mastery_dominator": "Epic.Fire_Mastery_Dominator",
   "epic.flame_mastery": "Epic.Flame_Mastery",
   "epic.force_mastery": "Epic.Force_Mastery",
+  "epic.guardian_fire_mastery": "Epic.Fire_Mastery_Guardian",
+  "epic.guardian_ice_mastery": "Epic.Ice_Mastery_Guardian",
+  "epic.guardian_leviathan_mastery": "Epic.Leviathan_Mastery_Guardian",
+  "epic.guardian_mace_mastery": "Epic.Mace_Mastery_Guardian",
+  "epic.guardian_mu_mastery": "Epic.Mu_Mastery_Guardian",
+  "epic.guardian_munitions_mastery": "Epic.Munitions_Mastery_Guardian",
+  "epic.guardian_primal_forces_mastery": "Epic.Primal_Forces_Mastery_Guardian",
+  "epic.guardian_psionic_mastery": "Epic.Psionic_Mastery_Guardian",
+  "epic.guardian_soul_mastery": "Epic.Soul_Mastery_Guardian",
   "epic.heat_mastery_stalker": "Epic.Heat_Mastery_Stalker",
   "epic.ice_mastery": "Epic.Ice_Mastery",
   "epic.ice_mastery_dominator": "Epic.Ice_Mastery_Dominator",
@@ -3050,7 +3066,9 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "guardian_comp.organic_composition": "Guardian_Composition.Organic_Composition",
   "guardian_comp.pain_focusing": "Guardian_Composition.Pain_Focusing",
   "guardian_comp.radiation_composition": "Guardian_Composition.Radiation_Composition",
+  "guardian_comp.reconstructive_healing": "Guardian_Composition.Reconstructive_Composition",
   "guardian_comp.stone_composition": "Guardian_Composition.Stone Composition",
+  "guardian_comp.temporal_reaction": "Guardian_Composition.Temporal_Composition",
   "incarnate.alpha": "Incarnate.Alpha",
   "incarnate.alpha_silent": "Incarnate.Alpha_Silent",
   "incarnate.antimatterrayburn": "Incarnate.AntiMatterRayBurn",

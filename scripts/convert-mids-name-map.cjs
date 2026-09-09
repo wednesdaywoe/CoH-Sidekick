@@ -49,7 +49,7 @@
  * archetype — so a Guardian build imported fine while the map that should have carried its
  * rotations was empty.
  *
- * So the pairing is derived in two passes. The exact `group.set` key first; then the
+ * So the pairing is derived in three passes. The exact `group.set` key first; then the
  * leftovers pair on the set segment alone, and take three conditions, because the set
  * segment alone is not an identity — six of our powersets are called `savage_melee`:
  *
@@ -63,6 +63,36 @@
  *                          power with ours and is refused on exactly that.
  *   reported when refused  a leftover is named with the condition it failed. The bare
  *                          `continue` this replaces is what let 13 powersets vanish.
+ *
+ * Then the third pass, for the sets whose two spellings share nothing at all (MBDEXPORT-9).
+ * Mids puts the archetype qualifier on the far end of an epic pool — `Epic.Dark_Mastery_Blaster`
+ * for our `Epic.Blaster_Dark_Mastery` — contracts it where archetypes share the set
+ * (`Epic.Ice_Mastery_DefCorr`, `Epic.Psionic_Mastery_ScrapStalk`) and abbreviates the theme
+ * as readily as the archetype (`Epic.Sentinel_Elec_Mastery`). And a set HC renamed outright
+ * is worse than any of those: Shock Therapy is Mids' Electrical Affinity, Time Manipulation
+ * its Temporal Manipulation, and no rule over the two strings will ever say so.
+ *
+ * So the name carries no signal here and the ROSTER carries the whole claim: the two sets
+ * hold the same number of powers, and every one of Mids' is one of ours. That is a strong
+ * condition — full coverage alone lets a one-power critter set match anything that happens
+ * to carry its name — and it is still not an identity, so two more follow:
+ *
+ *   the group ours ASSERTS   where several Mids sets hold our roster, keep the ones in a
+ *                            group the pairs already made map ours to. Three archetypes'
+ *                            Electrical Affinity carry the same nine powers, and only the
+ *                            group says which is the Controller's.
+ *   the abbreviation         then `abbreviationScore` below, and only where it is decisive.
+ *                            `Corr_Flame_Mastery` against `Def_Flame_Mastery` for our
+ *                            Corruptor's Fire Mastery is the whole population of that.
+ *   refused on a merge       one Mids set holding the exact roster of TWO of ours is a
+ *                            merge, and a merge read backwards has no answer — the same
+ *                            withdrawal the name rows take, one level up. Both are refused
+ *                            and named rather than one being awarded the pair.
+ *
+ * Every pair this pass mints goes to stderr in full, because none of them can be checked
+ * by reading the two names. `scripts/keys/mbdexport9-powerset-pairing-census.cjs` is the
+ * other half: it attributes every set the three passes leave, and reds on one that has an
+ * unpaired Mids counterpart holding its exact roster.
  *
  * The map is keyed by OUR `group.set`, because that is what its main reader has in hand:
  * `findPowerByMidsName` builds the key from the candidate powers' own paths. The importer's
@@ -210,12 +240,36 @@ function corroboration(midsPowers, ours) {
 }
 
 /**
+ * How much of Mids' set segment reads as an ABBREVIATION of ours (DATA-GAP MBDEXPORT-9).
+ *
+ * Mids shortens by truncation, and does it everywhere: `Sentinel_Elec_Mastery`,
+ * `Sentinel_Psi_Mastery`, `Sentinel_Lev_Mastery`, `Corr_Flame_Mastery`, `Def_Flame_Mastery`.
+ * So a token of Mids' that no token of ours matches outright still counts when one is a
+ * prefix of the other. Tokens the two spellings share are set aside first — what is left
+ * is the part that has to be explained.
+ *
+ * Only ever a tie-break, and only between Mids sets that carry OUR EXACT ROSTER. Both arms
+ * of `Corr_Flame_Mastery` / `Def_Flame_Mastery` hold the same five power names, so the
+ * names written are the same either way and it is the path that differs.
+ */
+function abbreviationScore(ourKey, midsKey) {
+  const tokens = (key) => normalizeSegment(key.split('.').slice(1).join('.')).split('_').filter(Boolean);
+  const ours = tokens(ourKey);
+  const theirs = tokens(midsKey);
+  const oursLeft = ours.filter((t) => !theirs.includes(t));
+  return theirs.filter((t) => !ours.includes(t))
+    .filter((t) => oursLeft.some((o) => o.startsWith(t) || t.startsWith(o)))
+    .length;
+}
+
+/**
  * Mids' powersets paired to ours: the exact key, then the corroborated residual join.
  * See the header for why the second pass takes three conditions and not one.
  */
 function pairPowersets() {
   const paired = [];
   const unmatched = [];
+  const unpairedOurs = [];
   const midsKeys = [...midsSets.keys()];
 
   const claimedOurs = new Set();
@@ -263,18 +317,102 @@ function pairPowersets() {
       continue;
     }
     paired.push({ midsKey, ourKey, shared });
+    claimedOurs.add(ourKey);
   }
-  return { paired, unmatched };
+
+  // The third pass, where BOTH segments are respelled (DATA-GAP MBDEXPORT-9). See the
+  // header: the name carries no signal at all here, so the roster carries the whole claim.
+  const pairedMids = new Set(paired.map((p) => p.midsKey));
+  const ourRosterOf = (key) => exportSets.get(key);
+  const midsRosterOf = (key) => midsSets.get(key).rows;
+
+  // The group correspondence the pairs already made ASSERT, rather than one asserted here.
+  // Thirteen Guardian pairs are what says `guardian_comp` is Mids' `Guardian_Composition`,
+  // and that is the evidence that separates the Controller's Shock Therapy from the
+  // Corruptor's when both carry the same nine powers.
+  const groupsAsserted = new Map();
+  for (const { midsKey, ourKey } of paired) {
+    const group = ourKey.split('.')[0];
+    if (!groupsAsserted.has(group)) groupsAsserted.set(group, new Set());
+    groupsAsserted.get(group).add(midsKey.split('.')[0]);
+  }
+
+  const whole = new Map();
+  for (const ourKey of exportSets.keys()) {
+    if (claimedOurs.has(ourKey)) continue;
+    const ours = ourRosterOf(ourKey);
+    const hits = [];
+    for (const midsKey of midsKeys) {
+      if (pairedMids.has(midsKey)) continue;
+      const rows = midsRosterOf(midsKey);
+      if (rows.length !== ours.length) continue;
+      if (corroboration(rows, ours) !== ours.length) continue;
+      hits.push(midsKey);
+    }
+    if (hits.length > 0) whole.set(ourKey, hits);
+  }
+
+  const narrowed = new Map();
+  for (const [ourKey, hits] of whole) {
+    let candidates = hits;
+    if (candidates.length > 1) {
+      const groups = groupsAsserted.get(ourKey.split('.')[0]);
+      const sameGroup = candidates.filter((k) => groups && groups.has(k.split('.')[0]));
+      if (sameGroup.length > 0) candidates = sameGroup;
+    }
+    if (candidates.length > 1) {
+      const scored = candidates.map((k) => [abbreviationScore(ourKey, k), k]);
+      const best = Math.max(...scored.map(([n]) => n));
+      const top = scored.filter(([n]) => n === best).map(([, k]) => k);
+      if (best > 0 && top.length === 1) candidates = top;
+    }
+    if (candidates.length > 1) {
+      unpairedOurs.push({
+        ourKey,
+        why: `${candidates.length} Mids sets carry exactly our roster: ${candidates.join(', ')}`,
+      });
+      continue;
+    }
+    narrowed.set(ourKey, candidates[0]);
+  }
+
+  // One Mids set claimed by two of ours is a MERGE, and a merge has no answer read
+  // backwards — the same withdrawal the name rows take, one level up. Refused for both,
+  // and named, rather than resolved to whichever the tie-breaks happen to favour.
+  const claimants = new Map();
+  for (const [ourKey, midsKey] of narrowed) {
+    if (!claimants.has(midsKey)) claimants.set(midsKey, []);
+    claimants.get(midsKey).push(ourKey);
+  }
+  for (const [midsKey, ourKeys] of claimants) {
+    if (ourKeys.length > 1) {
+      for (const ourKey of ourKeys) {
+        unpairedOurs.push({ ourKey, why: `Mids ${midsKey} is the whole roster of ${ourKeys.length} of ours: ${ourKeys.join(', ')}` });
+      }
+      continue;
+    }
+    paired.push({ midsKey, ourKey: ourKeys[0], shared: midsRosterOf(midsKey).length, rekeyed: true });
+  }
+
+  // A Mids leftover pass three DID reach loses the reason pass two gave it; the rest keep
+  // theirs. `unpairedOurs` is the other side of the same coin and stays its own list — a
+  // count that mixed the two would answer neither question.
+  const reached = new Set(paired.map((p) => p.midsKey));
+  return { paired, unmatched: unmatched.filter((u) => !reached.has(u.midsKey)), unpairedOurs };
 }
 
-const { paired, unmatched } = pairPowersets();
+const { paired, unmatched, unpairedOurs } = pairPowersets();
 
 // `--pairs` prints the powerset pairing and stops. It exists because the pairing is an
 // input to measurements this generator does not itself make (MBDEXPORT-8's separator
 // census), and a measurement that re-derives it is a second copy of the three conditions
 // above — free to drift, and wrong in exactly the way the number is supposed to settle.
 if (process.argv.includes('--pairs')) {
-  for (const { midsKey, ourKey } of paired) process.stdout.write(`${ourKey}\t${midsKey}\n`);
+  // `writeSync` and not `process.stdout.write`: a piped stdout is asynchronous, and an
+  // `exit` under it drops whatever has not flushed. That truncates a 3,596-line pairing
+  // at whatever the pipe happened to take — silently, and differently each run, so a
+  // census reading it reports powersets as unpaired that are paired.
+  fs.writeSync(1, paired.map(({ midsKey, ourKey }) => `${ourKey}\t${midsKey}\n`).join(''));
   process.exit(0);
 }
 
@@ -582,3 +720,15 @@ console.error(
   + [...byReason].map(([why, n]) => `${why}: ${n}`).join('; ') + ')',
 );
 for (const { midsKey, why } of unmatched) console.error(`    ${midsKey} — ${why}`);
+
+// Every pair the roster pass minted, in full (DATA-GAP MBDEXPORT-9). These are the ones no
+// part of the NAME argues for — the claim is that the two sets hold the same powers and
+// nothing else holds them — so the list is the reviewable artifact, not the count.
+const rekeyed = paired.filter((p) => p.rekeyed);
+console.error(`  rekeyed: ${rekeyed.length} pairs whose two spellings share nothing, matched on the roster`);
+for (const { ourKey, midsKey, shared } of rekeyed) {
+  console.error(`    ${ourKey} — ${midsSets.get(midsKey).path || midsKey} (${shared} powers, all of both)`);
+}
+// And ours the pass declined to pair, with the condition each failed.
+console.error(`  ours-unpaired: ${unpairedOurs.length} of our powersets a Mids set carries whole but ambiguously`);
+for (const { ourKey, why } of unpairedOurs) console.error(`    ${ourKey} — ${why}`);

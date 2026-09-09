@@ -11,10 +11,10 @@
  * below carries those pairs so a reader holding the .mbd's own path can reach the same row.
  *
  * Source: Mids Reborn thunderspy database 2026.3.346 (sha256 1bbc83348369…)
- * Powersets paired with the export: 3441 of 3535. Remapped names: 54.
- * Reverse rows for the writer: 54, plus 0 the display join could only reach with its separators stripped.
+ * Powersets paired with the export: 3453 of 3535. Remapped names: 86.
+ * Reverse rows for the writer: 86, plus 0 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 0 — NONE. The thunderspy names dump predates MBDEXPORT-6 and carries folded powerset keys, so Mids' own spelling is not in it. Re-run emit_mids_names.py against that fork's I12.mhd to fill this in.
- * Mids powersets with no counterpart here: 94 — listed by the generator on stderr.
+ * Mids powersets with no counterpart here: 82 — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset thunderspy
  */
@@ -22,6 +22,20 @@
 export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   "blaster_ranged.assault_rifle": {
     "ignite": "Aim"
+  },
+  "blaster_support.radiation_manipulation": {
+    "fission": "Fusional_Build_Up",
+    "half-life": "Nuclear_Mutation",
+    "irradiated_ground": "Choking_Cloud",
+    "neutron_burst": "Fallout",
+    "particle_acceleration": "Metabolic_Aura"
+  },
+  "blaster_support.time_manipulation": {
+    "be_gone": "Future_Pain",
+    "chronos": "Chronological_Selection",
+    "dangerous_acceleration": "Aging_Touch",
+    "stable_time_loop": "Time_Lord",
+    "temporal_ablation": "Temporal_Healing"
   },
   "brute_defense.super_reflexes": {
     "practiced brawler": "Practiced_Brawler"
@@ -49,11 +63,21 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
     "aim": "Build_Up",
     "feint": "Taunt"
   },
+  "defender_ranged.brawling": {
+    "feint": "Taunt"
+  },
+  "defender_ranged.broad_sword": {
+    "aim": "Build_Up",
+    "feint": "Taunt"
+  },
   "defender_ranged.claws": {
     "feint": "Taunt"
   },
   "defender_ranged.dual_blades": {
     "feint": "Taunt"
+  },
+  "defender_ranged.earth_assault": {
+    "aim": "Power_Boost"
   },
   "defender_ranged.katana": {
     "aim": "Build_Up",
@@ -62,6 +86,9 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "defender_ranged.kinetic_assault": {
     "disrupting _torrent": "Disrupting_Torrent",
     "velocity_siphon": "Speed_Siphon"
+  },
+  "defender_ranged.martial_assault": {
+    "eagles_claw": "Spinning_Kick"
   },
   "defender_ranged.radiation_blast": {
     "fusion": "Aim"
@@ -84,6 +111,16 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "dominator_assault.kinetic_assault": {
     "disrupting _torrent": "Disrupting_Torrent"
   },
+  "dominator_assault.telekinetic_assault": {
+    "psi-blade_slam": "PsiBlade_Slam",
+    "psi-blade_slash": "PsiBlade_Slash",
+    "psi-blade_spin": "PsiBlade_Spin",
+    "psi-whip_coil": "PsiWhip_Coil",
+    "psi-whip_crack": "PsiWhip_Crack",
+    "psi-whip_lash": "PsiWhip_Lash",
+    "psi-whip_thrash": "PsiWhip_Thrash",
+    "psychokinetic_pulse": "Telekinetic_Pulse"
+  },
   "dominator_control.darkness_control": {
     "spirit_host": "Shadowy_Binds"
   },
@@ -92,6 +129,9 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   },
   "dominator_control.water_control": {
     "tidal wave": "Tidal_Wave"
+  },
+  "epic.dominator_atomic_mastery": {
+    "electron_haze": "Neutron_Bomb"
   },
   "inherent.inherent": {
     "tenacity": "Mez_Resistance"
@@ -147,8 +187,20 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "tanker_defense.ice_armor": {
     "icy_bastion": "Chilling_Embrace"
   },
+  "tanker_defense.sacred_armor": {
+    "centered": "Geomancy_Root_Bonus",
+    "in_touch": "Guiding_Light_Root_Bonus",
+    "radiating_light": "Guiding_Light"
+  },
   "tanker_defense.super_reflexes": {
     "practiced brawler": "Practiced_Brawler"
+  },
+  "tanker_melee.hobo_melee": {
+    "buildup": "Hard_Life",
+    "cryoshot": "Birdshot",
+    "dragon's_breath": "Dragon_Breath",
+    "frag_12": "Grenade",
+    "venom_shell": "Snakeshot"
   },
   "tanker_melee.pale_blade": {
     "perdition": "Sunder_Bone",
@@ -162,7 +214,18 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
  * A reader that starts from the .mbd (the importer's retired-name check) resolves through
  * this; a reader that starts from our own powers (the matcher) already holds the map's key.
  */
-export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {};
+export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {
+  "blaster_support.atomic_manipulation": "blaster_support.radiation_manipulation",
+  "blaster_support.temporal_manipulation": "blaster_support.time_manipulation",
+  "defender_ranged.broadsword": "defender_ranged.broad_sword",
+  "defender_ranged.earth_combat": "defender_ranged.earth_assault",
+  "defender_ranged.martial_combat": "defender_ranged.martial_assault",
+  "defender_ranged.street_justice": "defender_ranged.brawling",
+  "dominator_assault.psychokinetic_assault": "dominator_assault.telekinetic_assault",
+  "epic.atomic_mastery": "epic.dominator_atomic_mastery",
+  "tanker_defense.nature_armor": "tanker_defense.sacred_armor",
+  "tanker_melee.hard_life": "tanker_melee.hobo_melee"
+};
 
 /**
  * The same join backwards — THIS dataset's internal name (lower-cased) → Mids' own, for
@@ -181,6 +244,20 @@ export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {};
 export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   "blaster_ranged.assault_rifle": {
     "aim": "Ignite"
+  },
+  "blaster_support.radiation_manipulation": {
+    "choking_cloud": "Irradiated_Ground",
+    "fallout": "Neutron_Burst",
+    "fusional_build_up": "Fission",
+    "metabolic_aura": "Particle_Acceleration",
+    "nuclear_mutation": "Half-Life"
+  },
+  "blaster_support.time_manipulation": {
+    "aging_touch": "Dangerous_Acceleration",
+    "chronological_selection": "Chronos",
+    "future_pain": "Be_Gone",
+    "temporal_healing": "Temporal_Ablation",
+    "time_lord": "Stable_Time_Loop"
   },
   "brute_defense.super_reflexes": {
     "practiced_brawler": "Practiced Brawler"
@@ -208,11 +285,21 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
     "build_up": "Aim",
     "taunt": "Feint"
   },
+  "defender_ranged.brawling": {
+    "taunt": "Feint"
+  },
+  "defender_ranged.broad_sword": {
+    "build_up": "Aim",
+    "taunt": "Feint"
+  },
   "defender_ranged.claws": {
     "taunt": "Feint"
   },
   "defender_ranged.dual_blades": {
     "taunt": "Feint"
+  },
+  "defender_ranged.earth_assault": {
+    "power_boost": "Aim"
   },
   "defender_ranged.katana": {
     "build_up": "Aim",
@@ -221,6 +308,9 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "defender_ranged.kinetic_assault": {
     "disrupting_torrent": "Disrupting _Torrent",
     "speed_siphon": "Velocity_Siphon"
+  },
+  "defender_ranged.martial_assault": {
+    "spinning_kick": "Eagles_Claw"
   },
   "defender_ranged.radiation_blast": {
     "aim": "Fusion"
@@ -243,6 +333,16 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "dominator_assault.kinetic_assault": {
     "disrupting_torrent": "Disrupting _Torrent"
   },
+  "dominator_assault.telekinetic_assault": {
+    "psiblade_slam": "Psi-Blade_Slam",
+    "psiblade_slash": "Psi-Blade_Slash",
+    "psiblade_spin": "Psi-Blade_Spin",
+    "psiwhip_coil": "Psi-Whip_Coil",
+    "psiwhip_crack": "Psi-Whip_Crack",
+    "psiwhip_lash": "Psi-Whip_Lash",
+    "psiwhip_thrash": "Psi-Whip_Thrash",
+    "telekinetic_pulse": "Psychokinetic_Pulse"
+  },
   "dominator_control.darkness_control": {
     "shadowy_binds": "Spirit_Host"
   },
@@ -251,6 +351,9 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   },
   "dominator_control.water_control": {
     "tidal_wave": "Tidal Wave"
+  },
+  "epic.dominator_atomic_mastery": {
+    "neutron_bomb": "Electron_Haze"
   },
   "inherent.inherent": {
     "mez_resistance": "Tenacity"
@@ -306,8 +409,20 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "tanker_defense.ice_armor": {
     "chilling_embrace": "Icy_Bastion"
   },
+  "tanker_defense.sacred_armor": {
+    "geomancy_root_bonus": "Centered",
+    "guiding_light": "Radiating_Light",
+    "guiding_light_root_bonus": "In_Touch"
+  },
   "tanker_defense.super_reflexes": {
     "practiced_brawler": "Practiced Brawler"
+  },
+  "tanker_melee.hobo_melee": {
+    "birdshot": "Cryoshot",
+    "dragon_breath": "Dragon's_Breath",
+    "grenade": "Frag_12",
+    "hard_life": "Buildup",
+    "snakeshot": "Venom_Shell"
   },
   "tanker_melee.pale_blade": {
     "build_up": "Virulent",
