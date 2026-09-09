@@ -130,6 +130,17 @@ const TRACKED_ROOTS = [
   // with it — 66 more paths and 27 engine files mid-bag-strip, which is a different adjudication
   // than this one. Listing the directory guards its own files and follows none of its imports.
   'src/utils/mids-import',
+  // Joined 2026-09-09, and these are two FILES rather than a tree, which `git ls-files` takes as
+  // readily as a directory. `src/utils` is not addable: 132 paths shared with the beta and 61 of
+  // them differing, so listing the tree would surface 61 unadjudicated forks in one commit. These
+  // two are the ones with a live consumer. `mids-export.ts` is the source the Rust .mbd writer
+  // will be ported from, and it forked from the beta's copy under SLOT-3 — three hunks, all slot
+  // levels. `slot-levels.ts` is where that fork actually lives (690 lines to the beta's 879).
+  // Their test twins were already adjudicated in `shared-test-surface.json` under the same gap;
+  // the sources were watched by nothing, and the only reason `mids-import/importer.ts` next door
+  // IS watched is that someone seeded its directory as a root above.
+  'src/utils/mids-export.ts',
+  'src/utils/slot-levels.ts',
   'docs',
 ];
 

@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**4 open, of 269 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
+**4 open, of 270 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
 parse, and all found by the same thing: six real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
@@ -655,7 +655,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 58 of 62 closed
+[Full detail](gaps/pipeline-provenance.md) — 59 of 63 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -880,6 +880,9 @@ measurement went, and where a closure for the residual belongs too.
   unread. The claim is a graded `evidence` field now, `measurements` carries a per-repo run whose
   head expires it, all 37 red beta files are rostered to a gap, and canonical's CI runs the beta's
   suite
+- [x] **FORK-6** — FORK-4's coverage invariant is only as wide as the population it discovers: `TRACKED_ROOTS` reaches `src/utils/mids-import` because someone seeded that
+  directory, so `mids-export.ts` and `slot-levels.ts` one level up were adjudicated by nothing while their test twins already carried SLOT-3 declarations; both are `forked` now with an
+  exit re-cut against the Rust `.mbd` port, added as file paths because `src/utils` shares 132 paths with the beta and 61 of them differ
 - [x] **FIXTURE-1** — the manually-emitted gate fixtures (procs, movement, set-bonus) drifted on
   sampling identity and labels only, no values; all three re-emitted, gates green, and the
   emitters now run in `npm run regen` so the drift class is closed

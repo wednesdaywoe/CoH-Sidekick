@@ -65,7 +65,7 @@
     },
     {
       "path": "src/utils/mids-export-thunderspy.test.ts",
-      "reason": "Pins what a Thunderspy build becomes as a .mbd (MBDEXPORT-2). Reads fixtures/skif/v4/thunderpy-primalist.skif, and the beta has no fixtures/ tree — the same reason as the .mbd corpus gate beside it.",
+      "reason": "Pins what a Thunderspy build becomes as a .mbd (MBDEXPORT-2). Reads fixtures/skif/v4/thunderpy-primalist.skif, and the beta has no fixtures/ tree — the same reason as the .mbd corpus gate beside it. It is un-carryable for a second reason worth naming, because the first one would go away if the beta ever grew fixtures: it calls the one-arg `exportToMidsWithReport(build)`, and the beta's takes a `levelUpMode` second argument (SLOT-3), so it would not type-check there. What it grades is therefore canonical's forked copy and not the one users run. The two copies differ in three hunks, all slot levels, so every assertion here holds for the beta's copy too — this gate asserts nothing about a slot's `Level`.",
       "gap": "MBDEXPORT-2"
     }
   ],
@@ -192,7 +192,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "3c225c98917c441ba7ac6d9981be9db3921bf7b092cd88ef65808cd587175236"
+      "sha256": "94a9e9d56e428ac8a75cb1440d320cb346091e5b94feb77ce2362cf853b0d905"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -503,7 +503,7 @@
     {
       "path": "scripts/verify-sync.cjs",
       "status": "identical",
-      "sha256": "518356c265e4bc868fcdabf55cfda0fcf4932817cd4bc9ce823ae45d11ce7488"
+      "sha256": "7e763017a3775447f3fa032084cdf270ff10a73e5356e9bbcd466e8fccbe5666"
     },
     {
       "path": "src/data/core/atom-query.ts",
@@ -622,6 +622,17 @@
       "sha256": "cab2ab8fe2e1521e846cebd3a2ae6241e1ae5c266564e530441769bb7b9f911c"
     },
     {
+      "path": "src/utils/mids-export.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "7cb2936f5a49c9714d832757eaa3b5f8f0234db150adf815c6181f695b7a98bb",
+        "beta": "64bd8c16c802425e9e74fae9974dee31ab09e880ae855a8a2e423b08b8876b32"
+      },
+      "reason": "SLOT-3 (beta commit d59d7d3d5c): beta's `exportToMids` / `exportToMidsWithReport` take a second `levelUpMode` parameter and resolve slot levels through `computeExportSlotLevels`, so off-mode placement stops enforcing a pick-level schedule floor and says once in the UI that the Level it writes is synthetic. Canonical's copy keeps the one-arg form and `computeAllSlotLevels`. Three hunks, all slot levels — name rotation, enhancement UID mapping and warning emission are byte-identical, so every MBDEXPORT pin taken against canonical's copy holds for the beta's except a claim about a slot's `Level`. Canonical's copy is not app code: it is the source the Rust `.mbd` writer will be ported from, and `crates/app/src/build_io.rs` still lists `.mbd`/`.mxd` as not in the rebuild. Port THIS copy and Rust inherits the floor SLOT-3 removed, stamping every exported slot with a levelling history the build never had — a Rule 1 soft-wrong value written into a file another planner reads as authoritative.",
+      "exit": "canonical's vendored TS half takes SLOT-3 through all ten `slot-levels.ts` consumers (Header, PowerRow, useSlotLevels, useBuildBudget, uiStore, buildStore, export-print, forum-export, mids-export, mids-import/importer), or that half is retired once the Rust writer lands. Not a carry either way: `--write` cannot converge a fork and `sync:shared` refuses to clobber a beta-authored edit, so this side will not converge on its own. Whichever comes first, the Rust `.mbd` writer must be ported from the BETA's two-arg form, and this row is where that is recorded.",
+      "gap": "SLOT-3"
+    },
+    {
       "path": "src/utils/mids-import/accolades.test.ts",
       "status": "identical",
       "sha256": "d521254056d2bc7d0f8a2e67f924fa9f7315c03fc9d211c4068d9070dbdd456f"
@@ -639,7 +650,7 @@
         "beta": "b286a85db96c9f7f419846c6c73714ddd6961b9321c6c89c78708bdb91765f23"
       },
       "reason": "SLOT-3: beta's import call now passes ensureSlotOrderPopulated a live levelUpMode flag (false here — this pure parser has no store access, so the store's own importMidsBuild action re-runs the call against the real mode right after) so off-mode slot placement stops enforcing a pick-level schedule floor. Canonical's copy still calls the one-arg form; canonical's slot-levels.ts has no levelUpMode parameter to receive it.",
-      "exit": "canonical's own TS import tooling adopts the same levelUpMode-aware call (or a maintainer confirms it doesn't need SLOT-3's fix), then a --write carries the converged hash across. sync:shared only flows canonical to beta and refuses to clobber a beta-authored edit, so this side won't converge on its own.",
+      "exit": "canonical's own TS import tooling adopts the same levelUpMode-aware call (or a maintainer confirms it doesn't need SLOT-3's fix), then a --write carries the converged hash across. sync:shared only flows canonical to beta and refuses to clobber a beta-authored edit, so this side won't converge on its own. Re-cut 2026-09-09 with its two source twins: the first half of that will not happen on its own — canonical's `src/` is not tooling that adopts things, it is the tree the Rust port reads — so the condition that actually binds is that the Rust `.mbd` READER be ported from the beta's levelUpMode-aware call, the same way the writer must be (see `src/utils/mids-export.ts`).",
       "gap": "SLOT-3"
     },
     {
@@ -676,6 +687,17 @@
       "path": "src/utils/mids-import/types.ts",
       "status": "identical",
       "sha256": "5a318cca903590857c07e6a3d52c296df9fa5dabed46039fa3600e94465f29fa"
+    },
+    {
+      "path": "src/utils/slot-levels.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "182c3ec64929b4a769dc41aac96f66527399422df096b894c8c55f755700d4f2",
+        "beta": "7ea96df36e8b9b47340e2a88e61b1ed75ae1f316b054c6822cb0d91342b1390e"
+      },
+      "reason": "SLOT-3 (beta commit d59d7d3d5c), and the module the `mids-export.ts` fork beside it actually lives in: 690 lines to the beta's 879. `computeAllSlotLevels`, `ensureSlotOrderPopulated`, `backfillSlotOrderLevels`, `canMoveSlotLevel` and `applySlotLevelMove` all gained a trailing `levelUpMode`, and the beta added `computeExportSlotLevels`, `reconcileStoredSlotLevels` and `scrubFabricatedSlotLevels`, which canonical has no counterpart for. Its test twin `src/utils/slot-levels.test.ts` is `identical` in `shared-test-surface.json` and honestly so — it exercises only `countPlacedBudgetSlots`, which SLOT-3 does not touch — so the shared test surface says nothing at all about the forked 189 lines. That is what this row is for.",
+      "exit": "canonical's vendored TS half takes SLOT-3 through all ten `slot-levels.ts` consumers (Header, PowerRow, useSlotLevels, useBuildBudget, uiStore, buildStore, export-print, forum-export, mids-export, mids-import/importer), or that half is retired once the Rust writer lands. Not a carry either way: `--write` cannot converge a fork and `sync:shared` refuses to clobber a beta-authored edit, so this side will not converge on its own. Whichever comes first, the Rust `.mbd` writer must be ported from the BETA's two-arg form, and this row is where that is recorded.",
+      "gap": "SLOT-3"
     },
     {
       "path": "tools/bin-crawler/audit_stack_alignment.py",
