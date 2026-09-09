@@ -5,10 +5,12 @@
 
 import type { Build, SelectedPower, Powerset, Enhancement, IOSetEnhancement, GenericIOEnhancement, SpecialEnhancement, OriginEnhancement } from '@/types';
 import { INCARNATE_SLOT_ORDER } from '@/types';
+import type { IncarnateSlotId, SelectedIncarnatePower } from '@/types';
 import type { MbdFile, MbdPowerEntry, MbdSlotEntry, MbdEnhancement } from '@/utils/mids-import/types';
 import { getPowerset, getPowersetsForArchetype } from '@/data/powersets';
 import { getPowerPool } from '@/data/power-pools';
 import { getEpicPool } from '@/data/epic-pools';
+import { getIncarnatePower } from '@/data/incarnates';
 import { getIOSet } from '@/data/io-sets';
 import { getMidsGenericIOUid, getMidsIOSetPieceUid, getMidsOriginUid, getMidsSpecialUid } from '@/data/mids-uids';
 import {
@@ -745,12 +747,20 @@ export function exportToMidsWithReport(
     powerEntries.push(buildPowerEntry(power, fullName, 'inherent', slotLevels, warnings));
   }
 
-  // Incarnates. `powerName` is already Mids' own `Incarnate.<Slot>.<Power>`.
+  // Incarnates (DATA-GAP MBDEXPORT-7). `powerName` is our own slug — the last segment of
+  // the roster's `fullName`, lower-cased — and a comment here used to claim it was already
+  // Mids' `Incarnate.<Slot>.<Power>`. It has no dots, so Mids resolved nothing and the row
+  // came back blank; the reason nobody noticed is that an incarnate carries no enhancement
+  // slots, so a hunt that counted lost enhancements walked straight past it.
+  //
+  // The roster is where the three-segment name lives, and it goes out through the same two
+  // lookups every other power does: the set path, and the power's own name in Mids'
+  // spelling. `Incarnate.Alpha` and its 102 siblings are in the path table already.
   for (const slot of INCARNATE_SLOT_ORDER) {
     const chosen = build.incarnates?.[slot];
     if (!chosen?.powerName) continue;
     powerEntries.push({
-      PowerName: chosen.powerName,
+      PowerName: incarnateFullName(chosen, slot, resolve, warnings),
       Level: 50,
       StatInclude: true,
       ProcInclude: false,
@@ -783,6 +793,41 @@ export function exportToMidsWithReport(
   };
 
   return { json: JSON.stringify(mbdFile, null, 2), warnings };
+}
+
+/**
+ * Mids' `Incarnate.<Slot>.<Power>` for a chosen incarnate (DATA-GAP MBDEXPORT-7).
+ *
+ * `powerName` holds two different things depending on who wrote the build, which is how a
+ * comment here claiming it was "already Mids' own" managed to be half true for months: the
+ * `.skif` reader stores the full `Incarnate.Judgement.Mighty_Radial_Final_Judgement`, and
+ * the `.mbd` importer stores `power.id` — `musculature_radial_paragon`, a slug with no dots
+ * and nothing for Mids to resolve.
+ *
+ * A slug cannot be un-slugged: it does not say where its underscores were capitals. So the
+ * roster answers first, `powerName` second where it is already a path, and an incarnate
+ * neither can name is reported rather than written as a bare word.
+ */
+function incarnateFullName(
+  chosen: SelectedIncarnatePower,
+  slot: IncarnateSlotId,
+  resolve: (ourKey: string, label: string) => MidsSet,
+  warnings: MidsExportWarning[],
+): string {
+  const fromRoster = getIncarnatePower(slot, chosen.powerId || chosen.powerName)?.fullName;
+  const fullName = fromRoster ?? (chosen.powerName.split('.').length >= 3 ? chosen.powerName : '');
+  const segments = fullName.split('.');
+  if (segments.length < 3) {
+    warnings.push({
+      power: chosen.displayName || chosen.powerName,
+      slot: 0,
+      detail: `no ${slot} power of that name in the roster, so Mids gets ${chosen.powerName}`,
+    });
+    return chosen.powerName;
+  }
+  const set = resolve(`${segments[0]}.${segments[1]}`, `${chosen.displayName} (${slot})`);
+  const name = midsPowerSegment(set.ourKey, segments.slice(2).join('.'));
+  return set.path ? `${set.path}.${name}` : name;
 }
 
 /**

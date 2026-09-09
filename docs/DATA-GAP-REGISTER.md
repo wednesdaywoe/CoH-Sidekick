@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**6 open, of 276 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
+**5 open, of 276 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
 parse, and all found by the same thing: seven real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
@@ -75,17 +75,18 @@ Kheldian form path (MBDEXPORT-5), a powerset path derived from an icon (MBDEXPOR
 incarnate slug (MBDEXPORT-7), a rename the join is too tight to see (MBDEXPORT-8). MBDEXPORT-2 is
 the fifth kind, a fork Mids has never had.
 
-MBDEXPORT-6 closed the same day it opened, and it changed what the rest of the list is. Both
-segments of the path are read out of Mids' database now instead of composed from an icon, which
-took the Guardian and the Night Widow from 70 lost enhancements to none — and it un-blinded the
-census itself, which had been folding those two segments to lower case and could not see a
-wrong-CASE path. What the closure left behind is MBDEXPORT-9, its own residual, measured: 19
+Two of those closed the same day, and the first changed what the rest of the list is. MBDEXPORT-6
+made both segments of the path a read of Mids' database instead of a composition from an icon,
+which took the Guardian and the Night Widow from 70 lost enhancements to none — and it un-blinded
+the census itself, which had been folding those two segments to lower case and could not see a
+wrong-CASE path. MBDEXPORT-7 then cost one function, because an incarnate's name goes out through
+the same two lookups. What the first left behind is MBDEXPORT-9, its own residual, measured: 19
 Homecoming sets the pairing cannot reach, mostly epic pools Mids names the other way round.
 
-The rest are still silent. Mids answers a name it cannot bind with a blank row that keeps the
-slots, and we answer with `warnings: []`. MBDEXPORT-6 put the first crack in that: a powerset it
-cannot name in Mids' namespace now says so, on every fork, and Thunderspy's seven are the first
-warnings that build has ever produced.
+MBDEXPORT-5 and MBDEXPORT-8 are still silent, and so is MBDEXPORT-2. Mids answers a name it cannot
+bind with a blank row that keeps the slots, and we answer with `warnings: []`. MBDEXPORT-6 put the
+first crack in that: a powerset it cannot name in Mids' namespace now says so, on every fork, and
+Thunderspy's thirteen are the first warnings that build has ever produced.
 
 The parser frontier itself is clear — EXPRPUNT-1 opened and closed on 2026-09-08, and
 [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9 — so
@@ -757,19 +758,14 @@ measurement went, and where a closure for the residual belongs too.
   **Check** — `npx vitest run src/utils/mids-import/name-map.test.ts` pins the four counts at
   19 / 17 / 386 / 28. A count falling while this row is open means the pairing widened without the
   mints being reviewed, which is the join MBDIMPORT-2's header argues at length against.
-- [ ] **MBDEXPORT-7** — every incarnate exports as a bare slug. `processIncarnateEntry` reads Mids'
-  `Incarnate.Alpha.Musculature_Radial_Paragon` and stores `powerName: power.id`, our own
-  `musculature_radial_paragon`; the writer emits that verbatim under a comment asserting the field
-  "is already Mids' own `Incarnate.<Slot>.<Power>`". Three per Stalker corpus build, no dots,
-  nothing for Mids to resolve — and 0 enhancements at risk, which is why a hunt that counted lost
-  enhancements walked past it
-  **Goal** — an incarnate read out of a `.mbd` is written back to the name it was read from.
-  **Done when** — the export emits a three-segment `Incarnate.<Slot>.<Power>` from the incarnate
-  roster's own `fullName` rather than the stored slug; one with no Mids-side name is reported
-  rather than written; and the comment claiming `powerName` is already Mids' is deleted or made
-  true.
-  **Check** — `npx vitest run src/utils/mids-import/mbd-export-names.test.ts` pins the three bare
-  slugs on both Stalker builds while this row is open.
+- [x] **MBDEXPORT-7** — every incarnate exported as a bare slug: `processIncarnateEntry` read Mids'
+  `Incarnate.Alpha.Musculature_Radial_Paragon` and stored `powerName: power.id`, and the writer
+  emitted that verbatim under a comment asserting the field "is already Mids' own
+  `Incarnate.<Slot>.<Power>`" — three per Stalker corpus build, no dots, nothing to resolve, and 0
+  enhancements at risk, which is why a hunt counting lost enhancements walked past it; the name
+  comes from the roster now and goes out through MBDEXPORT-6's two lookups. The comment was half
+  true and that is what hid it: the `.skif` reader stores a full path in `powerName` and the `.mbd`
+  importer stores a slug, so the writer takes the roster first and a stored path second
 - [ ] **MBDEXPORT-8** — the name map's display join folds separator runs to one space and no
   further, so a rename that only moved a separator mints no row: Rebirth's `Moonbeam` against Mids'
   `Moon_Beam`. The tightness is right for the IMPORT reader, which resolves that pair on its own
