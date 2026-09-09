@@ -200,7 +200,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "69b28cd85a50c6c17db298a8f93ef7d3f35badd8b3e2eeacfc60612634f352de"
+      "sha256": "1fd55a410c45bd4c0335ec59fb6902eb86da083f43331a304192861a830be44c"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -658,8 +658,8 @@
       "path": "src/utils/mids-export.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "c724c1ba642be9e2017a07ee167ef2caa6325aca5eaf4f1dddc44d07f870e385",
-        "beta": "6fb4f28236d87b5ad4d9a507eeeccbb34dbb6f9ecbf355028301ce73e5145039"
+        "canonical": "bff7487a1383868261bd62eb2b1b6a2a4195068225adc198b41acb49ded4931b",
+        "beta": "f2c6af00d70db8981e5dde2155eac34cd0b859472da5c8e93c9aad7a0d49793b"
       },
       "reason": "SLOT-3 (beta commit d59d7d3d5c): beta's `exportToMids` / `exportToMidsWithReport` take a second `levelUpMode` parameter and resolve slot levels through `computeExportSlotLevels`, so off-mode placement stops enforcing a pick-level schedule floor and says once in the UI that the Level it writes is synthetic. Canonical's copy keeps the one-arg form and `computeAllSlotLevels`. Three hunks, all slot levels — name rotation, enhancement UID mapping and warning emission are byte-identical, so every MBDEXPORT pin taken against canonical's copy holds for the beta's except a claim about a slot's `Level`. Canonical's copy is not app code: it is the source the Rust `.mbd` writer will be ported from, and `crates/app/src/build_io.rs` still lists `.mbd`/`.mxd` as not in the rebuild. Port THIS copy and Rust inherits the floor SLOT-3 removed, stamping every exported slot with a levelling history the build never had — a Rule 1 soft-wrong value written into a file another planner reads as authoritative.",
       "exit": "canonical's vendored TS half takes SLOT-3 through all ten `slot-levels.ts` consumers (Header, PowerRow, useSlotLevels, useBuildBudget, uiStore, buildStore, export-print, forum-export, mids-export, mids-import/importer), or that half is retired once the Rust writer lands. Not a carry either way: `--write` cannot converge a fork and `sync:shared` refuses to clobber a beta-authored edit, so this side will not converge on its own. Whichever comes first, the Rust `.mbd` writer must be ported from the BETA's two-arg form, and this row is where that is recorded.",

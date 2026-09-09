@@ -19,7 +19,7 @@ import {
   midsPowersetPathsKnown,
 } from '@/data/mids-name-map';
 import { MIDS_STAT_MAP, MIDS_ORIGIN_TIER } from '@/utils/mids-import/mappers';
-import { getInherentPowers, getArchetypeInherentPowers, POWER_PICK_LEVELS, getPicksGrantedAtLevel } from '@/data';
+import { getInherentPowers, getArchetypeInherentPowers, POWER_PICK_LEVELS, getPicksGrantedAtLevel, GRANTED_POWER_GROUPS } from '@/data';
 import { computeExportSlotLevels, type SlotLevel } from '@/utils/slot-levels';
 import { powerKey, type PowerCategory } from '@/utils/power-key';
 
@@ -263,6 +263,28 @@ function buildPowerName(
   return set.path ? `${set.path}.${midsName}` : midsName;
 }
 
+/**
+ * Whether this power is a form sub-power Mids files under `Inherent.Inherent`
+ * (DATA-GAP MBDEXPORT-5).
+ *
+ * A Kheldian's Nova and Dwarf attacks live in the form's powerset here — they are attached
+ * to the parent form on the way in, and the finished build carries them there — but Mids
+ * both writes and expects `Inherent.Inherent.Dark_Nova_Blast`. The importer already knows
+ * this: `slottableSubPowerParent` reads exactly that prefix, and the two halves disagreed
+ * about where a form power lives.
+ *
+ * The condition is read off `GRANTED_POWER_GROUPS`, not off a list of Kheldian names —
+ * `slottable` is the flag that means "granted, and carries slots of its own", and it is
+ * the same flag the reader keys on. A power that merely shares an internal name with one
+ * is not caught, because being auto-granted is half the test.
+ */
+function isFormSubPower(power: SelectedPower): boolean {
+  if (!power.isAutoGranted) return false;
+  const internalName = (power.internalName || power.name).toLowerCase();
+  return Object.values(GRANTED_POWER_GROUPS).some((group) => group.slottable
+    && group.grantedPowers.some((granted) => granted.toLowerCase() === internalName));
+}
+
 /** The set a chosen power is written under, branch sets included. See `owningPowerset`. */
 function setForPower(
   power: SelectedPower,
@@ -272,6 +294,11 @@ function setForPower(
   fallback: MidsSet,
   resolve: (ourKey: string, label: string) => MidsSet,
 ): { powersetId: string; set: MidsSet } {
+  if (isFormSubPower(power)) {
+    // One label for however many parents a fork's forms have — the memo keys on the set,
+    // so a per-parent label would name whichever form happened to be collected first.
+    return { powersetId, set: resolve('Inherent.Inherent', 'auto-granted form powers') };
+  }
   if (category === 'pool' || category === 'epic') return { powersetId, set: fallback };
   const owner = owningPowerset(power, powersetId, archetypeId);
   if (owner.id === powersetId) return { powersetId, set: fallback };
@@ -696,6 +723,12 @@ export function exportToMidsWithReport(
   // Mids reads this array positionally, so grouping by powerset scrambles the
   // grid even though every Level field is right.
   const chosen: { level: number; entry: MbdPowerEntry }[] = [];
+  // Form sub-powers do not take a pick, and the file has to say so positionally: Mids
+  // reads everything past `LastPower` as auto-granted, and its own Warshade file puts the
+  // ten Nova and Dwarf attacks down there with the inherents (MBDEXPORT-5). Leaving them
+  // in the level-up run costs ten picks and shifts every power after them, which is a
+  // second, quieter way to hand back a build the author did not write.
+  const granted: MbdPowerEntry[] = [];
   const collect = (
     powers: SelectedPower[],
     powersetId: string,
@@ -705,10 +738,9 @@ export function exportToMidsWithReport(
     for (const power of powers) {
       const owner = setForPower(power, powersetId, archetypeId, category, set, resolve);
       const powerName = buildPowerName(power, owner.powersetId, owner.set, category);
-      chosen.push({
-        level: power.level,
-        entry: buildPowerEntry(power, powerName, category, slotLevels, warnings),
-      });
+      const entry = buildPowerEntry(power, powerName, category, slotLevels, warnings);
+      if (isFormSubPower(power)) granted.push(entry);
+      else chosen.push({ level: power.level, entry });
     }
   };
 
@@ -746,6 +778,10 @@ export function exportToMidsWithReport(
     }
     powerEntries.push(buildPowerEntry(power, fullName, 'inherent', slotLevels, warnings));
   }
+
+  // The form sub-powers, after the inherent grid and in the order they were collected —
+  // which is Mids' own order in the file this was measured against.
+  for (const entry of granted) powerEntries.push(entry);
 
   // Incarnates (DATA-GAP MBDEXPORT-7). `powerName` is our own slug — the last segment of
   // the roster's `fullName`, lower-cased — and a comment here used to claim it was already

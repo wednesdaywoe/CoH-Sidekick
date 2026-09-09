@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**5 open, of 276 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
+**4 open, of 276 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
 parse, and all found by the same thing: seven real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
@@ -75,18 +75,20 @@ Kheldian form path (MBDEXPORT-5), a powerset path derived from an icon (MBDEXPOR
 incarnate slug (MBDEXPORT-7), a rename the join is too tight to see (MBDEXPORT-8). MBDEXPORT-2 is
 the fifth kind, a fork Mids has never had.
 
-Two of those closed the same day, and the first changed what the rest of the list is. MBDEXPORT-6
-made both segments of the path a read of Mids' database instead of a composition from an icon,
-which took the Guardian and the Night Widow from 70 lost enhancements to none — and it un-blinded
-the census itself, which had been folding those two segments to lower case and could not see a
-wrong-CASE path. MBDEXPORT-7 then cost one function, because an incarnate's name goes out through
-the same two lookups. What the first left behind is MBDEXPORT-9, its own residual, measured: 19
-Homecoming sets the pairing cannot reach, mostly epic pools Mids names the other way round.
+Three of those closed the same day, and the first changed what the rest of the list is.
+MBDEXPORT-6 made both segments of the path a read of Mids' database instead of a composition from
+an icon, which took the Guardian and the Night Widow from 70 lost enhancements to none — and it
+un-blinded the census itself, which had been folding those two segments to lower case and could
+not see a wrong-CASE path. MBDEXPORT-7 then cost one function, because an incarnate's name goes
+out through the same two lookups, and MBDEXPORT-5 took the Warshade's 36 back with one more.
+What the first left behind is MBDEXPORT-9, its own residual, measured: 19 Homecoming sets the
+pairing cannot reach, mostly epic pools Mids names the other way round.
 
-MBDEXPORT-5 and MBDEXPORT-8 are still silent, and so is MBDEXPORT-2. Mids answers a name it cannot
-bind with a blank row that keeps the slots, and we answer with `warnings: []`. MBDEXPORT-6 put the
-first crack in that: a powerset it cannot name in Mids' namespace now says so, on every fork, and
-Thunderspy's thirteen are the first warnings that build has ever produced.
+Every corpus build now binds whole in Mids' namespace but one name — MBDEXPORT-8's `Moonbeam`,
+which costs no enhancement — so what is left on the writing side is that, MBDEXPORT-9, and
+MBDEXPORT-2's fork Mids has never had. The silence is going too: a powerset the writer cannot name
+in Mids' namespace says so on every fork, and Thunderspy's fourteen are the first warnings that
+build has ever produced.
 
 The parser frontier itself is clear — EXPRPUNT-1 opened and closed on 2026-09-08, and
 [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9 — so
@@ -784,21 +786,17 @@ measurement went, and where a closure for the residual belongs too.
   origin pieces in 86 cost all 86. `MIDS_ORIGIN_TIER` is now exported and read backwards by the
   writer, an unmapped tier warns instead of writing, and `mbd-roundtrip.test.ts` grades every
   corpus file's output against Mids' vocabulary rather than against ours
-- [ ] **MBDEXPORT-5** — a Kheldian's ten form sub-powers export at their powerset path
-  (`Warshade_Offensive.Umbral_Blast.Dark_Nova_Blast`), where Mids both writes and expects
-  `Inherent.Inherent.Dark_Nova_Blast`. Opened in Mids, all ten come back as blank rows holding the
-  file's own empty slots and **36 of 86 enhancements are gone**, with `warnings: []`. The importer
-  gets this right — `slottableSubPowerParent` reads exactly that prefix — so the two halves
-  disagree about where a form power lives
-  **Goal** — a power the importer resolved out of `Inherent.Inherent.*` is written back to it.
-  **Done when** — the export emits the `Inherent.Inherent.` prefix for any power carrying
-  `isAutoGranted` with a `slottable` parent, derived from `GRANTED_POWER_GROUPS` rather than a list
-  of Kheldian names; a granted power with no Mids-side home is reported rather than written at a
-  path Mids will not bind; and the claim is graded by opening the export in Mids, since a blank row
-  is invisible to our own reader.
-  **Check** — `npx vitest run src/utils/mids-import/mbd-corpus.test.ts` holds the import half at
-  ten sub-powers attached with the file's slot counts; the export half has no gate yet, and the
-  first thing this row owes is one.
+- [x] **MBDEXPORT-5** — a Kheldian's ten form sub-powers exported at their powerset path
+  (`Warshade_Offensive.Umbral_Blast.Dark_Nova_Blast`) where Mids both writes and expects
+  `Inherent.Inherent.Dark_Nova_Blast` — ten blank rows holding the file's own empty slots, **36 of
+  86 enhancements gone**, `warnings: []`, while the importer had read them from that prefix all
+  along; the writer takes the prefix from `GRANTED_POWER_GROUPS`' `slottable` flag plus
+  `isAutoGranted`, the reader's own rule and not a list of Kheldian names (Thunderspy's Primalist
+  forms ride the same line). **The name was half of it**: a `.mbd` is read positionally around
+  `LastPower`, Mids files all ten in the auto-granted tail at the parent form's level, and fixing
+  the prefix alone would have bound them into ten picks the author never made. Graded on both
+  halves against files Mids wrote; the row also asked for a manual open in Mids, and that ran
+  without an error dialog but could not be screenshotted here — see the gaps entry
 - [x] **MBDEXPORT-1** — the .mbd exporter built Mids' enhancement UIDs out of set display names, and
   Mids answers a UID it does not know by leaving the slot empty with no error: a user's exported
   build arrived missing 13 of 63 enhancements, all four Fitness inherents and the uniques in them,
