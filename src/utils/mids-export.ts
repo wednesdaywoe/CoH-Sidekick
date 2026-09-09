@@ -12,7 +12,7 @@ import { getPowerPool } from '@/data/power-pools';
 import { getEpicPool } from '@/data/epic-pools';
 import { getIOSet } from '@/data/io-sets';
 import { getMidsGenericIOUid, getMidsIOSetPieceUid, getMidsOriginUid, getMidsSpecialUid } from '@/data/mids-uids';
-import { MIDS_STAT_MAP } from '@/utils/mids-import/mappers';
+import { MIDS_STAT_MAP, MIDS_ORIGIN_TIER } from '@/utils/mids-import/mappers';
 import { getInherentPowers, getArchetypeInherentPowers, POWER_PICK_LEVELS, getPicksGrantedAtLevel } from '@/data';
 import { computeExportSlotLevels, type SlotLevel } from '@/utils/slot-levels';
 import { powerKey, type PowerCategory } from '@/utils/power-key';
@@ -264,17 +264,39 @@ function buildGenericIOEnhancement(enh: GenericIOEnhancement): MbdEnhancement | 
 }
 
 /**
+ * `Grade` as Mids spells it, keyed by our tier — `MIDS_ORIGIN_TIER` read the
+ * other way round, so the two directions cannot drift apart again.
+ *
+ * They had, and it was the worst failure this exporter has had. `Grade` used to
+ * be written as `enh.tier`, i.e. our own `SO`/`DO`/`TO`. Mids parses that field
+ * with `Enum.Parse` against `eEnhGrade`, whose members are `TrainingO`, `DualO`
+ * and `SingleO`; `SO` throws inside `LoadEnhancementData`, inside `LoadBuild`,
+ * and Mids answers with "Requested value 'SO' was not found" and an empty
+ * default character. Three origin pieces in a build of 86 enhancements cost the
+ * user all 86 and every power holding them. See DATA-GAP MBDEXPORT-4.
+ */
+const MIDS_GRADE_BY_TIER: Record<string, string> = Object.fromEntries(
+  Object.entries(MIDS_ORIGIN_TIER).map(([grade, tier]) => [tier, grade]),
+);
+
+/**
  * Origin (TO/DO/SO) enhancements. The stat half is the suffix the crafted IOs
  * use; `getMidsOriginUid` turns it into the record Mids actually carries, and
- * `Grade` supplies the tier.
+ * `Grade` supplies the tier — in Mids' spelling, never ours.
+ *
+ * A tier with no Mids grade returns null, which the caller turns into a warning
+ * and an empty slot. That loses one enhancement; writing the token anyway loses
+ * the entire build, so the empty slot is the conservative half of the trade.
  */
 function buildOriginEnhancement(enh: OriginEnhancement): MbdEnhancement | null {
   const crafted = midsGenericIOSuffix(enh.stat);
   const uid = crafted && getMidsOriginUid(crafted);
   if (!uid) return null;
+  const grade = MIDS_GRADE_BY_TIER[enh.tier];
+  if (!grade) return null;
   return {
     Uid: uid,
-    Grade: enh.tier,
+    Grade: grade,
     IoLevel: 0,
     RelativeLevel: buildRelativeLevel(enh.boost),
     Obtained: false,

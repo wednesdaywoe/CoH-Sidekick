@@ -380,10 +380,23 @@ describe('mids-export origin enhancements', () => {
     expect(missing).toEqual([]);
   });
 
-  it('carries the tier in Grade, where Mids reads it', () => {
+  /**
+   * `Grade` is Mids' `eEnhGrade`, whose members are `TrainingO`, `DualO` and
+   * `SingleO` — never our `TO`/`DO`/`SO`. This assertion used to read `'SO'`,
+   * under a title claiming that was "where Mids reads it", and it was green for
+   * as long as it was wrong: Mids `Enum.Parse`s the field, throws inside
+   * `LoadBuild`, and refuses the entire build. See DATA-GAP MBDEXPORT-4, and the
+   * corpus-graded version of this claim in canonical's
+   * `mids-import/mbd-roundtrip.test.ts` — this repo has no `fixtures/` tree.
+   *
+   * A hand-fed test states its author's model of the format. That is exactly how
+   * MBDIMPORT-6 survived on the reader's side too, passing `'SO'` by hand
+   * through a branch no real file could reach.
+   */
+  it('carries the tier in Grade, spelled as Mids spells it', () => {
     const mbd = JSON.parse(exportToMids(buildWithSlot(createOriginEnhancement('Accuracy', 'SO')), true));
     const slot = mbd.PowerEntries.flatMap((pe: { SlotEntries: unknown[] }) => pe.SlotEntries)
       .find((se: { Enhancement: { Grade: string } | null }) => se.Enhancement)!;
-    expect(slot.Enhancement.Grade).toBe('SO');
+    expect(slot.Enhancement.Grade).toBe('SingleO');
   });
 });

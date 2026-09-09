@@ -69,8 +69,15 @@ export function mapOrigin(midsOrigin: string): Origin {
  * test that verified the negative relative levels passed `'SO'` by hand. The
  * first real levelling build ever read lost 79 of its 89 enhancements. See
  * DATA-GAP MBDIMPORT-6.
+ *
+ * Exported because the writer needs it too, and needed it for exactly as long.
+ * `mids-export.ts` wrote our own `SO` back into the file, and Mids `Enum.Parse`s
+ * that field: it throws inside `LoadBuild` and the whole build refuses to open,
+ * not one slot of it. Fixing the reader and leaving the writer to its own
+ * spelling is how MBDEXPORT-4 survived MBDIMPORT-6 by a day. One table, read
+ * forwards here and backwards there.
  */
-const MIDS_ORIGIN_TIER: Record<string, 'TO' | 'DO' | 'SO'> = {
+export const MIDS_ORIGIN_TIER: Record<string, 'TO' | 'DO' | 'SO'> = {
   TrainingO: 'TO',
   DualO: 'DO',
   SingleO: 'SO',
