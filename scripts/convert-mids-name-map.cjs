@@ -74,6 +74,7 @@
  * Usage:
  *   node scripts/convert-mids-name-map.cjs --dataset homecoming
  *   node scripts/convert-mids-name-map.cjs --dataset homecoming --dry-run
+ *   node scripts/convert-mids-name-map.cjs --dataset homecoming --pairs   # the powerset pairing
  */
 
 const fs = require('fs');
@@ -168,6 +169,19 @@ for (const [key, rows] of Object.entries(midsNames.powersets || {})) {
 }
 
 /**
+ * Every non-alphanumeric gone — the import matcher's own ladder (MBDEXPORT-8).
+ *
+ * `normalizeDisplay` above stops at collapsing separator RUNS, so "Moon Beam" and
+ * "Moonbeam" are a miss there, and deliberately: a forward row for a pair the matcher
+ * already resolves on this ladder is a row that is not a rotation, and a row that is not a
+ * rotation is a chance to bind the wrong power. The WRITER has no ladder, so for it a miss
+ * is not a fallback but a wrong name. This width serves the writer and only the writer.
+ */
+function stripSeparators(s) {
+  return String(s || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+}
+
+/**
  * A powerset's own segment, separators and case folded away.
  *
  * Wider than `normalizeDisplay` on purpose: this compares INTERNAL names, where Mids'
@@ -255,12 +269,23 @@ function pairPowersets() {
 
 const { paired, unmatched } = pairPowersets();
 
+// `--pairs` prints the powerset pairing and stops. It exists because the pairing is an
+// input to measurements this generator does not itself make (MBDEXPORT-8's separator
+// census), and a measurement that re-derives it is a second copy of the three conditions
+// above — free to drift, and wrong in exactly the way the number is supposed to settle.
+if (process.argv.includes('--pairs')) {
+  for (const { midsKey, ourKey } of paired) process.stdout.write(`${ourKey}\t${midsKey}\n`);
+  process.exit(0);
+}
+
 const map = {};
 const reverse = {};
+const looseReverse = {};
 const alias = {};
 const stats = {
   shared: paired.length, rows: 0, reverseRows: 0,
   ambiguous: [], merges: [], levelRejected: [], reverseWithdrawn: [],
+  loose: [], looseAmbiguous: [],
 };
 
 for (const { midsKey, ourKey } of paired) {
@@ -287,6 +312,11 @@ for (const { midsKey, ourKey } of paired) {
   // Rebirth's Martial Mastery carries `"Shukuchi "` with a trailing space, and the folded
   // key `"shukuchi"` is a name Mids has no record of.
   const reverseRows = {};
+  // Reverse rows the tight join cannot reach, for the writer alone (DATA-GAP MBDEXPORT-8).
+  // Kept in their own table rather than merged above, so that "every reverse row inverts a
+  // forward row" stays an invariant a gate can hold, and so the looser provenance of these
+  // is impossible to read past.
+  const looseReverseRows = {};
   const claimed = new Map();
   for (const [midsInternal, midsDisplay] of midsPowers) {
     const candidates = byDisplay.get(normalizeDisplay(midsDisplay)) || [];
@@ -325,6 +355,47 @@ for (const { midsKey, ourKey } of paired) {
       delete reverseRows[ourInternal.toLowerCase()];
     }
     claimed.set(ourInternal, midsInternal);
+  }
+
+  // The writer's second pass. Only the Mids names the tight join reached NOTHING with are
+  // eligible — anything it did reach is already answered, rightly or by a withdrawal, and
+  // reopening it here would overrule a decision made with more evidence.
+  const byStripped = new Map();
+  for (const power of ours) {
+    const k = stripSeparators(power.displayName);
+    if (!k) continue;
+    if (!byStripped.has(k)) byStripped.set(k, []);
+    byStripped.get(k).push(power);
+  }
+  for (const [midsInternal, midsDisplay] of midsPowers) {
+    if ((byDisplay.get(normalizeDisplay(midsDisplay)) || []).length > 0) continue;
+    const candidates = byStripped.get(stripSeparators(midsDisplay)) || [];
+    if (candidates.length !== 1) {
+      if (candidates.length > 1) {
+        stats.looseAmbiguous.push(`${ourKey}: "${midsDisplay}" reaches ${candidates.length} powers here`);
+      }
+      continue;
+    }
+    const ourInternal = candidates[0].internalName;
+    if (ourInternal.toLowerCase() === String(midsInternal).toLowerCase()) continue;
+    // Ours is already answered by the tight pass, or claimed by it: leave it alone.
+    if (reverseRows[ourInternal.toLowerCase()] || claimed.has(ourInternal)) continue;
+    // The same withdrawal the tight pass takes, and for the same reason — a display
+    // coincidence does not outrank Mids carrying that exact name at that exact level.
+    const incumbent = midsByName.get(ourInternal.toLowerCase());
+    if (incumbent && incumbent[2] !== null && candidates[0].level === incumbent[2]) {
+      stats.levelRejected.push(
+        `${ourKey}: "${midsDisplay}" (loose) — ${ourInternal} is Mids' own ${incumbent[0]} `
+        + `(both level ${incumbent[2]}), not ${midsInternal}`,
+      );
+      continue;
+    }
+    looseReverseRows[ourInternal.toLowerCase()] = String(midsInternal);
+    stats.loose.push(`${ourKey}: ${ourInternal} → ${midsInternal} ("${candidates[0].displayName}" / "${midsDisplay}")`);
+  }
+  if (Object.keys(looseReverseRows).length > 0) {
+    looseReverse[ourKey] = Object.fromEntries(
+      Object.entries(looseReverseRows).sort(([a], [b]) => a.localeCompare(b)));
   }
 
   if (Object.keys(rows).length > 0) {
@@ -372,6 +443,7 @@ const sorted = Object.fromEntries(Object.keys(map).sort().map((k) => [k, map[k]]
 const sortedReverse = Object.fromEntries(Object.keys(reverse).sort().map((k) => [k, reverse[k]]));
 const sortedAlias = Object.fromEntries(Object.keys(alias).sort().map((k) => [k, alias[k]]));
 const sortedPaths = Object.fromEntries(Object.keys(pathTable).sort().map((k) => [k, pathTable[k]]));
+const sortedLoose = Object.fromEntries(Object.keys(looseReverse).sort().map((k) => [k, looseReverse[k]]));
 
 const source = `Mids Reborn ${namesDataset} database ${midsNames.version} `
   + `(sha256 ${String(midsNames.sha256).slice(0, 12)}…)`
@@ -391,7 +463,7 @@ const body = `/**
  *
  * Source: ${source}
  * Powersets paired with the export: ${stats.shared} of ${midsSets.size}. Remapped names: ${stats.rows}.
- * Reverse rows for the writer: ${stats.reverseRows}${stats.reverseWithdrawn.length ? `, with ${stats.reverseWithdrawn.length} withdrawn as ambiguous` : ''}.
+ * Reverse rows for the writer: ${stats.reverseRows}${stats.reverseWithdrawn.length ? `, with ${stats.reverseWithdrawn.length} withdrawn as ambiguous` : ''}, plus ${stats.loose.length} the display join could only reach with its separators stripped.
  * Powerset paths for the writer: ${Object.keys(sortedPaths).length}${KEYS_ARE_LITERAL ? '' : ` — NONE. The ${namesDataset} names dump predates MBDEXPORT-6 and carries folded powerset keys, so Mids' own spelling is not in it. Re-run emit_mids_names.py against that fork's I12.mhd to fill this in.`}
  * Mids powersets with no counterpart here: ${unmatched.length} — listed by the generator on stderr.
  *
@@ -444,6 +516,28 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
  * with a blank row that still holds the power's slots.
  */
 export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = ${JSON.stringify(sortedPaths, null, 2)};
+
+/**
+ * Reverse rows the display join could only reach with every separator stripped — for the
+ * .mbd writer, and for it alone (DATA-GAP MBDEXPORT-8).
+ *
+ * Rebirth spells a power \`Moonbeam\` and Mids spells it \`Moon_Beam\`. The join above
+ * folds separator RUNS to one space and stops, so that pair is a miss, and that tightness
+ * is right where it is: the IMPORT matcher resolves such a pair on its own
+ * all-separators-stripped ladder, and a forward row for a pair it already handles is a row
+ * that is not a rotation — a chance to bind the wrong power for no gain.
+ *
+ * The writer has no ladder. One lookup, and ours goes out on a miss, under a name Mids
+ * answers with a blank row that keeps the slots. So the width the reader needs and the
+ * width the writer needs are different, and this is the writer's.
+ *
+ * A separate table rather than extra rows in \`MIDS_NAME_REVERSE\` for two reasons: that
+ * one is exactly the inverse of \`MIDS_NAME_MAP\` and a gate holds it to that, and these
+ * rows come from a looser join, which is a fact about them a reader should not have to
+ * infer. Ours-already-answered is never overruled — a key here is one the tight pass left
+ * empty.
+ */
+export const MIDS_NAME_REVERSE_LOOSE: Readonly<Record<string, Readonly<Record<string, string>>>> = ${JSON.stringify(sortedLoose, null, 2)};
 `;
 
 if (dryRun) {
@@ -457,7 +551,7 @@ console.error(
   `[convert-mids-name-map] ${datasetId}: ${stats.rows} remapped names across ` +
   `${Object.keys(sorted).length} powersets (of ${stats.shared} paired, ` +
   `${Object.keys(sortedAlias).length} by alias), ${stats.reverseRows} reverse, ` +
-  `${Object.keys(sortedPaths).length} powerset paths` +
+  `${Object.keys(sortedPaths).length} powerset paths, ${stats.loose.length} loose reverse` +
   (dryRun ? ' [dry run]' : ` -> ${path.relative(REPO_ROOT, OUTPUT_PATH)}`),
 );
 if (!KEYS_ARE_LITERAL) {
@@ -467,6 +561,8 @@ if (!KEYS_ARE_LITERAL) {
     + ` The .mbd writer will report every set on this fork rather than guess (MBDEXPORT-6).`,
   );
 }
+for (const line of stats.loose) console.error(`  loose reverse: ${line}`);
+for (const line of stats.looseAmbiguous) console.error(`  loose-ambiguous: ${line}`);
 for (const line of stats.merges) console.error(`  merge: ${line}`);
 for (const line of stats.reverseWithdrawn) console.error(`  reverse-withdrawn: ${line}`);
 for (const line of stats.levelRejected) console.error(`  level-rejected: ${line}`);

@@ -23,24 +23,28 @@ import {
   MIDS_POWERSET_ALIAS as HOMECOMING_MIDS_SETS,
   MIDS_NAME_REVERSE as HOMECOMING_MIDS_REVERSE,
   MIDS_POWERSET_PATH as HOMECOMING_MIDS_PATHS,
+  MIDS_NAME_REVERSE_LOOSE as HOMECOMING_MIDS_LOOSE,
 } from './datasets/homecoming/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as REBIRTH_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as REBIRTH_MIDS_SETS,
   MIDS_NAME_REVERSE as REBIRTH_MIDS_REVERSE,
   MIDS_POWERSET_PATH as REBIRTH_MIDS_PATHS,
+  MIDS_NAME_REVERSE_LOOSE as REBIRTH_MIDS_LOOSE,
 } from './datasets/rebirth/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as THUNDERSPY_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as THUNDERSPY_MIDS_SETS,
   MIDS_NAME_REVERSE as THUNDERSPY_MIDS_REVERSE,
   MIDS_POWERSET_PATH as THUNDERSPY_MIDS_PATHS,
+  MIDS_NAME_REVERSE_LOOSE as THUNDERSPY_MIDS_LOOSE,
 } from './datasets/thunderspy/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as BRAINSTORM_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as BRAINSTORM_MIDS_SETS,
   MIDS_NAME_REVERSE as BRAINSTORM_MIDS_REVERSE,
   MIDS_POWERSET_PATH as BRAINSTORM_MIDS_PATHS,
+  MIDS_NAME_REVERSE_LOOSE as BRAINSTORM_MIDS_LOOSE,
 } from './datasets/brainstorm/generated/mids-name-map';
 
 type NameMap = Readonly<Record<string, Readonly<Record<string, string>>>>;
@@ -72,6 +76,21 @@ const REVERSE_BY_DATASET: Record<DatasetId, NameMap> = {
   rebirth: REBIRTH_MIDS_REVERSE,
   thunderspy: THUNDERSPY_MIDS_REVERSE,
   brainstorm: BRAINSTORM_MIDS_REVERSE,
+};
+
+/**
+ * The rows the display join could only reach with its separators stripped (MBDEXPORT-8).
+ *
+ * A writer-side supplement to `MIDS_NAME_REVERSE`, kept separate because it comes from a
+ * looser join: the reader has its own all-separators-stripped ladder and does not want
+ * these as forward rows, and the invariant that the reverse table inverts the forward one
+ * stays exactly true with them out here.
+ */
+const LOOSE_BY_DATASET: Record<DatasetId, NameMap> = {
+  homecoming: HOMECOMING_MIDS_LOOSE,
+  rebirth: REBIRTH_MIDS_LOOSE,
+  thunderspy: THUNDERSPY_MIDS_LOOSE,
+  brainstorm: BRAINSTORM_MIDS_LOOSE,
 };
 
 /**
@@ -127,6 +146,11 @@ function reverseRowsFor(powersetKey: string): Readonly<Record<string, string>> |
   return lookupRows(REVERSE_BY_DATASET[getActiveDataset().id], powersetKey);
 }
 
+/** And against the looser writer-side table, which is read through the same alias. */
+function looseRowsFor(powersetKey: string): Readonly<Record<string, string>> | undefined {
+  return lookupRows(LOOSE_BY_DATASET[getActiveDataset().id], powersetKey);
+}
+
 function lookupRows(map: NameMap, powersetKey: string): Readonly<Record<string, string>> | undefined {
   const key = normalizeKey(powersetKey);
   if (map[key]) return map[key];
@@ -179,7 +203,12 @@ export function midsNameForExport(
   powersetKey: string,
   ourInternalName: string,
 ): string | undefined {
-  return reverseRowsFor(powersetKey)?.[ourInternalName.trim().toLowerCase()];
+  const key = ourInternalName.trim().toLowerCase();
+  // The tight table first, always. The loose one only answers where the display join
+  // reached nothing at all (MBDEXPORT-8), so this order is the generator's decision
+  // carried through rather than a preference expressed here — but stating it once beats
+  // relying on the two tables never overlapping.
+  return reverseRowsFor(powersetKey)?.[key] ?? looseRowsFor(powersetKey)?.[key];
 }
 
 /**
@@ -217,4 +246,9 @@ export function midsNameMap(): NameMap {
 /** The active dataset's whole reverse table — for gates and audits, not for resolution. */
 export function midsNameReverseMap(): NameMap {
   return REVERSE_BY_DATASET[getActiveDataset().id];
+}
+
+/** The looser writer-side rows — for gates and audits, not for resolution. */
+export function midsNameReverseLooseMap(): NameMap {
+  return LOOSE_BY_DATASET[getActiveDataset().id];
 }

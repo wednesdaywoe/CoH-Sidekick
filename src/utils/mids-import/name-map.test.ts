@@ -10,24 +10,28 @@ import {
   MIDS_POWERSET_ALIAS as HOMECOMING_ALIAS,
   MIDS_NAME_REVERSE as HOMECOMING_REVERSE,
   MIDS_POWERSET_PATH as HOMECOMING_PATHS,
+  MIDS_NAME_REVERSE_LOOSE as HOMECOMING_LOOSE,
 } from '@/data/datasets/homecoming/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as REBIRTH_MAP,
   MIDS_POWERSET_ALIAS as REBIRTH_ALIAS,
   MIDS_NAME_REVERSE as REBIRTH_REVERSE,
   MIDS_POWERSET_PATH as REBIRTH_PATHS,
+  MIDS_NAME_REVERSE_LOOSE as REBIRTH_LOOSE,
 } from '@/data/datasets/rebirth/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as THUNDERSPY_MAP,
   MIDS_POWERSET_ALIAS as THUNDERSPY_ALIAS,
   MIDS_NAME_REVERSE as THUNDERSPY_REVERSE,
   MIDS_POWERSET_PATH as THUNDERSPY_PATHS,
+  MIDS_NAME_REVERSE_LOOSE as THUNDERSPY_LOOSE,
 } from '@/data/datasets/thunderspy/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as BRAINSTORM_MAP,
   MIDS_POWERSET_ALIAS as BRAINSTORM_ALIAS,
   MIDS_NAME_REVERSE as BRAINSTORM_REVERSE,
   MIDS_POWERSET_PATH as BRAINSTORM_PATHS,
+  MIDS_NAME_REVERSE_LOOSE as BRAINSTORM_LOOSE,
 } from '@/data/datasets/brainstorm/generated/mids-name-map';
 import { findPowerByMidsName } from './mappers';
 import { importMidsBuild } from '@/utils/mids-import';
@@ -520,5 +524,68 @@ describe('Mids .mbd export — the powerset path table', () => {
     expect(midsPowersetPathForExport('Guardian_Comp.Atmospheric_Composition'))
       .toBe('Guardian_Composition.Atmospheric_Composition');
     await loadDataset('homecoming');
+  });
+});
+
+/**
+ * MBDEXPORT-8 — the rows only a wider join can reach, and why they live apart.
+ *
+ * Rebirth spells a power `Moonbeam`; Mids spells it `Moon_Beam`. The name map's display
+ * join folds separator RUNS to one space and stops, so that pair is a miss — and that is
+ * the right width for the READER, whose matcher resolves such a pair on its own
+ * all-separators-stripped ladder. A forward row for a pair the matcher already handles is
+ * a row that is not a rotation, and a row that is not a rotation is a chance to bind the
+ * wrong power for no gain.
+ *
+ * The writer has no ladder: one lookup, and ours goes out on a miss, under a name Mids
+ * answers with a blank row that keeps the slots. So it reads a second table, minted at the
+ * wider width and for it alone.
+ *
+ * The census that justified widening anything is
+ * `scripts/keys/mbdexport8-separator-census.cjs`: one name across all four datasets, and
+ * none refused as ambiguous. The count is small enough that the table's whole content is
+ * asserted here rather than sampled.
+ */
+describe('Mids .mbd export — the looser writer-side rows', () => {
+  const forks = {
+    homecoming: [HOMECOMING_REVERSE, HOMECOMING_LOOSE],
+    rebirth: [REBIRTH_REVERSE, REBIRTH_LOOSE],
+    thunderspy: [THUNDERSPY_REVERSE, THUNDERSPY_LOOSE],
+    brainstorm: [BRAINSTORM_REVERSE, BRAINSTORM_LOOSE],
+  } as const;
+
+  it('carries exactly the one pair the census found, at the fork that has it', () => {
+    expect(REBIRTH_LOOSE).toEqual({
+      'guardian_assault.dark_assault': { moonbeam: 'Moon_Beam' },
+    });
+    expect(HOMECOMING_LOOSE).toEqual({});
+    expect(THUNDERSPY_LOOSE).toEqual({});
+    expect(BRAINSTORM_LOOSE).toEqual({});
+  });
+
+  it('never answers where the tight table already does', () => {
+    // The separation is the safety property. A loose row for a power the tight join
+    // reached would be a looser join overruling a tighter one on the same evidence, which
+    // is the failure the generator's whole display-join argument is about.
+    for (const [fork, [reverse, loose]] of Object.entries(forks)) {
+      for (const [key, rows] of Object.entries(loose)) {
+        for (const ourName of Object.keys(rows)) {
+          expect(reverse[key]?.[ourName], `${fork} ${key}: ${ourName} is in both tables`)
+            .toBeUndefined();
+        }
+      }
+    }
+  });
+
+  it('reaches the writer through the same lookup, and only after the tight table', async () => {
+    await loadDataset('rebirth');
+    expect(midsNameForExport('guardian_assault.dark_assault', 'Moonbeam')).toBe('Moon_Beam');
+    // Its neighbour in the same set is answered by the tight table, and a power neither
+    // carries still says nothing — undefined means "write ours", not "no such power".
+    expect(midsNameForExport('guardian_assault.dark_assault', 'Smite')).toBeUndefined();
+    await loadDataset('homecoming');
+    // And the fold is per-dataset: Homecoming has no such powerset, so this is the shape
+    // of the vacuous negative this file used to assert without noticing.
+    expect(midsNameForExport('guardian_assault.dark_assault', 'Moonbeam')).toBeUndefined();
   });
 });

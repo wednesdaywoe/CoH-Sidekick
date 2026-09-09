@@ -12,7 +12,7 @@
  *
  * Source: Mids Reborn homecoming database 2026.5.1337 (sha256 7568ff37f3a6…) — Mids ships no brainstorm build, so a brainstorm .mbd carries homecoming's namespace
  * Powersets paired with the export: 3561 of 3653. Remapped names: 83.
- * Reverse rows for the writer: 83.
+ * Reverse rows for the writer: 83, plus 0 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 3561
  * Mids powersets with no counterpart here: 92 — listed by the generator on stderr.
  *
@@ -4053,3 +4053,25 @@ export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {
   "widow_training.night_widow_training": "Widow_Training.Night_Widow_Training",
   "widow_training.widow_training": "Widow_Training.Widow_Training"
 };
+
+/**
+ * Reverse rows the display join could only reach with every separator stripped — for the
+ * .mbd writer, and for it alone (DATA-GAP MBDEXPORT-8).
+ *
+ * Rebirth spells a power `Moonbeam` and Mids spells it `Moon_Beam`. The join above
+ * folds separator RUNS to one space and stops, so that pair is a miss, and that tightness
+ * is right where it is: the IMPORT matcher resolves such a pair on its own
+ * all-separators-stripped ladder, and a forward row for a pair it already handles is a row
+ * that is not a rotation — a chance to bind the wrong power for no gain.
+ *
+ * The writer has no ladder. One lookup, and ours goes out on a miss, under a name Mids
+ * answers with a blank row that keeps the slots. So the width the reader needs and the
+ * width the writer needs are different, and this is the writer's.
+ *
+ * A separate table rather than extra rows in `MIDS_NAME_REVERSE` for two reasons: that
+ * one is exactly the inverse of `MIDS_NAME_MAP` and a gate holds it to that, and these
+ * rows come from a looser join, which is a fact about them a reader should not have to
+ * infer. Ours-already-answered is never overruled — a key here is one the tight pass left
+ * empty.
+ */
+export const MIDS_NAME_REVERSE_LOOSE: Readonly<Record<string, Readonly<Record<string, string>>>> = {};

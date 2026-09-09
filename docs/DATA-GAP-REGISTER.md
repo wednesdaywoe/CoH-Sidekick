@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**4 open, of 276 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
+**3 open, of 276 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
 parse, and all found by the same thing: seven real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
@@ -75,20 +75,23 @@ Kheldian form path (MBDEXPORT-5), a powerset path derived from an icon (MBDEXPOR
 incarnate slug (MBDEXPORT-7), a rename the join is too tight to see (MBDEXPORT-8). MBDEXPORT-2 is
 the fifth kind, a fork Mids has never had.
 
-Three of those closed the same day, and the first changed what the rest of the list is.
-MBDEXPORT-6 made both segments of the path a read of Mids' database instead of a composition from
-an icon, which took the Guardian and the Night Widow from 70 lost enhancements to none — and it
-un-blinded the census itself, which had been folding those two segments to lower case and could
-not see a wrong-CASE path. MBDEXPORT-7 then cost one function, because an incarnate's name goes
-out through the same two lookups, and MBDEXPORT-5 took the Warshade's 36 back with one more.
-What the first left behind is MBDEXPORT-9, its own residual, measured: 19 Homecoming sets the
-pairing cannot reach, mostly epic pools Mids names the other way round.
+All four closed the same day, and the first changed what the other three were. MBDEXPORT-6 made
+both segments of the path a read of Mids' database instead of a composition from an icon, which
+took the Guardian and the Night Widow from 70 lost enhancements to none — and it un-blinded the
+census itself, which had been folding those two segments to lower case and could not see a
+wrong-CASE path. MBDEXPORT-7 then cost one function, because an incarnate's name goes out through
+the same two lookups; MBDEXPORT-5 took the Warshade's 36 back with one more, once the corpus file
+showed that a `.mbd` is read positionally and the name was half the fix; and MBDEXPORT-8's census
+said one name across all four datasets would reach Mids only through a wider join, and nothing
+false would, so the widening cost a second writer-side table and no judgement call.
 
-Every corpus build now binds whole in Mids' namespace but one name — MBDEXPORT-8's `Moonbeam`,
-which costs no enhancement — so what is left on the writing side is that, MBDEXPORT-9, and
-MBDEXPORT-2's fork Mids has never had. The silence is going too: a powerset the writer cannot name
-in Mids' namespace says so on every fork, and Thunderspy's fourteen are the first warnings that
-build has ever produced.
+**All seven corpus builds now bind whole** — every `PowerName` in every file resolves against its
+fork's own Mids database. What the first closure left behind is MBDEXPORT-9, its own residual,
+measured: 19 Homecoming sets the pairing cannot reach, mostly epic pools Mids names the other way
+round. With MBDEXPORT-2's fork Mids has never had, that is the writing side.
+
+The silence is going too. A powerset the writer cannot name in Mids' namespace says so on every
+fork, and Thunderspy's fourteen are the first warnings that build has ever produced.
 
 The parser frontier itself is clear — EXPRPUNT-1 opened and closed on 2026-09-08, and
 [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9 — so
@@ -768,18 +771,18 @@ measurement went, and where a closure for the residual belongs too.
   comes from the roster now and goes out through MBDEXPORT-6's two lookups. The comment was half
   true and that is what hid it: the `.skif` reader stores a full path in `powerName` and the `.mbd`
   importer stores a slug, so the writer takes the roster first and a stored path second
-- [ ] **MBDEXPORT-8** — the name map's display join folds separator runs to one space and no
-  further, so a rename that only moved a separator mints no row: Rebirth's `Moonbeam` against Mids'
-  `Moon_Beam`. The tightness is right for the IMPORT reader, which resolves that pair on its own
-  all-separators-stripped ladder and logs it; the writer has one lookup and no ladder. 1 name in
-  the 7-file corpus, population across the three forks unmeasured
-  **Goal** — a name that differs from Mids' only in separators is written in Mids' spelling.
-  **Done when** — the population is measured across all three forks FIRST, since one observed name
-  does not justify widening a join that mints false rows when it is too loose; then either a
-  writer-only separator-insensitive pass lands with the pairs it would mint listed, or the row
-  closes as adjudicated-not-worth-it with that count written down.
-  **Check** — `midsNameForExport('guardian_assault.dark_assault', 'Moonbeam')` returns undefined
-  while this row is open, and `mbd-export-names.test.ts` asserts it.
+- [x] **MBDEXPORT-8** — the name map's display join folds separator runs to one space and no
+  further, so a rename that only moved a separator minted no row: Rebirth's `Moonbeam` against
+  Mids' `Moon_Beam`. The tightness is right for the IMPORT reader, which resolves that pair on its
+  own all-separators-stripped ladder and logs it; the writer has one lookup and no ladder, so ours
+  went out under a name Mids answers with a blank row. Measured before widening anything
+  ([`mbdexport8-separator-census.cjs`](../scripts/keys/mbdexport8-separator-census.cjs)): **1
+  reachable name across all four datasets, 0 ambiguous** — so the risk the tightness defends
+  against does not materialise at this width. Closed as a SECOND table, `MIDS_NAME_REVERSE_LOOSE`,
+  read only where the tight one answers nothing, which keeps "every reverse row inverts a forward
+  row" holdable as an invariant. The old `Check` was vacuous — it asserted `undefined` under the
+  Homecoming dataset, where that powerset does not exist; the census stayed, and exits 1 if a
+  reachable name ever goes unminted
 - [x] **MBDEXPORT-4** — the exporter wrote `Grade: enh.tier`, so an origin enhancement read in as
   Mids' `SingleO` went back out as our `SO`, a token MBDIMPORT-6 had proved that day no Mids
   writes; `Enum.Parse` threw inside `LoadBuild` and Mids refused **the whole build** — three
