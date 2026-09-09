@@ -57,14 +57,17 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**4 open, of 270 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
-parse, and all found by the same thing: six real `.mbd` files and a working Mids
+**5 open, of 272 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
+parse, and all found by the same thing: seven real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
 Reading a `.mbd`: MBDIMPORT-5 drops a refused power's enhancements out of both tallies,
 and MBDIMPORT-7 is why one of them was refused: the name map's join is blind to a whole category.
-Writing one: MBDEXPORT-2, where Mids has never had a Thunderspy database and the exporter answers
-with defaults; and MBDEXPORT-3, where the export applies no reverse name rotation at all.
+
+Writing one is the worse half, and the Kheldian corpus file proved it by round trip. MBDEXPORT-4
+wrote a grade token Mids cannot parse and is closed. MBDEXPORT-5 writes form sub-powers at a path
+Mids will not bind, losing 36 of 86 enhancements to blank rows; MBDEXPORT-3 applies no reverse name
+rotation; and MBDEXPORT-2 answers a fork Mids has never had with defaults.
 
 The parser frontier itself is clear — EXPRPUNT-1 opened and closed on 2026-09-08, and
 [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9 — so
@@ -655,7 +658,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 59 of 63 closed
+[Full detail](gaps/pipeline-provenance.md) — 60 of 65 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -726,6 +729,27 @@ measurement went, and where a closure for the residual belongs too.
   carrying a rotation, not only on one that happens to avoid them.
   **Check** — `grep -c mids-name-map src/utils/mids-export.ts` returns 0 while this row is open.
   Non-zero means the export reads the map, which is the whole of the fix.
+- [x] **MBDEXPORT-4** — the exporter wrote `Grade: enh.tier`, so an origin enhancement read in as
+  Mids' `SingleO` went back out as our `SO`, a token MBDIMPORT-6 had proved that day no Mids
+  writes; `Enum.Parse` threw inside `LoadBuild` and Mids refused **the whole build** — three
+  origin pieces in 86 cost all 86. `MIDS_ORIGIN_TIER` is now exported and read backwards by the
+  writer, an unmapped tier warns instead of writing, and `mbd-roundtrip.test.ts` grades every
+  corpus file's output against Mids' vocabulary rather than against ours
+- [ ] **MBDEXPORT-5** — a Kheldian's ten form sub-powers export at their powerset path
+  (`Warshade_Offensive.Umbral_Blast.Dark_Nova_Blast`), where Mids both writes and expects
+  `Inherent.Inherent.Dark_Nova_Blast`. Opened in Mids, all ten come back as blank rows holding the
+  file's own empty slots and **36 of 86 enhancements are gone**, with `warnings: []`. The importer
+  gets this right — `slottableSubPowerParent` reads exactly that prefix — so the two halves
+  disagree about where a form power lives
+  **Goal** — a power the importer resolved out of `Inherent.Inherent.*` is written back to it.
+  **Done when** — the export emits the `Inherent.Inherent.` prefix for any power carrying
+  `isAutoGranted` with a `slottable` parent, derived from `GRANTED_POWER_GROUPS` rather than a list
+  of Kheldian names; a granted power with no Mids-side home is reported rather than written at a
+  path Mids will not bind; and the claim is graded by opening the export in Mids, since a blank row
+  is invisible to our own reader.
+  **Check** — `npx vitest run src/utils/mids-import/mbd-corpus.test.ts` holds the import half at
+  ten sub-powers attached with the file's slot counts; the export half has no gate yet, and the
+  first thing this row owes is one.
 - [x] **MBDEXPORT-1** — the .mbd exporter built Mids' enhancement UIDs out of set display names, and
   Mids answers a UID it does not know by leaving the slot empty with no error: a user's exported
   build arrived missing 13 of 63 enhancements, all four Fitness inherents and the uniques in them,

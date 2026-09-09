@@ -64,6 +64,14 @@
       "gap": "MBDIMPORT-5"
     },
     {
+      "path": "src/utils/mids-import/mbd-roundtrip.test.ts",
+      "reason": "Reads fixtures/mids/, which lives in canonical alone — the beta has no fixtures/ tree. It grades the seam rather than either half: a corpus file is read, written back out, and the OUTPUT is checked against Mids' own vocabulary, which is what MBDEXPORT-4 needed and no in-process round trip could give. Its verdict covers the beta's writer too: the beta's mids-export.ts is a declared SLOT-3 fork, and the same MBDEXPORT-4 edit was applied to it by hand on 2026-09-09 — that hand carry, not this gate, is what the fork row owes.",
+      "gap": "MBDEXPORT-4",
+      "mentions": [
+        "src/utils/mids-export.test.ts"
+      ]
+    },
+    {
       "path": "src/utils/mids-export-thunderspy.test.ts",
       "reason": "Pins what a Thunderspy build becomes as a .mbd (MBDEXPORT-2). Reads fixtures/skif/v4/thunderpy-primalist.skif, and the beta has no fixtures/ tree — the same reason as the .mbd corpus gate beside it. It is un-carryable for a second reason worth naming, because the first one would go away if the beta ever grew fixtures: it calls the one-arg `exportToMidsWithReport(build)`, and the beta's takes a `levelUpMode` second argument (SLOT-3), so it would not type-check there. What it grades is therefore canonical's forked copy and not the one users run. The two copies differ in three hunks, all slot levels, so every assertion here holds for the beta's copy too — this gate asserts nothing about a slot's `Level`.",
       "gap": "MBDEXPORT-2"
@@ -192,7 +200,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "94a9e9d56e428ac8a75cb1440d320cb346091e5b94feb77ce2362cf853b0d905"
+      "sha256": "dd4b6165fb40ab3cf414dd2f4fc91575cedb7d119e064e2c4dcc9f5a52704a0e"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -625,8 +633,8 @@
       "path": "src/utils/mids-export.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "7cb2936f5a49c9714d832757eaa3b5f8f0234db150adf815c6181f695b7a98bb",
-        "beta": "64bd8c16c802425e9e74fae9974dee31ab09e880ae855a8a2e423b08b8876b32"
+        "canonical": "1163508c7377eedc79fab7761d647b07f6020c3baa070a1c6c451f7da7926829",
+        "beta": "7623cc9c166e779991bac3a0034f17b358189440137256719407ec31abd7062d"
       },
       "reason": "SLOT-3 (beta commit d59d7d3d5c): beta's `exportToMids` / `exportToMidsWithReport` take a second `levelUpMode` parameter and resolve slot levels through `computeExportSlotLevels`, so off-mode placement stops enforcing a pick-level schedule floor and says once in the UI that the Level it writes is synthetic. Canonical's copy keeps the one-arg form and `computeAllSlotLevels`. Three hunks, all slot levels — name rotation, enhancement UID mapping and warning emission are byte-identical, so every MBDEXPORT pin taken against canonical's copy holds for the beta's except a claim about a slot's `Level`. Canonical's copy is not app code: it is the source the Rust `.mbd` writer will be ported from, and `crates/app/src/build_io.rs` still lists `.mbd`/`.mxd` as not in the rebuild. Port THIS copy and Rust inherits the floor SLOT-3 removed, stamping every exported slot with a levelling history the build never had — a Rule 1 soft-wrong value written into a file another planner reads as authoritative.",
       "exit": "canonical's vendored TS half takes SLOT-3 through all ten `slot-levels.ts` consumers (Header, PowerRow, useSlotLevels, useBuildBudget, uiStore, buildStore, export-print, forum-export, mids-export, mids-import/importer), or that half is retired once the Rust writer lands. Not a carry either way: `--write` cannot converge a fork and `sync:shared` refuses to clobber a beta-authored edit, so this side will not converge on its own. Whichever comes first, the Rust `.mbd` writer must be ported from the BETA's two-arg form, and this row is where that is recorded.",
@@ -666,7 +674,7 @@
     {
       "path": "src/utils/mids-import/mappers.ts",
       "status": "identical",
-      "sha256": "15232400f835cc20b005fe4b942cdbc741bdf2b1ea76d6e28621e0f049057c57"
+      "sha256": "8320e238a8f51039806ebbd6a1dd9d1c2a637ab3c850adba85e46f41920e0636"
     },
     {
       "path": "src/utils/mids-import/name-map.test.ts",
@@ -1147,7 +1155,7 @@
     {
       "path": "tools/mids-oracle/mids-wine.sh",
       "status": "identical",
-      "sha256": "c263962855fa6907449454f8be79a150a7583b758c9787387f369240c63f4b5f"
+      "sha256": "0b0e4f2e68f8b480356bae5e19e97fcc08373879dffbaceb607ae49e92f756b0"
     },
     {
       "path": "tools/mids-oracle/oracle_divergence_rules.json",

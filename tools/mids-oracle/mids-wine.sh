@@ -30,7 +30,9 @@ set -euo pipefail
 
 PREFIX="${MIDS_WINEPREFIX:-$HOME/Games/mids-reborn}"
 APP="$PREFIX/drive_c/MidsReborn"
-[ -x "$APP/MidsReborn.exe" ] || { echo "no Mids at $APP — see setup above" >&2; exit 1; }
+# -f, not -x: an in-app update unzips the exe without a unix exec bit, and Wine
+# does not need one. `-x` here reported "no Mids" against a working install.
+[ -f "$APP/MidsReborn.exe" ] || { echo "no Mids at $APP — see setup above" >&2; exit 1; }
 
 if [ $# -ge 1 ]; then
   cp "$1" "$APP/test.mbd"
@@ -51,8 +53,15 @@ json.dump(cfg, open(p, 'w'), indent=2)
 PY
 fi
 
+# A prefix booted by Lutris is served by Lutris' own wineserver, and a bare
+# `wine` from PATH against it dies with "wine client error: version mismatch"
+# and no window. Point WINE at the runner that booted the prefix when that
+# happens — e.g.
+#   WINE=~/.local/share/lutris/runners/wine/wine-11.10-amd64/bin/wine
+WINE="${WINE:-wine}"
+
 cd "$APP"
-WINEPREFIX="$PREFIX" WINEDEBUG=-all setsid nohup wine MidsReborn.exe >/tmp/mids-wine.log 2>&1 </dev/null &
+WINEPREFIX="$PREFIX" WINEDEBUG=-all setsid nohup "$WINE" MidsReborn.exe >/tmp/mids-wine.log 2>&1 </dev/null &
 echo "launched; window appears in ~40s. Screenshot with:"
 echo "  W=\$(DISPLAY=:0 xdotool search --name \"Mids' Reborn\" | head -1)"
 echo "  DISPLAY=:0 import -window \$W /tmp/mids.png"
