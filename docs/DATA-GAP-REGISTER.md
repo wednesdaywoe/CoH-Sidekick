@@ -57,10 +57,13 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 265 entries.** MBDIMPORT-5 opened 2026-09-09: the `.mbd` importer drops a refused
-power's enhancements out of both of its tallies. It is a reader defect downstream of a clean
-parse, found by the first Mids-written files ever pointed at that reader
-([fixtures/mids](../fixtures/mids/README.md)).
+**2 open, of 266 entries.** Both opened 2026-09-09, and both are Mids-interop defects downstream
+of a clean parse.
+
+On the read side, MBDIMPORT-5 drops a refused power's enhancements out of both tallies — found by
+the first Mids-written files ever pointed at that reader
+([fixtures/mids](../fixtures/mids/README.md)). On the write side, MBDEXPORT-2: Mids has never had
+a Thunderspy database, and the exporter answers that with defaults rather than saying so.
 
 The parser frontier itself is clear — EXPRPUNT-1 opened and closed on 2026-09-08, and
 [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9 — so
@@ -651,7 +654,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 57 of 58 closed
+[Full detail](gaps/pipeline-provenance.md) — 57 of 59 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -694,6 +697,23 @@ measurement went, and where a closure for the residual belongs too.
   the alpha slot, the origin and every slot's placement level; UIDs are now read from Mids' own
   EnhDB per fork, both directions share the table, and three population sweeps plus a source-hash
   staleness gate hold it
+- [ ] **MBDEXPORT-2** — Mids ships Generic, Homecoming and Rebirth databases and has never had a
+  Thunderspy one (user, 2026-09-09); three places answer that with a default instead of saying so.
+  The vendored `Thunderspy/EnhDB.mhd` the UID emitter reads is byte-identical to Mids' **Generic**
+  database while the emitter says "Thunderspy ships its own"; the exporter stamps
+  `Database: 'Homecoming'` on every build that is not Rebirth; and `|| 'Class_Blaster'` makes an
+  archetype Mids never had indistinguishable from a real Blaster. `thunderpy-primalist.skif`
+  exports as a Homecoming Blaster with powersets no HC database holds, and `warnings: []`
+  **Goal** — a build this planner cannot honestly express as a `.mbd` says so, rather than
+  arriving in Mids as a different character.
+  **Done when** — the Thunderspy EnhDB's real provenance is stated wherever it is read; an
+  archetype with no `Class_` token warns instead of defaulting, per this module's own contract that
+  an unreported warning is a build with holes and no explanation; the `Database` string is decided
+  for a fork Mids does not carry rather than falling into the Homecoming else-branch; and the four
+  sets with no Mids UID at all are reported on export rather than shipped as empty slots.
+  **Check** — `npx vitest run src/utils/mids-export-thunderspy.test.ts` pins all four halves of
+  today's behaviour on a real Thunderspy build. Pins, not approval: closing this row changes them
+  deliberately, and any other movement reds.
 - [x] **PARTSTAT-2** — the Dominator `Domination` node in `archetypes.json` hand-copied three values the export owns and had drifted, stating `recharge` 200 on the fork whose export says 180; TS gained the name-join to the `Inherent.Inherent` twin that Rust already had, the card's window is now the longest span its caster-side atoms hold open rather than the bag's modal vote, and the four hand-authored `effects` blocks are gone — atom-less bags 4 → 0
 
 - [x] **PARTSTAT-1** — four converters wrote a power's execution stats into the `effects` bag

@@ -16,7 +16,10 @@ import { MIDS_UIDS as REBIRTH } from './datasets/rebirth/generated/mids-uids';
 import { MIDS_UIDS as THUNDERSPY } from './datasets/thunderspy/generated/mids-uids';
 
 // Mirrors DATASET_SOURCES in tools/mids-oracle/emit_mids_uids.py. Brainstorm is
-// Homecoming's open beta and shares its enhancement namespace.
+// Homecoming's open beta and shares its enhancement namespace. `Thunderspy/EnhDB.mhd`
+// is Mids' GENERIC database under a Thunderspy name — Mids has never carried a
+// Thunderspy one — so this gate pins a file whose provenance it cannot see
+// (DATA-GAP MBDEXPORT-2).
 const SOURCES = [
   ['homecoming', HOMECOMING, 'MidsReborn-master/MidsReborn/Databases/Homecoming/EnhDB.mhd'],
   ['brainstorm', BRAINSTORM, 'MidsReborn-master/MidsReborn/Databases/Homecoming/EnhDB.mhd'],

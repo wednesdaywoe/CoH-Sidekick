@@ -34,7 +34,17 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file_
 MIDS_DB = os.path.join(REPO_ROOT, "MidsReborn-master", "MidsReborn", "Databases")
 
 # Which EnhDB each dataset reads. Brainstorm is Homecoming's open beta and
-# shares HC's enhancement namespace; Thunderspy ships its own.
+# shares HC's enhancement namespace.
+#
+# THUNDERSPY IS NOT A MIDS DATABASE. Mids Reborn ships Generic, Homecoming and
+# Rebirth, and has never supported Thunderspy (user, 2026-09-09). The vendored
+# `Thunderspy/EnhDB.mhd` this reads is byte-identical to Mids' own GENERIC
+# database — the closest stand-in there is, not the fork's own file, and this
+# comment used to claim otherwise. It gets 210 of Thunderspy's 213 sets because
+# they are shared CoH sets; the three it cannot get (`kb` and the two Primalist
+# ATOs) exist in no Mids database at all. See DATA-GAP MBDEXPORT-2 — the
+# staleness gate below pins this file's sha256, which grades freshness and is
+# blind to which database it is.
 DATASET_SOURCES = {
     "homecoming": os.path.join(MIDS_DB, "Homecoming", "EnhDB.mhd"),
     "brainstorm": os.path.join(MIDS_DB, "Homecoming", "EnhDB.mhd"),
