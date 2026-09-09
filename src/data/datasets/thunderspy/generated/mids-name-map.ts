@@ -13,6 +13,7 @@
  * Source: Mids Reborn thunderspy database 2026.3.346 (sha256 1bbc83348369…)
  * Powersets paired with the export: 3441 of 3535. Remapped names: 54.
  * Reverse rows for the writer: 54.
+ * Powerset paths for the writer: 0 — NONE. The thunderspy names dump predates MBDEXPORT-6 and carries folded powerset keys, so Mids' own spelling is not in it. Re-run emit_mids_names.py against that fork's I12.mhd to fill this in.
  * Mids powersets with no counterpart here: 94 — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset thunderspy
@@ -313,3 +314,24 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
     "sunder_bone": "Perdition"
   }
 };
+
+/**
+ * OUR `group.powerset` (lower-cased) → Mids' own spelling of it, for the .mbd writer
+ * (DATA-GAP MBDEXPORT-6).
+ *
+ * The first two segments of a `PowerName`, read out of Mids' database rather than
+ * composed. The writer used to build them from an archetype table and the powerset's ICON
+ * filename, and neither is a read of what Mids calls the set: a Rebirth Guardian went out
+ * as `Guardian_Comp.Electric_Armor` where Mids holds
+ * `Guardian_Composition.Atmospheric_Composition`, with all nine power names already
+ * right inside it.
+ *
+ * Case is load-bearing here for the same reason it is in `MIDS_NAME_REVERSE`, and it is
+ * not reconstructible: `Epic.VEAT_Mace_Mastery`, `Pool.Force_of_Will` and
+ * `Epic.Dark_Mastery_TankBrute` are none of them what title-casing produces.
+ *
+ * A set absent from this table is one this pairing could not reach. The writer reports it
+ * rather than composing a path, because Mids answers a `group.set` it cannot resolve
+ * with a blank row that still holds the power's slots.
+ */
+export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = {};

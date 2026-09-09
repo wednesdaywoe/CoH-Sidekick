@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**6 open, of 275 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
+**6 open, of 276 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
 parse, and all found by the same thing: seven real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
@@ -70,13 +70,22 @@ wrote a grade token Mids cannot parse, and MBDEXPORT-3 wrote our internal names 
 renamed the power; both are closed. MBDEXPORT-3's closure brought a census of every `PowerName` we
 write, graded against Mids' own database, and that census is where the rest of this list came from.
 
-Four of the six came out of that census, each a different way to write a name Mids cannot resolve:
-a Kheldian form path (MBDEXPORT-5), a powerset path derived from an icon (MBDEXPORT-6), a bare
+Four rows came out of that census, each a different way to write a name Mids cannot resolve: a
+Kheldian form path (MBDEXPORT-5), a powerset path derived from an icon (MBDEXPORT-6), a bare
 incarnate slug (MBDEXPORT-7), a rename the join is too tight to see (MBDEXPORT-8). MBDEXPORT-2 is
 the fifth kind, a fork Mids has never had.
 
-All of them are silent. Mids answers a name it cannot bind with a blank row that keeps the slots,
-and we answer with `warnings: []`.
+MBDEXPORT-6 closed the same day it opened, and it changed what the rest of the list is. Both
+segments of the path are read out of Mids' database now instead of composed from an icon, which
+took the Guardian and the Night Widow from 70 lost enhancements to none — and it un-blinded the
+census itself, which had been folding those two segments to lower case and could not see a
+wrong-CASE path. What the closure left behind is MBDEXPORT-9, its own residual, measured: 19
+Homecoming sets the pairing cannot reach, mostly epic pools Mids names the other way round.
+
+The rest are still silent. Mids answers a name it cannot bind with a blank row that keeps the
+slots, and we answer with `warnings: []`. MBDEXPORT-6 put the first crack in that: a powerset it
+cannot name in Mids' namespace now says so, on every fork, and Thunderspy's seven are the first
+warnings that build has ever produced.
 
 The parser frontier itself is clear — EXPRPUNT-1 opened and closed on 2026-09-08, and
 [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9 — so
@@ -721,21 +730,33 @@ measurement went, and where a closure for the residual belongs too.
   table, not an inversion, because the forward map folds away the case and the trailing space that
   Mids' `PiDFromUidPower` compares on — and a corpus-wide census against Mids' own `.mhd` grades
   every name we write
-- [ ] **MBDEXPORT-6** — `buildPowersetPath` composes Mids' `group.set` from `AT_TABLES` plus the
-  powerset's ICON filename, and neither is a read of what Mids calls the set. The Rebirth Guardian
-  exports `Guardian_Comp.Electric_Armor` where Mids holds `Guardian_Composition.Atmospheric_Composition`
-  — with our nine power names already correct inside it — and the Night Widow writes
-  `Teamwork.Teamwork` / `Widow_Training.Widow_Training` for Mids' `Teamwork.Widow_Teamwork` /
-  `Widow_Training.Night_Widow_Training`. 70 of 86 enhancements across the two, `warnings: []`
-  **Goal** — the powerset path we write is the one Mids carries, read rather than derived.
-  **Done when** — the powerset pairing `convert-mids-name-map.cjs` already computes for all 3,459
-  sets is emitted as ours → Mids' literal `group.set` and `buildPowersetPath` resolves through it;
-  a set with no Mids counterpart is reported rather than written at a guessed path;
-  `emit_mids_names.py` stops folding those two segments to lower case, since the gate is blind to a
-  wrong-CASE path until it does; and the census reaches 0 unbound for both builds.
-  **Check** — `npx vitest run src/utils/mids-import/mbd-export-names.test.ts` pins the Guardian at
-  9 unbound / 36 enhancements and the Widow at 9 / 34 while this row is open. Movement without this
-  row closing is the writer regressing, not the fix landing.
+- [x] **MBDEXPORT-6** — `buildPowersetPath` composed Mids' `group.set` from `AT_TABLES` plus the
+  powerset's ICON filename, so the Rebirth Guardian went out as `Guardian_Comp.Electric_Armor`
+  where Mids holds `Guardian_Composition.Atmospheric_Composition` with our nine power names already
+  correct inside it, and the Night Widow wrote the Blood Widow's real sets for hers — 70 of 86
+  enhancements across the two, `warnings: []`; both segments are a generated lookup now
+  (`MIDS_POWERSET_PATH`, minted by the pairing that already answered the name half), the oracle
+  keeps Mids' literal case because none of `Epic.VEAT_Mace_Mastery`, `Pool.Force_of_Will` or
+  `Guardian_Composition.Stone Composition` survives title-casing, each power resolves the set that
+  actually holds it rather than the one the build picked from — Mids' own file spreads a Night
+  Widow across four — and an unpaired set is reported instead of going out in silence
+- [ ] **MBDEXPORT-9** — MBDEXPORT-6's reading is only as wide as the pairing behind it, and
+  `pairPowersets` joins on the set segment, which Mids spells the other way round for an epic pool:
+  ours is `Epic.Blaster_Dark_Mastery` where Mids has `Epic.Dark_Mastery_Blaster`, contracted to
+  `Epic.Dark_Mastery_TankBrute` where archetypes share it and dropped entirely for
+  `Epic.Electricity_Mastery`. 19 sets on Homecoming, 17 on Rebirth, 28 on Brainstorm, 386 on
+  Thunderspy (that fork's own, MBDEXPORT-2's). Reported, no longer silent, still unbindable
+  **Goal** — a set a build can hold either resolves to Mids' own path or is a set Mids demonstrably
+  does not have.
+  **Done when** — the qualifier inversion is closed by a rule derived from Mids' naming rather than
+  a table of pairs, corroborated by a shared power the way the segment pass already is, with the
+  pairs it mints listed; `Pool.Fitness` against Mids' `Inherent.Fitness` is decided or declared the
+  inherent writer's business; and every set still unpaired is attributed — Mids' database lags the
+  fork (Shock Therapy is Defender-only there), or the fork has no Mids database — so what stands is
+  a roster, not a remainder.
+  **Check** — `npx vitest run src/utils/mids-import/name-map.test.ts` pins the four counts at
+  19 / 17 / 386 / 28. A count falling while this row is open means the pairing widened without the
+  mints being reviewed, which is the join MBDIMPORT-2's header argues at length against.
 - [ ] **MBDEXPORT-7** — every incarnate exports as a bare slug. `processIncarnateEntry` reads Mids'
   `Incarnate.Alpha.Musculature_Radial_Paragon` and stores `powerName: power.id`, our own
   `musculature_radial_paragon`; the writer emits that verbatim under a comment asserting the field
@@ -802,9 +823,11 @@ measurement went, and where a closure for the residual belongs too.
   for a fork Mids does not carry rather than falling into the Homecoming else-branch; and the three
   Thunderspy sets with no Mids UID (`kb` and the two Primalist ATOs) are reported on export rather
   than shipped as empty slots.
-  **Check** — `npx vitest run src/utils/mids-export-thunderspy.test.ts` pins all four halves of
-  today's behaviour on a real Thunderspy build. Pins, not approval: closing this row changes them
-  deliberately, and any other movement reds.
+  **Check** — `npx vitest run src/utils/mids-export-thunderspy.test.ts` pins today's behaviour on a
+  real Thunderspy build. Pins, not approval: closing this row changes them deliberately, and any
+  other movement reds. One of the four moved already — MBDEXPORT-6 made the writer report the seven
+  powersets it cannot name in Mids, since this fork's names dump carries no such spelling — and the
+  gate asserts the other three are still silent.
 - [x] **PARTSTAT-2** — the Dominator `Domination` node in `archetypes.json` hand-copied three values the export owns and had drifted, stating `recharge` 200 on the fork whose export says 180; TS gained the name-join to the `Inherent.Inherent` twin that Rust already had, the card's window is now the longest span its caster-side atoms hold open rather than the bag's modal vote, and the four hand-authored `effects` blocks are gone — atom-less bags 4 → 0
 
 - [x] **PARTSTAT-1** — four converters wrote a power's execution stats into the `effects` bag

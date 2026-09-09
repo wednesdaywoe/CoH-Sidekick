@@ -3,16 +3,19 @@
  * This is the reverse of src/utils/mids-import/.
  */
 
-import type { Build, SelectedPower, Enhancement, IOSetEnhancement, GenericIOEnhancement, SpecialEnhancement, OriginEnhancement } from '@/types';
+import type { Build, SelectedPower, Powerset, Enhancement, IOSetEnhancement, GenericIOEnhancement, SpecialEnhancement, OriginEnhancement } from '@/types';
 import { INCARNATE_SLOT_ORDER } from '@/types';
 import type { MbdFile, MbdPowerEntry, MbdSlotEntry, MbdEnhancement } from '@/utils/mids-import/types';
-import { AT_TABLES } from '@/data/at-tables';
-import { getPowerset } from '@/data/powersets';
+import { getPowerset, getPowersetsForArchetype } from '@/data/powersets';
 import { getPowerPool } from '@/data/power-pools';
 import { getEpicPool } from '@/data/epic-pools';
 import { getIOSet } from '@/data/io-sets';
 import { getMidsGenericIOUid, getMidsIOSetPieceUid, getMidsOriginUid, getMidsSpecialUid } from '@/data/mids-uids';
-import { midsNameForExport } from '@/data/mids-name-map';
+import {
+  midsNameForExport,
+  midsPowersetPathForExport,
+  midsPowersetPathsKnown,
+} from '@/data/mids-name-map';
 import { MIDS_STAT_MAP, MIDS_ORIGIN_TIER } from '@/utils/mids-import/mappers';
 import { getInherentPowers, getArchetypeInherentPowers, POWER_PICK_LEVELS, getPicksGrantedAtLevel } from '@/data';
 import { computeExportSlotLevels, type SlotLevel } from '@/utils/slot-levels';
@@ -70,72 +73,25 @@ function midsGenericIOSuffix(stat: string): string | null {
 // HELPERS
 // ============================================
 
-/** Convert a lowercase_underscore string to Title_Case */
-function titleCase(str: string): string {
-  return str
-    .split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('_');
-}
+type SetCategory = 'primary' | 'secondary' | 'pool' | 'epic';
 
 /**
- * Get the Mids internal name for a powerset from its icon.
- * Icon "willpower_set.png" → "Willpower"
- * Icon "thermal_radiation_set.ico" → "Thermal_Radiation"
- * Rebirth and HC datasets store icons as .ico; the import mapper strips
- * either extension, so strip any extension here to keep the round-trip.
- */
-function getMidsSetName(icon: string): string {
-  const stem = icon
-    .replace(/_set\.(?:png|ico|jpg|gif)$/, '')
-    .replace(/\.(?:png|ico|jpg|gif)$/, '');
-  return titleCase(stem);
-}
-
-/**
- * Normalize an AT category prefix to Title_Case for Mids compatibility.
- * "Corruptor_BUFF" → "Corruptor_Buff", "Brute_DEFENSE" → "Brute_Defense"
- */
-function normalizeCategoryPrefix(prefix: string): string {
-  return titleCase(prefix.toLowerCase());
-}
-
-/**
- * Build the Mids powerset path (first two segments):
- * e.g., "Tanker_Defense.Willpower"
- */
-function buildPowersetPath(
-  archetypeId: string,
-  powersetId: string,
-  category: 'primary' | 'secondary',
-): string {
-  const at = AT_TABLES[archetypeId];
-  const rawPrefix = category === 'primary' ? at?.primaryCategory : at?.secondaryCategory;
-  if (!rawPrefix) return '';
-
-  const prefix = normalizeCategoryPrefix(rawPrefix);
-
-  const powerset = getPowerset(powersetId);
-  if (!powerset?.icon) return '';
-
-  const midsName = getMidsSetName(powerset.icon);
-  return `${prefix}.${midsName}`;
-}
-
-/**
- * The `group.powerset` this power belongs to, in OUR namespace — the key the name map is
- * keyed by (MBDIMPORT-2), and the one thing the reverse lookup below cannot guess.
+ * One powerset in the two namespaces a `PowerName` needs (MBDEXPORT-3, MBDEXPORT-6).
  *
- * Taken from the power's own `fullName` first, exactly as the import side's
- * `powersetKeysOf` does, so both directions read the table through the same key. The
- * powerset definition's `setPath` is the fallback, because the .skif writer prunes
- * `fullName` off a stored power.
+ * A Mids `PowerName` is `group.set.power`. `ourKey` is the first two segments as THIS
+ * dataset spells them, and it is the key both name tables are keyed by; `path` is the same
+ * two segments as MIDS spells them, which is what actually goes in the file.
  */
-function ourPowersetKey(
-  power: { internalName?: string; fullName?: string },
-  powersetId: string,
-  category: 'primary' | 'secondary' | 'pool' | 'epic',
-): string {
+interface MidsSet {
+  ourKey: string;
+  path: string;
+}
+
+/**
+ * The `group.powerset` this powerset has in OUR namespace — the key the name map is keyed
+ * by (MBDIMPORT-2), and the one thing the reverse lookups below cannot guess.
+ */
+function ourPowersetKey(powersetId: string, category: SetCategory): string {
   // Pools and epics carry no `setPath` on their runtime type, so their key comes off
   // their own first power — which is how `powersetKeysOf` reads them on the import side.
   const setPath = category === 'pool'
@@ -143,9 +99,98 @@ function ourPowersetKey(
     : category === 'epic'
       ? getEpicPool(powersetId)?.powers.find((p) => p.fullName)?.fullName
       : getPowerset(powersetId)?.setPath;
-  const path = power.fullName ?? setPath ?? '';
-  const segments = path.split('.');
+  const segments = (setPath ?? '').split('.');
   return segments.length >= 2 ? `${segments[0]}.${segments[1]}` : '';
+}
+
+/** What this planner calls the set, for a warning a user has to act on. */
+function powersetLabel(powersetId: string, category: SetCategory): string {
+  const set = category === 'pool'
+    ? getPowerPool(powersetId)
+    : category === 'epic'
+      ? getEpicPool(powersetId)
+      : getPowerset(powersetId);
+  return set?.name || powersetId;
+}
+
+/**
+ * A powerset resolved into Mids' namespace, or reported (DATA-GAP MBDEXPORT-6).
+ *
+ * The path used to be COMPOSED — an archetype table for the group and the powerset's icon
+ * filename for the set — and neither is a read of what Mids calls the set. A Rebirth
+ * Guardian went out as `Guardian_Comp.Electric_Armor` where Mids holds
+ * `Guardian_Composition.Atmospheric_Composition`, with all nine power names already right
+ * inside it; every power in the set arrived as a blank row still holding its slots.
+ *
+ * So it is looked up now, in the pairing the name map already computes. Where the lookup
+ * misses, ours goes out — it is the game's own spelling, which is what Mids built its
+ * database from, so it is the best available guess and often right — and the guess is
+ * REPORTED, because the failure mode being fixed here is a silent one.
+ */
+function resolveMidsSet(ourKey: string, label: string, warnings: MidsExportWarning[]): MidsSet {
+  if (!ourKey) return { ourKey: '', path: '' };
+
+  const known = midsPowersetPathForExport(ourKey);
+  if (known) return { ourKey, path: known };
+
+  warnings.push({
+    power: label,
+    slot: 0,
+    detail: midsPowersetPathsKnown()
+      // The pairing ran and reached nothing: Mids has no set that answers to this one.
+      ? `Mids has no powerset paired with ${ourKey} — its powers will open as empty rows`
+      // No Mids database has been read for this fork at all, which is a different fact
+      // and sends the reader somewhere else (MBDEXPORT-2).
+      : `no Mids database has been read for this fork, so ${ourKey} is our own spelling`,
+  });
+  return { ourKey, path: ourKey };
+}
+
+/**
+ * Resolve each `group.set` once per build, reporting each unpaired one once.
+ *
+ * The memo is not an optimisation: without it an unpaired set warns once per power in it,
+ * and the report a user reads turns a single missing pairing into eighteen lines.
+ */
+function setResolver(warnings: MidsExportWarning[]): (ourKey: string, label: string) => MidsSet {
+  const seen = new Map<string, MidsSet>();
+  return (ourKey, label) => {
+    const hit = seen.get(ourKey);
+    if (hit) return hit;
+    const set = resolveMidsSet(ourKey, label, warnings);
+    seen.set(ourKey, set);
+    return set;
+  };
+}
+
+/**
+ * The powerset that actually holds this power, which is not always the one the build
+ * picked it from.
+ *
+ * An Arachnos Widow's branch powers live in their own sets — `Widow_Training.Night_Widow_Training`
+ * and `Teamwork.Widow_Teamwork` — while the build holds `Widow_Training.Widow_Training`
+ * and `Teamwork.Teamwork`, and Mids writes every power under its OWN set: the corpus Night
+ * Widow, written by Mids itself, spreads 23 powers across four of them. Taking the build's
+ * set for all of them is what cost that file nine entries and 34 enhancements.
+ *
+ * The build's own set answers first, so nothing changes for the archetypes that have no
+ * branches. A power no single set in the archetype claims falls back to it too, because a
+ * guess between two sets is not a decode — and the path lookup reports what it cannot pair.
+ */
+function owningPowerset(
+  power: { name: string; internalName?: string },
+  powersetId: string,
+  archetypeId: string,
+): { id: string; set: Powerset | undefined } {
+  const internalName = power.internalName || power.name;
+  const own = getPowerset(powersetId);
+  if (own?.powers.some((p) => p.internalName === internalName)) return { id: powersetId, set: own };
+
+  const holders = getPowersetsForArchetype(archetypeId)
+    .filter((set) => set.powers.some((p) => p.internalName === internalName));
+  return holders.length === 1
+    ? { id: holders[0].id ?? powersetId, set: holders[0] }
+    : { id: powersetId, set: own };
 }
 
 /**
@@ -176,47 +221,62 @@ function rotateFullName(fullName: string, powersetKey: string): string {
 }
 
 /**
- * Build the full Mids PowerName for a power.
- * For pool/epic powers: use fullName if available.
- * For primary/secondary: {Category}.{SetName}.{InternalName}
+ * This power's own last segment, in OUR namespace.
  *
- * A pool or epic `fullName` is OURS, not Mids' — the two agree on most names, which is why
- * it reads as already-Mids-shaped and why the difference stayed invisible. So every branch
- * puts its power segment through the reverse name map on the way out; `pool.flight` and
- * `epic.martial_mastery` both carry rotations.
+ * `fullName` first — a stored power carries it, and it is the segment the export itself
+ * uses — then the set definition's copy, because the .skif writer prunes `fullName` off a
+ * stored power, and `internalName` last.
+ */
+function ourPowerSegment(
+  power: { name: string; internalName?: string; fullName?: string },
+  powersetId: string,
+  category: SetCategory,
+): string {
+  const def = category === 'pool'
+    ? getPowerPool(powersetId)?.powers.find((p) => p.internalName === power.internalName)
+    : category === 'epic'
+      ? getEpicPool(powersetId)?.powers.find((p) => p.internalName === power.internalName)
+      : undefined;
+  const fullName = power.fullName ?? def?.fullName;
+  const segments = fullName?.split('.') ?? [];
+  if (segments.length >= 3) return segments.slice(2).join('.');
+  return power.internalName || power.name.replace(/\s+/g, '_');
+}
+
+/**
+ * The full Mids `PowerName` for a power: `set.path` + this power's name in Mids' spelling.
+ *
+ * Both halves are lookups now and neither is a transform. A pool or epic `fullName` is
+ * OURS, not Mids', and the two agree on most names — which is why it read as
+ * already-Mids-shaped, and why `Pool.Force_of_Will` against a title-cased
+ * `Pool.Force_Of_Will` stayed invisible.
  */
 function buildPowerName(
   power: { name: string; internalName?: string; fullName?: string },
   powersetId: string,
-  archetypeId: string,
-  category: 'primary' | 'secondary' | 'pool' | 'epic',
+  set: MidsSet,
+  category: SetCategory,
 ): string {
-  const powersetKey = ourPowersetKey(power, powersetId, category);
+  const midsName = midsPowerSegment(set.ourKey, ourPowerSegment(power, powersetId, category));
+  return set.path ? `${set.path}.${midsName}` : midsName;
+}
 
-  // Pool and epic powers carry a fullName of their own; only its tail needs rotating.
-  if (power.fullName && (power.fullName.startsWith('Pool.') || power.fullName.startsWith('Epic.'))) {
-    return rotateFullName(power.fullName, powersetKey);
-  }
-
-  // For pool powers without fullName, try looking up from pool definition
-  if (category === 'pool') {
-    const pool = getPowerPool(powersetId);
-    const def = pool?.powers.find((p) => p.internalName === power.internalName);
-    if (def?.fullName) return rotateFullName(def.fullName, powersetKey);
-  }
-
-  // For epic powers without fullName, try looking up from epic definition
-  if (category === 'epic') {
-    const epic = getEpicPool(powersetId);
-    const def = epic?.powers.find((p) => p.internalName === power.internalName);
-    if (def?.fullName) return rotateFullName(def.fullName, powersetKey);
-  }
-
-  // Primary/secondary: construct from AT category + set name + power internal name
-  const setPath = buildPowersetPath(archetypeId, powersetId, category as 'primary' | 'secondary');
-  const internalName = power.internalName || power.name.replace(/\s+/g, '_');
-  const midsName = midsPowerSegment(powersetKey, internalName);
-  return setPath ? `${setPath}.${midsName}` : midsName;
+/** The set a chosen power is written under, branch sets included. See `owningPowerset`. */
+function setForPower(
+  power: SelectedPower,
+  powersetId: string,
+  archetypeId: string,
+  category: SetCategory,
+  fallback: MidsSet,
+  resolve: (ourKey: string, label: string) => MidsSet,
+): { powersetId: string; set: MidsSet } {
+  if (category === 'pool' || category === 'epic') return { powersetId, set: fallback };
+  const owner = owningPowerset(power, powersetId, archetypeId);
+  if (owner.id === powersetId) return { powersetId, set: fallback };
+  return {
+    powersetId: owner.id,
+    set: resolve(ourPowersetKey(owner.id, category), owner.set?.name || owner.id),
+  };
 }
 
 // ============================================
@@ -258,8 +318,16 @@ function buildRelativeLevel(boost?: number): string {
  * hands the user a build with holes in it and no way to know why. We refuse to
  * guess and report the hole instead.
  */
+/**
+ * One thing in the build that could not be written under a name Mids will resolve.
+ *
+ * Mids answers an unknown name with a blank row that keeps the slots, so an unreported
+ * one is a build the user gets back with holes and no explanation.
+ */
 export interface MidsExportWarning {
+  /** The power, or the powerset, this is about — whatever the user sees it called. */
   power: string;
+  /** 1-based slot, or 0 when the subject is the power or powerset itself. */
   slot: number;
   detail: string;
 }
@@ -604,45 +672,23 @@ export function exportToMidsWithReport(
 
   // Build PowerSets array: always 8 entries
   // [0]=primary, [1]=secondary, [2]="" (reserved), [3-6]=pools, [7]=epic
-  const primaryPath = build.primary.id
-    ? buildPowersetPath(archetypeId, build.primary.id, 'primary')
-    : '';
-  const secondaryPath = build.secondary.id
-    ? buildPowersetPath(archetypeId, build.secondary.id, 'secondary')
-    : '';
+  // Each set resolved ONCE, so the header array and every `PowerName` under it are the
+  // same string and an unpaired set is reported once rather than once per power.
+  const blankSet: MidsSet = { ourKey: '', path: '' };
+  const resolve = setResolver(warnings);
+  const resolveSet = (id: string, category: SetCategory) =>
+    resolve(ourPowersetKey(id, category), powersetLabel(id, category));
 
-  // Collect pool paths (up to 4)
-  const poolPaths: string[] = [];
-  for (const pool of build.pools) {
-    const poolDef = getPowerPool(pool.id);
-    const defPower = poolDef?.powers[0];
-    const fullName = defPower?.fullName || (pool.powers[0] as { fullName?: string } | undefined)?.fullName;
-    if (fullName && fullName.startsWith('Pool.')) {
-      const parts = fullName.split('.');
-      poolPaths.push(`${parts[0]}.${parts[1]}`);
-    } else {
-      poolPaths.push(`Pool.${titleCase(pool.id)}`);
-    }
-  }
+  const primary = build.primary.id ? resolveSet(build.primary.id, 'primary') : blankSet;
+  const secondary = build.secondary.id ? resolveSet(build.secondary.id, 'secondary') : blankSet;
+  const pools = build.pools.map((pool) => resolveSet(pool.id, 'pool'));
+  const epic = build.epicPool ? resolveSet(build.epicPool.id, 'epic') : blankSet;
+
+  const poolPaths = pools.map((pool) => pool.path);
   // Pad to exactly 4 pool slots
   while (poolPaths.length < 4) poolPaths.push('');
 
-  // Epic path: derive from first epic power's fullName for correct Mids naming
-  let epicPath = '';
-  if (build.epicPool) {
-    const epicDef = getEpicPool(build.epicPool.id);
-    const firstEpicPower = epicDef?.powers[0];
-    const fullName = firstEpicPower?.fullName
-      || (build.epicPool.powers[0] as { fullName?: string } | undefined)?.fullName;
-    if (fullName && fullName.startsWith('Epic.')) {
-      const parts = fullName.split('.');
-      epicPath = `${parts[0]}.${parts[1]}`;
-    } else {
-      epicPath = `Epic.${titleCase(build.epicPool.id)}`;
-    }
-  }
-
-  const powerSets = [primaryPath, secondaryPath, '', ...poolPaths, epicPath];
+  const powerSets = [primary.path, secondary.path, '', ...poolPaths, epic.path];
 
   // Collect the chosen powers, then lay them out along the pick schedule —
   // Mids reads this array positionally, so grouping by powerset scrambles the
@@ -651,10 +697,12 @@ export function exportToMidsWithReport(
   const collect = (
     powers: SelectedPower[],
     powersetId: string,
-    category: 'primary' | 'secondary' | 'pool' | 'epic',
+    set: MidsSet,
+    category: SetCategory,
   ) => {
     for (const power of powers) {
-      const powerName = buildPowerName(power, powersetId, archetypeId, category);
+      const owner = setForPower(power, powersetId, archetypeId, category, set, resolve);
+      const powerName = buildPowerName(power, owner.powersetId, owner.set, category);
       chosen.push({
         level: power.level,
         entry: buildPowerEntry(power, powerName, category, slotLevels, warnings),
@@ -662,10 +710,10 @@ export function exportToMidsWithReport(
     }
   };
 
-  collect(build.primary.powers, build.primary.id || '', 'primary');
-  collect(build.secondary.powers, build.secondary.id || '', 'secondary');
-  for (const pool of build.pools) collect(pool.powers, pool.id, 'pool');
-  if (build.epicPool) collect(build.epicPool.powers, build.epicPool.id, 'epic');
+  collect(build.primary.powers, build.primary.id || '', primary, 'primary');
+  collect(build.secondary.powers, build.secondary.id || '', secondary, 'secondary');
+  build.pools.forEach((pool, i) => collect(pool.powers, pool.id, pools[i], 'pool'));
+  if (build.epicPool) collect(build.epicPool.powers, build.epicPool.id, epic, 'epic');
 
   const powerEntries: MbdPowerEntry[] = orderByPickSchedule(chosen);
 

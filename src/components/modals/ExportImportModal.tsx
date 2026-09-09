@@ -1688,15 +1688,18 @@ export function ExportImportModal({ isOpen, onClose }: ExportImportModalProps) {
                 {midsExportWarnings.length > 0 && (
                   <div className="rounded border border-amber-600/50 bg-amber-950/30 p-3 text-xs">
                     <p className="font-semibold text-amber-300">
-                      {midsExportWarnings.length} enhancement{midsExportWarnings.length === 1 ? '' : 's'} could not be written to the .mbd
+                      {midsExportWarnings.length} thing{midsExportWarnings.length === 1 ? '' : 's'} could not be named for Mids
                     </p>
                     <p className="mt-1 text-amber-200/80">
-                      Mids has no name for these, so those slots will open empty. Everything else exported normally.
+                      Mids opens a name it does not know as a blank row that still holds the slots, so
+                      these are the parts of the build that may arrive empty. Everything else exported normally.
                     </p>
                     <ul className="mt-2 space-y-0.5 text-amber-200/70">
                       {midsExportWarnings.map((w, i) => (
+                        /* `slot: 0` is a warning about the power or powerset itself rather than
+                           about one of its enhancements — see MidsExportWarning. */
                         <li key={`${w.power}-${w.slot}-${i}`}>
-                          {w.power} slot {w.slot}: {w.detail}
+                          {w.slot > 0 ? `${w.power} slot ${w.slot}` : w.power}: {w.detail}
                         </li>
                       ))}
                     </ul>

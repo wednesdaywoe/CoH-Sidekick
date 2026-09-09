@@ -84,12 +84,26 @@ def main(argv=None) -> int:
     name, version = read_header(buf)
     powers, total = read_powers(buf)
 
+    # Keyed by Mids' OWN spelling of `group.set`, case and all. Folding it here is what
+    # MBDEXPORT-6 was: the writer composes a `PowerName` out of these two segments, Mids
+    # resolves one with an ordinal `==`, and a lower-cased path binds to nothing. Two
+    # spellings that differ only in case would collide — neither database has such a pair,
+    # and the assert below says so rather than leaving it to hold by luck.
     sets: dict[str, list] = collections.defaultdict(list)
+    folded: dict[str, str] = {}
     for p in powers:
         group, pset = p["group"], p["set"]
         if not group or not pset:
             continue
-        sets[f"{group}.{pset}".lower()].append([p["power"], p.get("display") or "", p.get("level")])
+        key = f"{group}.{pset}"
+        first = folded.setdefault(key.lower(), key)
+        if first != key:
+            print(
+                f"error: {args.dataset} spells one powerset two ways: {first!r} and {key!r}",
+                file=sys.stderr,
+            )
+            return 3
+        sets[key].append([p["power"], p.get("display") or "", p.get("level")])
 
     payload = {
         "dataset": args.dataset,
@@ -97,7 +111,11 @@ def main(argv=None) -> int:
         "version": version,
         "sha256": hashlib.sha256(buf).hexdigest(),
         "powerCount": total,
-        "powersets": {k: sets[k] for k in sorted(sets)},
+        # The marker a reader checks before trusting a key's case. A dump written before
+        # MBDEXPORT-6 carries folded keys and no marker, and its case is unrecoverable
+        # without the `.mhd` — which is a different answer from "Mids spells it that way".
+        "powersetKeys": "literal",
+        "powersets": {k: sets[k] for k in sorted(sets, key=str.lower)},
     }
 
     with open(out_path, "w", encoding="utf-8") as fh:

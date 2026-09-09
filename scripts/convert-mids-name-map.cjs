@@ -150,6 +150,24 @@ const midsNames = JSON.parse(fs.readFileSync(NAMES_PATH, 'utf-8'));
 const exportSets = readExportPowersets();
 
 /**
+ * Mids' powerset keys, folded for the join and kept literal for the writer (MBDEXPORT-6).
+ *
+ * The pairing below compares spellings across two namespaces, so it has to fold. The .mbd
+ * WRITER composes a `PowerName` out of these two segments and Mids resolves one with an
+ * ordinal `==`, so it needs the case back — `Epic.VEAT_Mace_Mastery` and
+ * `Pool.Force_of_Will` are not what title-casing the folded key produces.
+ *
+ * A dump emitted before MBDEXPORT-6 carries folded keys and no marker. Its case is not
+ * recoverable from the JSON, and guessing it would write a path that binds to nothing
+ * while looking resolved, so the path table is withheld for that fork and said out loud.
+ */
+const KEYS_ARE_LITERAL = midsNames.powersetKeys === 'literal';
+const midsSets = new Map();
+for (const [key, rows] of Object.entries(midsNames.powersets || {})) {
+  midsSets.set(key.toLowerCase(), { path: KEYS_ARE_LITERAL ? key : null, rows });
+}
+
+/**
  * A powerset's own segment, separators and case folded away.
  *
  * Wider than `normalizeDisplay` on purpose: this compares INTERNAL names, where Mids'
@@ -184,7 +202,7 @@ function corroboration(midsPowers, ours) {
 function pairPowersets() {
   const paired = [];
   const unmatched = [];
-  const midsKeys = Object.keys(midsNames.powersets || {});
+  const midsKeys = [...midsSets.keys()];
 
   const claimedOurs = new Set();
   const residual = [];
@@ -225,7 +243,7 @@ function pairPowersets() {
       continue;
     }
     const ourKey = candidates[0];
-    const shared = corroboration(midsNames.powersets[midsKey], exportSets.get(ourKey));
+    const shared = corroboration(midsSets.get(midsKey).rows, exportSets.get(ourKey));
     if (shared === 0) {
       unmatched.push({ midsKey, why: `uncorroborated — shares no power with ${ourKey}` });
       continue;
@@ -246,7 +264,7 @@ const stats = {
 };
 
 for (const { midsKey, ourKey } of paired) {
-  const midsPowers = midsNames.powersets[midsKey];
+  const midsPowers = midsSets.get(midsKey).rows;
   const ours = exportSets.get(ourKey);
 
   // Display → our powers. A list, not a single entry: a set with two powers under one
@@ -322,6 +340,24 @@ for (const { midsKey, ourKey } of paired) {
   }
 }
 
+/**
+ * Ours → Mids' literal `group.set`, for every paired set (MBDEXPORT-6).
+ *
+ * A separate table from `MIDS_NAME_MAP` because it covers a different population: the map
+ * carries only sets that ROTATED a power name, and the writer needs a path for every set
+ * a build can hold. Rebirth's Guardian secondaries are the shape of the defect — nine
+ * power names already correct inside a `group.set` Mids has never heard of.
+ *
+ * Only from a dump that kept Mids' case. Where it did not, the table is empty and the
+ * header below says which fork and why, because a path assembled from a folded key looks
+ * resolved and binds to nothing.
+ */
+const pathTable = {};
+for (const { midsKey, ourKey } of paired) {
+  const literal = midsSets.get(midsKey).path;
+  if (literal) pathTable[ourKey] = literal;
+}
+
 // An alias that is also a key of the map would silently steer one powerset's lookup into
 // another's rows. It cannot happen — a pair only reaches the residual pass when its Mids
 // key matched no export set — and the assert is here because "cannot happen" is how the
@@ -335,6 +371,7 @@ for (const midsKey of Object.keys(alias)) {
 const sorted = Object.fromEntries(Object.keys(map).sort().map((k) => [k, map[k]]));
 const sortedReverse = Object.fromEntries(Object.keys(reverse).sort().map((k) => [k, reverse[k]]));
 const sortedAlias = Object.fromEntries(Object.keys(alias).sort().map((k) => [k, alias[k]]));
+const sortedPaths = Object.fromEntries(Object.keys(pathTable).sort().map((k) => [k, pathTable[k]]));
 
 const source = `Mids Reborn ${namesDataset} database ${midsNames.version} `
   + `(sha256 ${String(midsNames.sha256).slice(0, 12)}…)`
@@ -353,8 +390,9 @@ const body = `/**
  * below carries those pairs so a reader holding the .mbd's own path can reach the same row.
  *
  * Source: ${source}
- * Powersets paired with the export: ${stats.shared} of ${Object.keys(midsNames.powersets || {}).length}. Remapped names: ${stats.rows}.
+ * Powersets paired with the export: ${stats.shared} of ${midsSets.size}. Remapped names: ${stats.rows}.
  * Reverse rows for the writer: ${stats.reverseRows}${stats.reverseWithdrawn.length ? `, with ${stats.reverseWithdrawn.length} withdrawn as ambiguous` : ''}.
+ * Powerset paths for the writer: ${Object.keys(sortedPaths).length}${KEYS_ARE_LITERAL ? '' : ` — NONE. The ${namesDataset} names dump predates MBDEXPORT-6 and carries folded powerset keys, so Mids' own spelling is not in it. Re-run emit_mids_names.py against that fork's I12.mhd to fill this in.`}
  * Mids powersets with no counterpart here: ${unmatched.length} — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset ${datasetId}
@@ -385,6 +423,27 @@ export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = ${JSON.stri
  * reports it instead of picking.
  */
 export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, string>>>> = ${JSON.stringify(sortedReverse, null, 2)};
+
+/**
+ * OUR \`group.powerset\` (lower-cased) → Mids' own spelling of it, for the .mbd writer
+ * (DATA-GAP MBDEXPORT-6).
+ *
+ * The first two segments of a \`PowerName\`, read out of Mids' database rather than
+ * composed. The writer used to build them from an archetype table and the powerset's ICON
+ * filename, and neither is a read of what Mids calls the set: a Rebirth Guardian went out
+ * as \`Guardian_Comp.Electric_Armor\` where Mids holds
+ * \`Guardian_Composition.Atmospheric_Composition\`, with all nine power names already
+ * right inside it.
+ *
+ * Case is load-bearing here for the same reason it is in \`MIDS_NAME_REVERSE\`, and it is
+ * not reconstructible: \`Epic.VEAT_Mace_Mastery\`, \`Pool.Force_of_Will\` and
+ * \`Epic.Dark_Mastery_TankBrute\` are none of them what title-casing produces.
+ *
+ * A set absent from this table is one this pairing could not reach. The writer reports it
+ * rather than composing a path, because Mids answers a \`group.set\` it cannot resolve
+ * with a blank row that still holds the power's slots.
+ */
+export const MIDS_POWERSET_PATH: Readonly<Record<string, string>> = ${JSON.stringify(sortedPaths, null, 2)};
 `;
 
 if (dryRun) {
@@ -397,9 +456,17 @@ if (dryRun) {
 console.error(
   `[convert-mids-name-map] ${datasetId}: ${stats.rows} remapped names across ` +
   `${Object.keys(sorted).length} powersets (of ${stats.shared} paired, ` +
-  `${Object.keys(sortedAlias).length} by alias), ${stats.reverseRows} reverse` +
+  `${Object.keys(sortedAlias).length} by alias), ${stats.reverseRows} reverse, ` +
+  `${Object.keys(sortedPaths).length} powerset paths` +
   (dryRun ? ' [dry run]' : ` -> ${path.relative(REPO_ROOT, OUTPUT_PATH)}`),
 );
+if (!KEYS_ARE_LITERAL) {
+  console.error(
+    `  no powerset paths: the ${namesDataset} names dump carries folded powerset keys and no`
+    + ` "powersetKeys": "literal" marker, so Mids' own spelling of a group.set is not in it.`
+    + ` The .mbd writer will report every set on this fork rather than guess (MBDEXPORT-6).`,
+  );
+}
 for (const line of stats.merges) console.error(`  merge: ${line}`);
 for (const line of stats.reverseWithdrawn) console.error(`  reverse-withdrawn: ${line}`);
 for (const line of stats.levelRejected) console.error(`  level-rejected: ${line}`);

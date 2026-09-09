@@ -22,21 +22,25 @@ import {
   MIDS_NAME_MAP as HOMECOMING_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as HOMECOMING_MIDS_SETS,
   MIDS_NAME_REVERSE as HOMECOMING_MIDS_REVERSE,
+  MIDS_POWERSET_PATH as HOMECOMING_MIDS_PATHS,
 } from './datasets/homecoming/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as REBIRTH_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as REBIRTH_MIDS_SETS,
   MIDS_NAME_REVERSE as REBIRTH_MIDS_REVERSE,
+  MIDS_POWERSET_PATH as REBIRTH_MIDS_PATHS,
 } from './datasets/rebirth/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as THUNDERSPY_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as THUNDERSPY_MIDS_SETS,
   MIDS_NAME_REVERSE as THUNDERSPY_MIDS_REVERSE,
+  MIDS_POWERSET_PATH as THUNDERSPY_MIDS_PATHS,
 } from './datasets/thunderspy/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as BRAINSTORM_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as BRAINSTORM_MIDS_SETS,
   MIDS_NAME_REVERSE as BRAINSTORM_MIDS_REVERSE,
+  MIDS_POWERSET_PATH as BRAINSTORM_MIDS_PATHS,
 } from './datasets/brainstorm/generated/mids-name-map';
 
 type NameMap = Readonly<Record<string, Readonly<Record<string, string>>>>;
@@ -68,6 +72,21 @@ const REVERSE_BY_DATASET: Record<DatasetId, NameMap> = {
   rebirth: REBIRTH_MIDS_REVERSE,
   thunderspy: THUNDERSPY_MIDS_REVERSE,
   brainstorm: BRAINSTORM_MIDS_REVERSE,
+};
+
+/**
+ * Ours → Mids' literal `group.set`, for the .mbd WRITER (MBDEXPORT-3's sibling, MBDEXPORT-6).
+ *
+ * The path half of a `PowerName`. `MIDS_NAME_REVERSE` above answers the third segment and
+ * this answers the first two, and they are separate tables because they cover different
+ * populations: a rotation table holds only the names that MOVED, while the writer needs a
+ * path for every set a build can hold.
+ */
+const PATH_BY_DATASET: Record<DatasetId, SetAlias> = {
+  homecoming: HOMECOMING_MIDS_PATHS,
+  rebirth: REBIRTH_MIDS_PATHS,
+  thunderspy: THUNDERSPY_MIDS_PATHS,
+  brainstorm: BRAINSTORM_MIDS_PATHS,
 };
 
 /** Mids' spelling of a powerset key → ours, for the pairs where the group segment drifted. */
@@ -161,6 +180,33 @@ export function midsNameForExport(
   ourInternalName: string,
 ): string | undefined {
   return reverseRowsFor(powersetKey)?.[ourInternalName.trim().toLowerCase()];
+}
+
+/**
+ * Mids' own spelling of OUR `group.powerset` (`guardian_comp.atmospheric_composition` →
+ * `Guardian_Composition.Atmospheric_Composition`), or undefined when nothing pairs them.
+ *
+ * Undefined does NOT mean "write ours" here, and that is the difference from
+ * `midsNameForExport` above. This table covers every paired set rather than only the ones
+ * that drifted, so a miss is a set the pairing could not reach — and Mids answers a
+ * `group.set` it cannot resolve with a blank row that keeps the power's slots. The caller
+ * says so.
+ */
+export function midsPowersetPathForExport(ourPowersetKey: string): string | undefined {
+  return PATH_BY_DATASET[getActiveDataset().id][normalizeKey(ourPowersetKey)];
+}
+
+/**
+ * Whether this fork's Mids namespace was read at all.
+ *
+ * False where the names dump this dataset was generated from predates MBDEXPORT-6 and
+ * carries powerset keys folded to lower case — Mids' own spelling is not recoverable from
+ * it, so `midsPowersetPathForExport` answers undefined for every set on the fork. That is
+ * a different fact from "Mids has no such powerset", and a warning that conflates the two
+ * sends the reader after the wrong thing.
+ */
+export function midsPowersetPathsKnown(): boolean {
+  return Object.keys(PATH_BY_DATASET[getActiveDataset().id]).length > 0;
 }
 
 /** The active dataset's whole table — for gates and audits, not for resolution. */

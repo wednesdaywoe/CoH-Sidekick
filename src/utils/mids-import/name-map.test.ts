@@ -1,26 +1,33 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { loadDataset } from '@/data/dataset';
 import { getAllPowersets, getPowerPoolIds, getPowerPool, getAllEpicPools } from '@/data';
-import { midsNameMap, midsNameRemap, midsNameForExport } from '@/data/mids-name-map';
+import {
+  midsNameMap, midsNameRemap, midsNameForExport,
+  midsPowersetPathForExport, midsPowersetPathsKnown,
+} from '@/data/mids-name-map';
 import {
   MIDS_NAME_MAP as HOMECOMING_MAP,
   MIDS_POWERSET_ALIAS as HOMECOMING_ALIAS,
   MIDS_NAME_REVERSE as HOMECOMING_REVERSE,
+  MIDS_POWERSET_PATH as HOMECOMING_PATHS,
 } from '@/data/datasets/homecoming/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as REBIRTH_MAP,
   MIDS_POWERSET_ALIAS as REBIRTH_ALIAS,
   MIDS_NAME_REVERSE as REBIRTH_REVERSE,
+  MIDS_POWERSET_PATH as REBIRTH_PATHS,
 } from '@/data/datasets/rebirth/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as THUNDERSPY_MAP,
   MIDS_POWERSET_ALIAS as THUNDERSPY_ALIAS,
   MIDS_NAME_REVERSE as THUNDERSPY_REVERSE,
+  MIDS_POWERSET_PATH as THUNDERSPY_PATHS,
 } from '@/data/datasets/thunderspy/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as BRAINSTORM_MAP,
   MIDS_POWERSET_ALIAS as BRAINSTORM_ALIAS,
   MIDS_NAME_REVERSE as BRAINSTORM_REVERSE,
+  MIDS_POWERSET_PATH as BRAINSTORM_PATHS,
 } from '@/data/datasets/brainstorm/generated/mids-name-map';
 import { findPowerByMidsName } from './mappers';
 import { importMidsBuild } from '@/utils/mids-import';
@@ -417,6 +424,101 @@ describe('Mids .mbd export — the reverse name table', () => {
       .toBe('Groundeding_Shield');
     expect(midsNameForExport('guardian_comp.atmospheric_composition', 'Charged_Armor'))
       .toBeUndefined();
+    await loadDataset('homecoming');
+  });
+});
+
+/**
+ * MBDEXPORT-6 — the two segments in FRONT of a power name.
+ *
+ * The writer used to COMPOSE them, from an archetype table for the group and the
+ * powerset's icon filename for the set. A Rebirth Guardian went out as
+ * `Guardian_Comp.Electric_Armor` where Mids holds
+ * `Guardian_Composition.Atmospheric_Composition` — every power name inside it already
+ * correct, and every one of them arriving as a blank row that kept its slots. 70
+ * enhancements across two corpus builds, with `warnings: []`.
+ *
+ * The table below is read out of Mids' own database instead. What it is graded on here is
+ * the two things a lookup table can be wrong about: whether it can be reached from the key
+ * its caller holds, and how much of the population it actually covers.
+ */
+describe('Mids .mbd export — the powerset path table', () => {
+  const forks = {
+    homecoming: HOMECOMING_PATHS,
+    rebirth: REBIRTH_PATHS,
+    thunderspy: THUNDERSPY_PATHS,
+    brainstorm: BRAINSTORM_PATHS,
+  } as const;
+
+  /** Every `group.set` a build on this fork can hold, in OUR spelling. */
+  function ourSetKeys(): Set<string> {
+    const keys = new Set<string>();
+    const add = (path: string | undefined) => {
+      const segments = (path ?? '').split('.');
+      if (segments.length >= 2) keys.add(`${segments[0]}.${segments[1]}`);
+    };
+    for (const set of Object.values(getAllPowersets())) add(set.setPath);
+    for (const id of getPowerPoolIds()) {
+      add(getPowerPool(id)?.powers.find((p) => p.fullName)?.fullName);
+    }
+    for (const epic of Object.values(getAllEpicPools())) {
+      add(epic.powers.find((p) => p.fullName)?.fullName);
+    }
+    return keys;
+  }
+
+  it('is keyed by OUR spelling and valued by Mids own, at every fork', () => {
+    let graded = 0;
+    for (const [fork, paths] of Object.entries(forks)) {
+      for (const [ourKey, midsPath] of Object.entries(paths)) {
+        // The key is folded, because the caller holds our path in whatever case the
+        // export wrote it. The value is not, because Mids resolves a `PowerName` with an
+        // ordinal `==` — `Guardian_Composition.Stone Composition` carries a SPACE where
+        // we write an underscore, and `Pool.Force_of_Will` a lower-case `of`.
+        expect(ourKey, `${fork}: key not folded`).toBe(ourKey.toLowerCase());
+        expect(midsPath.split('.').length, `${fork} ${ourKey}: ${midsPath} is not group.set`).toBe(2);
+        graded++;
+      }
+    }
+    // 3574 + 3459 + 0 + 3561 as generated. Thunderspy is the zero and it is not a bug:
+    // its names dump predates this table and carries folded powerset keys, so Mids' own
+    // spelling is not in it and the generator refuses to invent one.
+    expect(graded).toBe(10594);
+    expect(Object.keys(THUNDERSPY_PATHS)).toEqual([]);
+  });
+
+  it('covers every set a build can hold, or reports the ones it cannot', async () => {
+    // The measurement, pinned. An unpaired set is not silent any more — the writer warns
+    // and sends ours — but it is still a set whose powers Mids will not bind, so the
+    // count is held to what was measured on 2026-09-09 and moves only on purpose.
+    const unpaired: Record<string, number> = {};
+    for (const fork of ['homecoming', 'rebirth', 'thunderspy', 'brainstorm'] as const) {
+      await loadDataset(fork);
+      unpaired[fork] = [...ourSetKeys()].filter((k) => !midsPowersetPathForExport(k)).length;
+    }
+    await loadDataset('homecoming');
+    // MBDEXPORT-9 owns the three live forks' residual: mostly epic pools, where Mids
+    // spells the set for the archetypes that share it (`Epic.Dark_Mastery_TankBrute` for
+    // our `Epic.Tank_Dark_Mastery`) and the pairing's segment join cannot see it.
+    expect(unpaired).toEqual({ homecoming: 19, rebirth: 17, thunderspy: 386, brainstorm: 28 });
+  }, 600000);
+
+  it('says whether a fork has a Mids namespace at all, rather than reading absence as loss', () => {
+    // Two facts a bare `undefined` conflates. On Homecoming an unpaired set means Mids
+    // has no counterpart; on Thunderspy it means no Mids database was ever read, and the
+    // writer says so, because the two send a reader to different places.
+    expect(midsPowersetPathsKnown()).toBe(true);
+    expect(midsPowersetPathForExport('Blaster_Ranged.Fire_Blast')).toBe('Blaster_Ranged.Fire_Blast');
+  });
+
+  it('keeps the spelling no derivation produces', async () => {
+    await loadDataset('rebirth');
+    // A space where we write an underscore, and a group we abbreviate. Neither survives
+    // title-casing a folded key, which is what the writer used to do.
+    expect(midsPowersetPathForExport('Guardian_Comp.Stone_Composition'))
+      .toBe('Guardian_Composition.Stone Composition');
+    expect(midsPowersetPathForExport('Guardian_Comp.Atmospheric_Composition'))
+      .toBe('Guardian_Composition.Atmospheric_Composition');
     await loadDataset('homecoming');
   });
 });
