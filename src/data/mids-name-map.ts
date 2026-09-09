@@ -18,12 +18,25 @@
  */
 
 import { getActiveDataset, type DatasetId } from './dataset';
-import { MIDS_NAME_MAP as HOMECOMING_MIDS_NAMES } from './datasets/homecoming/generated/mids-name-map';
-import { MIDS_NAME_MAP as REBIRTH_MIDS_NAMES } from './datasets/rebirth/generated/mids-name-map';
-import { MIDS_NAME_MAP as THUNDERSPY_MIDS_NAMES } from './datasets/thunderspy/generated/mids-name-map';
-import { MIDS_NAME_MAP as BRAINSTORM_MIDS_NAMES } from './datasets/brainstorm/generated/mids-name-map';
+import {
+  MIDS_NAME_MAP as HOMECOMING_MIDS_NAMES,
+  MIDS_POWERSET_ALIAS as HOMECOMING_MIDS_SETS,
+} from './datasets/homecoming/generated/mids-name-map';
+import {
+  MIDS_NAME_MAP as REBIRTH_MIDS_NAMES,
+  MIDS_POWERSET_ALIAS as REBIRTH_MIDS_SETS,
+} from './datasets/rebirth/generated/mids-name-map';
+import {
+  MIDS_NAME_MAP as THUNDERSPY_MIDS_NAMES,
+  MIDS_POWERSET_ALIAS as THUNDERSPY_MIDS_SETS,
+} from './datasets/thunderspy/generated/mids-name-map';
+import {
+  MIDS_NAME_MAP as BRAINSTORM_MIDS_NAMES,
+  MIDS_POWERSET_ALIAS as BRAINSTORM_MIDS_SETS,
+} from './datasets/brainstorm/generated/mids-name-map';
 
 type NameMap = Readonly<Record<string, Readonly<Record<string, string>>>>;
+type SetAlias = Readonly<Record<string, string>>;
 
 /**
  * One entry per dataset and no `default` arm, for the reason `accolades.ts` records: a
@@ -37,14 +50,51 @@ const MAP_BY_DATASET: Record<DatasetId, NameMap> = {
   brainstorm: BRAINSTORM_MIDS_NAMES,
 };
 
+/** Mids' spelling of a powerset key → ours, for the pairs where the group segment drifted. */
+const ALIAS_BY_DATASET: Record<DatasetId, SetAlias> = {
+  homecoming: HOMECOMING_MIDS_SETS,
+  rebirth: REBIRTH_MIDS_SETS,
+  thunderspy: THUNDERSPY_MIDS_SETS,
+  brainstorm: BRAINSTORM_MIDS_SETS,
+};
+
+/**
+ * Separators and case folded away, so one spelling of a key reaches its row.
+ *
+ * Mids writes a powerset segment with a trailing space and sometimes a space where we
+ * write an underscore (`Guardian_Composition.Stone composition`), and this table is read
+ * from both namespaces — see `rowsFor`.
+ */
+function normalizeKey(key: string): string {
+  return key.trim().replace(/[\s_-]+/g, '_').toLowerCase();
+}
+
+/**
+ * This powerset's rows, whichever namespace spelled the key.
+ *
+ * The map is keyed by OUR `group.powerset`, because its main reader — the matcher in
+ * `mids-import/mappers.ts` — builds the key from the candidate powers' own paths. But the
+ * importer's retired-name check holds the .mbd's own path instead, and Mids' group segment
+ * has drifted from ours (`Guardian_Composition` for `Guardian_Comp`, MBDIMPORT-7). Two
+ * keyings of one table is how a fix lands on one reader and leaves the other wrong
+ * (METHOD-7), so the alias is resolved here rather than at either call site.
+ */
+function rowsFor(powersetKey: string): Readonly<Record<string, string>> | undefined {
+  const dataset = getActiveDataset().id;
+  const key = normalizeKey(powersetKey);
+  const map = MAP_BY_DATASET[dataset];
+  if (map[key]) return map[key];
+  const ours = ALIAS_BY_DATASET[dataset][key];
+  return ours ? map[ours] : undefined;
+}
+
 /**
  * This dataset's internal name for the power Mids calls `midsInternalName` inside
  * `powersetKey` (`blaster_support.tactical_arrow`), or undefined when the two agree —
  * which is every name but a hundred-odd, so undefined is the overwhelmingly common answer.
  */
 export function midsNameRemap(powersetKey: string, midsInternalName: string): string | undefined {
-  const set = MAP_BY_DATASET[getActiveDataset().id][powersetKey.toLowerCase()];
-  return set?.[midsInternalName.toLowerCase()];
+  return rowsFor(powersetKey)?.[midsInternalName.trim().toLowerCase()];
 }
 
 /**
@@ -59,9 +109,8 @@ export function midsNameRemap(powersetKey: string, midsInternalName: string): st
  * falls through to a warning.
  */
 export function midsNameOwners(powersetKey: string): ReadonlyMap<string, string> {
-  const set = MAP_BY_DATASET[getActiveDataset().id][powersetKey.toLowerCase()];
   const owners = new Map<string, string>();
-  for (const [midsName, ourName] of Object.entries(set ?? {})) {
+  for (const [midsName, ourName] of Object.entries(rowsFor(powersetKey) ?? {})) {
     owners.set(ourName.toLowerCase(), midsName);
   }
   return owners;

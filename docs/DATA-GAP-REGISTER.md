@@ -57,12 +57,13 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**5 open, of 272 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
+**4 open, of 272 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
 parse, and all found by the same thing: seven real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
-Reading a `.mbd`: MBDIMPORT-5 drops a refused power's enhancements out of both tallies,
-and MBDIMPORT-7 is why one of them was refused: the name map's join is blind to a whole category.
+Reading a `.mbd`: MBDIMPORT-5 drops a refused power's enhancements out of both tallies. MBDIMPORT-7
+was why one of them was refused — the name map's join was blind to a whole category — and closed
+the same day, taking the corpus Guardian from six lost enhancements to none.
 
 Writing one is the worse half, and the Kheldian corpus file proved it by round trip. MBDEXPORT-4
 wrote a grade token Mids cannot parse and is closed. MBDEXPORT-5 writes form sub-powers at a path
@@ -658,7 +659,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 60 of 65 closed
+[Full detail](gaps/pipeline-provenance.md) — 61 of 65 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -692,30 +693,20 @@ measurement went, and where a closure for the residual belongs too.
   level rather than only as one power warning; `slotsImported` states what it counts, since today
   it matches neither the file's 98 nor the finished build's 97; and the Rust reader lands asserting
   that invariant rather than pinning around it.
-  **Check** — `npx vitest run src/utils/mids-import/mbd-corpus.test.ts` pins the three files at 0,
-  6 and 1 enhancements lost to neither tally. A fix turns all three to 0 and the pins into the
-  invariant; any other movement reds, including the corpus growing a file that loses more.
+  **Check** — `npx vitest run src/utils/mids-import/mbd-corpus.test.ts` pins the corpus at 6 and 1
+  enhancements lost to neither tally, on the two Stalker files, and 0 on the other five —
+  MBDIMPORT-7 took the Guardian's 6 to 0 on 2026-09-09. A fix turns the last two to 0 and the pins
+  into the invariant; any other movement reds, including the corpus growing a file that loses more.
 - [x] **MBDIMPORT-6** — Mids grades an origin enhancement `TrainingO`/`DualO`/`SingleO` and the
   importer tested for `'SO'`/`'DO'`/`'TO'`, which no `.mbd` carries: the branch was dead while
   `SingleO` was swallowed by the special-enhancement check above it, so the first real levelling
   build ever read lost 79 of its 89 enhancements — and MBDIMPORT-4's own suite had passed `'SO'`
   by hand through that same unreachable door; specials now key on UID prefix alone and origins on
   Mids' grade names
-- [ ] **MBDIMPORT-7** — the name map joins Mids' powersets to ours on the export's own category
-  token, and the two spell one differently: our Rebirth export says `Guardian_Comp`, Mids says
-  `Guardian_Composition`, so all 13 Guardian secondaries get no rotation rows and the generator
-  `continue`s past the miss without reporting it. The corpus Guardian loses Grounding Shield —
-  Mids spells it `Groundeding_Shield` — and its six enhancements go with it
-  **Goal** — a powerset Mids and this export both carry is compared, or the failure to compare it
-  is stated.
-  **Done when** — the join reports every Mids powerset it could not match rather than skipping it
-  silently; the Guardian secondaries join and their rotations reach the map; and the fix is derived
-  rather than a table of names — the import path resolves a powerset on its second segment alone,
-  which is why importing a Guardian build works while the map that should hold this name does not.
-  **Check** — `node scripts/convert-mids-name-map.cjs --dataset rebirth` reports "24 powersets (of
-  3447 shared)" while this row is open, against 3,547 powersets in
-  `tools/mids-oracle/mids-power-names.rebirth.json`. A rising shared count, or any
-  `guardian_composition` key in the map, is the fix landing.
+- [x] **MBDIMPORT-7** — the name map joined Mids' powersets to ours on the export's own category
+  token, and the two spell one differently (`Guardian_Comp` against `Guardian_Composition`), so
+  all 13 Rebirth Guardian secondaries got no rotation rows and each miss was a bare `continue`;
+  leftovers now pair on the set segment alone, unique and corroborated or reported, keyed by ours
 - [ ] **MBDEXPORT-3** — the export applies no reverse name rotation, so every power whose internal
   name the game rotated leaves here unbindable: 82 such names on Homecoming, 54 on Thunderspy, 32
   on Rebirth. `mids-export.ts` imports `mids-uids` and never `mids-name-map`, under a doc line

@@ -141,6 +141,16 @@ const TRACKED_ROOTS = [
   // IS watched is that someone seeded its directory as a root above.
   'src/utils/mids-export.ts',
   'src/utils/slot-levels.ts',
+  // Joined 2026-09-09 under MBDIMPORT-7, at zero drift — five files, every hash equal. The
+  // `.mbd` name map: the accessor, and the four generated tables it reads. Nothing discovered
+  // them. `pipelineSources` follows `require('../src/…')` out of the converters and
+  // `convert-mids-name-map.cjs` requires none — it only WRITES TypeScript — while
+  // `src/utils/mids-import` is seeded as a directory and follows none of its imports, so the
+  // module `mappers.ts` resolves every .mbd power name through sat outside both. A glob rather
+  // than five paths so a fifth fork's table arrives guarded instead of unwatched, which is the
+  // shape this entry is fixing.
+  'src/data/mids-name-map.ts',
+  'src/data/datasets/*/generated/mids-name-map.ts',
   'docs',
 ];
 

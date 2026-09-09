@@ -1,13 +1,18 @@
 /**
  * Mids internal name → this dataset's internal name — AUTO-GENERATED, DO NOT EDIT.
  *
- * Keyed by `group.powerset` (lower-cased, as the .mbd spells it), then by the Mids
- * internal name (lower-cased). The value is this dataset's internal name for the SAME
- * power, joined on the display name — the identity that survived HC's internal-name
- * rotations. See DATA-GAP MBDIMPORT-2.
+ * Keyed by OUR `group.powerset` (lower-cased), then by the Mids internal name
+ * (lower-cased). The value is this dataset's internal name for the SAME power, joined on
+ * the display name — the identity that survived HC's internal-name rotations. See
+ * DATA-GAP MBDIMPORT-2.
+ *
+ * The key is ours rather than Mids' because Mids' group segment drifts too
+ * (`Guardian_Composition` for our `Guardian_Comp`, MBDIMPORT-7). `MIDS_POWERSET_ALIAS`
+ * below carries those pairs so a reader holding the .mbd's own path can reach the same row.
  *
  * Source: Mids Reborn homecoming database 2026.5.1337 (sha256 7568ff37f3a6…)
- * Powersets shared with the export: 3500. Remapped names: 82.
+ * Powersets paired with the export: 3574 of 3653. Remapped names: 83.
+ * Mids powersets with no counterpart here: 79 — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset homecoming
  */
@@ -104,6 +109,9 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   },
   "mastermind_pets.protector_3": {
     "seeker drones": "Seeker_Drones"
+  },
+  "mission_maker_attacks.arsenal_assault": {
+    "sniper_rifle_normal": "Sniper_Rifle"
   },
   "peacebringer_defensive.luminous_aura": {
     "quantum_maneuvers": "Quantum_Acceleration"
@@ -221,4 +229,14 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "villain_pets.spirit_tree": {
     "spirit_tree": "Spirit_Tree_Taunt"
   }
+};
+
+/**
+ * Mids' `group.powerset` → ours, for the pairs that spell the group differently.
+ *
+ * A reader that starts from the .mbd (the importer's retired-name check) resolves through
+ * this; a reader that starts from our own powers (the matcher) already holds the map's key.
+ */
+export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {
+  "redirects.arsenal_assault": "mission_maker_attacks.arsenal_assault"
 };

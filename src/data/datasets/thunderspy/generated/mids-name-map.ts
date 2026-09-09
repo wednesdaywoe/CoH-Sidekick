@@ -1,13 +1,18 @@
 /**
  * Mids internal name → this dataset's internal name — AUTO-GENERATED, DO NOT EDIT.
  *
- * Keyed by `group.powerset` (lower-cased, as the .mbd spells it), then by the Mids
- * internal name (lower-cased). The value is this dataset's internal name for the SAME
- * power, joined on the display name — the identity that survived HC's internal-name
- * rotations. See DATA-GAP MBDIMPORT-2.
+ * Keyed by OUR `group.powerset` (lower-cased), then by the Mids internal name
+ * (lower-cased). The value is this dataset's internal name for the SAME power, joined on
+ * the display name — the identity that survived HC's internal-name rotations. See
+ * DATA-GAP MBDIMPORT-2.
+ *
+ * The key is ours rather than Mids' because Mids' group segment drifts too
+ * (`Guardian_Composition` for our `Guardian_Comp`, MBDIMPORT-7). `MIDS_POWERSET_ALIAS`
+ * below carries those pairs so a reader holding the .mbd's own path can reach the same row.
  *
  * Source: Mids Reborn thunderspy database 2026.3.346 (sha256 1bbc83348369…)
- * Powersets shared with the export: 3440. Remapped names: 54.
+ * Powersets paired with the export: 3441 of 3535. Remapped names: 54.
+ * Mids powersets with no counterpart here: 94 — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset thunderspy
  */
@@ -148,3 +153,11 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
     "virulent": "Build_Up"
   }
 };
+
+/**
+ * Mids' `group.powerset` → ours, for the pairs that spell the group differently.
+ *
+ * A reader that starts from the .mbd (the importer's retired-name check) resolves through
+ * this; a reader that starts from our own powers (the matcher) already holds the map's key.
+ */
+export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {};

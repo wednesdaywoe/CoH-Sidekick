@@ -40,6 +40,37 @@
  * counterpart here (a power HC removed) get none either — those fall through to the
  * matcher's own ladder and, failing that, to a warning, which is the honest outcome.
  *
+ * All of that is the join INSIDE a powerset. Pairing the powersets themselves is its own
+ * problem, and MBDIMPORT-7 is what happens when it is assumed away: the group segment
+ * drifts too. Rebirth's Guardian secondaries are `Guardian_Comp` here and
+ * `Guardian_Composition` in Mids, so a `group.set` string comparison matched none of the
+ * 13 and skipped them without a word. The import path never had this bug because it never
+ * reads the group — `resolvePowerset` resolves on the SECOND segment and the build's own
+ * archetype — so a Guardian build imported fine while the map that should have carried its
+ * rotations was empty.
+ *
+ * So the pairing is derived in two passes. The exact `group.set` key first; then the
+ * leftovers pair on the set segment alone, and take three conditions, because the set
+ * segment alone is not an identity — six of our powersets are called `savage_melee`:
+ *
+ *   unique on both sides   only one leftover Mids set and one leftover of ours carry the
+ *                          segment. Thunderspy's `scrapper_melee.ice_melee` and
+ *                          `stalker_melee.ice_melee` both want `mission_maker_attacks.ice_melee`,
+ *                          and a pairing that has to choose is not a decode.
+ *   corroborated           the two sets share at least one power, by internal name or by
+ *                          display. Two unrelated sets that happen to share a name mint
+ *                          nothing but false rows; `redirects.staff_fighting` shares no
+ *                          power with ours and is refused on exactly that.
+ *   reported when refused  a leftover is named with the condition it failed. The bare
+ *                          `continue` this replaces is what let 13 powersets vanish.
+ *
+ * The map is keyed by OUR `group.set`, because that is what its main reader has in hand:
+ * `findPowerByMidsName` builds the key from the candidate powers' own paths. The importer's
+ * `midsNameIsRetired` holds the .mbd's Mids-spelled path instead, so the pairs whose
+ * spellings differ are emitted as `MIDS_POWERSET_ALIAS` and both readers resolve through
+ * it. One table, addressable from either namespace — two keyings of one table is the trap
+ * METHOD-7 records.
+ *
  * Usage:
  *   node scripts/convert-mids-name-map.cjs --dataset homecoming
  *   node scripts/convert-mids-name-map.cjs --dataset homecoming --dry-run
@@ -118,13 +149,101 @@ function readExportPowersets() {
 const midsNames = JSON.parse(fs.readFileSync(NAMES_PATH, 'utf-8'));
 const exportSets = readExportPowersets();
 
-const map = {};
-const stats = { shared: 0, rows: 0, ambiguous: [], merges: [], levelRejected: [] };
+/**
+ * A powerset's own segment, separators and case folded away.
+ *
+ * Wider than `normalizeDisplay` on purpose: this compares INTERNAL names, where Mids'
+ * `stone composition` and our `Stone_Composition` are the same set spelled two ways, and
+ * a Mids key can carry trailing whitespace inside a segment (`dark_composition `).
+ */
+function normalizeSegment(s) {
+  return String(s || '').trim().replace(/[\s_-]+/g, '_').toLowerCase();
+}
 
-for (const [key, midsPowers] of Object.entries(midsNames.powersets || {})) {
-  const ours = exportSets.get(key);
-  if (!ours) continue;
-  stats.shared++;
+/** The `set` half of a `group.set` key — everything after the first dot. */
+function setSegmentOf(key) {
+  return normalizeSegment(key.split('.').slice(1).join('.'));
+}
+
+/** How many of `midsPowers` this powerset also carries, by internal name or by display. */
+function corroboration(midsPowers, ours) {
+  const internal = new Set(ours.map((p) => p.internalName.toLowerCase()));
+  const display = new Set(ours.map((p) => normalizeDisplay(p.displayName)).filter(Boolean));
+  let shared = 0;
+  for (const [midsInternal, midsDisplay] of midsPowers) {
+    if (internal.has(String(midsInternal).trim().toLowerCase())) shared++;
+    else if (display.has(normalizeDisplay(midsDisplay))) shared++;
+  }
+  return shared;
+}
+
+/**
+ * Mids' powersets paired to ours: the exact key, then the corroborated residual join.
+ * See the header for why the second pass takes three conditions and not one.
+ */
+function pairPowersets() {
+  const paired = [];
+  const unmatched = [];
+  const midsKeys = Object.keys(midsNames.powersets || {});
+
+  const claimedOurs = new Set();
+  const residual = [];
+  for (const midsKey of midsKeys) {
+    if (exportSets.has(midsKey)) {
+      paired.push({ midsKey, ourKey: midsKey });
+      claimedOurs.add(midsKey);
+    } else {
+      residual.push(midsKey);
+    }
+  }
+
+  const index = (keys) => {
+    const out = new Map();
+    for (const key of keys) {
+      const segment = setSegmentOf(key);
+      if (!out.has(segment)) out.set(segment, []);
+      out.get(segment).push(key);
+    }
+    return out;
+  };
+  const midsBySegment = index(residual);
+  const oursBySegment = index([...exportSets.keys()].filter((k) => !claimedOurs.has(k)));
+
+  for (const midsKey of residual) {
+    const segment = setSegmentOf(midsKey);
+    const theirs = midsBySegment.get(segment) || [];
+    const candidates = oursBySegment.get(segment) || [];
+    if (candidates.length === 0) {
+      unmatched.push({ midsKey, why: 'no powerset of that name here' });
+      continue;
+    }
+    if (candidates.length > 1 || theirs.length > 1) {
+      unmatched.push({
+        midsKey,
+        why: `ambiguous — ${theirs.length} Mids sets and ${candidates.length} of ours share "${segment}"`,
+      });
+      continue;
+    }
+    const ourKey = candidates[0];
+    const shared = corroboration(midsNames.powersets[midsKey], exportSets.get(ourKey));
+    if (shared === 0) {
+      unmatched.push({ midsKey, why: `uncorroborated — shares no power with ${ourKey}` });
+      continue;
+    }
+    paired.push({ midsKey, ourKey, shared });
+  }
+  return { paired, unmatched };
+}
+
+const { paired, unmatched } = pairPowersets();
+
+const map = {};
+const alias = {};
+const stats = { shared: paired.length, rows: 0, ambiguous: [], merges: [], levelRejected: [] };
+
+for (const { midsKey, ourKey } of paired) {
+  const midsPowers = midsNames.powersets[midsKey];
+  const ours = exportSets.get(ourKey);
 
   // Display → our powers. A list, not a single entry: a set with two powers under one
   // display name (the Nature Affinity pet's "Rebirth" heal and rez) cannot be joined on
@@ -144,7 +263,7 @@ for (const [key, midsPowers] of Object.entries(midsNames.powersets || {})) {
     const candidates = byDisplay.get(normalizeDisplay(midsDisplay)) || [];
     if (candidates.length === 0) continue;
     if (candidates.length > 1) {
-      stats.ambiguous.push(`${key}: "${midsDisplay}" names ${candidates.length} powers here`);
+      stats.ambiguous.push(`${ourKey}: "${midsDisplay}" names ${candidates.length} powers here`);
       continue;
     }
     const ourInternal = candidates[0].internalName;
@@ -155,28 +274,42 @@ for (const [key, midsPowers] of Object.entries(midsNames.powersets || {})) {
     const incumbent = midsByName.get(ourInternal.toLowerCase());
     if (incumbent && incumbent[2] !== null && candidates[0].level === incumbent[2]) {
       stats.levelRejected.push(
-        `${key}: "${midsDisplay}" — ${ourInternal} is Mids' own ${incumbent[0]} `
+        `${ourKey}: "${midsDisplay}" — ${ourInternal} is Mids' own ${incumbent[0]} `
         + `(both level ${incumbent[2]}), not ${midsInternal}`,
       );
       continue;
     }
-    rows[String(midsInternal).toLowerCase()] = ourInternal;
+    rows[String(midsInternal).trim().toLowerCase()] = ourInternal;
     // Two Mids names resolving onto one of ours is a MERGE, not a rotation, and a remap
     // row would silently drop whichever entry the build listed second. Recorded so the
     // gate can see it; the row still stands, because the alternative is the mis-bind.
     if (claimed.has(ourInternal)) {
-      stats.merges.push(`${key}: ${claimed.get(ourInternal)} and ${midsInternal} both → ${ourInternal}`);
+      stats.merges.push(`${ourKey}: ${claimed.get(ourInternal)} and ${midsInternal} both → ${ourInternal}`);
     }
     claimed.set(ourInternal, midsInternal);
   }
 
   if (Object.keys(rows).length > 0) {
-    map[key] = Object.fromEntries(Object.entries(rows).sort(([a], [b]) => a.localeCompare(b)));
+    map[ourKey] = Object.fromEntries(Object.entries(rows).sort(([a], [b]) => a.localeCompare(b)));
     stats.rows += Object.keys(rows).length;
+    // Only for a pair that actually carries rows: an alias to an absent key is a lookup
+    // that resolves to nothing, which reads exactly like the miss it is meant to fix.
+    if (normalizeSegment(midsKey) !== normalizeSegment(ourKey)) alias[normalizeSegment(midsKey)] = ourKey;
+  }
+}
+
+// An alias that is also a key of the map would silently steer one powerset's lookup into
+// another's rows. It cannot happen — a pair only reaches the residual pass when its Mids
+// key matched no export set — and the assert is here because "cannot happen" is how the
+// bug above this one got written.
+for (const midsKey of Object.keys(alias)) {
+  if (map[midsKey]) {
+    throw new Error(`alias ${midsKey} -> ${alias[midsKey]} collides with a map key of the same name`);
   }
 }
 
 const sorted = Object.fromEntries(Object.keys(map).sort().map((k) => [k, map[k]]));
+const sortedAlias = Object.fromEntries(Object.keys(alias).sort().map((k) => [k, alias[k]]));
 
 const source = `Mids Reborn ${namesDataset} database ${midsNames.version} `
   + `(sha256 ${String(midsNames.sha256).slice(0, 12)}…)`
@@ -185,18 +318,31 @@ const source = `Mids Reborn ${namesDataset} database ${midsNames.version} `
 const body = `/**
  * Mids internal name → this dataset's internal name — AUTO-GENERATED, DO NOT EDIT.
  *
- * Keyed by \`group.powerset\` (lower-cased, as the .mbd spells it), then by the Mids
- * internal name (lower-cased). The value is this dataset's internal name for the SAME
- * power, joined on the display name — the identity that survived HC's internal-name
- * rotations. See DATA-GAP MBDIMPORT-2.
+ * Keyed by OUR \`group.powerset\` (lower-cased), then by the Mids internal name
+ * (lower-cased). The value is this dataset's internal name for the SAME power, joined on
+ * the display name — the identity that survived HC's internal-name rotations. See
+ * DATA-GAP MBDIMPORT-2.
+ *
+ * The key is ours rather than Mids' because Mids' group segment drifts too
+ * (\`Guardian_Composition\` for our \`Guardian_Comp\`, MBDIMPORT-7). \`MIDS_POWERSET_ALIAS\`
+ * below carries those pairs so a reader holding the .mbd's own path can reach the same row.
  *
  * Source: ${source}
- * Powersets shared with the export: ${stats.shared}. Remapped names: ${stats.rows}.
+ * Powersets paired with the export: ${stats.shared} of ${Object.keys(midsNames.powersets || {}).length}. Remapped names: ${stats.rows}.
+ * Mids powersets with no counterpart here: ${unmatched.length} — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset ${datasetId}
  */
 
 export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, string>>>> = ${JSON.stringify(sorted, null, 2)};
+
+/**
+ * Mids' \`group.powerset\` → ours, for the pairs that spell the group differently.
+ *
+ * A reader that starts from the .mbd (the importer's retired-name check) resolves through
+ * this; a reader that starts from our own powers (the matcher) already holds the map's key.
+ */
+export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = ${JSON.stringify(sortedAlias, null, 2)};
 `;
 
 if (dryRun) {
@@ -208,10 +354,25 @@ if (dryRun) {
 
 console.error(
   `[convert-mids-name-map] ${datasetId}: ${stats.rows} remapped names across ` +
-  `${Object.keys(sorted).length} powersets (of ${stats.shared} shared)` +
-  (dryRun ? ' [dry run]' : ` -> ${path.relpath ? '' : ''}${path.relative(REPO_ROOT, OUTPUT_PATH)}`),
+  `${Object.keys(sorted).length} powersets (of ${stats.shared} paired, ` +
+  `${Object.keys(sortedAlias).length} by alias)` +
+  (dryRun ? ' [dry run]' : ` -> ${path.relative(REPO_ROOT, OUTPUT_PATH)}`),
 );
 for (const line of stats.merges) console.error(`  merge: ${line}`);
 for (const line of stats.levelRejected) console.error(`  level-rejected: ${line}`);
 for (const line of stats.ambiguous.slice(0, 10)) console.error(`  ambiguous: ${line}`);
 if (stats.ambiguous.length > 10) console.error(`  ambiguous: … +${stats.ambiguous.length - 10} more`);
+
+// Every Mids powerset this run could not pair, and why. MBDIMPORT-7 was 13 of these
+// answered with a bare `continue`: a skip nobody could see is indistinguishable from a
+// powerset Mids does not carry.
+const byReason = new Map();
+for (const { why } of unmatched) {
+  const reason = why.split(' —')[0];
+  byReason.set(reason, (byReason.get(reason) || 0) + 1);
+}
+console.error(
+  `  unpaired: ${unmatched.length} Mids powersets with no counterpart here (`
+  + [...byReason].map(([why, n]) => `${why}: ${n}`).join('; ') + ')',
+);
+for (const { midsKey, why } of unmatched) console.error(`    ${midsKey} — ${why}`);
