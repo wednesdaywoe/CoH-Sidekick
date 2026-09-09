@@ -21,18 +21,22 @@ import { getActiveDataset, type DatasetId } from './dataset';
 import {
   MIDS_NAME_MAP as HOMECOMING_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as HOMECOMING_MIDS_SETS,
+  MIDS_NAME_REVERSE as HOMECOMING_MIDS_REVERSE,
 } from './datasets/homecoming/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as REBIRTH_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as REBIRTH_MIDS_SETS,
+  MIDS_NAME_REVERSE as REBIRTH_MIDS_REVERSE,
 } from './datasets/rebirth/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as THUNDERSPY_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as THUNDERSPY_MIDS_SETS,
+  MIDS_NAME_REVERSE as THUNDERSPY_MIDS_REVERSE,
 } from './datasets/thunderspy/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as BRAINSTORM_MIDS_NAMES,
   MIDS_POWERSET_ALIAS as BRAINSTORM_MIDS_SETS,
+  MIDS_NAME_REVERSE as BRAINSTORM_MIDS_REVERSE,
 } from './datasets/brainstorm/generated/mids-name-map';
 
 type NameMap = Readonly<Record<string, Readonly<Record<string, string>>>>;
@@ -48,6 +52,22 @@ const MAP_BY_DATASET: Record<DatasetId, NameMap> = {
   rebirth: REBIRTH_MIDS_NAMES,
   thunderspy: THUNDERSPY_MIDS_NAMES,
   brainstorm: BRAINSTORM_MIDS_NAMES,
+};
+
+/**
+ * The same tables backwards — ours → Mids' — for the .mbd WRITER (MBDEXPORT-3).
+ *
+ * A second generated table rather than an inversion of the one above, because the forward
+ * table is lossy in the direction the writer needs: it folds Mids' spelling to lower case
+ * and trims it, and Mids resolves a `PowerName` by ordinal `==` against its own string.
+ * Both halves are minted by one pass of `convert-mids-name-map.cjs` over one join, so
+ * they cannot drift; `name-map.test.ts` holds them to being mutual inverses.
+ */
+const REVERSE_BY_DATASET: Record<DatasetId, NameMap> = {
+  homecoming: HOMECOMING_MIDS_REVERSE,
+  rebirth: REBIRTH_MIDS_REVERSE,
+  thunderspy: THUNDERSPY_MIDS_REVERSE,
+  brainstorm: BRAINSTORM_MIDS_REVERSE,
 };
 
 /** Mids' spelling of a powerset key → ours, for the pairs where the group segment drifted. */
@@ -80,11 +100,18 @@ function normalizeKey(key: string): string {
  * (METHOD-7), so the alias is resolved here rather than at either call site.
  */
 function rowsFor(powersetKey: string): Readonly<Record<string, string>> | undefined {
-  const dataset = getActiveDataset().id;
+  return lookupRows(MAP_BY_DATASET[getActiveDataset().id], powersetKey);
+}
+
+/** The same resolution against the reverse table, so one keying serves both directions. */
+function reverseRowsFor(powersetKey: string): Readonly<Record<string, string>> | undefined {
+  return lookupRows(REVERSE_BY_DATASET[getActiveDataset().id], powersetKey);
+}
+
+function lookupRows(map: NameMap, powersetKey: string): Readonly<Record<string, string>> | undefined {
   const key = normalizeKey(powersetKey);
-  const map = MAP_BY_DATASET[dataset];
   if (map[key]) return map[key];
-  const ours = ALIAS_BY_DATASET[dataset][key];
+  const ours = ALIAS_BY_DATASET[getActiveDataset().id][key];
   return ours ? map[ours] : undefined;
 }
 
@@ -116,7 +143,32 @@ export function midsNameOwners(powersetKey: string): ReadonlyMap<string, string>
   return owners;
 }
 
+/**
+ * Mids' internal name for THIS dataset's `ourInternalName` inside `powersetKey`, or
+ * undefined when the two agree — which is every name but a hundred-odd.
+ *
+ * The writer's half of the rotation (DATA-GAP MBDEXPORT-3). Undefined is the normal
+ * answer and means "write ours"; it does NOT mean "Mids has no such power". This table
+ * carries only names that moved, so it cannot tell those two apart, and a caller that
+ * reported every undefined would report the whole build.
+ *
+ * The returned string is Mids' literal spelling — its case and any inner or trailing
+ * whitespace are part of the identity, because `PiDFromUidPower` compares with `==`.
+ * Write it through unaltered.
+ */
+export function midsNameForExport(
+  powersetKey: string,
+  ourInternalName: string,
+): string | undefined {
+  return reverseRowsFor(powersetKey)?.[ourInternalName.trim().toLowerCase()];
+}
+
 /** The active dataset's whole table — for gates and audits, not for resolution. */
 export function midsNameMap(): NameMap {
   return MAP_BY_DATASET[getActiveDataset().id];
+}
+
+/** The active dataset's whole reverse table — for gates and audits, not for resolution. */
+export function midsNameReverseMap(): NameMap {
+  return REVERSE_BY_DATASET[getActiveDataset().id];
 }

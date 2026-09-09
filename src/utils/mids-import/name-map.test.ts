@@ -1,22 +1,26 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { loadDataset } from '@/data/dataset';
 import { getAllPowersets, getPowerPoolIds, getPowerPool, getAllEpicPools } from '@/data';
-import { midsNameMap, midsNameRemap } from '@/data/mids-name-map';
+import { midsNameMap, midsNameRemap, midsNameForExport } from '@/data/mids-name-map';
 import {
   MIDS_NAME_MAP as HOMECOMING_MAP,
   MIDS_POWERSET_ALIAS as HOMECOMING_ALIAS,
+  MIDS_NAME_REVERSE as HOMECOMING_REVERSE,
 } from '@/data/datasets/homecoming/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as REBIRTH_MAP,
   MIDS_POWERSET_ALIAS as REBIRTH_ALIAS,
+  MIDS_NAME_REVERSE as REBIRTH_REVERSE,
 } from '@/data/datasets/rebirth/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as THUNDERSPY_MAP,
   MIDS_POWERSET_ALIAS as THUNDERSPY_ALIAS,
+  MIDS_NAME_REVERSE as THUNDERSPY_REVERSE,
 } from '@/data/datasets/thunderspy/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as BRAINSTORM_MAP,
   MIDS_POWERSET_ALIAS as BRAINSTORM_ALIAS,
+  MIDS_NAME_REVERSE as BRAINSTORM_REVERSE,
 } from '@/data/datasets/brainstorm/generated/mids-name-map';
 import { findPowerByMidsName } from './mappers';
 import { importMidsBuild } from '@/utils/mids-import';
@@ -341,5 +345,78 @@ describe('Mids .mbd import — the powerset alias table', () => {
     // Rebirth's four Guardian secondaries are the reason this table exists. A regeneration
     // that empties it has lost the join, not found the names agreeing.
     expect(graded).toBeGreaterThanOrEqual(4);
+  });
+});
+
+/**
+ * MBDEXPORT-3 — the writer's table, held to being the reader's table backwards.
+ *
+ * Two tables, one join. `MIDS_NAME_REVERSE` exists because the forward map is lossy in the
+ * direction the .mbd WRITER needs it: it folds Mids' spelling to lower case and trims it,
+ * while Mids resolves a `PowerName` by ordinal `==` against its own database string. Case
+ * and inner whitespace are identity on that side and discarded on this one.
+ *
+ * A second table is also a second thing to drift, which is what this grades. Both are
+ * minted by one pass of `convert-mids-name-map.cjs` over one display join, so a row in one
+ * and not the other means a hand edit to a generated file or a generator that has grown a
+ * second code path.
+ */
+describe('Mids .mbd export — the reverse name table', () => {
+  const forks = {
+    homecoming: [HOMECOMING_MAP, HOMECOMING_REVERSE],
+    rebirth: [REBIRTH_MAP, REBIRTH_REVERSE],
+    thunderspy: [THUNDERSPY_MAP, THUNDERSPY_REVERSE],
+    brainstorm: [BRAINSTORM_MAP, BRAINSTORM_REVERSE],
+  } as const;
+
+  it('inverts every forward row, at every fork', () => {
+    let graded = 0;
+    for (const [fork, [map, reverse]] of Object.entries(forks)) {
+      // Same powersets both ways. A reverse row is withdrawn only where two Mids names
+      // land on one power of ours — a merge, which the generator reports and which no fork
+      // currently carries. If one appears, the count assertion below names the fork.
+      expect(Object.keys(reverse).sort(), `${fork}: powersets differ`)
+        .toEqual(Object.keys(map).sort());
+
+      for (const [key, rows] of Object.entries(reverse)) {
+        for (const [ourName, midsName] of Object.entries(rows)) {
+          expect(map[key]?.[midsName.trim().toLowerCase()]?.toLowerCase(),
+            `${fork} ${key}: reverse ${ourName} → ${midsName} inverts to nothing`)
+            .toBe(ourName);
+          graded++;
+        }
+      }
+      expect(Object.values(reverse).reduce((n, rows) => n + Object.keys(rows).length, 0),
+        `${fork}: a forward row with no reverse — the generator withdrew one as ambiguous`)
+        .toBe(Object.values(map).reduce((n, rows) => n + Object.keys(rows).length, 0));
+    }
+    // 83 + 36 + 54 + 83 as generated. A table that stopped being emitted would leave every
+    // loop above unentered and every assertion in it unexecuted.
+    expect(graded).toBe(256);
+  });
+
+  it('keeps the spelling the forward key throws away', () => {
+    // The whole reason for a second table rather than an inversion in TypeScript. Both of
+    // these fold to something Mids' `==` will not match: `disrupting _torrent` loses the
+    // capitals, `shukuchi` loses a trailing space that is part of the name.
+    expect(REBIRTH_REVERSE['dominator_assault.kinetic_assault']['disrupting_torrent'])
+      .toBe('Disrupting _Torrent');
+    expect(REBIRTH_REVERSE['epic.martial_mastery']['shukuchi']).toBe('Shukuchi ');
+    // …and the forward table, read backwards in the obvious way, gives neither.
+    expect(Object.keys(REBIRTH_MAP['epic.martial_mastery'])).toContain('shukuchi');
+  });
+
+  it('resolves through the powerset alias, like the forward reader does', async () => {
+    await loadDataset('rebirth');
+    // Rebirth spells the group `Guardian_Composition` and we spell it `Guardian_Comp`. The
+    // alias is resolved inside the module for both directions rather than at either call
+    // site — one keying of one table, which is the trap METHOD-7 records.
+    expect(midsNameForExport('guardian_comp.atmospheric_composition', 'Grounding_Shield'))
+      .toBe('Groundeding_Shield');
+    expect(midsNameForExport('Guardian_Composition.Atmospheric_Composition', 'Grounding_Shield'))
+      .toBe('Groundeding_Shield');
+    expect(midsNameForExport('guardian_comp.atmospheric_composition', 'Charged_Armor'))
+      .toBeUndefined();
+    await loadDataset('homecoming');
   });
 });

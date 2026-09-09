@@ -238,8 +238,12 @@ function pairPowersets() {
 const { paired, unmatched } = pairPowersets();
 
 const map = {};
+const reverse = {};
 const alias = {};
-const stats = { shared: paired.length, rows: 0, ambiguous: [], merges: [], levelRejected: [] };
+const stats = {
+  shared: paired.length, rows: 0, reverseRows: 0,
+  ambiguous: [], merges: [], levelRejected: [], reverseWithdrawn: [],
+};
 
 for (const { midsKey, ourKey } of paired) {
   const midsPowers = midsNames.powersets[midsKey];
@@ -258,6 +262,13 @@ for (const { midsKey, ourKey } of paired) {
 
   const midsByName = new Map(midsPowers.map((row) => [String(row[0]).toLowerCase(), row]));
   const rows = {};
+  // The same join read the other way, for the EXPORT path (DATA-GAP MBDEXPORT-3). It has
+  // to be minted here rather than inverted from `rows` in TypeScript, because `rows` keys
+  // on a folded spelling and the writer needs Mids' literal one: Mids' loader resolves a
+  // `PowerName` with `PiDFromUidPower`, an ordinal `==` against the database's own string.
+  // Rebirth's Martial Mastery carries `"Shukuchi "` with a trailing space, and the folded
+  // key `"shukuchi"` is a name Mids has no record of.
+  const reverseRows = {};
   const claimed = new Map();
   for (const [midsInternal, midsDisplay] of midsPowers) {
     const candidates = byDisplay.get(normalizeDisplay(midsDisplay)) || [];
@@ -280,11 +291,20 @@ for (const { midsKey, ourKey } of paired) {
       continue;
     }
     rows[String(midsInternal).trim().toLowerCase()] = ourInternal;
+    reverseRows[ourInternal.toLowerCase()] = String(midsInternal);
     // Two Mids names resolving onto one of ours is a MERGE, not a rotation, and a remap
     // row would silently drop whichever entry the build listed second. Recorded so the
     // gate can see it; the row still stands, because the alternative is the mis-bind.
+    //
+    // Read backwards the merge has no answer at all — one of our powers, two Mids names,
+    // and nothing in the data says which the user meant. The reverse row is WITHDRAWN
+    // rather than resolved to whichever came last, so the writer falls back to our own
+    // spelling and reports it. That is today's behaviour for the name, which is the one
+    // outcome here that is not a guess.
     if (claimed.has(ourInternal)) {
       stats.merges.push(`${ourKey}: ${claimed.get(ourInternal)} and ${midsInternal} both → ${ourInternal}`);
+      stats.reverseWithdrawn.push(`${ourKey}: ${ourInternal} is claimed by ${claimed.get(ourInternal)} and ${midsInternal}`);
+      delete reverseRows[ourInternal.toLowerCase()];
     }
     claimed.set(ourInternal, midsInternal);
   }
@@ -292,6 +312,10 @@ for (const { midsKey, ourKey } of paired) {
   if (Object.keys(rows).length > 0) {
     map[ourKey] = Object.fromEntries(Object.entries(rows).sort(([a], [b]) => a.localeCompare(b)));
     stats.rows += Object.keys(rows).length;
+    if (Object.keys(reverseRows).length > 0) {
+      reverse[ourKey] = Object.fromEntries(Object.entries(reverseRows).sort(([a], [b]) => a.localeCompare(b)));
+      stats.reverseRows += Object.keys(reverseRows).length;
+    }
     // Only for a pair that actually carries rows: an alias to an absent key is a lookup
     // that resolves to nothing, which reads exactly like the miss it is meant to fix.
     if (normalizeSegment(midsKey) !== normalizeSegment(ourKey)) alias[normalizeSegment(midsKey)] = ourKey;
@@ -309,6 +333,7 @@ for (const midsKey of Object.keys(alias)) {
 }
 
 const sorted = Object.fromEntries(Object.keys(map).sort().map((k) => [k, map[k]]));
+const sortedReverse = Object.fromEntries(Object.keys(reverse).sort().map((k) => [k, reverse[k]]));
 const sortedAlias = Object.fromEntries(Object.keys(alias).sort().map((k) => [k, alias[k]]));
 
 const source = `Mids Reborn ${namesDataset} database ${midsNames.version} `
@@ -329,6 +354,7 @@ const body = `/**
  *
  * Source: ${source}
  * Powersets paired with the export: ${stats.shared} of ${Object.keys(midsNames.powersets || {}).length}. Remapped names: ${stats.rows}.
+ * Reverse rows for the writer: ${stats.reverseRows}${stats.reverseWithdrawn.length ? `, with ${stats.reverseWithdrawn.length} withdrawn as ambiguous` : ''}.
  * Mids powersets with no counterpart here: ${unmatched.length} — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset ${datasetId}
@@ -343,6 +369,22 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
  * this; a reader that starts from our own powers (the matcher) already holds the map's key.
  */
 export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = ${JSON.stringify(sortedAlias, null, 2)};
+
+/**
+ * The same join backwards — THIS dataset's internal name (lower-cased) → Mids' own, for
+ * the .mbd writer (DATA-GAP MBDEXPORT-3).
+ *
+ * Not derivable from \`MIDS_NAME_MAP\` above, and that is the point of emitting it. The
+ * forward map keys on a folded spelling because its reader is matching; the writer is
+ * producing, and Mids resolves a \`PowerName\` by ordinal \`==\` against its own database
+ * string. Case and inner whitespace are load-bearing on this side and discarded on that
+ * one — Rebirth spells one power \`"Shukuchi "\`, trailing space and all.
+ *
+ * One row per forward row, minus any withdrawn: two Mids names landing on one power of
+ * ours is answerable forwards and not backwards, so that name gets no row and the writer
+ * reports it instead of picking.
+ */
+export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, string>>>> = ${JSON.stringify(sortedReverse, null, 2)};
 `;
 
 if (dryRun) {
@@ -355,10 +397,11 @@ if (dryRun) {
 console.error(
   `[convert-mids-name-map] ${datasetId}: ${stats.rows} remapped names across ` +
   `${Object.keys(sorted).length} powersets (of ${stats.shared} paired, ` +
-  `${Object.keys(sortedAlias).length} by alias)` +
+  `${Object.keys(sortedAlias).length} by alias), ${stats.reverseRows} reverse` +
   (dryRun ? ' [dry run]' : ` -> ${path.relative(REPO_ROOT, OUTPUT_PATH)}`),
 );
 for (const line of stats.merges) console.error(`  merge: ${line}`);
+for (const line of stats.reverseWithdrawn) console.error(`  reverse-withdrawn: ${line}`);
 for (const line of stats.levelRejected) console.error(`  level-rejected: ${line}`);
 for (const line of stats.ambiguous.slice(0, 10)) console.error(`  ambiguous: ${line}`);
 if (stats.ambiguous.length > 10) console.error(`  ambiguous: … +${stats.ambiguous.length - 10} more`);

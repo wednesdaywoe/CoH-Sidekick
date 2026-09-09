@@ -12,6 +12,7 @@ import { getPowerPool } from '@/data/power-pools';
 import { getEpicPool } from '@/data/epic-pools';
 import { getIOSet } from '@/data/io-sets';
 import { getMidsGenericIOUid, getMidsIOSetPieceUid, getMidsOriginUid, getMidsSpecialUid } from '@/data/mids-uids';
+import { midsNameForExport } from '@/data/mids-name-map';
 import { MIDS_STAT_MAP, MIDS_ORIGIN_TIER } from '@/utils/mids-import/mappers';
 import { getInherentPowers, getArchetypeInherentPowers, POWER_PICK_LEVELS, getPicksGrantedAtLevel } from '@/data';
 import { computeExportSlotLevels, type SlotLevel } from '@/utils/slot-levels';
@@ -122,9 +123,67 @@ function buildPowersetPath(
 }
 
 /**
+ * The `group.powerset` this power belongs to, in OUR namespace — the key the name map is
+ * keyed by (MBDIMPORT-2), and the one thing the reverse lookup below cannot guess.
+ *
+ * Taken from the power's own `fullName` first, exactly as the import side's
+ * `powersetKeysOf` does, so both directions read the table through the same key. The
+ * powerset definition's `setPath` is the fallback, because the .skif writer prunes
+ * `fullName` off a stored power.
+ */
+function ourPowersetKey(
+  power: { internalName?: string; fullName?: string },
+  powersetId: string,
+  category: 'primary' | 'secondary' | 'pool' | 'epic',
+): string {
+  // Pools and epics carry no `setPath` on their runtime type, so their key comes off
+  // their own first power — which is how `powersetKeysOf` reads them on the import side.
+  const setPath = category === 'pool'
+    ? getPowerPool(powersetId)?.powers.find((p) => p.fullName)?.fullName
+    : category === 'epic'
+      ? getEpicPool(powersetId)?.powers.find((p) => p.fullName)?.fullName
+      : getPowerset(powersetId)?.setPath;
+  const path = power.fullName ?? setPath ?? '';
+  const segments = path.split('.');
+  return segments.length >= 2 ? `${segments[0]}.${segments[1]}` : '';
+}
+
+/**
+ * Mids' spelling of `ourInternalName`, or ours where the two agree (DATA-GAP MBDEXPORT-3).
+ *
+ * The rotation the importer undoes, redone. HC and Rebirth have moved internal names
+ * underneath stable display names, so the name this planner holds is one Mids may have no
+ * record of — 82 such names on Homecoming, 54 on Thunderspy, 32 on Rebirth. Mids answers a
+ * `PowerName` it cannot resolve with a blank row that still holds the power's slots, so an
+ * unrotated name costs the power AND every enhancement in it, silently, in a file that
+ * looks complete from this side.
+ *
+ * Whatever comes back is written through byte for byte. `PiDFromUidPower` compares with
+ * `==`, so Mids' case and its stray whitespace (`Epic.Martial_Mastery.Shukuchi `) are part
+ * of the name; normalising them here would re-open the defect in a tidier spelling.
+ */
+function midsPowerSegment(powersetKey: string, ourInternalName: string): string {
+  if (!powersetKey) return ourInternalName;
+  return midsNameForExport(powersetKey, ourInternalName) ?? ourInternalName;
+}
+
+/** `Pool.Flight.Fly` with its power segment put into Mids' namespace. */
+function rotateFullName(fullName: string, powersetKey: string): string {
+  const segments = fullName.split('.');
+  if (segments.length < 3) return fullName;
+  const tail = segments.slice(2).join('.');
+  return `${segments[0]}.${segments[1]}.${midsPowerSegment(powersetKey, tail)}`;
+}
+
+/**
  * Build the full Mids PowerName for a power.
  * For pool/epic powers: use fullName if available.
  * For primary/secondary: {Category}.{SetName}.{InternalName}
+ *
+ * A pool or epic `fullName` is OURS, not Mids' — the two agree on most names, which is why
+ * it reads as already-Mids-shaped and why the difference stayed invisible. So every branch
+ * puts its power segment through the reverse name map on the way out; `pool.flight` and
+ * `epic.martial_mastery` both carry rotations.
  */
 function buildPowerName(
   power: { name: string; internalName?: string; fullName?: string },
@@ -132,29 +191,32 @@ function buildPowerName(
   archetypeId: string,
   category: 'primary' | 'secondary' | 'pool' | 'epic',
 ): string {
-  // Pool and epic powers typically have fullName already in Mids format
+  const powersetKey = ourPowersetKey(power, powersetId, category);
+
+  // Pool and epic powers carry a fullName of their own; only its tail needs rotating.
   if (power.fullName && (power.fullName.startsWith('Pool.') || power.fullName.startsWith('Epic.'))) {
-    return power.fullName;
+    return rotateFullName(power.fullName, powersetKey);
   }
 
   // For pool powers without fullName, try looking up from pool definition
   if (category === 'pool') {
     const pool = getPowerPool(powersetId);
     const def = pool?.powers.find((p) => p.internalName === power.internalName);
-    if (def?.fullName) return def.fullName;
+    if (def?.fullName) return rotateFullName(def.fullName, powersetKey);
   }
 
   // For epic powers without fullName, try looking up from epic definition
   if (category === 'epic') {
     const epic = getEpicPool(powersetId);
     const def = epic?.powers.find((p) => p.internalName === power.internalName);
-    if (def?.fullName) return def.fullName;
+    if (def?.fullName) return rotateFullName(def.fullName, powersetKey);
   }
 
   // Primary/secondary: construct from AT category + set name + power internal name
   const setPath = buildPowersetPath(archetypeId, powersetId, category as 'primary' | 'secondary');
   const internalName = power.internalName || power.name.replace(/\s+/g, '_');
-  return setPath ? `${setPath}.${internalName}` : internalName;
+  const midsName = midsPowerSegment(powersetKey, internalName);
+  return setPath ? `${setPath}.${midsName}` : midsName;
 }
 
 // ============================================
@@ -683,12 +745,16 @@ export function exportToMidsWithReport(
  */
 function inherentFullName(power: SelectedPower, archetypeId: string): string | null {
   const stored = (power as { fullName?: string }).fullName;
-  if (stored?.startsWith('Inherent.')) return stored;
-
-  const name = power.internalName || power.name;
-  const match = [...getInherentPowers(), ...getArchetypeInherentPowers(archetypeId || undefined)]
-    .find((def) => def.internalName === name || def.name === power.name);
-  return match?.fullName ?? null;
+  const full = stored?.startsWith('Inherent.')
+    ? stored
+    : [...getInherentPowers(), ...getArchetypeInherentPowers(archetypeId || undefined)]
+      .find((def) => def.internalName === (power.internalName || power.name) || def.name === power.name)
+      ?.fullName;
+  if (!full) return null;
+  // Inherents rotate too — Thunderspy carries a row under `inherent.*` — and this path
+  // never went through `buildPowerName`, so the rewrite has to be repeated here.
+  const segments = full.split('.');
+  return rotateFullName(full, segments.length >= 2 ? `${segments[0]}.${segments[1]}` : '');
 }
 
 /**

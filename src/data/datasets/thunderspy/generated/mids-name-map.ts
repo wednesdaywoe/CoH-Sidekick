@@ -12,6 +12,7 @@
  *
  * Source: Mids Reborn thunderspy database 2026.3.346 (sha256 1bbc83348369…)
  * Powersets paired with the export: 3441 of 3535. Remapped names: 54.
+ * Reverse rows for the writer: 54.
  * Mids powersets with no counterpart here: 94 — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset thunderspy
@@ -161,3 +162,154 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
  * this; a reader that starts from our own powers (the matcher) already holds the map's key.
  */
 export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {};
+
+/**
+ * The same join backwards — THIS dataset's internal name (lower-cased) → Mids' own, for
+ * the .mbd writer (DATA-GAP MBDEXPORT-3).
+ *
+ * Not derivable from `MIDS_NAME_MAP` above, and that is the point of emitting it. The
+ * forward map keys on a folded spelling because its reader is matching; the writer is
+ * producing, and Mids resolves a `PowerName` by ordinal `==` against its own database
+ * string. Case and inner whitespace are load-bearing on this side and discarded on that
+ * one — Rebirth spells one power `"Shukuchi "`, trailing space and all.
+ *
+ * One row per forward row, minus any withdrawn: two Mids names landing on one power of
+ * ours is answerable forwards and not backwards, so that name gets no row and the writer
+ * reports it instead of picking.
+ */
+export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  "blaster_ranged.assault_rifle": {
+    "aim": "Ignite"
+  },
+  "brute_defense.super_reflexes": {
+    "practiced_brawler": "Practiced Brawler"
+  },
+  "controller_buff.traps": {
+    "time_bomb": "Auto_Turret"
+  },
+  "controller_control.darkness_control": {
+    "shadowy_binds": "Spirit_Host"
+  },
+  "controller_control.gravity_control": {
+    "crush": "Gravity_Field"
+  },
+  "controller_control.water_control": {
+    "tidal_wave": "Tidal Wave"
+  },
+  "corruptor_ranged.assault_rifle": {
+    "aim": "Ignite"
+  },
+  "defender_ranged.assault_rifle": {
+    "aim": "Ignite",
+    "beanbag": "Single_Shot"
+  },
+  "defender_ranged.battle_axe": {
+    "build_up": "Aim",
+    "taunt": "Feint"
+  },
+  "defender_ranged.claws": {
+    "taunt": "Feint"
+  },
+  "defender_ranged.dual_blades": {
+    "taunt": "Feint"
+  },
+  "defender_ranged.katana": {
+    "build_up": "Aim",
+    "taunt": "Feint"
+  },
+  "defender_ranged.kinetic_assault": {
+    "disrupting_torrent": "Disrupting _Torrent",
+    "speed_siphon": "Velocity_Siphon"
+  },
+  "defender_ranged.radiation_blast": {
+    "aim": "Fusion"
+  },
+  "defender_ranged.savage_melee": {
+    "taunt": "Feint"
+  },
+  "defender_ranged.staff_fighting": {
+    "confront": "Feint",
+    "staff_mastery": "Build_Up"
+  },
+  "defender_ranged.war_mace": {
+    "build_up": "Aim",
+    "taunt": "Feint"
+  },
+  "dominator_assault.atomic_assault": {
+    "electron_haze": "Neutron_Bomb",
+    "proton_volley": "Proton_Burst"
+  },
+  "dominator_assault.kinetic_assault": {
+    "disrupting_torrent": "Disrupting _Torrent"
+  },
+  "dominator_control.darkness_control": {
+    "shadowy_binds": "Spirit_Host"
+  },
+  "dominator_control.electric_control": {
+    "electric_fence": "Synaptic_Surge"
+  },
+  "dominator_control.water_control": {
+    "tidal_wave": "Tidal Wave"
+  },
+  "inherent.inherent": {
+    "mez_resistance": "Tenacity"
+  },
+  "mastermind_buff.obedience_training": {
+    "backhand_slap": "Punish"
+  },
+  "mastermind_buff.radiation_emission": {
+    "em_pulse": "EMP_Pulse",
+    "enervating_field": "Enervating__Field",
+    "radiant_aura": "Radiation_Emission"
+  },
+  "mastermind_buff.traps": {
+    "trip_mine": "Auto_Turret"
+  },
+  "mastermind_pets.protector_3": {
+    "seeker_drones": "Seeker Drones"
+  },
+  "mastermind_summon.knights": {
+    "beheader": "Gash"
+  },
+  "pool.fighting": {
+    "slam": "Weapon_Slam",
+    "strike": "Weapon_Strike",
+    "swirl": "Weapon_Swing"
+  },
+  "pool.gadgetry": {
+    "blaster_barrage": "Drone_Barrage",
+    "wrist_blaster": "Blaster_Drone"
+  },
+  "pool.invisibility": {
+    "invisibility": "Intangibility"
+  },
+  "pool.utility_belt": {
+    "flying_kick": "Envenomed Barrage"
+  },
+  "scrapper_defense.super_reflexes": {
+    "practiced_brawler": "Practiced Brawler"
+  },
+  "stalker_defense.invulnerability": {
+    "hide": "Resist_Elements",
+    "resist_forces": "Resist_Energies"
+  },
+  "stalker_defense.spectral_aura": {
+    "apparitional_avoidance": "Spectral_Shift"
+  },
+  "stalker_defense.super_reflexes": {
+    "practiced_brawler": "Practiced Brawler"
+  },
+  "stalker_melee.spectral_melee": {
+    "assassins_reave": "Assassin's_Reave"
+  },
+  "tanker_defense.ice_armor": {
+    "chilling_embrace": "Icy_Bastion"
+  },
+  "tanker_defense.super_reflexes": {
+    "practiced_brawler": "Practiced Brawler"
+  },
+  "tanker_melee.pale_blade": {
+    "build_up": "Virulent",
+    "sunder_bone": "Perdition"
+  }
+};

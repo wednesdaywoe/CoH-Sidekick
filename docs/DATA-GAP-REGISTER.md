@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**4 open, of 272 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
+**6 open, of 275 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
 parse, and all found by the same thing: seven real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
@@ -66,9 +66,17 @@ was why one of them was refused — the name map's join was blind to a whole cat
 the same day, taking the corpus Guardian from six lost enhancements to none.
 
 Writing one is the worse half, and the Kheldian corpus file proved it by round trip. MBDEXPORT-4
-wrote a grade token Mids cannot parse and is closed. MBDEXPORT-5 writes form sub-powers at a path
-Mids will not bind, losing 36 of 86 enhancements to blank rows; MBDEXPORT-3 applies no reverse name
-rotation; and MBDEXPORT-2 answers a fork Mids has never had with defaults.
+wrote a grade token Mids cannot parse, and MBDEXPORT-3 wrote our internal names where Mids had
+renamed the power; both are closed. MBDEXPORT-3's closure brought a census of every `PowerName` we
+write, graded against Mids' own database, and that census is where the rest of this list came from.
+
+Four of the six came out of that census, each a different way to write a name Mids cannot resolve:
+a Kheldian form path (MBDEXPORT-5), a powerset path derived from an icon (MBDEXPORT-6), a bare
+incarnate slug (MBDEXPORT-7), a rename the join is too tight to see (MBDEXPORT-8). MBDEXPORT-2 is
+the fifth kind, a fork Mids has never had.
+
+All of them are silent. Mids answers a name it cannot bind with a blank row that keeps the slots,
+and we answer with `warnings: []`.
 
 The parser frontier itself is clear — EXPRPUNT-1 opened and closed on 2026-09-08, and
 [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9 — so
@@ -659,7 +667,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 61 of 65 closed
+[Full detail](gaps/pipeline-provenance.md) — 62 of 68 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -707,19 +715,52 @@ measurement went, and where a closure for the residual belongs too.
   token, and the two spell one differently (`Guardian_Comp` against `Guardian_Composition`), so
   all 13 Rebirth Guardian secondaries got no rotation rows and each miss was a bare `continue`;
   leftovers now pair on the set segment alone, unique and corroborated or reported, keyed by ours
-- [ ] **MBDEXPORT-3** — the export applies no reverse name rotation, so every power whose internal
-  name the game rotated leaves here unbindable: 82 such names on Homecoming, 54 on Thunderspy, 32
-  on Rebirth. `mids-export.ts` imports `mids-uids` and never `mids-name-map`, under a doc line
-  calling itself "the reverse of `src/utils/mids-import/`". Proven in Mids rather than argued: our
-  Rebirth export's `Disrupting_Torrent` showed as a blank row still holding six enhancements, and
-  the same file with that one name changed to Mids' `Disrupting _Torrent` bound all of it
-  **Goal** — a build exported from here opens in Mids as the build the user had.
-  **Done when** — the export resolves each power name through the same per-powerset map the import
-  reads, in reverse; a name with no reverse entry is reported rather than written as-is, since a
-  power Mids cannot bind takes its enhancements with it; and the round trip is graded on a build
-  carrying a rotation, not only on one that happens to avoid them.
-  **Check** — `grep -c mids-name-map src/utils/mids-export.ts` returns 0 while this row is open.
-  Non-zero means the export reads the map, which is the whole of the fix.
+- [x] **MBDEXPORT-3** — the export applied no reverse name rotation, so a power the game had renamed
+  left here under a name Mids has no record of and arrived as a blank row still holding its slots;
+  the writer now resolves every power segment through a generated `MIDS_NAME_REVERSE` — a second
+  table, not an inversion, because the forward map folds away the case and the trailing space that
+  Mids' `PiDFromUidPower` compares on — and a corpus-wide census against Mids' own `.mhd` grades
+  every name we write
+- [ ] **MBDEXPORT-6** — `buildPowersetPath` composes Mids' `group.set` from `AT_TABLES` plus the
+  powerset's ICON filename, and neither is a read of what Mids calls the set. The Rebirth Guardian
+  exports `Guardian_Comp.Electric_Armor` where Mids holds `Guardian_Composition.Atmospheric_Composition`
+  — with our nine power names already correct inside it — and the Night Widow writes
+  `Teamwork.Teamwork` / `Widow_Training.Widow_Training` for Mids' `Teamwork.Widow_Teamwork` /
+  `Widow_Training.Night_Widow_Training`. 70 of 86 enhancements across the two, `warnings: []`
+  **Goal** — the powerset path we write is the one Mids carries, read rather than derived.
+  **Done when** — the powerset pairing `convert-mids-name-map.cjs` already computes for all 3,459
+  sets is emitted as ours → Mids' literal `group.set` and `buildPowersetPath` resolves through it;
+  a set with no Mids counterpart is reported rather than written at a guessed path;
+  `emit_mids_names.py` stops folding those two segments to lower case, since the gate is blind to a
+  wrong-CASE path until it does; and the census reaches 0 unbound for both builds.
+  **Check** — `npx vitest run src/utils/mids-import/mbd-export-names.test.ts` pins the Guardian at
+  9 unbound / 36 enhancements and the Widow at 9 / 34 while this row is open. Movement without this
+  row closing is the writer regressing, not the fix landing.
+- [ ] **MBDEXPORT-7** — every incarnate exports as a bare slug. `processIncarnateEntry` reads Mids'
+  `Incarnate.Alpha.Musculature_Radial_Paragon` and stores `powerName: power.id`, our own
+  `musculature_radial_paragon`; the writer emits that verbatim under a comment asserting the field
+  "is already Mids' own `Incarnate.<Slot>.<Power>`". Three per Stalker corpus build, no dots,
+  nothing for Mids to resolve — and 0 enhancements at risk, which is why a hunt that counted lost
+  enhancements walked past it
+  **Goal** — an incarnate read out of a `.mbd` is written back to the name it was read from.
+  **Done when** — the export emits a three-segment `Incarnate.<Slot>.<Power>` from the incarnate
+  roster's own `fullName` rather than the stored slug; one with no Mids-side name is reported
+  rather than written; and the comment claiming `powerName` is already Mids' is deleted or made
+  true.
+  **Check** — `npx vitest run src/utils/mids-import/mbd-export-names.test.ts` pins the three bare
+  slugs on both Stalker builds while this row is open.
+- [ ] **MBDEXPORT-8** — the name map's display join folds separator runs to one space and no
+  further, so a rename that only moved a separator mints no row: Rebirth's `Moonbeam` against Mids'
+  `Moon_Beam`. The tightness is right for the IMPORT reader, which resolves that pair on its own
+  all-separators-stripped ladder and logs it; the writer has one lookup and no ladder. 1 name in
+  the 7-file corpus, population across the three forks unmeasured
+  **Goal** — a name that differs from Mids' only in separators is written in Mids' spelling.
+  **Done when** — the population is measured across all three forks FIRST, since one observed name
+  does not justify widening a join that mints false rows when it is too loose; then either a
+  writer-only separator-insensitive pass lands with the pairs it would mint listed, or the row
+  closes as adjudicated-not-worth-it with that count written down.
+  **Check** — `midsNameForExport('guardian_assault.dark_assault', 'Moonbeam')` returns undefined
+  while this row is open, and `mbd-export-names.test.ts` asserts it.
 - [x] **MBDEXPORT-4** — the exporter wrote `Grade: enh.tier`, so an origin enhancement read in as
   Mids' `SingleO` went back out as our `SO`, a token MBDIMPORT-6 had proved that day no Mids
   writes; `Enum.Parse` threw inside `LoadBuild` and Mids refused **the whole build** — three

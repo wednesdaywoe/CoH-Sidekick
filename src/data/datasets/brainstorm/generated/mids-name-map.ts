@@ -12,6 +12,7 @@
  *
  * Source: Mids Reborn homecoming database 2026.5.1337 (sha256 7568ff37f3a6…) — Mids ships no brainstorm build, so a brainstorm .mbd carries homecoming's namespace
  * Powersets paired with the export: 3561 of 3653. Remapped names: 83.
+ * Reverse rows for the writer: 83.
  * Mids powersets with no counterpart here: 92 — listed by the generator on stderr.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset brainstorm
@@ -239,4 +240,232 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
  */
 export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {
   "redirects.arsenal_assault": "mission_maker_attacks.arsenal_assault"
+};
+
+/**
+ * The same join backwards — THIS dataset's internal name (lower-cased) → Mids' own, for
+ * the .mbd writer (DATA-GAP MBDEXPORT-3).
+ *
+ * Not derivable from `MIDS_NAME_MAP` above, and that is the point of emitting it. The
+ * forward map keys on a folded spelling because its reader is matching; the writer is
+ * producing, and Mids resolves a `PowerName` by ordinal `==` against its own database
+ * string. Case and inner whitespace are load-bearing on this side and discarded on that
+ * one — Rebirth spells one power `"Shukuchi "`, trailing space and all.
+ *
+ * One row per forward row, minus any withdrawn: two Mids names landing on one power of
+ * ours is answerable forwards and not backwards, so that name gets no row and the writer
+ * reports it instead of picking.
+ */
+export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  "blaster_ranged.seismic_blast": {
+    "shockwaves": "Seismic_Shockwaves"
+  },
+  "blaster_ranged.storm_blast": {
+    "aim": "Intensify"
+  },
+  "blaster_support.electricity_manipulation": {
+    "lightning_clap": "Lightning_Field",
+    "lightning_field": "Lightning_Clap"
+  },
+  "blaster_support.sonic_manipulation": {
+    "build_up": "Sound_Booster"
+  },
+  "blaster_support.tactical_arrow": {
+    "gymnastics": "Oil_Slick_Arrow",
+    "quickness": "Gymnastics"
+  },
+  "brute_defense.ice_armor": {
+    "rime_ice": "Rime"
+  },
+  "brute_defense.psionic_armor": {
+    "fortify_mind": "Psychokinetic_Barrier"
+  },
+  "brute_defense.regeneration": {
+    "instant_regeneration": "Reactive_Regeneration"
+  },
+  "brute_melee.sonic_melee": {
+    "build_up": "Sound_Booster"
+  },
+  "controller_buff.marine_affinity": {
+    "call_depths": "Power_of_the_Depths"
+  },
+  "controller_control.arsenal_control": {
+    "gun_drone": "Tri_Cannon"
+  },
+  "controller_control.pyrotechnic_control": {
+    "sparkling_field": "Sparkling_Chain"
+  },
+  "corruptor_buff.marine_affinity": {
+    "call_depths": "Power_of_the_Depths"
+  },
+  "corruptor_ranged.seismic_blast": {
+    "shockwaves": "Seismic_Shockwaves"
+  },
+  "corruptor_ranged.storm_blast": {
+    "aim": "Intensify"
+  },
+  "defender_buff.marine_affinity": {
+    "call_depths": "Power_of_the_Depths"
+  },
+  "defender_buff.shock_therapy": {
+    "defibrillate": "Defibrilate",
+    "discharge": "Galvanic_Sentinel"
+  },
+  "defender_ranged.seismic_blast": {
+    "shockwaves": "Seismic_Shockwaves"
+  },
+  "defender_ranged.storm_blast": {
+    "aim": "Intensify"
+  },
+  "dominator_assault.arsenal_assault": {
+    "heavy_blow": "Elbow_Strike"
+  },
+  "dominator_assault.savage_assault": {
+    "call_ravens": "Unkindness"
+  },
+  "dominator_control.arsenal_control": {
+    "gun_drone": "Tri_Cannon",
+    "smoke_grenade": "Smoke_Canister"
+  },
+  "dominator_control.illusion_control": {
+    "decoy": "Phantom_Army",
+    "invisibility": "Superior_Invisibility",
+    "spectral_terror": "Spectral_Terrror"
+  },
+  "dominator_control.pyrotechnic_control": {
+    "sparkling_field": "Sparkling_Chain"
+  },
+  "mastermind_buff.kinetics": {
+    "fulcrum_shift": "Kinetic_Transfer"
+  },
+  "mastermind_buff.marine_affinity": {
+    "call_depths": "Power_of_the_Depths"
+  },
+  "mastermind_buff.radiation_emission": {
+    "em_pulse": "EMP_Pulse",
+    "enervating_field": "Enervating__Field",
+    "radiant_aura": "Radiation_Emission"
+  },
+  "mastermind_pets.protector_3": {
+    "seeker_drones": "Seeker Drones"
+  },
+  "mission_maker_attacks.arsenal_assault": {
+    "sniper_rifle": "Sniper_Rifle_Normal"
+  },
+  "peacebringer_defensive.luminous_aura": {
+    "quantum_acceleration": "Quantum_Maneuvers"
+  },
+  "pool.flight": {
+    "afterburner": "Evasive_Maneuvers"
+  },
+  "redirects.pyrotechnic_control": {
+    "glitteringcolumn_glitterexplosion": "Glitter_Explosion"
+  },
+  "redirects.storm_blast": {
+    "nukenado_skin": "Storm_Eye"
+  },
+  "scrapper_defense.ice_armor": {
+    "rime_ice": "Rime"
+  },
+  "scrapper_defense.psionic_armor": {
+    "fortify_mind": "Psychokinetic_Barrier"
+  },
+  "scrapper_defense.regeneration": {
+    "instant_regeneration": "Reactive_Regeneration"
+  },
+  "scrapper_defense.stone_armor": {
+    "mineral_armor": "Minerals",
+    "stone_armor": "Rock_Armor"
+  },
+  "scrapper_melee.sonic_melee": {
+    "build_up": "Sound_Booster"
+  },
+  "scrapper_melee.stone_melee": {
+    "confront": "Taunt"
+  },
+  "sentinel_defense.ice_armor": {
+    "rime_ice": "Rime"
+  },
+  "sentinel_defense.invulnerability": {
+    "unyeilding": "Unyielding"
+  },
+  "sentinel_defense.psionic_armor": {
+    "fortify_mind": "Psychokinetic_Barrier"
+  },
+  "sentinel_defense.stone_armor": {
+    "mineral_armor": "Minerals",
+    "stone_armor": "Rock_Armor"
+  },
+  "sentinel_ranged.seismic_blast": {
+    "shockwaves": "Seismic_Shockwaves"
+  },
+  "sentinel_ranged.storm_blast": {
+    "aim": "Intensify"
+  },
+  "set_bonus.pvp_set_bonus": {
+    "increased_range_4": "Increased_Range_2",
+    "increased_range_7": "Increased_Range_3"
+  },
+  "set_bonus.set_bonus": {
+    "increased_range_4": "Increased_Range_2",
+    "increased_range_7": "Increased_Range_3"
+  },
+  "stalker_defense.ice_armor": {
+    "rime_ice": "Rime"
+  },
+  "stalker_defense.psionic_armor": {
+    "fortify_mind": "Psychokinetic_Barrier"
+  },
+  "stalker_defense.regeneration": {
+    "instant_regeneration": "Reactive_Regeneration"
+  },
+  "stalker_defense.shield_defense": {
+    "active_defense": "Deflection",
+    "battle_agility": "Active_Defense",
+    "deflection": "Battle_Agility"
+  },
+  "stalker_defense.stone_armor": {
+    "mineral_armor": "Minerals",
+    "stone_armor": "Rock_Armor"
+  },
+  "stalker_defense.willpower": {
+    "reconstruction": "Resurgence"
+  },
+  "stalker_melee.sonic_melee": {
+    "assassins_resonance": "Assassins_Whisper"
+  },
+  "stalker_melee.stone_melee": {
+    "assassins_rockslide": "Assassins_Smash",
+    "heavy_mallet": "Seismic_Mallet"
+  },
+  "tanker_defense.energy_aura": {
+    "energize": "Conserve_Power",
+    "energy_reserve": "Power_Armor"
+  },
+  "tanker_defense.ice_armor": {
+    "rime_ice": "Rime"
+  },
+  "tanker_defense.psionic_armor": {
+    "fortify_mind": "Psychokinetic_Barrier"
+  },
+  "tanker_defense.regeneration": {
+    "instant_healing": "Reactive_Regeneration"
+  },
+  "tanker_melee.sonic_melee": {
+    "build_up": "Sound_Booster"
+  },
+  "teamwork.fortunata_teamwork": {
+    "fate_sealed": "FRT_Fate_Sealed"
+  },
+  "teamwork.widow_teamwork": {
+    "pain_tolerance": "NW_Pain_Tolerance"
+  },
+  "temporary_powers.accolades": {
+    "labyrinth_conqueror": "Conqueror_of_the_Labyrinth",
+    "markrecall": "Mark_and_Recall",
+    "sfc_accolade_power": "Sheer_Willpower"
+  },
+  "villain_pets.spirit_tree": {
+    "spirit_tree_taunt": "Spirit_Tree"
+  }
 };
