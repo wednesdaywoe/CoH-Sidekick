@@ -57,6 +57,11 @@
         "src/data/dataset.ts",
         "scripts/detect-chance-mod-selectors.cjs"
       ]
+    },
+    {
+      "path": "src/utils/mids-import/mbd-corpus.test.ts",
+      "reason": "Reads fixtures/mids/, the corpus of Mids-written .mbd files, which lives in canonical because that is where the Rust reader will grade against it — the beta has no fixtures/ tree at all. Both copies of the importer were run against the corpus on 2026-09-09 and returned identical summaries, so this gate's verdict covers the beta's copy; the day they diverge, that is what the pinned counts here will say.",
+      "gap": "MBDIMPORT-5"
     }
   ],
   "betaOnly": [
