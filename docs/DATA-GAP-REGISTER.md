@@ -57,13 +57,14 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**2 open, of 266 entries.** Both opened 2026-09-09, and both are Mids-interop defects downstream
-of a clean parse.
+**4 open, of 269 entries.** All opened 2026-09-09, all Mids-interop defects downstream of a clean
+parse, and all found by the same thing: six real `.mbd` files and a working Mids
+([fixtures/mids](../fixtures/mids/README.md)).
 
-On the read side, MBDIMPORT-5 drops a refused power's enhancements out of both tallies — found by
-the first Mids-written files ever pointed at that reader
-([fixtures/mids](../fixtures/mids/README.md)). On the write side, MBDEXPORT-2: Mids has never had
-a Thunderspy database, and the exporter answers that with defaults rather than saying so.
+Reading a `.mbd`: MBDIMPORT-5 drops a refused power's enhancements out of both tallies,
+and MBDIMPORT-7 is why one of them was refused: the name map's join is blind to a whole category.
+Writing one: MBDEXPORT-2, where Mids has never had a Thunderspy database and the exporter answers
+with defaults; and MBDEXPORT-3, where the export applies no reverse name rotation at all.
 
 The parser frontier itself is clear — EXPRPUNT-1 opened and closed on 2026-09-08, and
 [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9 — so
@@ -654,7 +655,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 57 of 59 closed
+[Full detail](gaps/pipeline-provenance.md) — 58 of 62 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -691,6 +692,40 @@ measurement went, and where a closure for the residual belongs too.
   **Check** — `npx vitest run src/utils/mids-import/mbd-corpus.test.ts` pins the three files at 0,
   6 and 1 enhancements lost to neither tally. A fix turns all three to 0 and the pins into the
   invariant; any other movement reds, including the corpus growing a file that loses more.
+- [x] **MBDIMPORT-6** — Mids grades an origin enhancement `TrainingO`/`DualO`/`SingleO` and the
+  importer tested for `'SO'`/`'DO'`/`'TO'`, which no `.mbd` carries: the branch was dead while
+  `SingleO` was swallowed by the special-enhancement check above it, so the first real levelling
+  build ever read lost 79 of its 89 enhancements — and MBDIMPORT-4's own suite had passed `'SO'`
+  by hand through that same unreachable door; specials now key on UID prefix alone and origins on
+  Mids' grade names
+- [ ] **MBDIMPORT-7** — the name map joins Mids' powersets to ours on the export's own category
+  token, and the two spell one differently: our Rebirth export says `Guardian_Comp`, Mids says
+  `Guardian_Composition`, so all 13 Guardian secondaries get no rotation rows and the generator
+  `continue`s past the miss without reporting it. The corpus Guardian loses Grounding Shield —
+  Mids spells it `Groundeding_Shield` — and its six enhancements go with it
+  **Goal** — a powerset Mids and this export both carry is compared, or the failure to compare it
+  is stated.
+  **Done when** — the join reports every Mids powerset it could not match rather than skipping it
+  silently; the Guardian secondaries join and their rotations reach the map; and the fix is derived
+  rather than a table of names — the import path resolves a powerset on its second segment alone,
+  which is why importing a Guardian build works while the map that should hold this name does not.
+  **Check** — `node scripts/convert-mids-name-map.cjs --dataset rebirth` reports "24 powersets (of
+  3447 shared)" while this row is open, against 3,547 powersets in
+  `tools/mids-oracle/mids-power-names.rebirth.json`. A rising shared count, or any
+  `guardian_composition` key in the map, is the fix landing.
+- [ ] **MBDEXPORT-3** — the export applies no reverse name rotation, so every power whose internal
+  name the game rotated leaves here unbindable: 82 such names on Homecoming, 54 on Thunderspy, 32
+  on Rebirth. `mids-export.ts` imports `mids-uids` and never `mids-name-map`, under a doc line
+  calling itself "the reverse of `src/utils/mids-import/`". Proven in Mids rather than argued: our
+  Rebirth export's `Disrupting_Torrent` showed as a blank row still holding six enhancements, and
+  the same file with that one name changed to Mids' `Disrupting _Torrent` bound all of it
+  **Goal** — a build exported from here opens in Mids as the build the user had.
+  **Done when** — the export resolves each power name through the same per-powerset map the import
+  reads, in reverse; a name with no reverse entry is reported rather than written as-is, since a
+  power Mids cannot bind takes its enhancements with it; and the round trip is graded on a build
+  carrying a rotation, not only on one that happens to avoid them.
+  **Check** — `grep -c mids-name-map src/utils/mids-export.ts` returns 0 while this row is open.
+  Non-zero means the export reads the map, which is the whole of the fix.
 - [x] **MBDEXPORT-1** — the .mbd exporter built Mids' enhancement UIDs out of set display names, and
   Mids answers a UID it does not know by leaving the slot empty with no error: a user's exported
   build arrived missing 13 of 63 enhancements, all four Fitness inherents and the uniques in them,
@@ -707,10 +742,10 @@ measurement went, and where a closure for the residual belongs too.
   **Goal** — a build this planner cannot honestly express as a `.mbd` says so, rather than
   arriving in Mids as a different character.
   **Done when** — the Thunderspy EnhDB's real provenance is stated wherever it is read; an
-  archetype with no `Class_` token warns instead of defaulting, per this module's own contract that
-  an unreported warning is a build with holes and no explanation; the `Database` string is decided
-  for a fork Mids does not carry rather than falling into the Homecoming else-branch; and the four
-  sets with no Mids UID at all are reported on export rather than shipped as empty slots.
+  archetype with no `Class_` token warns instead of defaulting; the `Database` string is decided
+  for a fork Mids does not carry rather than falling into the Homecoming else-branch; and the three
+  Thunderspy sets with no Mids UID (`kb` and the two Primalist ATOs) are reported on export rather
+  than shipped as empty slots.
   **Check** — `npx vitest run src/utils/mids-export-thunderspy.test.ts` pins all four halves of
   today's behaviour on a real Thunderspy build. Pins, not approval: closing this row changes them
   deliberately, and any other movement reds.

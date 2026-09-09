@@ -55,6 +55,44 @@ export function mapOrigin(midsOrigin: string): Origin {
   return MIDS_ORIGIN_MAP[midsOrigin] ?? 'Natural';
 }
 
+/**
+ * Mids' `eEnhGrade`, spelled as Mids writes it into a `.mbd`.
+ *
+ * This importer used to branch on `'SO' | 'DO' | 'TO'`, which no file has ever
+ * carried — dead code that made origin enhancements look handled. `SingleO` was
+ * meanwhile swallowed one branch earlier by the special-enhancement check, so
+ * every single-origin piece in a real build came back "Unrecognized special
+ * enhancement prefix" and every DO and TO came back "IO set not found".
+ *
+ * It read as covered because the only origin-graded pieces in the Homecoming
+ * corpus are Hamidon Os, which the special path genuinely owns, and because the
+ * test that verified the negative relative levels passed `'SO'` by hand. The
+ * first real levelling build ever read lost 79 of its 89 enhancements. See
+ * DATA-GAP MBDIMPORT-6.
+ */
+const MIDS_ORIGIN_TIER: Record<string, 'TO' | 'DO' | 'SO'> = {
+  TrainingO: 'TO',
+  DualO: 'DO',
+  SingleO: 'SO',
+};
+
+/**
+ * Split `Magic_Endurance_Discount` into its origin and its stat.
+ *
+ * Mids names an origin enhancement `<Origin>_<Stat>`, and the stat half is what
+ * `MIDS_STAT_MAP` keys on. Only the five real origins split — a UID that starts
+ * with anything else is left whole, so a shape this does not know reaches the
+ * stat lookup intact and fails there by name rather than being quietly halved.
+ */
+function splitOriginUid(uid: string): [Origin | undefined, string] {
+  const cut = uid.indexOf('_');
+  if (cut > 0) {
+    const head = uid.slice(0, cut);
+    if (MIDS_ORIGIN_MAP[head]) return [MIDS_ORIGIN_MAP[head], uid.slice(cut + 1)];
+  }
+  return [undefined, uid];
+}
+
 // ============================================
 // POWERSET MAPPING
 // ============================================
@@ -887,21 +925,26 @@ export function mapEnhancementUid(
   const level = Math.min(Math.max(ioLevel + 1, 1), 53);
   const boost = parseBoostLevel(relativeLevel);
 
-  // Check for special enhancements (Hamidon, Synthetic HO, Titan, Hydra, D-Sync, Prestige)
-  if (grade === 'SingleO' || uid.startsWith('Synthetic_Hamidon_') || uid.startsWith('Hamidon_') || uid.startsWith('Titan_') || uid.startsWith('Hydra_') || uid.startsWith('DSync_') || uid.startsWith('Dsync_') || uid.startsWith('Generic_')) {
+  // Special enhancements (Hamidon, Synthetic HO, Titan, Hydra, D-Sync, Prestige)
+  // are identified by their UID prefix and nothing else. Grade cannot do it:
+  // Mids grades a Hamidon `SingleO`, and so is every ordinary SO in the game.
+  if (uid.startsWith('Synthetic_Hamidon_') || uid.startsWith('Hamidon_') || uid.startsWith('Titan_') || uid.startsWith('Hydra_') || uid.startsWith('DSync_') || uid.startsWith('Dsync_') || uid.startsWith('Generic_')) {
     return mapSpecialEnhancementUid(uid, boost);
   }
 
-  // Check for origin enhancements (SO/DO/TO)
-  if (grade === 'SO' || grade === 'DO' || grade === 'TO') {
-    const stat = MIDS_STAT_MAP[uid] ?? uid;
+  // Origin enhancements (TO/DO/SO), which Mids grades TrainingO/DualO/SingleO
+  // and names `<Origin>_<Stat>`.
+  const tier = grade ? MIDS_ORIGIN_TIER[grade] : undefined;
+  if (tier) {
+    const [origin, statUid] = splitOriginUid(uid);
+    const stat = MIDS_STAT_MAP[statUid] ?? statUid;
     try {
-      const enh = createOriginEnhancement(stat as any, grade, undefined, boost || undefined);
+      const enh = createOriginEnhancement(stat as any, tier, origin, boost || undefined);
       return { enhancement: enh, warning: null };
     } catch {
       return {
         enhancement: null,
-        warning: { type: 'enhancement', midsName: uid, message: `Unknown origin enhancement stat: ${uid}` },
+        warning: { type: 'enhancement', midsName: uid, message: `Unknown origin enhancement stat: ${statUid}` },
       };
     }
   }

@@ -63,13 +63,28 @@ def set_key(uid: str) -> str:
     and drops apostrophes. Two sets need more: `Attuned_Cupids_Crush` carries a
     prefix on the *set* record, and `Gaussians_Synchronized_Fire-Control` keeps
     a hyphen the piece UIDs spell as `FireControl`.
+
+    And whitespace is dropped, because Mids carries the game's typos exactly.
+    Rebirth's EnhDB names one set `Superior _Endless_Nightmare`, with a stray
+    space that its own piece UIDs do not have — the same shape as its
+    `Disrupting _Torrent` power. Keeping it produced the setId
+    `superior _endless_nightmare`, which matches nothing on either side: the
+    export reported "Mids has no enhancement by that name" for a set Mids
+    plainly has, and the import failed all six pieces. One key in four forks.
+    See DATA-GAP MBDEXPORT-2.
     """
     stem = uid
     for prefix in UID_PREFIXES:
         if stem.startswith(prefix):
             stem = stem[len(prefix):]
             break
-    return stem.lower().replace("'", "’").replace("’", "").replace("-", "")
+    return (
+        stem.lower()
+        .replace("'", "’")
+        .replace("’", "")
+        .replace("-", "")
+        .replace(" ", "")
+    )
 
 
 def piece_index(uid: str) -> int | None:

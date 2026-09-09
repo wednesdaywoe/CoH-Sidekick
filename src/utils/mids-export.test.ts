@@ -124,12 +124,15 @@ describe('mids-export enhancement UIDs', () => {
   const UNNAMEABLE: Record<string, string[]> = {
     homecoming: [],
     brainstorm: [],
-    // Mids' Rebirth EnhDB has no `_A` for Return From the Grave, and no
-    // Superior Endless Nightmare at all.
-    rebirth: [
-      'return_from_the_grave piece 1',
-      ...[1, 2, 3, 4, 5, 6].map((n) => `superior_endless_nightmare piece ${n}`),
-    ],
+    // Mids' Rebirth EnhDB has no `_A` for Return From the Grave.
+    //
+    // Superior Endless Nightmare used to be listed here too, on the claim that
+    // Mids had no such set. It has one — a user slotted it in Mids and exported
+    // the build. What Mids does not have is our spelling: its set record reads
+    // `Superior _Endless_Nightmare`, with a stray space its own piece UIDs lack,
+    // and the emitter's key kept it. The six pieces became nameable the moment
+    // `set_key` dropped whitespace (MBDEXPORT-2), which is what reds this list.
+    rebirth: ['return_from_the_grave piece 1'],
     // Thunderspy ships KB and the Primalist ATOs; Mids has no Thunderspy build
     // of its own, so its Generic database predates all three.
     thunderspy: [
