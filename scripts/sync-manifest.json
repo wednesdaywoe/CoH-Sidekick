@@ -217,7 +217,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "303bd5f9da295832e22924e2899b6992f6d724a20f28bc5be1f10ba9d3660f3f"
+      "sha256": "586c55919947dac83c2ad226c6cafe7ff33ce4834889af4eccf02e2b9e8c4809"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -696,8 +696,8 @@
       "path": "src/utils/mids-import/importer.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "8b88d0b998ae8f354bb9126802f7ed79b6519a4676fef7afb2752e1c8c1530e5",
-        "beta": "b286a85db96c9f7f419846c6c73714ddd6961b9321c6c89c78708bdb91765f23"
+        "canonical": "1ea367f8e123adb05ac39f24d9aac7d706e2ef3d77b987329561a1ea4b30b101",
+        "beta": "4a7189758556bd3216c6be9435e5d71c9d91bc0b1cdd50de1528f5f3e0dba4af"
       },
       "reason": "SLOT-3: beta's import call now passes ensureSlotOrderPopulated a live levelUpMode flag (false here — this pure parser has no store access, so the store's own importMidsBuild action re-runs the call against the real mode right after) so off-mode slot placement stops enforcing a pick-level schedule floor. Canonical's copy still calls the one-arg form; canonical's slot-levels.ts has no levelUpMode parameter to receive it.",
       "exit": "canonical's own TS import tooling adopts the same levelUpMode-aware call (or a maintainer confirms it doesn't need SLOT-3's fix), then a --write carries the converged hash across. sync:shared only flows canonical to beta and refuses to clobber a beta-authored edit, so this side won't converge on its own. Re-cut 2026-09-09 with its two source twins: the first half of that will not happen on its own — canonical's `src/` is not tooling that adopts things, it is the tree the Rust port reads — so the condition that actually binds is that the Rust `.mbd` READER be ported from the beta's levelUpMode-aware call, the same way the writer must be (see `src/utils/mids-export.ts`).",
@@ -731,12 +731,12 @@
     {
       "path": "src/utils/mids-import/summary-counts.test.ts",
       "status": "identical",
-      "sha256": "890b8a31ae837fe9c7137ee6a3d6f541e9e48410d14a814ef5db8d3fda40a870"
+      "sha256": "40cf115ec990be0632c221baf55bf3497253fb0eac5d31b5cdfa9ca526cdeec6"
     },
     {
       "path": "src/utils/mids-import/types.ts",
       "status": "identical",
-      "sha256": "5a318cca903590857c07e6a3d52c296df9fa5dabed46039fa3600e94465f29fa"
+      "sha256": "de6cff3a22cb93d2c38458948ad2ae6c19bf6db90121844bbd779fe3d21503ec"
     },
     {
       "path": "src/utils/slot-levels.ts",

@@ -369,6 +369,27 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
   for (const entry of mbd.PowerEntries) {
     if (!entry.PowerName) continue;
 
+    /**
+     * What this entry brought, read off the file before anything below has had a
+     * chance to decline it (MBDIMPORT-5).
+     *
+     * There are a dozen ways out of this body — a silent skip, an unrecognised
+     * format, the reassign guard, a name no powerset holds, a claim another entry
+     * already made — and each one used to leave whatever the entry was carrying in
+     * no count at all. The Stalker corpus file lost six enhancements down one of
+     * them beside `enhancementsFailed: 0`, which is worse than a break: the summary
+     * positively asserted that nothing had failed.
+     *
+     * So the accounting is `finally` rather than a line at each exit. A counter you
+     * have to remember to reach is a counter the next refusal path will miss, and
+     * this row exists because that is exactly what happened.
+     */
+    const held = entryEnhancements(entry);
+    const slotsHeld = entry.SlotEntries?.length ?? 0;
+    const enhBefore = summary.enhancementsImported + summary.enhancementsFailed;
+    const slotsBefore = summary.slotsImported;
+    try {
+
     // Handle incarnate powers separately (Incarnate.Alpha.Musculature_Radial_Paragon)
     if (entry.PowerName.startsWith('Incarnate.')) {
       const incResult = processIncarnateEntry(entry, warnings, summary);
@@ -504,6 +525,15 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
         claimedBy.set(powerName, entry.PowerName);
         return true;
       }
+      /**
+       * The slots were counted as they resolved, and it is only here that we learn
+       * they have nowhere to land. Hand them back so the reconciliation at the foot
+       * of the loop reports them, rather than the summary counting as imported six
+       * pieces the build does not hold. A duplicate carrying nothing still returns
+       * silently; one carrying pieces now says which pieces.
+       */
+      summary.enhancementsImported -= (result.power.slots ?? []).filter(Boolean).length;
+      summary.slotsImported -= entry.SlotEntries?.length ?? 0;
       const by = claimedBy.get(powerName);
       if (by && by !== entry.PowerName) {
         warnings.push({
@@ -542,6 +572,24 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
       case 'inherent':
         inherentSlotData.push(result.power);
         break;
+    }
+
+    } finally {
+      const enhReached = summary.enhancementsImported + summary.enhancementsFailed - enhBefore;
+      const slotsReached = summary.slotsImported - slotsBefore;
+      if (slotsHeld > slotsReached) {
+        summary.slotsSkipped = (summary.slotsSkipped ?? 0) + (slotsHeld - slotsReached);
+      }
+      if (held > enhReached) {
+        const orphaned = held - enhReached;
+        summary.enhancementsFailed += orphaned;
+        warnings.push({
+          type: 'enhancement',
+          midsName: entry.PowerName,
+          message: `${orphaned} slotted enhancement${orphaned === 1 ? '' : 's'} left the `
+            + 'build with this entry',
+        });
+      }
     }
   }
 
@@ -706,6 +754,24 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
   // import dialog reports and the number the dashboard's Pwr chip reports are the same
   // number computed the same way. See `countBudgetPowerPicks`.
   summary.powersImported = countBudgetPowerPicks(build);
+
+  /**
+   * The reconciliation the per-entry accounting above is supposed to make true, asserted
+   * rather than assumed. It cannot catch a shortfall — the `finally` already sweeps those
+   * into `enhancementsFailed` — but it does catch the other direction, an entry counted
+   * twice, which is what a dropped duplicate looked like before `claimSlot` handed its
+   * count back.
+   */
+  const fileEnhancements = mbd.PowerEntries.reduce((n, e) => n + entryEnhancements(e), 0);
+  const accounted = summary.enhancementsImported + summary.enhancementsFailed;
+  if (accounted !== fileEnhancements) {
+    warnings.push({
+      type: 'general',
+      midsName: '',
+      message: `Import accounted for ${accounted} enhancements, and the file holds `
+        + `${fileEnhancements}`,
+    });
+  }
 
   return {
     success: true,
@@ -1128,6 +1194,11 @@ function processIncarnateEntry(
 // ============================================
 // SELECTED POWER CONSTRUCTION
 // ============================================
+
+/** What the file says this entry holds, counted off the file rather than off what resolved. */
+function entryEnhancements(entry: MbdPowerEntry): number {
+  return (entry.SlotEntries ?? []).filter((s) => s.Enhancement).length;
+}
 
 function buildSelectedPower(
   powerDef: Power,

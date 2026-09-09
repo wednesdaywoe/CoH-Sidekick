@@ -57,13 +57,13 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**2 open, of 276 entries.** Both opened 2026-09-09, both Mids-interop defects downstream of a
-clean parse, and both found by the same thing: seven real `.mbd` files and a working Mids
+**1 open, of 276 entries.** It opened 2026-09-09, a Mids-interop defect downstream of a clean
+parse, found by what found the rest: seven real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
-Reading a `.mbd`: MBDIMPORT-5 drops a refused power's enhancements out of both tallies. MBDIMPORT-7
-was why one of them was refused — the name map's join was blind to a whole category — and closed
-the same day, taking the corpus Guardian from six lost enhancements to none.
+Reading a `.mbd` is done. The name map's join was blind to a whole category, which is why the
+corpus Guardian lost six enhancements (MBDIMPORT-7); nothing said so because a declined entry
+took its pieces out of both tallies (MBDIMPORT-5). Both closed 2026-09-09.
 
 Writing one is the worse half, and the Kheldian corpus file proved it by round trip. MBDEXPORT-4
 wrote a grade token Mids cannot parse, and MBDEXPORT-3 wrote our internal names where Mids had
@@ -95,7 +95,7 @@ and 19 / 17 / 28 unpaired sets became 1 / 6 / 10, each survivor attributed.
 The 56 name rotations that came with those paths are the part to remember: an unpaired set carries
 no name rows either, so its rotations were invisible rather than absent.
 
-That leaves MBDEXPORT-2's fork Mids has never had, on the writing side.
+That leaves MBDEXPORT-2's fork Mids has never had, alone on the list.
 
 The silence is going too. A powerset the writer cannot name in Mids' namespace says so on every
 fork, and Thunderspy's fourteen are the first warnings that build has ever produced.
@@ -106,7 +106,8 @@ truncated at whatever the pipe took — differently each run. `fs.writeSync` now
 
 The parser frontier itself is clear — EXPRPUNT-1 opened and closed on 2026-09-08, and
 [strip1-beta-port](streams/strip1-beta-port.md) closed the same day at BPORT9 — so
-[REBUILD-PROGRESS](REBUILD-PROGRESS.md)'s `.mbd` row is the live work, with MBDIMPORT-5 inside it.
+[REBUILD-PROGRESS](REBUILD-PROGRESS.md)'s `.mbd` row is the live work. It carries the
+reconciliation MBDIMPORT-5 landed, so the Rust reader asserts it rather than inheriting it.
 
 **Carried residuals — named work inside closed entries.** Nine items were scoped out of a closure
 and recorded there rather than reopened. They are not `[ ]` rows: their hosts *are* closed with
@@ -693,7 +694,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 67 of 69 closed
+[Full detail](gaps/pipeline-provenance.md) — 68 of 69 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -714,23 +715,7 @@ measurement went, and where a closure for the residual belongs too.
   (x0.70 read as fresh); beta's signed offset table is ported with `relative-level.test.ts`,
   and the Special/Origin factories' +3 cap gave way to `storedLevelOffset`, which preserves
   a negative and clamps to no range — the copies converge back to identical
-- [ ] **MBDIMPORT-5** — a power the reassign guard refuses takes its slots and its enhancements
-  out of the build with it, and neither tally counts them: the 3.7.5.21 Stalker file holds 92
-  enhancements, imports 86, and reports `enhancementsFailed: 0` beside one power-level warning, so
-  six pieces are in the file and in no number the user is shown; MBDIMPORT-1's shape one door over,
-  found by the first three Mids-written files ever run through this importer
-  ([fixtures/mids](../fixtures/mids/README.md))
-  **Goal** — every enhancement a `.mbd` holds is either in the build or in a count that says it is
-  not.
-  **Done when** — `enhancementsImported + enhancementsFailed` equals the file's own enhancement
-  count on all three corpus files; a refused power reports its orphaned slots at the enhancement
-  level rather than only as one power warning; `slotsImported` states what it counts, since today
-  it matches neither the file's 98 nor the finished build's 97; and the Rust reader lands asserting
-  that invariant rather than pinning around it.
-  **Check** — `npx vitest run src/utils/mids-import/mbd-corpus.test.ts` pins the corpus at 6 and 1
-  enhancements lost to neither tally, on the two Stalker files, and 0 on the other five —
-  MBDIMPORT-7 took the Guardian's 6 to 0 on 2026-09-09. A fix turns the last two to 0 and the pins
-  into the invariant; any other movement reds, including the corpus growing a file that loses more.
+- [x] **MBDIMPORT-5** — a power the reassign guard refused took its slots and its enhancements out of the build with it and neither tally counted them: the 3.7.5.21 Stalker file held 92 enhancements, imported 86 and reported `enhancementsFailed: 0`, so six pieces were in the file and in no number the user was shown; every declined entry is now reconciled against what it arrived holding, once at the foot of the loop rather than at each of a dozen refusal sites, and `slotsSkipped` makes `slotsImported` state what it counts
 - [x] **MBDIMPORT-6** — Mids grades an origin enhancement `TrainingO`/`DualO`/`SingleO` and the
   importer tested for `'SO'`/`'DO'`/`'TO'`, which no `.mbd` carries: the branch was dead while
   `SingleO` was swallowed by the special-enhancement check above it, so the first real levelling

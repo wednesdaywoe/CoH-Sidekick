@@ -70,6 +70,51 @@ describe('Mids .mbd import — summary counts', () => {
     expect(result.build?.incarnates.alpha).toBeTruthy();
   });
 
+  /**
+   * MBDIMPORT-5's other direction. The row was found on a refused power, whose slots
+   * never reached a counter at all; this is the entry that reaches every counter and
+   * is dropped afterwards, when a second spelling of the same power finds the first
+   * already there. `enhancementsImported` then claimed pieces the build did not hold,
+   * and the corpus cannot see it — none of the seven real files collides on a power
+   * carrying anything, so the collision above is deliberately slotted here.
+   */
+  it('does not count the pieces of a colliding entry it drops', () => {
+    const piece = (uid: string) => ({
+      Level: 1, IsInherent: false, FlippedEnhancement: null,
+      Enhancement: { Uid: uid, Grade: 'None', IoLevel: 50, RelativeLevel: 'Even', Obtained: false },
+    });
+    const collided = importMidsBuild(JSON.stringify({
+      BuiltWith: { App: 'Mids Reborn', Version: '3.7.5.21', Database: 'Homecoming' },
+      Level: '49', Class: 'Class_Blaster', Origin: 'Technology', Name: 'collision',
+      PowerSets: ['Blaster_Ranged.Assault_Rifle', 'Blaster_Support.Electricity_Manipulation'],
+      PowerEntries: [
+        {
+          PowerName: 'Blaster_Support.Electricity_Manipulation.Havok_Punch',
+          Level: 10, StatInclude: true, SlotEntries: [piece('Crafted_Kinetic_Combat_A')],
+        },
+        {
+          PowerName: 'Blaster_Support.Electricity_Manipulation.Havoc_Punch',
+          Level: 10, StatInclude: true,
+          SlotEntries: [piece('Crafted_Kinetic_Combat_B'), piece('Crafted_Kinetic_Combat_C')],
+        },
+      ],
+    }));
+
+    const secondary = collided.build?.secondary?.powers ?? [];
+    expect(secondary.map((p) => p.internalName)).toEqual(['Havok_Punch']);
+    expect((secondary[0].slots ?? []).filter(Boolean)).toHaveLength(1);
+
+    // One in the build, two dropped with the entry, three in the file — and the
+    // dropped pair named at the enhancement level rather than only as a power warning.
+    expect(collided.summary.enhancementsImported).toBe(1);
+    expect(collided.summary.enhancementsFailed).toBe(2);
+    expect(collided.summary.slotsImported + (collided.summary.slotsSkipped ?? 0)).toBe(3);
+    expect(collided.warnings.map((w) => [w.type, w.midsName])).toEqual([
+      ['power', 'Blaster_Support.Electricity_Manipulation.Havoc_Punch'],
+      ['enhancement', 'Blaster_Support.Electricity_Manipulation.Havoc_Punch'],
+    ]);
+  });
+
   it('does not count an accolade the user excluded from their Mids totals', () => {
     // Stated against the included case above, which lands: a bare `toBe(0)` would pass
     // for an importer that counted no accolade at all.

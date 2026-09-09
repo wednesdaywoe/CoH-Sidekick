@@ -75,9 +75,32 @@ export interface MidsImportSummary {
    */
   powersImported: number;
   powersFailed: number;
+  /**
+   * Enhancements the finished build holds. Every enhancement the file carries is in
+   * this count or in `enhancementsFailed` — MBDIMPORT-5 was six that were in neither,
+   * riding out of the build on a power the reassign guard was right to refuse.
+   */
   enhancementsImported: number;
+  /**
+   * Enhancements the file carries that the build does not: a piece whose UID this
+   * dataset cannot resolve, and every piece slotted into an entry the importer
+   * declined — reported at the enhancement level whatever refused the entry holding
+   * it, because a power-level warning does not say how much went with it.
+   */
   enhancementsFailed: number;
+  /**
+   * Slot entries the file carries that the build took. Not the file's slot count —
+   * a declined entry brings slots too, and those are `slotsSkipped`. Not the finished
+   * build's either, which is larger: every power arrives holding a free first slot the
+   * file never mentioned.
+   */
   slotsImported: number;
+  /**
+   * Slot entries the file carries that the build did not take, so that the sentence
+   * above is checkable rather than merely written: `slotsImported + slotsSkipped` is
+   * the file's own slot count. Optional on the same terms as `accoladesImported`.
+   */
+  slotsSkipped?: number;
   /**
    * Accolade toggles switched on, counted apart from powers because they consume no
    * pick. Optional, and absent rather than 0 for an importer that does not report the
