@@ -80,7 +80,36 @@ DATASET_PROVENANCE = {
     ),
 }
 
-UID_PREFIXES = ("Superior_Attuned_", "Attuned_", "Crafted_")
+# The attunement prefix a record's UID carries, longest first so
+# `Superior_Attuned_` is never read as `Attuned_`.
+#
+# Both halves of the file need this. `set_key` strips it to reach the set stem,
+# and `prefix_class` KEEPS it, because it is the only thing that tells apart the
+# records a set stem alone cannot: `Crafted_Shrapnel_A` and its attuned twin sit
+# at the same set and piece, and the game carries both under names Mids has
+# never heard of. Stripping the prefix and discarding which one it was left the
+# reader with a set and a piece where the game has two records, and six of
+# Homecoming's UIDs unresolvable for want of one word.
+UID_PREFIX_CLASS = (
+    ("Superior_Attuned_", "superior-attuned"),
+    ("Attuned_", "attuned"),
+    ("Crafted_", "crafted"),
+)
+
+UID_PREFIXES = tuple(prefix for prefix, _ in UID_PREFIX_CLASS)
+
+# A record whose UID carries none of them. NOT a synonym for "not attuned" —
+# Rebirth spells 23 of its sets bare and 117 of those pieces are the game's
+# ATTUNED records. It means Mids states nothing, and the reader must not infer.
+NO_PREFIX = "bare"
+
+
+def prefix_class(uid: str) -> str:
+    """Which attunement prefix a UID carries, as the table names it."""
+    for prefix, name in UID_PREFIX_CLASS:
+        if uid.startswith(prefix):
+            return name
+    return NO_PREFIX
 
 
 def set_key(uid: str) -> str:
@@ -138,6 +167,7 @@ def build_table(mhd_path: str) -> dict:
     source_sha256 = hashlib.sha256(raw).hexdigest()
 
     io_set_pieces: dict[str, list[str]] = {}
+    io_set_prefix: dict[str, str] = {}
     notes: list[str] = []
     for s in sets:
         key = set_key(s["uid"])
@@ -189,6 +219,25 @@ def build_table(mhd_path: str) -> dict:
         size = max([*by_piece, len(members)]) if members else 0
         io_set_pieces[key] = [by_piece.get(n, "") for n in range(1, size + 1)]
 
+        # The set's attunement prefix, read off the pieces this table actually
+        # emits rather than off the SET record's own UID — those are two
+        # different observations, and it is the piece UID a `.mbd` names.
+        #
+        # A fold, and one that fails loud rather than picking a winner: measured
+        # across all four forks every set's pieces agree, so one value per set
+        # says the same thing as one per piece at a fifth the size. If a
+        # re-vendored database ever mixes them, the fold is wrong and the
+        # generator stops instead of shipping a class that is right for five
+        # pieces and wrong for the sixth.
+        classes = {prefix_class(uid) for uid in by_piece.values()}
+        if len(classes) > 1:
+            raise SystemExit(
+                f"{s['uid']}: pieces carry more than one attunement prefix "
+                f"({sorted(classes)}); the per-set prefix cannot describe them"
+            )
+        if classes:
+            io_set_prefix[key] = classes.pop()
+
         holes = [n for n in range(1, size + 1) if n not in by_piece]
         if holes:
             notes.append(f"{s['uid']}: no UID for piece {holes}, emitted empty")
@@ -201,6 +250,7 @@ def build_table(mhd_path: str) -> dict:
 
     return {
         "ioSetPieces": io_set_pieces,
+        "ioSetPrefix": io_set_prefix,
         "genericIO": generic,
         "special": special,
         "origin": origin,
@@ -238,6 +288,12 @@ def render_ts(dataset: str, source: str, table: dict) -> str:
     for key in sorted(table["ioSetPieces"]):
         pieces = ", ".join(json.dumps(p) for p in table["ioSetPieces"][key])
         lines.append(f"    {json.dumps(key)}: [{pieces}],")
+    lines.append("  },")
+    lines.append("")
+    lines.append("  /** setId → the attunement prefix its piece UIDs carry. */")
+    lines.append("  ioSetPrefix: {")
+    for key in sorted(table["ioSetPrefix"]):
+        lines.append(f"    {json.dumps(key)}: {json.dumps(table['ioSetPrefix'][key])},")
     lines.append("  },")
     lines.append("")
     lines.append("  /** Every crafted generic IO UID Mids knows. */")

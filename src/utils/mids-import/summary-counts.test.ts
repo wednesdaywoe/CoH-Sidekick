@@ -75,7 +75,7 @@ describe('Mids .mbd import — summary counts', () => {
    * never reached a counter at all; this is the entry that reaches every counter and
    * is dropped afterwards, when a second spelling of the same power finds the first
    * already there. `enhancementsImported` then claimed pieces the build did not hold,
-   * and the corpus cannot see it — none of the seven real files collides on a power
+   * and the corpus cannot see it — none of the eight real files collides on a power
    * carrying anything, so the collision above is deliberately slotted here.
    */
   it('does not count the pieces of a colliding entry it drops', () => {

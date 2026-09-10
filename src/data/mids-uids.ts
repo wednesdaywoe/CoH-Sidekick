@@ -30,6 +30,9 @@
 
 import { getActiveDataset } from './dataset';
 
+/** The attunement prefix a Mids UID carries, or `'bare'` where it carries none. */
+export type MidsUidPrefix = 'superior-attuned' | 'attuned' | 'crafted' | 'bare';
+
 export interface MidsUidTable {
   /**
    * setId → piece UID, indexed by `pieceNum - 1`. Keys match the planner's
@@ -41,6 +44,22 @@ export interface MidsUidTable {
    * that piece; callers must treat it as unresolvable rather than emit it.
    */
   ioSetPieces: Record<string, readonly string[]>;
+  /**
+   * setId → the attunement prefix that set's piece UIDs carry.
+   *
+   * `set_key` strips the prefix to reach the stem, and this is the half it used
+   * to throw away. It matters because the stem alone does not identify a
+   * record: Mids' `Crafted_Shrapnel_A` reaches the game's Artillery set at
+   * piece 1, where the game holds TWO records — the crafted one and its attuned
+   * twin — and only the word `Crafted_` says which. Six Homecoming UIDs are
+   * unresolvable without it.
+   *
+   * `'bare'` is a statement, not a gap: Mids spells 23 of Rebirth's sets with
+   * no prefix at all, and 117 of those pieces are the game's ATTUNED records,
+   * so a reader that took bare for "not attuned" would bind the wrong one.
+   * It means Mids says nothing about attunement here.
+   */
+  ioSetPrefix: Record<string, MidsUidPrefix>;
   /** Every crafted generic IO UID Mids knows, e.g. `Crafted_Endurance_Discount`. */
   genericIO: readonly string[];
   /** Hamidon / Hydra / Titan / D-Sync and friends. */
@@ -58,7 +77,7 @@ export interface MidsUidTable {
   sourceSha256: string;
 }
 
-const EMPTY: MidsUidTable = { ioSetPieces: {}, genericIO: [], special: [], origin: [], sourceSha256: '' };
+const EMPTY: MidsUidTable = { ioSetPieces: {}, ioSetPrefix: {}, genericIO: [], special: [], origin: [], sourceSha256: '' };
 
 /** The active dataset's UID table. */
 export function getMidsUids(): MidsUidTable {

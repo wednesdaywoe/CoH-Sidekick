@@ -57,9 +57,18 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 277 entries.** The last row closed 2026-09-09, a Mids-interop defect downstream of a
-clean parse, found by what found the rest: seven real `.mbd` files and a working Mids
-([fixtures/mids](../fixtures/mids/README.md)).
+**2 open, of 280 entries.** MBDIMPORT-8, opened 2026-09-09 by the Rust port of the `.mbd`
+reader: the imported character level comes from an unsourced heuristic that raises 3 of the 8
+corpus builds above what their file states. Downstream of a clean parse, and not a blocker —
+the row exists to stop it being ported blind.
+
+Beside it, MBDIMPORT-9, opened 2026-09-10 by that port's enhancement resolution: Mids spells two
+Rebirth sets with no attunement prefix where the game holds two records apiece, so twelve UIDs
+name a coordinate and stop. Every other Mids UID on all four forks resolves; in the corpus it
+costs 12 of 542 slotted enhancements.
+
+Everything before it is closed, the last on 2026-09-09, found by what found the rest: eight real
+`.mbd` files and a working Mids ([fixtures/mids](../fixtures/mids/README.md)).
 
 Reading a `.mbd` is done. The name map's join was blind to a whole category, which is why the
 corpus Guardian lost six enhancements (MBDIMPORT-7); nothing said so because a declined entry
@@ -85,7 +94,7 @@ through the same two lookups; MBDEXPORT-5 took the Warshade's 36 back with one m
 corpus file showed that a `.mbd` is read positionally and the name was half the fix; MBDEXPORT-8's
 census said one name in four datasets would reach Mids only through a wider join, nothing false.
 
-**All seven corpus builds now bind whole** — every `PowerName` in every file resolves against its
+**All eight corpus builds now bind whole** — every `PowerName` in every file resolves against its
 fork's own Mids database.
 
 What that closure left behind went the same day, as MBDEXPORT-9. The pairing joined on the set
@@ -705,7 +714,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 70 of 70 closed
+[Full detail](gaps/pipeline-provenance.md) — 71 of 73 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -737,6 +746,41 @@ measurement went, and where a closure for the residual belongs too.
   token, and the two spell one differently (`Guardian_Comp` against `Guardian_Composition`), so
   all 13 Rebirth Guardian secondaries got no rotation rows and each miss was a bare `continue`;
   leftovers now pair on the set segment alone, unique and corroborated or reported, keyed by ours
+- [ ] **MBDIMPORT-8** — a `.mbd`'s top-level `Level` is NOT the character level and nothing in
+  the file states it: the corpus Warshade is a complete level-50 build (author-confirmed, 67
+  placed slots) and reads `Level` 48, and its slots-only control reproduces it. Measured across
+  the 8-file corpus, `Level` is the 0-based highest level the build USES — a characterisation,
+  not a source. So the level is derived, and the derivation in use is an unsourced heuristic
+  (`maxPowerEntryLevel >= 49 ? 50`) that happens to answer 50 everywhere the corpus can check.
+  **Goal** — the imported character level comes from a stated rule with a source behind it.
+  **Done when** — the rule is written down with what backs it (Mids' own source, or a save
+  measured under Wine at a known level), and the corpus pins the derived level per file so a
+  later change cannot move it silently.
+  **Check** — `node scripts/keys/mbdimport8-level-is-not-character-level.cjs` names the files
+  pairing a sub-50 `Level` with a full 67-slot complement, and exits non-zero at none. Zero means
+  the claim is ungradeable rather than fixed, and the plain read looks safe again.
+- [ ] **MBDIMPORT-9** — Mids spells Rebirth's Rolling Barrage and Synapse's Agility with no
+  attunement prefix (`Rolling_Barrage_A`…`_F`), and the game holds both `Crafted_` and
+  `Attuned_` records at each of those twelve set-and-piece coordinates: the UID reaches a
+  coordinate, two records answer, and nothing in the file says which. Twelve UIDs on Rebirth,
+  zero on the other three forks; in the corpus it costs 12 of 542 slotted enhancements, six
+  Rolling Barrage pieces in each of two builds. Every other second-door UID resolves — its
+  prefix names the record (Homecoming's six `Crafted_Shrapnel_*`) or the coordinate holds only
+  one. **Not** settled by the 117 bare Rebirth pieces that land on single-record coordinates:
+  those never posed the question, so they are 117 observations of nothing.
+  **Goal** — a `.mbd` naming one of those two sets slots the piece the author had.
+  **Done when** — a source outside the UID's spelling says which record a bare Mids UID names —
+  Mids' own set record read for its members' roster, or a build authored in Mids with a known
+  piece of either set and exported — and the twelve resolve with their attunement pinned.
+  **Check** — `cargo test -p coh_data --test mbd_import_corpus` states both populations: the
+  table's twelve, in those two sets and no others on any fork, and the corpus's twelve, named
+  rather than counted. A thirteenth reds it; so does a reader that starts guessing.
+- [x] **MBDIMPORT-10** — `rename_all = "camelCase"` renders the reader's `generic_io` as
+  `genericIo` while the emitted table spells it `genericIO`, so the field matched nothing and
+  `#[serde(default)]` filled it empty on all four forks: `MidsUids::family` could never answer
+  `GenericIo`. Nothing saw it — the sibling rosters parse and a vaguer refusal is still a correct
+  one; an explicit rename, plus a per-fork census of all three rosters
+
 - [x] **MBDEXPORT-3** — the export applied no reverse name rotation, so a power the game had renamed
   left here under a name Mids has no record of and arrived as a blank row still holding its slots;
   the writer now resolves every power segment through a generated `MIDS_NAME_REVERSE` — a second
