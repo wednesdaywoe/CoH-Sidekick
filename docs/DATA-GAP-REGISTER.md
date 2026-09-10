@@ -57,15 +57,14 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**2 open, of 280 entries.** MBDIMPORT-8, opened 2026-09-09 by the Rust port of the `.mbd`
-reader: the imported character level comes from an unsourced heuristic that raises 3 of the 8
-corpus builds above what their file states. Downstream of a clean parse, and not a blocker —
-the row exists to stop it being ported blind.
+**2 open, of 281 entries.** MBDIMPORT-9, opened 2026-09-10 by the Rust port's enhancement
+resolution: Mids spells two Rebirth sets with no attunement prefix where the game holds two
+records apiece, so twelve UIDs name a coordinate and stop. Its set-record door was walked on
+2026-09-10 and came back negative, leaving only a build authored in the Mids GUI.
 
-Beside it, MBDIMPORT-9, opened 2026-09-10 by that port's enhancement resolution: Mids spells two
-Rebirth sets with no attunement prefix where the game holds two records apiece, so twelve UIDs
-name a coordinate and stop. Every other Mids UID on all four forks resolves; in the corpus it
-costs 12 of 542 slotted enhancements.
+Beside it, MBDIMPORT-11, opened 2026-09-10 by MBDIMPORT-8's closure: a `.mbd`'s placements follow
+Mids' respec table and the export carries only the levelling one, so the new level derivation
+grades them against the wrong schedule. One Rebirth build exceeds even the respec table.
 
 Everything before it is closed, the last on 2026-09-09, found by what found the rest: eight real
 `.mbd` files and a working Mids ([fixtures/mids](../fixtures/mids/README.md)).
@@ -714,7 +713,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 71 of 73 closed
+[Full detail](gaps/pipeline-provenance.md) — 72 of 74 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -746,19 +745,11 @@ measurement went, and where a closure for the residual belongs too.
   token, and the two spell one differently (`Guardian_Comp` against `Guardian_Composition`), so
   all 13 Rebirth Guardian secondaries got no rotation rows and each miss was a bare `continue`;
   leftovers now pair on the set segment alone, unique and corroborated or reported, keyed by ours
-- [ ] **MBDIMPORT-8** — a `.mbd`'s top-level `Level` is NOT the character level and nothing in
-  the file states it: the corpus Warshade is a complete level-50 build (author-confirmed, 67
-  placed slots) and reads `Level` 48, and its slots-only control reproduces it. Measured across
-  the 8-file corpus, `Level` is the 0-based highest level the build USES — a characterisation,
-  not a source. So the level is derived, and the derivation in use is an unsourced heuristic
-  (`maxPowerEntryLevel >= 49 ? 50`) that happens to answer 50 everywhere the corpus can check.
-  **Goal** — the imported character level comes from a stated rule with a source behind it.
-  **Done when** — the rule is written down with what backs it (Mids' own source, or a save
-  measured under Wine at a known level), and the corpus pins the derived level per file so a
-  later change cannot move it silently.
-  **Check** — `node scripts/keys/mbdimport8-level-is-not-character-level.cjs` names the files
-  pairing a sub-50 `Level` with a full 67-slot complement, and exits non-zero at none. Zero means
-  the claim is ungradeable rather than fixed, and the plain read looks safe again.
+- [x] **MBDIMPORT-8** — a `.mbd`'s top-level `Level` is NOT the character level and Mids has no
+  persisted one: `LoadBuild` never reads the field and `Character.Level` is recomputed as
+  `GetMaxLevel()`, so `Level == max(power, slot levels) − 1` on 8 of 8 corpus files; the
+  unsourced `maxPowerEntryLevel >= 49 ? 50` heuristic (which ignored slot levels) is replaced by
+  Mids' number as a floor and the export's own leveling schedule as the raise
 - [ ] **MBDIMPORT-9** — Mids spells Rebirth's Rolling Barrage and Synapse's Agility with no
   attunement prefix (`Rolling_Barrage_A`…`_F`), and the game holds both `Crafted_` and
   `Attuned_` records at each of those twelve set-and-piece coordinates: the UID reaches a
@@ -769,9 +760,10 @@ measurement went, and where a closure for the residual belongs too.
   one. **Not** settled by the 117 bare Rebirth pieces that land on single-record coordinates:
   those never posed the question, so they are 117 observations of nothing.
   **Goal** — a `.mbd` naming one of those two sets slots the piece the author had.
-  **Done when** — a source outside the UID's spelling says which record a bare Mids UID names —
-  Mids' own set record read for its members' roster, or a build authored in Mids with a known
-  piece of either set and exported — and the twelve resolve with their attunement pinned.
+  **Done when** — a source outside the UID's spelling says which record a bare Mids UID names,
+  and the twelve resolve with their attunement pinned. Mids' own set record was read 2026-09-10
+  and does NOT answer; the remaining door is a build authored in Mids with a known piece, which
+  needs the GUI.
   **Check** — `cargo test -p coh_data --test mbd_import_corpus` states both populations: the
   table's twelve, in those two sets and no others on any fork, and the corpus's twelve, named
   rather than counted. A thirteenth reds it; so does a reader that starts guessing.
@@ -780,6 +772,21 @@ measurement went, and where a closure for the residual belongs too.
   `#[serde(default)]` filled it empty on all four forks: `MidsUids::family` could never answer
   `GenericIo`. Nothing saw it — the sibling rosters parse and a vaguer refusal is still a correct
   one; an explicit rename, plus a per-fork census of all three rosters
+- [ ] **MBDIMPORT-11** — a `.mbd`'s slot placements follow Mids' RESPEC table (`RLevels.mhd`, 73
+  slots) and the export carries only the normal one (`assignable_boost`, 67), so MBDIMPORT-8's
+  level raise grades placements against a table they were not planned on. Costs nothing on the
+  corpus — all eight resolve to 50 either way — but the tables differ by 6, and a sub-50 build
+  placing between the two budgets would be raised to a level it has not reached. Census: HC ×5
+  and the Night Widow place 67; the Mastermind 72 (ordinary under respec); the Guardian **75**,
+  which exceeds even 73 by two and has no explanation — Rebirth granting more than we read, Mids'
+  Rebirth database being wrong, or an illegal build Mids wrote anyway.
+  **Goal** — placements are graded against the table Mids planned them on, and the Guardian's two
+  extra slots are attributed.
+  **Done when** — the export carries the respec schedule (or the binary is shown to hold only
+  one), the raise reads the right table, and the Guardian resolves to one of the three readings.
+  **Check** — `npx vitest run src/utils/mids-import/mbd-corpus.test.ts` states the population:
+  the files carrying an `overBudget` pin are exactly the Mastermind at 72 and the Guardian at 75.
+  A third joining them, or either leaving, breaks the census this row is sized from.
 
 - [x] **MBDEXPORT-3** — the export applied no reverse name rotation, so a power the game had renamed
   left here under a name Mids has no record of and arrived as a blank row still holding its slots;

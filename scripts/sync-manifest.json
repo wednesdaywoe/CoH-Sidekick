@@ -217,7 +217,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "5644e62280222c4f1a8c1de1c6dd92bb68df65b4df614d815a4b89bb3c1fc9f4"
+      "sha256": "8bc40e01115df7462faa155a2293516e354fc5e277997bc5aefff4cc1e329801"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -696,10 +696,10 @@
       "path": "src/utils/mids-import/importer.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "7504b438101c6d41cef43b02c858e54bc4459af82e1ed22a8372e5ada20dc0ff",
+        "canonical": "e38b029fbd472b5d9b8aaf5164b1b98b61ec2d21551513ffdfc6de0b60b84f8d",
         "beta": "e3e516784639583dac9d9156556c25d867cba0122ea3e86317d168039bdbe15a"
       },
-      "reason": "SLOT-3: beta's import call now passes ensureSlotOrderPopulated a live levelUpMode flag (false here — this pure parser has no store access, so the store's own importMidsBuild action re-runs the call against the real mode right after) so off-mode slot placement stops enforcing a pick-level schedule floor. Canonical's copy still calls the one-arg form; canonical's slot-levels.ts has no levelUpMode parameter to receive it.",
+      "reason": "SLOT-3: beta's import call now passes ensureSlotOrderPopulated a live levelUpMode flag (false here — this pure parser has no store access, so the store's own importMidsBuild action re-runs the call against the real mode right after) so off-mode slot placement stops enforcing a pick-level schedule floor. Canonical's copy still calls the one-arg form; canonical's slot-levels.ts has no levelUpMode parameter to receive it. MBDIMPORT-8 (2026-09-10) widened the fork: canonical derives the imported character level from Mids' GetMaxLevel floor raised by the leveling schedule (src/utils/mids-import/character-level.ts, canonical-only), where beta still carries the maxPowerEntryLevel >= 49 ? 50 heuristic.",
       "exit": "canonical's own TS import tooling adopts the same levelUpMode-aware call (or a maintainer confirms it doesn't need SLOT-3's fix), then a --write carries the converged hash across. sync:shared only flows canonical to beta and refuses to clobber a beta-authored edit, so this side won't converge on its own. Re-cut 2026-09-09 with its two source twins: the first half of that will not happen on its own — canonical's `src/` is not tooling that adopts things, it is the tree the Rust port reads — so the condition that actually binds is that the Rust `.mbd` READER be ported from the beta's levelUpMode-aware call, the same way the writer must be (see `src/utils/mids-export.ts`).",
       "gap": "SLOT-3"
     },
