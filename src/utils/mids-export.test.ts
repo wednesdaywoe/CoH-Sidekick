@@ -331,8 +331,11 @@ describe('mids-export regression: therm/water defender', () => {
     // pick sits one before it. It counts PICK SLOTS, not named powers — a build that
     // skipped its level-49 pick still has to keep the inherents out of that slot.
     expect(mbd.PowerEntries[mbd.LastPower - 1].PowerName).toBe('Pool.Fighting.Tough');
+    // `Temporary_Powers.` is the accolades (MBDEXPORT-12); Mids files them past `LastPower`
+    // in its own corpus, which is where the reader takes a name rather than an index.
+    const GRANTED = ['Inherent.', 'Incarnate.', 'Temporary_Powers.'];
     expect(mbd.PowerEntries.slice(mbd.LastPower).every(
-      (pe) => pe.PowerName.startsWith('Inherent.') || pe.PowerName.startsWith('Incarnate.'),
+      (pe: { PowerName: string }) => GRANTED.some((prefix) => pe.PowerName.startsWith(prefix)),
     )).toBe(true);
   });
 

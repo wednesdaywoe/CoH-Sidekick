@@ -11,6 +11,7 @@ import { getPowerset, getPowersetsForArchetype } from '@/data/powersets';
 import { getPowerPool } from '@/data/power-pools';
 import { getEpicPool } from '@/data/epic-pools';
 import { getIncarnatePower } from '@/data/incarnates';
+import { getAccolade } from '@/data/accolades';
 import { getIOSet } from '@/data/io-sets';
 import { getMidsGenericIOUid, getMidsIOSetPieceUid, getMidsOriginUid, getMidsSpecialUid } from '@/data/mids-uids';
 import {
@@ -878,6 +879,10 @@ export function exportToMidsWithReport(
     });
   }
 
+  // Accolades (DATA-GAP MBDEXPORT-12), after the granted run for the same reason the
+  // incarnates are: everything past `LastPower` is addressed by name, not by index.
+  for (const entry of accoladeEntries(build, resolve, warnings)) powerEntries.push(entry);
+
   const mbdFile: MbdFile = {
     BuiltWith: {
       App: 'CoH Planner',
@@ -932,6 +937,72 @@ function incarnateFullName(
   const set = resolve(`${segments[0]}.${segments[1]}`, `${chosen.displayName} (${slot})`);
   const name = midsPowerSegment(set.ourKey, segments.slice(2).join('.'));
   return set.path ? `${set.path}.${name}` : name;
+}
+
+/**
+ * The `Temporary_Powers.Accolades.*` entries for the accolades this build holds
+ * (DATA-GAP MBDEXPORT-12).
+ *
+ * MBDIMPORT-1 is this hole on the reader's side: a blanket `Temporary_Powers.` skip took the
+ * accolades out with the day-job temps, and a build lost The Atlas Medallion, Task Force
+ * Commander, Portal Jockey and Freedom Phalanx Reserve — their +MaxHP and +MaxEnd with them —
+ * while the summary reported nothing missing. The writer had the mirror of it: the roster was
+ * read on the way in and never written on the way out, so a build that arrived with four left
+ * with none.
+ *
+ * The name goes out through the same two lookups every other power name does — the set path,
+ * then the power's own name in Mids' spelling — because a path COMPOSED rather than looked up
+ * is MBDEXPORT-6's defect, and `Temporary_Powers.Accolades` is in the path table already.
+ * Composing it here would be right on all four forks today and unguarded the day one spells it
+ * differently.
+ *
+ * `StatInclude` is the mapping, not presence, and it is `true` for everything written: Mids
+ * keeps "owned" and "counted" apart, the planner carries only the counted state, and the
+ * reader on both sides reads the flag as that state. An accolade the planner does not hold is
+ * simply not written, which is the same statement.
+ *
+ * `Level` is not information about the build. Mids' own corpus writes 50 on two files and 1 on
+ * a third at the same character level, and neither reader looks at it for an accolade — so the
+ * character's level goes out, as the honest reading of a permanent buff this character holds.
+ *
+ * The count reconciles the way the import's does (MBDIMPORT-5): every id in the build's roster
+ * is either written or named in a warning. An accolade dropped in silence is the failure this
+ * row exists to end, so the miss is REPORTED rather than skipped — a stored id with no power
+ * behind it is a roster divergence, the same fact the reader's third arm surfaces.
+ */
+function accoladeEntries(
+  build: Build,
+  resolve: (ourKey: string, label: string) => MidsSet,
+  warnings: MidsExportWarning[],
+): MbdPowerEntry[] {
+  const entries: MbdPowerEntry[] = [];
+  for (const id of build.accolades ?? []) {
+    const power = getAccolade(id);
+    const segments = (power?.fullName ?? '').split('.');
+    if (!power || segments.length < 3) {
+      warnings.push({
+        power: power?.name || id,
+        slot: 0,
+        detail: power
+          ? `the accolade roster carries no full name for ${id}, so Mids gets no entry for it`
+          : `no accolade in this dataset answers to ${id}, so it is not written`,
+      });
+      continue;
+    }
+    const set = resolve(`${segments[0]}.${segments[1]}`, power.name);
+    const name = midsPowerSegment(set.ourKey, segments.slice(2).join('.'));
+    entries.push({
+      PowerName: set.path ? `${set.path}.${name}` : name,
+      Level: build.level,
+      StatInclude: true,
+      ProcInclude: false,
+      VariableValue: 0,
+      InherentSlotsUsed: 0,
+      SubPowerEntries: [],
+      SlotEntries: [],
+    });
+  }
+  return entries;
 }
 
 /**

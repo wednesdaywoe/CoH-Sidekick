@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**6 open, of 289 entries.** All six are our own `.mbd` WRITER, opened 2026-09-10 by the first
+**6 open, of 290 entries.** Five are our own `.mbd` WRITER, opened 2026-09-10 by the first
 thing that has ever read what it writes: `fixtures/mids/ours/` holds our exporter's spelling of
 each of the eight corpus builds, and `mbd_writer_roundtrip` reads both spellings against one
 database and compares the builds. The reader is not implicated — it is the instrument.
@@ -65,11 +65,14 @@ database and compares the builds. The reader is not implicated — it is the ins
 In the order they cost a user something:
 
 - **MBDEXPORT-11** — `LastPower` fixed to the COUNT and graded on Mids' files; awaiting Wine
-- **MBDEXPORT-12** — no accolades are written at all; 12 across the corpus
 - **MBDEXPORT-13** — an excluded power comes back included; `undefined` vs `false` across the seam
 - **MBDEXPORT-15** — only slots holding something are written; 8 empty placements go
 - **MBDEXPORT-14** — one piece's level written as 0; 3 slots
 - **MBDEXPORT-16** — a VEAT's branch filing is re-derived, not carried; 24 attributions, nothing lost
+
+The sixth is not the writer's. **ACCOLADE-3** — two accolade ids predate the internal-name
+convention and only `buildStore` renames them, so a `.skif` opened from a file loses those
+accolades from the totals in silence. MBDEXPORT-12's warning arm surfaced it on 2026-09-10.
 
 Each is pinned by its POPULATION in that test rather than waved through, so a deviation that
 widens reds even while its row is open, and a row closes by DELETING its pin. What none of them
@@ -327,7 +330,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Sets, boosts, incarnates, inherents
 
-[Full detail](gaps/sets-boosts-incarnates.md) — 27 of 27 closed
+[Full detail](gaps/sets-boosts-incarnates.md) — 27 of 28 closed
 
 - [x] **HYBRID-2** — Homecoming and its Brainstorm beta dropped the Melee Hybrid's status-protection
   rows at Total Radial Graft and both T4 Embodiments while the tooltip still promises them, where
@@ -344,6 +347,19 @@ measurement went, and where a closure for the residual belongs too.
   form gating the game gives them on every fork; the call landed with the script's FORK-1
   reconciliation, and a two-legged guard now derives the emitter roster and grades all 10,502
   emitted powers against their own export records
+- [ ] **ACCOLADE-3** — two accolade ids predate the internal-name convention (`atlas_medallion`,
+  `freedom_phalanx`) and the rename lives ONLY in `buildStore`'s persisted-state migration: a
+  `.skif` opened from a file goes through `hydrateBuild`, which folds the legacy OBJECT to its id
+  and leaves the id alone, so `getAccolade` answers undefined and `character-totals` filters the
+  pick out of the totals in silence. Surfaced 2026-09-10 by MBDEXPORT-12's warning arm. The Rust
+  engine already reports it; the TS one does not.
+  **Goal** — a build naming an accolade the roster does not hold either resolves or says so, on
+  both engines and whichever door it came through.
+  **Done when** — the rename is censused (how many stored ids predate the convention, and where
+  else a build enters that is not the store's rehydrate), a decision is written on where it
+  belongs, and the TS totals path reports an id it cannot resolve instead of filtering it away.
+  **Check** — `grep -n "atlas_medallion" src/utils/build-serialization.ts` prints nothing while
+  this row is open; a hit means the migration reached the file reader and the row is stale.
 - [x] **ACCOLADE-2** — the accolade converter was the one tree that never called `assignModes`, so
   the Labyrinth pair's `modes_required` zone gate was dropped and a buff you only have in one zone
   presented as permanent; the picker now warns from the field, in both UIs
@@ -740,7 +756,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 76 of 82 closed
+[Full detail](gaps/pipeline-provenance.md) — 77 of 82 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -863,6 +879,11 @@ measurement went, and where a closure for the residual belongs too.
   silently in both directions, since reader and writer read the one table; an unlettered member now
   lands at its POSITION in Mids' member list, the piece Mids has no record for goes out empty, and
   a per-fork placement census pins where every UID sits
+- [x] **MBDEXPORT-12** — accolades were not written at all: Mids files them under
+  `Temporary_Powers.Accolades.*`, our writer emitted no such entry, and a build that arrived with
+  four left with none — 12 across the three corpus files that carry any, MBDIMPORT-1's hole on the
+  writer's side; the roster now goes out through the same set-path and power-name lookups every
+  other name does, and an id no accolade answers to is reported rather than dropped
 - [ ] **MBDEXPORT-11** — the writer stated `LastPower` as the INDEX of the last pick where Mids'
   own files hold the COUNT, so the last power picked went into the granted run and came back at
   level 0 — 8 of 8 corpus files. Fixed 2026-09-10 (`powerEntries.length`), and the convention is
@@ -878,17 +899,6 @@ measurement went, and where a closure for the residual belongs too.
   **Check** — `npx vitest run src/utils/mids-import/mbd-roundtrip.test.ts` — the three
   MBDEXPORT-11 cases grade the count on Mids' files and on ours. If the corpus census stops
   reading 24 picks per file, the convention this was fixed to is wrong, not the fixture.
-- [ ] **MBDEXPORT-12** — accolades are not written at all: Mids files them under
-  `Temporary_Powers.Accolades.*` and our writer emits no such entry, so a build that arrives with
-  four leaves with none — 12 accolades across the three corpus files that carry any.
-  **Goal** — an accolade survives a round trip through Mids, the way MBDIMPORT-1 made it survive
-  the read.
-  **Done when** — the writer emits the accolade entries from the build's own `accolades` roster
-  through the same two lookups every other power name goes through (MBDEXPORT-6's lesson: a path
-  composed rather than looked up is the bug); the count is reconciled in the export report the way
-  the import's is (MBDIMPORT-5); and the round-trip pin is deleted.
-  **Check** — `grep -n "Accolades" src/utils/mids-export.ts` prints nothing while this row is
-  open. A hit means the writer already emits them and the row is stale.
 - [ ] **MBDEXPORT-13** — a power the author excluded from their totals is written back as
   included, on 2 to 20 powers per corpus file. It is a SEAM rather than a side: the importer
   stores `isActive: undefined` for an excluded power (deliberately — the calc gate reads
