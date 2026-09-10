@@ -57,8 +57,8 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 277 entries.** It opened 2026-09-09, a Mids-interop defect downstream of a clean
-parse, found by what found the rest: seven real `.mbd` files and a working Mids
+**0 open, of 277 entries.** The last row closed 2026-09-09, a Mids-interop defect downstream of a
+clean parse, found by what found the rest: seven real `.mbd` files and a working Mids
 ([fixtures/mids](../fixtures/mids/README.md)).
 
 Reading a `.mbd` is done. The name map's join was blind to a whole category, which is why the
@@ -103,10 +103,13 @@ own Brainstorm exports were refused by a message naming one fork twice.
 The silence went with it. A name the writer cannot resolve in Mids' namespace says so on every
 fork, and the fork and the archetype lead the list.
 
-**What is open is MBDEXPORT-10**, surfaced by that closure's regen. Mids' Rebirth database letters
-one set's sixth piece as a duplicate of its fifth, and the emitter's tie-break lands that set's rez
-proc on our "Recharge" piece — in both directions, because reader and writer share the table. One
-set of 233, Rebirth alone.
+Its names dump was re-cut the same day, against the `I12.mhd` it had always come from — same sha,
+every row identical, only the powerset keys' case restored. Thunderspy went from no path table at
+all to 3,453 paths, and from 386 unnamed powersets to the 14 the census already attributed.
+
+**The last to close was MBDEXPORT-10**, surfaced by that closure's regen. An unlettered member
+went to the last free slot, and Rebirth is the one database with two — so one set's rez proc bound
+to our "Recharge" piece, both directions. Mids' member order places it now.
 
 One defect surfaced on the way: the generator's `--pairs` output, which two censuses read, wrote
 to a piped stdout and then called `process.exit`. Node does not flush that, so the pairing
@@ -702,7 +705,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 69 of 70 closed
+[Full detail](gaps/pipeline-provenance.md) — 70 of 70 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -786,23 +789,12 @@ measurement went, and where a closure for the residual belongs too.
   that instead: an EnhDB that is Mids' Generic byte for byte under a Thunderspy name,
   `Database: 'Homecoming'` on every fork that is not Rebirth, and `|| 'Class_Blaster'` — which
   also sent Rebirth's Guardian, an archetype Mids HAS, out as a Blaster
-- [ ] **MBDEXPORT-10** — Mids' Rebirth EnhDB letters `Return_From_the_Grave`'s sixth piece `_E`, a
-  duplicate of its fifth, so the UID emitter has two free slots and one unlettered member
-  (`_Rez_Effects`) and fills the LAST — binding the set's rez proc to our piece 6, "Recharge".
-  Reader and writer share that table, so a Mids build's rez proc imports as Recharge and a slotted
-  Recharge exports as the rez proc, silently, both directions; our piece 1 has no UID at all and
-  exports as a reported empty slot. 1 set of 233, Rebirth alone: it is the only set in four forks
-  with an unlettered member and more than one hole (2 have an unlettered member at all)
-  **Goal** — a piece Mids' own data cannot place lands nowhere rather than on its neighbour.
-  **Done when** — the emitter places an unlettered member by its POSITION in Mids' member list
-  rather than at the last free slot, a slot Mids' letters leave genuinely ambiguous is emitted
-  empty (which the export already reports per slot), and a gate covers both sets across all four
-  forks so a second mislettered set arrives red rather than mis-bound.
-  **Check** — `npx vitest run src/utils/mids-export-thunderspy.test.ts` pins today's behaviour on a
-  real Thunderspy build. Pins, not approval: closing this row changes them deliberately, and any
-  other movement reds. One of the four moved already — MBDEXPORT-6 made the writer report the seven
-  powersets it cannot name in Mids, since this fork's names dump carries no such spelling — and the
-  gate asserts the other three are still silent.
+- [x] **MBDEXPORT-10** — Mids' Rebirth EnhDB letters `Return_From_the_Grave`'s sixth piece `_E`, a
+  duplicate of its fifth, so the emitter had two free slots and one unlettered member
+  (`_Rez_Effects`) and filed it LAST, binding the set's rez proc to our piece 6, "Recharge" —
+  silently in both directions, since reader and writer read the one table; an unlettered member now
+  lands at its POSITION in Mids' member list, the piece Mids has no record for goes out empty, and
+  a per-fork placement census pins where every UID sits
 - [x] **PARTSTAT-2** — the Dominator `Domination` node in `archetypes.json` hand-copied three values the export owns and had drifted, stating `recharge` 200 on the fork whose export says 180; TS gained the name-join to the `Inherent.Inherent` twin that Rust already had, the card's window is now the longest span its caster-side atoms hold open rather than the bag's modal vote, and the four hand-authored `effects` blocks are gone — atom-less bags 4 → 0
 
 - [x] **PARTSTAT-1** — four converters wrote a power's execution stats into the `effects` bag

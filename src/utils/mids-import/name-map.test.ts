@@ -487,11 +487,14 @@ describe('Mids .mbd export — the powerset path table', () => {
         graded++;
       }
     }
-    // 3596 + 3470 + 0 + 3582 as generated. Thunderspy is the zero and it is not a bug:
-    // its names dump predates this table and carries folded powerset keys, so Mids' own
-    // spelling is not in it and the generator refuses to invent one.
-    expect(graded).toBe(10648);
-    expect(Object.keys(THUNDERSPY_PATHS)).toEqual([]);
+    // 3596 + 3470 + 3453 + 3582 as generated. Thunderspy was the zero for a whole day: its
+    // names dump predated this table and carried folded powerset keys, so Mids' own spelling
+    // was not in it and the generator refused to invent one. The dump has been re-cut from
+    // the `Thunderspy/I12.mhd` it always came from — same file, same sha256, every row
+    // identical, only the 3,535 keys' CASE restored — so the withholding is over
+    // (MBDEXPORT-2).
+    expect(graded).toBe(14101);
+    expect(Object.keys(THUNDERSPY_PATHS)).toHaveLength(3453);
   });
 
   it('covers every set a build can hold, or reports the ones it cannot', async () => {
@@ -514,15 +517,18 @@ describe('Mids .mbd export — the powerset path table', () => {
     // whose four powers live at Mids' `Inherent.Fitness` — where our own `Inherent.Fitness`
     // already is).
     //
-    // Thunderspy's 386 is every set it has and is not this row's: no Mids database for
-    // that fork has ever been read, so the path table is withheld whole (MBDEXPORT-2).
-    expect(unpaired).toEqual({ homecoming: 1, rebirth: 6, thunderspy: 386, brainstorm: 10 });
+    // Thunderspy read 386 — every set it has — while its path table was withheld for the
+    // folded-key reason above. With the table in place it reads 14, and those 14 are in the
+    // census beside the other three forks' rather than standing outside it (MBDEXPORT-2).
+    expect(unpaired).toEqual({ homecoming: 1, rebirth: 6, thunderspy: 14, brainstorm: 10 });
   }, 600000);
 
   it('says whether a fork has a Mids namespace at all, rather than reading absence as loss', () => {
-    // Two facts a bare `undefined` conflates. On Homecoming an unpaired set means Mids
-    // has no counterpart; on Thunderspy it means no Mids database was ever read, and the
-    // writer says so, because the two send a reader to different places.
+    // Two facts a bare `undefined` conflates: a set Mids has no counterpart for, and a fork
+    // whose Mids database was never read at all. The two send a reader to different places,
+    // so the writer says which. All four forks now answer true — Thunderspy was the one that
+    // did not, and its dump was re-cut — which leaves this branch with no live population.
+    // Kept because the population is a FORK, and the fifth arrives without one.
     expect(midsPowersetPathsKnown()).toBe(true);
     expect(midsPowersetPathForExport('Blaster_Ranged.Fire_Blast')).toBe('Blaster_Ranged.Fire_Blast');
   });
@@ -594,6 +600,25 @@ describe('Mids .mbd export — the pairs matched on the roster (MBDEXPORT-9)', (
       ['guardian_comp.reconstructive_healing', 'Guardian_Composition.Reconstructive_Composition'],
       ['guardian_comp.temporal_reaction', 'Guardian_Composition.Temporal_Composition'],
     ],
+    // Thunderspy's twelve were real and unreadable until its names dump was re-cut with
+    // literal powerset keys: the pairing always found them and the generator always printed
+    // them, but there was no path table to hold them (MBDEXPORT-2). Four of the twelve are
+    // this fork renaming a stock CoH set (Hobo Melee for Hard Life, Brawling for Street
+    // Justice), which is exactly the class a roster join exists to reach.
+    thunderspy: [
+      ['blaster_support.radiation_manipulation', 'Blaster_Support.Atomic_Manipulation'],
+      ['blaster_support.time_manipulation', 'Blaster_Support.Temporal_Manipulation'],
+      ['defender_ranged.brawling', 'Defender_Ranged.Street_Justice'],
+      ['defender_ranged.broad_sword', 'Defender_Ranged.Broadsword'],
+      ['defender_ranged.earth_assault', 'Defender_Ranged.Earth_Combat'],
+      ['defender_ranged.holy_light', 'Defender_Ranged.Radiant_Blast'],
+      ['defender_ranged.martial_assault', 'Defender_Ranged.Martial_Combat'],
+      ['dominator_assault.telekinetic_assault', 'Dominator_Assault.Psychokinetic_Assault'],
+      ['epic.dominator_atomic_mastery', 'Epic.Atomic_Mastery'],
+      ['epic.mastermind_atomic_mastery', 'Epic.Atomic_Mastery_MM'],
+      ['tanker_defense.sacred_armor', 'Tanker_Defense.Nature_Armor'],
+      ['tanker_melee.hobo_melee', 'Tanker_Melee.Hard_Life'],
+    ],
     brainstorm: [
       ['blaster_support.time_manipulation', 'Blaster_Support.Temporal_Manipulation'],
       ['controller_buff.shock_therapy', 'Controller_Buff.Electrical_Affinity'],
@@ -619,18 +644,16 @@ describe('Mids .mbd export — the pairs matched on the roster (MBDEXPORT-9)', (
     ],
   };
 
-  it('mints exactly these, at every fork that has a path table', () => {
+  it('mints exactly these, at every fork', () => {
     const tables = {
-      homecoming: HOMECOMING_PATHS, rebirth: REBIRTH_PATHS, brainstorm: BRAINSTORM_PATHS,
+      homecoming: HOMECOMING_PATHS, rebirth: REBIRTH_PATHS,
+      thunderspy: THUNDERSPY_PATHS, brainstorm: BRAINSTORM_PATHS,
     } as const;
     for (const [fork, paths] of Object.entries(tables)) {
       const rekeyed = Object.entries(paths).filter(([ourKey, midsPath]) =>
         segment(ourKey) !== segment(midsPath));
       expect(rekeyed, fork).toEqual(REKEYED[fork]);
     }
-    // Thunderspy's twelve are real and invisible here: its dump predates MBDEXPORT-6, so
-    // the fork has no path table to read them out of. The generator lists them on stderr.
-    expect(Object.keys(THUNDERSPY_PATHS)).toEqual([]);
   });
 
   it('sends two archetypes that share a roster to two different Mids sets', () => {

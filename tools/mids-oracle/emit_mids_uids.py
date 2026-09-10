@@ -151,24 +151,47 @@ def build_table(mhd_path: str) -> dict:
         members = [enh[i]["uid"] for i in s["enhancement_indices"] if 0 <= i < len(enh)]
 
         by_piece: dict[int, str] = {}
-        unlettered: list[str] = []
-        for uid in members:
+        unlettered: list[tuple[int, str]] = []
+        for position, uid in enumerate(members, start=1):
             num = piece_index(uid)
             if num is None:
-                unlettered.append(uid)
+                unlettered.append((position, uid))
             elif num in by_piece:
                 notes.append(f"{s['uid']}: duplicate piece letter on {uid}, kept {by_piece[num]}")
             else:
                 by_piece[num] = uid
 
-        # Descriptive-suffix pieces ("..._Rez_Effects") carry no letter. The
-        # importer files them as the set's last piece; mirror that here.
-        for uid in unlettered:
-            slot = next(n for n in range(max(len(members), 6), 0, -1) if n not in by_piece)
-            by_piece[slot] = uid
+        # Descriptive-suffix pieces ("..._Rez_Effects") carry no letter, so the
+        # only thing left that places them is where they SIT in the member list.
+        #
+        # This used to file them at the set's LAST free slot, on the importer's
+        # own rule, and that is right for every set with one hole. Rebirth's
+        # Return From the Grave has two: its sixth record duplicates its fifth,
+        # so the letter key drops it and slots 1 and 6 both come free. The rez
+        # proc is member ONE, and "last free" bound it to our piece 6, Recharge
+        # — silently in both directions, because the import path reads this same
+        # table. Position says member one, and Mids' own names agree with our
+        # piece order down the set. MBDEXPORT-10.
+        for position, uid in unlettered:
+            if position in by_piece:
+                notes.append(
+                    f"{s['uid']}: unlettered member {uid} sits at position {position}, "
+                    f"held by {by_piece[position]}; left unplaced"
+                )
+            else:
+                by_piece[position] = uid
 
-        size = max(by_piece) if by_piece else 0
+        # Sized on Mids' member count, not on the letters that resolved, so a
+        # member we could not place leaves a hole rather than shortening the set.
+        # An empty string is the table's "Mids cannot name this piece" — the
+        # export reports that slot instead of emitting a UID Mids would open
+        # empty, and the reverse index skips it.
+        size = max([*by_piece, len(members)]) if members else 0
         io_set_pieces[key] = [by_piece.get(n, "") for n in range(1, size + 1)]
+
+        holes = [n for n in range(1, size + 1) if n not in by_piece]
+        if holes:
+            notes.append(f"{s['uid']}: no UID for piece {holes}, emitted empty")
 
     # Generic (crafted) IOs and the special/exotic rosters. Both are flat name
     # spaces the exporter validates against rather than a per-set list.

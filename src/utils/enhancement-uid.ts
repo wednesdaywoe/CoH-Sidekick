@@ -52,11 +52,16 @@ export function parseIOSetUid(uid: string): ParsedIOSetUid | null {
     pieceNum = pieceLetter.charCodeAt(0) - 'A'.charCodeAt(0) + 1;
     setName = remaining.slice(0, -2); // Remove "_X"
   } else {
-    // Some UIDs use a descriptive suffix instead of a letter for special pieces
-    // (e.g. "Superior_Return_From_the_Grave_Rez_Effects", event-set procs).
-    // Treat these as a synthetic last piece — the caller's piece-name resolver
-    // uses the display name to find the proc/special piece rather than pieceNum.
-    // Conservatively use 6 (the typical last-piece slot).
+    // A descriptive suffix where the letter should be ("..._Rez_Effects",
+    // event-set procs). Nothing in the string names a slot, so 6 is a guess,
+    // and no caller recovers from it: `mapEnhancementUid` takes
+    // `pieces.find((p) => p.num === pieceNum)`. This used to claim a
+    // display-name resolver did; there isn't one (MBDEXPORT-10).
+    //
+    // It stands because this function is the FALLBACK. Every such UID in a
+    // vendored Mids database is in `MIDS_UIDS`, which `mapEnhancementUid`
+    // reads first and which places these by their position in Mids' own member
+    // list. What lands here is a UID no vendored database carries.
     pieceNum = 6;
     setName = remaining;
   }

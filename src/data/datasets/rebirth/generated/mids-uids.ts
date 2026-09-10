@@ -156,7 +156,7 @@ export const MIDS_UIDS: MidsUidTable = {
     "rectified_reticle": ["Crafted_Rectified_Reticle_A", "Crafted_Rectified_Reticle_B", "Crafted_Rectified_Reticle_C"],
     "red_fortune": ["Crafted_Red_Fortune_A", "Crafted_Red_Fortune_B", "Crafted_Red_Fortune_C", "Crafted_Red_Fortune_D", "Crafted_Red_Fortune_E", "Crafted_Red_Fortune_F"],
     "regenerative_tissue": ["Crafted_Regenerative_Tissue_A", "Crafted_Regenerative_Tissue_B", "Crafted_Regenerative_Tissue_C", "Crafted_Regenerative_Tissue_D", "Crafted_Regenerative_Tissue_E"],
-    "return_from_the_grave": ["", "Return_From_the_Grave_B", "Return_From_the_Grave_C", "Return_From_the_Grave_D", "Return_From_the_Grave_E", "Return_From_the_Grave_Rez_Effects"],
+    "return_from_the_grave": ["Return_From_the_Grave_Rez_Effects", "Return_From_the_Grave_B", "Return_From_the_Grave_C", "Return_From_the_Grave_D", "Return_From_the_Grave_E", ""],
     "rolling_barrage": ["Rolling_Barrage_A", "Rolling_Barrage_B", "Rolling_Barrage_C", "Rolling_Barrage_D", "Rolling_Barrage_E", "Rolling_Barrage_F"],
     "rooting_grasp": ["Crafted_Rooting_Grasp_A", "Crafted_Rooting_Grasp_B", "Crafted_Rooting_Grasp_C", "Crafted_Rooting_Grasp_D", "Crafted_Rooting_Grasp_E"],
     "rope_a_dope": ["Crafted_Rope_A_Dope_A", "Crafted_Rope_A_Dope_B", "Crafted_Rope_A_Dope_C", "Crafted_Rope_A_Dope_D", "Crafted_Rope_A_Dope_E", "Crafted_Rope_A_Dope_F"],

@@ -124,7 +124,16 @@ describe('mids-export enhancement UIDs', () => {
   const UNNAMEABLE: Record<string, string[]> = {
     homecoming: [],
     brainstorm: [],
-    // Mids' Rebirth EnhDB has no `_A` for Return From the Grave.
+    // Mids' Rebirth EnhDB has no record for Return From the Grave's Recharge
+    // piece: its sixth member is a byte-copy of its fifth, `_E` twice. The
+    // superior twin has the piece and spells it `_F`, so this is one database
+    // row, not a set Mids never shipped.
+    //
+    // It read `piece 1` until MBDEXPORT-10, which is the same defect wearing
+    // the hole one slot along: the unlettered rez proc was filed at the last
+    // free slot, so piece 1 went unnamed and piece 6 went out as the rez proc.
+    // A list of what we cannot name had nowhere to record something we named
+    // WRONG, and the mis-bind sat next to this line for as long as it existed.
     //
     // Superior Endless Nightmare used to be listed here too, on the claim that
     // Mids had no such set. It has one — a user slotted it in Mids and exported
@@ -132,7 +141,7 @@ describe('mids-export enhancement UIDs', () => {
     // `Superior _Endless_Nightmare`, with a stray space its own piece UIDs lack,
     // and the emitter's key kept it. The six pieces became nameable the moment
     // `set_key` dropped whitespace (MBDEXPORT-2), which is what reds this list.
-    rebirth: ['return_from_the_grave piece 1'],
+    rebirth: ['return_from_the_grave piece 6'],
     // Thunderspy ships KB and the Primalist ATOs, and no Mids database holds any of the
     // three. This comment was for a while the ONLY place in either repo recording that our
     // Thunderspy UID table is Mids' Generic database — while the emitter next to it claimed
