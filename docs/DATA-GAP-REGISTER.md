@@ -57,14 +57,17 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**2 open, of 281 entries.** MBDIMPORT-9, opened 2026-09-10 by the Rust port's enhancement
-resolution: Mids spells two Rebirth sets with no attunement prefix where the game holds two
-records apiece, so twelve UIDs name a coordinate and stop. Its set-record door was walked on
-2026-09-10 and came back negative, leaving only a build authored in the Mids GUI.
+**1 open, of 281 entries.** MBDIMPORT-11, opened 2026-09-10 by MBDIMPORT-8's closure: a `.mbd`'s
+placements follow Mids' respec table and the export carries only the levelling one, so the new
+level derivation grades them against the wrong schedule. One Rebirth build, the Guardian, places
+75 budget slots — two above even the respec table's 73 — and has no explanation yet.
 
-Beside it, MBDIMPORT-11, opened 2026-09-10 by MBDIMPORT-8's closure: a `.mbd`'s placements follow
-Mids' respec table and the export carries only the levelling one, so the new level derivation
-grades them against the wrong schedule. One Rebirth build exceeds even the respec table.
+Both of the day's other rows closed into it: MBDIMPORT-8 on Mids having no persisted character
+level, MBDIMPORT-9 on Mids marking attunement positively.
+
+**One owed check rides on that second closure.** Its evidence includes how Mids renders those
+pieces, which is the author's recollection rather than a captured artifact, to be verified
+against a live Mids.
 
 Everything before it is closed, the last on 2026-09-09, found by what found the rest: eight real
 `.mbd` files and a working Mids ([fixtures/mids](../fixtures/mids/README.md)).
@@ -713,7 +716,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 72 of 74 closed
+[Full detail](gaps/pipeline-provenance.md) — 73 of 74 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -750,23 +753,12 @@ measurement went, and where a closure for the residual belongs too.
   `GetMaxLevel()`, so `Level == max(power, slot levels) − 1` on 8 of 8 corpus files; the
   unsourced `maxPowerEntryLevel >= 49 ? 50` heuristic (which ignored slot levels) is replaced by
   Mids' number as a floor and the export's own leveling schedule as the raise
-- [ ] **MBDIMPORT-9** — Mids spells Rebirth's Rolling Barrage and Synapse's Agility with no
-  attunement prefix (`Rolling_Barrage_A`…`_F`), and the game holds both `Crafted_` and
-  `Attuned_` records at each of those twelve set-and-piece coordinates: the UID reaches a
-  coordinate, two records answer, and nothing in the file says which. Twelve UIDs on Rebirth,
-  zero on the other three forks; in the corpus it costs 12 of 542 slotted enhancements, six
-  Rolling Barrage pieces in each of two builds. Every other second-door UID resolves — its
-  prefix names the record (Homecoming's six `Crafted_Shrapnel_*`) or the coordinate holds only
-  one. **Not** settled by the 117 bare Rebirth pieces that land on single-record coordinates:
-  those never posed the question, so they are 117 observations of nothing.
-  **Goal** — a `.mbd` naming one of those two sets slots the piece the author had.
-  **Done when** — a source outside the UID's spelling says which record a bare Mids UID names,
-  and the twelve resolve with their attunement pinned. Mids' own set record was read 2026-09-10
-  and does NOT answer; the remaining door is a build authored in Mids with a known piece, which
-  needs the GUI.
-  **Check** — `cargo test -p coh_data --test mbd_import_corpus` states both populations: the
-  table's twelve, in those two sets and no others on any fork, and the corpus's twelve, named
-  rather than counted. A thirteenth reds it; so does a reader that starts guessing.
+- [x] **MBDIMPORT-9** — Mids spells Rebirth's Rolling Barrage and Synapse's Agility with no
+  attunement prefix, and the game holds both `Crafted_` and `Attuned_` records at each of those
+  twelve coordinates, so the UID reached a coordinate and stopped; Mids marks attunement
+  positively and twice (a prefix, or `recipe_name == "Alt"`, neither ever on a crafted record)
+  and no set is spelled both ways, so a bare set is one the convention never reached and its
+  pieces resolve CRAFTED — verification of the render against a live Mids is owed
 - [x] **MBDIMPORT-10** — `rename_all = "camelCase"` renders the reader's `generic_io` as
   `genericIo` while the emitted table spells it `genericIO`, so the field matched nothing and
   `#[serde(default)]` filled it empty on all four forks: `MidsUids::family` could never answer
