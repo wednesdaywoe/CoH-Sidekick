@@ -134,24 +134,26 @@ const namesDataset = NAMES_DATASET[datasetId] || datasetId;
  * out of the dataset id — "Mids Reborn thunderspy database", an assertion that Mids has one.
  * It does not: Mids Reborn's releases carry Generic, Homecoming and Rebirth (MBDEXPORT-2).
  *
- * The Thunderspy entry is the one that needed saying, and saying carefully, because the
- * measurement does not match its sibling. `Thunderspy/EnhDB.mhd` is Mids' Generic database
- * byte for byte; the `I12.mhd` this dump was cut from is NOT — its content is Thunderspy's
- * (Spectral Melee, Hard Life, Pale Blade, the Defender melee sets), and 286 of our 305
- * Thunderspy powersets appear in it against 272 of Homecoming's 364. So the two vendored
- * files have different provenance, the `.mhd` itself is no longer on disk, and where it came
- * from is recorded nowhere — an agent may have found a Mids fork carrying the fork. Recorded
- * as measured and unattributed rather than guessed either way.
+ * The Thunderspy entry is the one that needed saying. `/Thunderspy/` is a third-party
+ * DATABASE DROP, not a pair of loose files: Mids' Generic database with four files replaced —
+ * `I12.mhd`, `NLevels.mhd`, `RLevels.mhd`, `SData.mhd` — plus that fork's powerset icons. Every
+ * other file in it, `EnhDB.mhd` included, is Generic byte for byte. So the enhancement half of
+ * MBDEXPORT-2 is not a stand-in this repo chose; it is the one the drop's own author shipped,
+ * having rebuilt the powers database and left the enhancement one alone.
+ *
+ * Who built it is still unrecorded. Mids Reborn's own releases carry Generic, Homecoming and
+ * Rebirth (checked on master, dev, dev-GfxRework, 4.0 and all thirteen forks), and its update
+ * channel serves the app and Homecoming, so it came from somewhere else. Recorded as measured
+ * and unattributed rather than guessed.
  */
 const NAMES_PROVENANCE = {
   homecoming: "Mids Reborn's own Homecoming database.",
   rebirth: "Mids Reborn's own Rebirth database.",
-  thunderspy: 'a Mids-format powers database holding THUNDERSPY content, vendored from outside'
-    + " Mids Reborn's own releases (which carry Generic, Homecoming and Rebirth only). Its"
-    + ' source .mhd is gone and its origin is unrecorded; the dump is the only evidence left.'
-    + ' Unlike Thunderspy/EnhDB.mhd next door, it is not Mids Generic under another name:'
-    + ' 286 of our 305 Thunderspy powersets are in it, against 272 of Homecoming\'s 364.'
-    + ' DATA-GAP MBDEXPORT-2.',
+  thunderspy: 'the I12 from a third-party THUNDERSPY database drop in `/Thunderspy/`: Mids\''
+    + ' Generic database with the powers DB, the two level tables and SData swapped out and that'
+    + " fork's icons added. Not from Mids Reborn's own releases, which carry Generic, Homecoming"
+    + ' and Rebirth; who built it is unrecorded. 286 of our 305 Thunderspy powersets are in it,'
+    + " against 272 of Homecoming's 364. DATA-GAP MBDEXPORT-2.",
 };
 const NAMES_PATH = path.join(REPO_ROOT, 'tools', 'mids-oracle', `mids-power-names.${namesDataset}.json`);
 const EXPORT_BASE = path.join(REPO_ROOT, 'exported_powers');

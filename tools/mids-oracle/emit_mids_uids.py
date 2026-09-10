@@ -69,12 +69,14 @@ DATASET_PROVENANCE = {
     ),
     "thunderspy": (
         "Mids Reborn's GENERIC database, byte-identical (md5 2e8d24a3…) to the "
-        "`Generic/EnhDB.mhd` a Mids install ships. Mids Reborn carries Generic, Homecoming "
-        "and Rebirth and has never had a Thunderspy database, so this is the closest stand-in "
-        "there is rather than the fork's own file. It resolves 210 of Thunderspy's 213 sets "
-        "because those are shared CoH sets; the three it cannot — `kb` and the two Primalist "
-        "ATOs — exist in no Mids database at all, and the export reports them per slot. "
-        "DATA-GAP MBDEXPORT-2."
+        "`Generic/EnhDB.mhd` a Mids install ships — and NOT a stand-in this repo picked. "
+        "`/Thunderspy/` is a third-party database drop built on Generic, with the powers DB "
+        "and three small tables swapped out; its author left the enhancement database alone, "
+        "so Generic's is what that fork ships. Mids Reborn itself carries Generic, Homecoming "
+        "and Rebirth and has never had a Thunderspy database. It resolves 210 of Thunderspy's "
+        "213 sets because those are shared CoH sets; the three it cannot — `kb` and the two "
+        "Primalist ATOs — exist in no Mids database at all, and the export reports them per "
+        "slot. DATA-GAP MBDEXPORT-2."
     ),
 }
 

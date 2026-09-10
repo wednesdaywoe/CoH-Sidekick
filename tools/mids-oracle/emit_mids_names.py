@@ -48,16 +48,20 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 # fourth .mhd to read and a key here could never be satisfied. The routing is the
 # converter's call, not this script's — see scripts/convert-mids-name-map.cjs.
 #
-# And Mids ships no Thunderspy build either, which makes the third entry the odd one:
-# `Thunderspy/I12.mhd` is not a Mids Reborn release database. It is also not what its
-# sibling is — `Thunderspy/EnhDB.mhd` is Mids' GENERIC database byte for byte, while the
-# dump this produced from the I12 holds Thunderspy content (Spectral Melee, Hard Life, Pale
-# Blade, the Defender melee sets; 286 of our 305 Thunderspy powersets are in it, against 272
-# of Homecoming's 364). The file itself is no longer on disk and where it came from is
-# recorded nowhere, so `mids-power-names.thunderspy.json` is now the only evidence of it and
-# this entry cannot currently be re-run. Stated rather than assumed either way, because a
-# header reading "Mids Reborn Powers Database" names no fork and a version alone names none
-# — see DATA-GAP MBDEXPORT-2.
+# And Mids ships no Thunderspy build either, which makes the third entry the odd one.
+# `/Thunderspy/` is a third-party DATABASE DROP: Mids' Generic database with four files
+# replaced — `I12.mhd` (2026.3.346, the Thunderspy powers), `NLevels.mhd`, `RLevels.mhd`,
+# `SData.mhd` — plus that fork's powerset icons. Everything else in it, `EnhDB.mhd` included,
+# is Generic byte for byte, which is WHY our Thunderspy enhancement UIDs are Generic's: the
+# drop's own author rebuilt the powers database and left the enhancement one alone. Who built
+# it is unrecorded; Mids Reborn's releases carry Generic, Homecoming and Rebirth, so it is not
+# from there. Stated rather than assumed, because a header reading "Mids Reborn Powers
+# Database" names no fork and a version alone names none — see DATA-GAP MBDEXPORT-2.
+#
+# The drop lives in BOTH repos now. It was in the beta alone until 2026-09-10, and this
+# script's default path (`REPO_ROOT/Thunderspy/I12.mhd`) therefore resolved in one twin and
+# not the other — which is how a session looking only at canonical concluded the file was
+# gone. A gitignored vendored directory is per-checkout; check both before calling one empty.
 DEFAULT_MHD = {
     "homecoming": os.path.expanduser(
         "~/Games/mids-reborn/drive_c/MidsReborn/Databases/Homecoming/I12.mhd"
