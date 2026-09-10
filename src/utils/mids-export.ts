@@ -817,10 +817,15 @@ export function exportToMidsWithReport(
 
   const powerEntries: MbdPowerEntry[] = orderByPickSchedule(chosen);
 
-  // `LastPower` is the index of the last CHOSEN power; Mids reads everything
-  // past it as auto-granted. Inherents and incarnates therefore have to follow
-  // the level-up run, and the marker has to be taken before they are added.
-  const lastPower = powerEntries.length - 1;
+  // `LastPower` is the COUNT of level-up slots, not the index of the last one —
+  // Mids reads entry `LastPower` itself as the first auto-granted power. This was
+  // written as `length - 1` under the other reading, which handed the level-49 pick
+  // to the granted run: it came back at level 0, one pick short, in all eight corpus
+  // files (MBDEXPORT-11). Mids' own files settle it — every one of them puts an
+  // `Inherent.*` at index `LastPower` and a real pick at `LastPower - 1`, and there
+  // is no separator entry between the two. Inherents and incarnates therefore follow
+  // the level-up run, and the count has to be taken before they are added.
+  const lastPower = powerEntries.length;
 
   // Inherents. Mids re-creates the roster itself, but only the build file
   // carries what the user slotted into them — and that is where a build keeps

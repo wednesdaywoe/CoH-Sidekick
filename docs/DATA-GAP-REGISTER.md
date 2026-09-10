@@ -57,7 +57,26 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 283 entries.** MBDIMPORT-12 and -13 opened and closed on 2026-09-10, both found by
+**6 open, of 289 entries.** All six are our own `.mbd` WRITER, opened 2026-09-10 by the first
+thing that has ever read what it writes: `fixtures/mids/ours/` holds our exporter's spelling of
+each of the eight corpus builds, and `mbd_writer_roundtrip` reads both spellings against one
+database and compares the builds. The reader is not implicated — it is the instrument.
+
+In the order they cost a user something:
+
+- **MBDEXPORT-11** — `LastPower` fixed to the COUNT and graded on Mids' files; awaiting Wine
+- **MBDEXPORT-12** — no accolades are written at all; 12 across the corpus
+- **MBDEXPORT-13** — an excluded power comes back included; `undefined` vs `false` across the seam
+- **MBDEXPORT-15** — only slots holding something are written; 8 empty placements go
+- **MBDEXPORT-14** — one piece's level written as 0; 3 slots
+- **MBDEXPORT-16** — a VEAT's branch filing is re-derived, not carried; 24 attributions, nothing lost
+
+Each is pinned by its POPULATION in that test rather than waved through, so a deviation that
+widens reds even while its row is open, and a row closes by DELETING its pin. What none of them
+can answer is whether a real Mids parses what we write — that half is Wine
+(`tools/mids-oracle/mids-wine.sh`), and it is what MBDEXPORT-4 and -5 took.
+
+The reader half is done. MBDIMPORT-12 and -13 opened and closed on 2026-09-10, both found by
 converting the `.mbd` corpus into builds: 86 respelled Homecoming sets carried no alias row and
 resolved to nothing, and one separator drift is left open by the name map by design.
 
@@ -721,7 +740,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 76 of 76 closed
+[Full detail](gaps/pipeline-provenance.md) — 76 of 82 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -844,6 +863,80 @@ measurement went, and where a closure for the residual belongs too.
   silently in both directions, since reader and writer read the one table; an unlettered member now
   lands at its POSITION in Mids' member list, the piece Mids has no record for goes out empty, and
   a per-fork placement census pins where every UID sits
+- [ ] **MBDEXPORT-11** — the writer stated `LastPower` as the INDEX of the last pick where Mids'
+  own files hold the COUNT, so the last power picked went into the granted run and came back at
+  level 0 — 8 of 8 corpus files. Fixed 2026-09-10 (`powerEntries.length`), and the convention is
+  now graded on Mids' own eight files rather than reasoned about: each holds exactly 24 picks, all
+  STRICTLY BELOW `LastPower`, with an inherent at `LastPower` and no separator entry between the
+  two. The pin is deleted and our files state 24 picks. What is left is the half this repo cannot
+  see: whether a real Mids parses ours that way.
+  **Goal** — a build written here opens in Mids holding every pick its author made.
+  **Done when** — `fixtures/mids/ours/blaster-assault-rifle-tactical-arrow-v3861.mbd` opens in
+  Mids under Wine (`tools/mids-oracle/mids-wine.sh`) with 24 picks and Stealth at 49 inside the
+  level-up grid, not in the granted run. No `wine` and no prefix exist on the machine this was
+  fixed on, which is why the row stays open rather than closing on green tests.
+  **Check** — `npx vitest run src/utils/mids-import/mbd-roundtrip.test.ts` — the three
+  MBDEXPORT-11 cases grade the count on Mids' files and on ours. If the corpus census stops
+  reading 24 picks per file, the convention this was fixed to is wrong, not the fixture.
+- [ ] **MBDEXPORT-12** — accolades are not written at all: Mids files them under
+  `Temporary_Powers.Accolades.*` and our writer emits no such entry, so a build that arrives with
+  four leaves with none — 12 accolades across the three corpus files that carry any.
+  **Goal** — an accolade survives a round trip through Mids, the way MBDIMPORT-1 made it survive
+  the read.
+  **Done when** — the writer emits the accolade entries from the build's own `accolades` roster
+  through the same two lookups every other power name goes through (MBDEXPORT-6's lesson: a path
+  composed rather than looked up is the bug); the count is reconciled in the export report the way
+  the import's is (MBDIMPORT-5); and the round-trip pin is deleted.
+  **Check** — `grep -n "Accolades" src/utils/mids-export.ts` prints nothing while this row is
+  open. A hit means the writer already emits them and the row is stale.
+- [ ] **MBDEXPORT-13** — a power the author excluded from their totals is written back as
+  included, on 2 to 20 powers per corpus file. It is a SEAM rather than a side: the importer
+  stores `isActive: undefined` for an excluded power (deliberately — the calc gate reads
+  `isAuto || isActive` and the JSON stays minimal) and the writer tests `isActive !== false`,
+  which `undefined` passes. It also shows up as EXTRA powers, since an entry a build says nothing
+  else about is carried on `StatInclude` alone, so Brawl, Sprint and Rest arrive switched on.
+  **Goal** — a power the author excluded comes back excluded.
+  **Done when** — the two halves agree on ONE representation of "excluded", decided rather than
+  patched on whichever side is nearer: `undefined` is load-bearing on the reader's side, so
+  `isActive === true` on the writer's is the cheap answer and the reason to check it is that
+  `isAuto` powers are true-by-default in the calc and may not be in the file; and the round-trip
+  pin is deleted, which also removes the extras it drops.
+  **Check** — `grep -n "isActive !== false" src/utils/mids-export.ts` and `grep -n
+  "effectiveIsActive" src/utils/mids-import/importer.ts` — one site each, and they are the two
+  ends of the seam. If either is gone, the seam was closed and this row is stale.
+- [ ] **MBDEXPORT-14** — a piece placed below its own level is written at `IoLevel: 0`, which
+  reads back as a level-1 IO: Mids states the Winter's Gift slow-resistance unique in Long Jump at
+  49 and we send 0 — one slot, in each of the three Homecoming corpus files that hold it.
+  **Goal** — a piece comes back at the level its author placed it at.
+  **Done when** — the case is characterised rather than patched: it is one PIECE, not one set, so
+  what the writer does with a piece whose level is not the build's is measured before it is
+  changed; and the round-trip pin's count moves from 3 to 0.
+  **Check** — `cargo test -p coh_data --test mbd_writer_roundtrip` — the corpus-wide count is
+  asserted at 3. Any other number means the population moved and this row's measurement is stale.
+- [ ] **MBDEXPORT-15** — a slot with nothing in it is not written, so Rebirth's Health and Stamina
+  come back with one slot each where the file states three — 8 empty slots across the two Rebirth
+  corpus files. A placement is the author's even when the slot is empty: it is spent budget, and
+  it is where the next enhancement goes.
+  **Goal** — the slots a build spent come back, filled or not.
+  **Done when** — `buildSlotEntries` emits a slot per PLACEMENT rather than per enhancement; the
+  slot count is reconciled in the export report against what the build holds; and the round-trip
+  pin's count moves from 8 to 0.
+  **Check** — `cargo test -p coh_data --test mbd_writer_roundtrip` — the summary arm derives its
+  expected slot delta from the two builds rather than from a literal, so a slot lost anywhere else
+  reds it rather than being absorbed into this row's 8.
+- [ ] **MBDEXPORT-16** — a VEAT's picks come back filed under a different branch: Mids'
+  `night-widow-training` / `widow-teamwork` become `widow-training` / `teamwork`, and 22 of the
+  corpus Night Widow's powers swap which side of that line their `powerset` override sits on. The
+  writer re-derives the filing from the build instead of carrying what the file said. Nothing is
+  lost — every power and every piece is still there — so this is the lowest of the six.
+  **Goal** — a build comes back filed where its author filed it.
+  **Done when** — it is decided whether the branch filing is information or presentation, because
+  the two answers are different work: if Mids resolves both spellings to the same record it is
+  presentation and this row closes as a written adjudication; if it does not, the writer carries
+  the file's own set per pick. Measured in a real Mids, not reasoned about.
+  **Check** — `cargo test -p coh_data --test mbd_writer_roundtrip` — the pin counts 24 (2
+  selections + 22 powers) on the one file. A count on a second file means this is not VEAT-shaped
+  and the row is describing the wrong thing.
 - [x] **PARTSTAT-2** — the Dominator `Domination` node in `archetypes.json` hand-copied three values the export owns and had drifted, stating `recharge` 200 on the fork whose export says 180; TS gained the name-join to the `Inherent.Inherent` twin that Rust already had, the card's window is now the longest span its caster-side atoms hold open rather than the bag's modal vote, and the four hand-authored `effects` blocks are gone — atom-less bags 4 → 0
 
 - [x] **PARTSTAT-1** — four converters wrote a power's execution stats into the `effects` bag

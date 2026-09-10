@@ -311,7 +311,7 @@ describe('mids-export regression: therm/water defender', () => {
    */
   it("sends all seven of Mids' inherent-grid powers, so its fixed indices are in range", () => {
     const { mbd } = exported();
-    expect(mbd.PowerEntries.slice(mbd.LastPower + 1, mbd.LastPower + 8).map((pe) => pe.PowerName))
+    expect(mbd.PowerEntries.slice(mbd.LastPower, mbd.LastPower + 7).map((pe) => pe.PowerName))
       .toEqual([
         'Inherent.Inherent.Brawl', 'Inherent.Inherent.Sprint', 'Inherent.Inherent.Rest',
         'Inherent.Fitness.Swift', 'Inherent.Fitness.Hurdle',
@@ -325,14 +325,13 @@ describe('mids-export regression: therm/water defender', () => {
       .toContain('Incarnate.Alpha.Cardiac_Radial_Paragon');
   });
 
-  it('keeps LastPower at the end of the level-up run', () => {
+  it('counts the level-up run in LastPower, so entry LastPower is the first granted one', () => {
     const { mbd } = exported();
-    // Everything past LastPower is auto-granted as far as Mids is concerned, so
-    // the inherents and the alpha have to sit behind the marker. The marker is
-    // the last PICK SLOT, not the last named power — a build that skipped its
-    // level-49 pick still has to keep the inherents out of that slot.
-    expect(mbd.PowerEntries[mbd.LastPower].PowerName).toBe('Pool.Fighting.Tough');
-    expect(mbd.PowerEntries.slice(mbd.LastPower + 1).every(
+    // `LastPower` is a COUNT: entry `LastPower` is already auto-granted, and the last
+    // pick sits one before it. It counts PICK SLOTS, not named powers — a build that
+    // skipped its level-49 pick still has to keep the inherents out of that slot.
+    expect(mbd.PowerEntries[mbd.LastPower - 1].PowerName).toBe('Pool.Fighting.Tough');
+    expect(mbd.PowerEntries.slice(mbd.LastPower).every(
       (pe) => pe.PowerName.startsWith('Inherent.') || pe.PowerName.startsWith('Incarnate.'),
     )).toBe(true);
   });
@@ -345,7 +344,7 @@ describe('mids-export regression: therm/water defender', () => {
    */
   it('lays the chosen powers out along the pick schedule', () => {
     const { mbd } = exported();
-    const picks = mbd.PowerEntries.slice(0, mbd.LastPower + 1);
+    const picks = mbd.PowerEntries.slice(0, mbd.LastPower);
     const levels = picks.map((pe) => pe.Level);
     expect(levels).toEqual([...levels].sort((a, b) => a - b));
     expect(levels).toEqual([1, 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24,
