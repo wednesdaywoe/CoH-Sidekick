@@ -3,6 +3,7 @@
  */
 
 import type { ArchetypeId, Enhancement, Power, Origin } from '@/types';
+import type { DatasetId } from '@/data/dataset';
 import {
   getAllPowersets,
   getPowerset,
@@ -30,6 +31,53 @@ import {
   type SpecialCategory,
 } from '@/utils/enhancement-uid';
 import { resolveMidsUid } from '@/data/mids-uids';
+
+// ============================================
+// FORK <-> MIDS DATABASE
+// ============================================
+
+/**
+ * Which Mids database a `.mbd` for each of our forks names, and whether Mids has one for that
+ * fork at all.
+ *
+ * Mids Reborn ships three databases — Generic, Homecoming, Rebirth — and has never had a
+ * Thunderspy or a Brainstorm one, so two of our four forks have no honest answer here. Both
+ * directions used to invent one from the same else-branch: the writer wrote `Homecoming` for
+ * everything that was not Rebirth, and the reader read that string back as the fork. A
+ * Thunderspy build exported and re-imported came back refused, with
+ * "This build was made for Homecoming, but the planner is currently running Homecoming" —
+ * one branch printing both labels.
+ *
+ * `own: false` marks a stand-in. Brainstorm is Homecoming's open beta and shares its
+ * namespace, which is the database its UID and name tables are already cut from. Thunderspy
+ * names `Generic`, which is the database its UID table IS — `Thunderspy/EnhDB.mhd` is
+ * byte-identical to Mids' `Generic/EnhDB.mhd` — and the only string measured to survive: in
+ * Mids 3.8.6 under Wine a build naming `Generic` opens, and one naming `Thunderspy` dies in a
+ * .NET error box with no build at all. See DATA-GAP MBDEXPORT-2.
+ */
+export const MIDS_DATABASE_FOR_DATASET: Record<DatasetId, { database: string; own: boolean }> = {
+  homecoming: { database: 'Homecoming', own: true },
+  rebirth: { database: 'Rebirth', own: true },
+  brainstorm: { database: 'Homecoming', own: false },
+  thunderspy: { database: 'Generic', own: false },
+};
+
+/**
+ * The forks a `.mbd` naming this database may have been built for — the inverse of the table
+ * above rather than a second copy of it, so the two directions cannot drift apart.
+ *
+ * A database identifies a fork only where some fork carries it as its OWN. `Generic` is a real
+ * Mids database in its own right, and a build authored in it is a plain CoH build rather than
+ * evidence of a fork, so it answers with nothing and the reader takes the file under whatever
+ * dataset is loaded. Empty likewise for a name we have never heard of, which is what Mids'
+ * own third-party databases would arrive as.
+ */
+export function datasetsForMidsDatabase(database: string | undefined): DatasetId[] {
+  if (!database) return [];
+  const named = (Object.entries(MIDS_DATABASE_FOR_DATASET) as [DatasetId, { database: string; own: boolean }][])
+    .filter(([, entry]) => entry.database === database);
+  return named.some(([, entry]) => entry.own) ? named.map(([id]) => id) : [];
+}
 
 // ============================================
 // ARCHETYPE MAPPING

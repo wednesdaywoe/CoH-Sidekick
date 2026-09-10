@@ -26,6 +26,7 @@ import hashlib
 import json
 import os
 import sys
+import textwrap
 
 import read_enhdb
 
@@ -50,6 +51,31 @@ DATASET_SOURCES = {
     "brainstorm": os.path.join(MIDS_DB, "Homecoming", "EnhDB.mhd"),
     "rebirth": os.path.join(MIDS_DB, "Rebirth", "EnhDB.mhd"),
     "thunderspy": os.path.join(REPO_ROOT, "Thunderspy", "EnhDB.mhd"),
+}
+
+# Which Mids database each dataset's table really came from, stated in the FILE the reader
+# opens rather than only here. The `.mhd` cannot say it — its header is "Mids Reborn
+# Enhancement Database" and nothing else, no fork and no version — so a path is all the
+# generated header used to carry, and `Thunderspy/EnhDB.mhd` reads like the fork's own file.
+# A sha256 gate over it (src/data/mids-uids-staleness.test.ts) grades freshness and is
+# structurally blind to which database it is. See DATA-GAP MBDEXPORT-2.
+DATASET_PROVENANCE = {
+    "homecoming": "Mids Reborn's own Homecoming database.",
+    "rebirth": "Mids Reborn's own Rebirth database.",
+    "brainstorm": (
+        "Mids Reborn's HOMECOMING database. Mids ships no Brainstorm one, and Brainstorm is "
+        "Homecoming's open beta sharing its enhancement namespace, so this is the fork's "
+        "database in everything but name."
+    ),
+    "thunderspy": (
+        "Mids Reborn's GENERIC database, byte-identical (md5 2e8d24a3…) to the "
+        "`Generic/EnhDB.mhd` a Mids install ships. Mids Reborn carries Generic, Homecoming "
+        "and Rebirth and has never had a Thunderspy database, so this is the closest stand-in "
+        "there is rather than the fork's own file. It resolves 210 of Thunderspy's 213 sets "
+        "because those are shared CoH sets; the three it cannot — `kb` and the two Primalist "
+        "ATOs — exist in no Mids database at all, and the export reports them per slot. "
+        "DATA-GAP MBDEXPORT-2."
+    ),
 }
 
 UID_PREFIXES = ("Superior_Attuned_", "Attuned_", "Crafted_")
@@ -158,6 +184,11 @@ def build_table(mhd_path: str) -> dict:
     }
 
 
+def wrap_comment(text: str, width: int = 76) -> list[str]:
+    """The provenance note as ` * ` lines, so the generated header stays readable."""
+    return [f" * {line}" for line in textwrap.wrap(text, width=width)]
+
+
 def render_ts(dataset: str, source: str, table: dict) -> str:
     rel_source = os.path.relpath(source, REPO_ROOT)
     lines = [
@@ -165,7 +196,8 @@ def render_ts(dataset: str, source: str, table: dict) -> str:
         f" * GENERATED — do not edit. Regenerate with:",
         f" *   python3 tools/mids-oracle/emit_mids_uids.py --dataset {dataset}",
         " *",
-        f" * Source: {rel_source} (Mids Reborn enhancement database).",
+        f" * Source: {rel_source}, which is:",
+        *wrap_comment(DATASET_PROVENANCE[dataset]),
         " *",
         " * Mids resolves a slotted enhancement by UID substring match and leaves the",
         " * slot empty on a miss, so the export path reads these rather than deriving",

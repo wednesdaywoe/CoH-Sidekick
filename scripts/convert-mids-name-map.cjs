@@ -125,6 +125,34 @@ const REPO_ROOT = path.resolve(__dirname, '..');
  */
 const NAMES_DATASET = { brainstorm: 'homecoming' };
 const namesDataset = NAMES_DATASET[datasetId] || datasetId;
+
+/**
+ * What each names dump IS, stated in the generated file rather than only here.
+ *
+ * An `I12.mhd` header carries "Mids Reborn Powers Database" and a version, never a fork, so
+ * the dump cannot say which database it came from and this header used to compose the claim
+ * out of the dataset id — "Mids Reborn thunderspy database", an assertion that Mids has one.
+ * It does not: Mids Reborn's releases carry Generic, Homecoming and Rebirth (MBDEXPORT-2).
+ *
+ * The Thunderspy entry is the one that needed saying, and saying carefully, because the
+ * measurement does not match its sibling. `Thunderspy/EnhDB.mhd` is Mids' Generic database
+ * byte for byte; the `I12.mhd` this dump was cut from is NOT — its content is Thunderspy's
+ * (Spectral Melee, Hard Life, Pale Blade, the Defender melee sets), and 286 of our 305
+ * Thunderspy powersets appear in it against 272 of Homecoming's 364. So the two vendored
+ * files have different provenance, the `.mhd` itself is no longer on disk, and where it came
+ * from is recorded nowhere — an agent may have found a Mids fork carrying the fork. Recorded
+ * as measured and unattributed rather than guessed either way.
+ */
+const NAMES_PROVENANCE = {
+  homecoming: "Mids Reborn's own Homecoming database.",
+  rebirth: "Mids Reborn's own Rebirth database.",
+  thunderspy: 'a Mids-format powers database holding THUNDERSPY content, vendored from outside'
+    + " Mids Reborn's own releases (which carry Generic, Homecoming and Rebirth only). Its"
+    + ' source .mhd is gone and its origin is unrecorded; the dump is the only evidence left.'
+    + ' Unlike Thunderspy/EnhDB.mhd next door, it is not Mids Generic under another name:'
+    + ' 286 of our 305 Thunderspy powersets are in it, against 272 of Homecoming\'s 364.'
+    + ' DATA-GAP MBDEXPORT-2.',
+};
 const NAMES_PATH = path.join(REPO_ROOT, 'tools', 'mids-oracle', `mids-power-names.${namesDataset}.json`);
 const EXPORT_BASE = path.join(REPO_ROOT, 'exported_powers');
 const RAW_ROOT = (datasetId === 'homecoming' && !fs.existsSync(path.join(EXPORT_BASE, datasetId)))
@@ -583,9 +611,21 @@ const sortedAlias = Object.fromEntries(Object.keys(alias).sort().map((k) => [k, 
 const sortedPaths = Object.fromEntries(Object.keys(pathTable).sort().map((k) => [k, pathTable[k]]));
 const sortedLoose = Object.fromEntries(Object.keys(looseReverse).sort().map((k) => [k, looseReverse[k]]));
 
-const source = `Mids Reborn ${namesDataset} database ${midsNames.version} `
-  + `(sha256 ${String(midsNames.sha256).slice(0, 12)}…)`
-  + (namesDataset === datasetId ? '' : ` — Mids ships no ${datasetId} build, so a ${datasetId} .mbd carries ${namesDataset}'s namespace`);
+/** A long provenance note as ` * `-prefixed lines, so the generated header stays readable. */
+function wrapComment(text, width = 92) {
+  const lines = [];
+  let line = '';
+  for (const word of text.split(' ')) {
+    if (line && (line + ' ' + word).length > width) { lines.push(line); line = word; }
+    else line = line ? `${line} ${word}` : word;
+  }
+  if (line) lines.push(line);
+  return lines.join('\n * ');
+}
+
+const source = `mids-power-names.${namesDataset}.json, version ${midsNames.version} `
+  + `(sha256 ${String(midsNames.sha256).slice(0, 12)}…) — ${NAMES_PROVENANCE[namesDataset]}`
+  + (namesDataset === datasetId ? '' : ` Mids ships no ${datasetId} build, so a ${datasetId} .mbd carries ${namesDataset}'s namespace.`);
 
 const body = `/**
  * Mids internal name → this dataset's internal name — AUTO-GENERATED, DO NOT EDIT.
@@ -599,7 +639,7 @@ const body = `/**
  * (\`Guardian_Composition\` for our \`Guardian_Comp\`, MBDIMPORT-7). \`MIDS_POWERSET_ALIAS\`
  * below carries those pairs so a reader holding the .mbd's own path can reach the same row.
  *
- * Source: ${source}
+ * Source: ${wrapComment(source)}
  * Powersets paired with the export: ${stats.shared} of ${midsSets.size}. Remapped names: ${stats.rows}.
  * Reverse rows for the writer: ${stats.reverseRows}${stats.reverseWithdrawn.length ? `, with ${stats.reverseWithdrawn.length} withdrawn as ambiguous` : ''}, plus ${stats.loose.length} the display join could only reach with its separators stripped.
  * Powerset paths for the writer: ${Object.keys(sortedPaths).length}${KEYS_ARE_LITERAL ? '' : ` — NONE. The ${namesDataset} names dump predates MBDEXPORT-6 and carries folded powerset keys, so Mids' own spelling is not in it. Re-run emit_mids_names.py against that fork's I12.mhd to fill this in.`}

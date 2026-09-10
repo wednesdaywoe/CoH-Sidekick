@@ -217,7 +217,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "586c55919947dac83c2ad226c6cafe7ff33ce4834889af4eccf02e2b9e8c4809"
+      "sha256": "50c6c8aa6afaa3d608b1809cd24cbfa66a899e1b2cb672ed7ae5cd4285bb71ad"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -397,7 +397,7 @@
     {
       "path": "scripts/convert-mids-name-map.cjs",
       "status": "identical",
-      "sha256": "99c4e6b1b7605f0e8433a85fae6bf952260cc69ef10b97eebed80dc40e645261"
+      "sha256": "9c909a918b9cb9cabfae75a305134c39ba54fd09588fc1d082845ca2cdfa68f4"
     },
     {
       "path": "scripts/convert-pet-entities.cjs",
@@ -548,22 +548,22 @@
     {
       "path": "src/data/datasets/brainstorm/generated/mids-name-map.ts",
       "status": "identical",
-      "sha256": "cfdbc367bf7fe09f5922606d6317a20a06bf5d4d5db55082e2a2ea28d156d153"
+      "sha256": "18ac555e0cfbf7977f74ed8734b083360751b0e25ba7b24acefcaab747f4d6db"
     },
     {
       "path": "src/data/datasets/homecoming/generated/mids-name-map.ts",
       "status": "identical",
-      "sha256": "8de7a3a174fe01c9126532af9fc2d895d1b25978b752bf0766531ecb8d0ad398"
+      "sha256": "b120e86caf259cf91a4f5760e248f676e06c4ccbc0e3b36abce218e45e8ae8d4"
     },
     {
       "path": "src/data/datasets/rebirth/generated/mids-name-map.ts",
       "status": "identical",
-      "sha256": "2fdbc3f6e8c25c1bd59c35d4d3a58da97e57c348e29d833882429754b6704c4f"
+      "sha256": "94cb3221f95249261d13557f36cb8f72a856e549cd76338c5f41e6057293cfec"
     },
     {
       "path": "src/data/datasets/thunderspy/generated/mids-name-map.ts",
       "status": "identical",
-      "sha256": "6b9ee0c58c68236dfe39e6bde0f2f5b50a3fcc0303d36595ce63a9f12bd5b568"
+      "sha256": "18e854db06c017e5f8955c13bc780589a02a69e247d24e3e9279e57a60bcf547"
     },
     {
       "path": "src/data/enhancement-curves.ts",
@@ -598,7 +598,7 @@
     {
       "path": "src/data/mids-uids.ts",
       "status": "identical",
-      "sha256": "e73a34e1019ad696a9957f5fd1ea6b630b4ffa26238e945bba167463b3c3f5d2"
+      "sha256": "31150a7a2f98ecccecc85dd046a5bf0314da60e749b0f1ef1d4d4dcdd3bdab6e"
     },
     {
       "path": "src/data/power-pools.ts",
@@ -675,8 +675,8 @@
       "path": "src/utils/mids-export.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "bff7487a1383868261bd62eb2b1b6a2a4195068225adc198b41acb49ded4931b",
-        "beta": "f2c6af00d70db8981e5dde2155eac34cd0b859472da5c8e93c9aad7a0d49793b"
+        "canonical": "0ee2080387841db5bba862016d3c490a2f44258a2948750a53dead99b44e3407",
+        "beta": "03e0bfaca169f6421717af596f529adc6d6338c922a6401f71cd9a66ba84cd23"
       },
       "reason": "SLOT-3 (beta commit d59d7d3d5c): beta's `exportToMids` / `exportToMidsWithReport` take a second `levelUpMode` parameter and resolve slot levels through `computeExportSlotLevels`, so off-mode placement stops enforcing a pick-level schedule floor and says once in the UI that the Level it writes is synthetic. Canonical's copy keeps the one-arg form and `computeAllSlotLevels`. Three hunks, all slot levels — name rotation, enhancement UID mapping and warning emission are byte-identical, so every MBDEXPORT pin taken against canonical's copy holds for the beta's except a claim about a slot's `Level`. Canonical's copy is not app code: it is the source the Rust `.mbd` writer will be ported from, and `crates/app/src/build_io.rs` still lists `.mbd`/`.mxd` as not in the rebuild. Port THIS copy and Rust inherits the floor SLOT-3 removed, stamping every exported slot with a levelling history the build never had — a Rule 1 soft-wrong value written into a file another planner reads as authoritative.",
       "exit": "canonical's vendored TS half takes SLOT-3 through all ten `slot-levels.ts` consumers (Header, PowerRow, useSlotLevels, useBuildBudget, uiStore, buildStore, export-print, forum-export, mids-export, mids-import/importer), or that half is retired once the Rust writer lands. Not a carry either way: `--write` cannot converge a fork and `sync:shared` refuses to clobber a beta-authored edit, so this side will not converge on its own. Whichever comes first, the Rust `.mbd` writer must be ported from the BETA's two-arg form, and this row is where that is recorded.",
@@ -696,8 +696,8 @@
       "path": "src/utils/mids-import/importer.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "1ea367f8e123adb05ac39f24d9aac7d706e2ef3d77b987329561a1ea4b30b101",
-        "beta": "4a7189758556bd3216c6be9435e5d71c9d91bc0b1cdd50de1528f5f3e0dba4af"
+        "canonical": "7504b438101c6d41cef43b02c858e54bc4459af82e1ed22a8372e5ada20dc0ff",
+        "beta": "e3e516784639583dac9d9156556c25d867cba0122ea3e86317d168039bdbe15a"
       },
       "reason": "SLOT-3: beta's import call now passes ensureSlotOrderPopulated a live levelUpMode flag (false here — this pure parser has no store access, so the store's own importMidsBuild action re-runs the call against the real mode right after) so off-mode slot placement stops enforcing a pick-level schedule floor. Canonical's copy still calls the one-arg form; canonical's slot-levels.ts has no levelUpMode parameter to receive it.",
       "exit": "canonical's own TS import tooling adopts the same levelUpMode-aware call (or a maintainer confirms it doesn't need SLOT-3's fix), then a --write carries the converged hash across. sync:shared only flows canonical to beta and refuses to clobber a beta-authored edit, so this side won't converge on its own. Re-cut 2026-09-09 with its two source twins: the first half of that will not happen on its own — canonical's `src/` is not tooling that adopts things, it is the tree the Rust port reads — so the condition that actually binds is that the Rust `.mbd` READER be ported from the beta's levelUpMode-aware call, the same way the writer must be (see `src/utils/mids-export.ts`).",
@@ -716,7 +716,7 @@
     {
       "path": "src/utils/mids-import/mappers.ts",
       "status": "identical",
-      "sha256": "8320e238a8f51039806ebbd6a1dd9d1c2a637ab3c850adba85e46f41920e0636"
+      "sha256": "ecea4d29ce2da6e6a03c7585c9e447220228199115d4476c085986e2741ab574"
     },
     {
       "path": "src/utils/mids-import/name-map.test.ts",
@@ -1152,12 +1152,12 @@
     {
       "path": "tools/mids-oracle/emit_mids_names.py",
       "status": "identical",
-      "sha256": "6896cfe426689f0d0f94d19de2a86f5644fa804c56449ebb4d11e81c1f7f45e2"
+      "sha256": "e027c90352b105979259ea96440bf6d2d2e9b1a762ba628a46a7201398c1df13"
     },
     {
       "path": "tools/mids-oracle/emit_mids_uids.py",
       "status": "identical",
-      "sha256": "75354a54b5f0f30573a22f2b71613cafd1603c2551f9d59b7de436998e741667"
+      "sha256": "17b70b227ebd559f24731eae9f6ada962e4ef3f506efe1cf74c1ec67d3377ea8"
     },
     {
       "path": "tools/mids-oracle/enh_oracle_mapping_gap_worklist.json",

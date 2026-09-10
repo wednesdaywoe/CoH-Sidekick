@@ -10,7 +10,8 @@
  * (`Guardian_Composition` for our `Guardian_Comp`, MBDIMPORT-7). `MIDS_POWERSET_ALIAS`
  * below carries those pairs so a reader holding the .mbd's own path can reach the same row.
  *
- * Source: Mids Reborn homecoming database 2026.5.1337 (sha256 7568ff37f3a6…)
+ * Source: mids-power-names.homecoming.json, version 2026.5.1337 (sha256 7568ff37f3a6…) — Mids Reborn's
+ * own Homecoming database.
  * Powersets paired with the export: 3596 of 3653. Remapped names: 95.
  * Reverse rows for the writer: 95, plus 0 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 3596

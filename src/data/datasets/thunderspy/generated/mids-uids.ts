@@ -2,7 +2,14 @@
  * GENERATED — do not edit. Regenerate with:
  *   python3 tools/mids-oracle/emit_mids_uids.py --dataset thunderspy
  *
- * Source: Thunderspy/EnhDB.mhd (Mids Reborn enhancement database).
+ * Source: Thunderspy/EnhDB.mhd, which is:
+ * Mids Reborn's GENERIC database, byte-identical (md5 2e8d24a3…) to the
+ * `Generic/EnhDB.mhd` a Mids install ships. Mids Reborn carries Generic,
+ * Homecoming and Rebirth and has never had a Thunderspy database, so this is
+ * the closest stand-in there is rather than the fork's own file. It resolves
+ * 210 of Thunderspy's 213 sets because those are shared CoH sets; the three it
+ * cannot — `kb` and the two Primalist ATOs — exist in no Mids database at all,
+ * and the export reports them per slot. DATA-GAP MBDEXPORT-2.
  *
  * Mids resolves a slotted enhancement by UID substring match and leaves the
  * slot empty on a miss, so the export path reads these rather than deriving

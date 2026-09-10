@@ -133,8 +133,13 @@ describe('mids-export enhancement UIDs', () => {
     // and the emitter's key kept it. The six pieces became nameable the moment
     // `set_key` dropped whitespace (MBDEXPORT-2), which is what reds this list.
     rebirth: ['return_from_the_grave piece 1'],
-    // Thunderspy ships KB and the Primalist ATOs; Mids has no Thunderspy build
-    // of its own, so its Generic database predates all three.
+    // Thunderspy ships KB and the Primalist ATOs, and no Mids database holds any of the
+    // three. This comment was for a while the ONLY place in either repo recording that our
+    // Thunderspy UID table is Mids' Generic database — while the emitter next to it claimed
+    // Thunderspy shipped its own — so the repo held a fact and its contradiction in two
+    // files neither of which cited the other. The provenance is now stated at every site
+    // that reads the file (MBDEXPORT-2), and this list is just the residue: three sets that
+    // exist on one fork and in no Mids database ever.
     thunderspy: [
       ...[1, 2, 3, 4, 5, 6].flatMap((n) => [
         `kb piece ${n}`,

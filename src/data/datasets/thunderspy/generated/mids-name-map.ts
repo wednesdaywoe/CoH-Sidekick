@@ -10,7 +10,12 @@
  * (`Guardian_Composition` for our `Guardian_Comp`, MBDIMPORT-7). `MIDS_POWERSET_ALIAS`
  * below carries those pairs so a reader holding the .mbd's own path can reach the same row.
  *
- * Source: Mids Reborn thunderspy database 2026.3.346 (sha256 1bbc83348369…)
+ * Source: mids-power-names.thunderspy.json, version 2026.3.346 (sha256 1bbc83348369…) — a Mids-format
+ * powers database holding THUNDERSPY content, vendored from outside Mids Reborn's own releases
+ * (which carry Generic, Homecoming and Rebirth only). Its source .mhd is gone and its origin
+ * is unrecorded; the dump is the only evidence left. Unlike Thunderspy/EnhDB.mhd next door, it
+ * is not Mids Generic under another name: 286 of our 305 Thunderspy powersets are in it,
+ * against 272 of Homecoming's 364. DATA-GAP MBDEXPORT-2.
  * Powersets paired with the export: 3453 of 3535. Remapped names: 86.
  * Reverse rows for the writer: 86, plus 0 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 0 — NONE. The thunderspy names dump predates MBDEXPORT-6 and carries folded powerset keys, so Mids' own spelling is not in it. Re-run emit_mids_names.py against that fork's I12.mhd to fill this in.

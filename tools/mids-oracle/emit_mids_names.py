@@ -47,6 +47,17 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 # authored in Mids' Homecoming database and carries Homecoming's namespace. There is no
 # fourth .mhd to read and a key here could never be satisfied. The routing is the
 # converter's call, not this script's — see scripts/convert-mids-name-map.cjs.
+#
+# And Mids ships no Thunderspy build either, which makes the third entry the odd one:
+# `Thunderspy/I12.mhd` is not a Mids Reborn release database. It is also not what its
+# sibling is — `Thunderspy/EnhDB.mhd` is Mids' GENERIC database byte for byte, while the
+# dump this produced from the I12 holds Thunderspy content (Spectral Melee, Hard Life, Pale
+# Blade, the Defender melee sets; 286 of our 305 Thunderspy powersets are in it, against 272
+# of Homecoming's 364). The file itself is no longer on disk and where it came from is
+# recorded nowhere, so `mids-power-names.thunderspy.json` is now the only evidence of it and
+# this entry cannot currently be re-run. Stated rather than assumed either way, because a
+# header reading "Mids Reborn Powers Database" names no fork and a version alone names none
+# — see DATA-GAP MBDEXPORT-2.
 DEFAULT_MHD = {
     "homecoming": os.path.expanduser(
         "~/Games/mids-reborn/drive_c/MidsReborn/Databases/Homecoming/I12.mhd"

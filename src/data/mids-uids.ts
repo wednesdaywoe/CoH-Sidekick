@@ -15,6 +15,17 @@
  *
  * So the table is generated from EnhDB.mhd — Mids is the only authority on its
  * own namespace — by `tools/mids-oracle/emit_mids_uids.py`.
+ *
+ * WHOSE EnhDB, per fork, because two of the four are not their own (MBDEXPORT-2).
+ * Homecoming and Rebirth read Mids' databases of those names. Brainstorm reads
+ * Homecoming's, which is the database a Brainstorm build is authored in anyway.
+ * Thunderspy reads Mids' GENERIC database — `Thunderspy/EnhDB.mhd` is byte-identical
+ * to `Generic/EnhDB.mhd` — because Mids Reborn has never shipped a Thunderspy
+ * database. It answers for 210 of that fork's 213 sets, since those are shared CoH
+ * sets; the three it cannot are `kb` and the two Primalist ATOs, which exist in no
+ * Mids database at all and are reported per slot by the export rather than dropped.
+ * `sourceSha256` and the gate over it gauge freshness, and neither can see which
+ * database the bytes are.
  */
 
 import { getActiveDataset } from './dataset';

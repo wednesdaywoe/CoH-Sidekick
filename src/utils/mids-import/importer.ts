@@ -31,7 +31,7 @@ import {
   STANCE_GROUPS,
   findStanceParent,
 } from '@/data';
-import { getActiveDataset, type DatasetId } from '@/data/dataset';
+import { getActiveDataset, getAllDatasetMetadata, type DatasetId } from '@/data/dataset';
 import type { InherentPowerDef } from '@/data';
 
 // ============================================
@@ -52,15 +52,13 @@ import type { InherentPowerDef } from '@/data';
 // produce a corrupt build. Caller should switch servers via the picker
 // (which reloads with the new dataset) before retrying the import.
 
-const MBD_DATABASE_TO_SERVER: Record<string, DatasetId> = {
-  'Homecoming': 'homecoming',
-  'Rebirth':    'rebirth',
-};
-
-function detectServerFromMbd(database: string | undefined): DatasetId | null {
-  if (!database) return null;
-  return MBD_DATABASE_TO_SERVER[database] ?? null;
-}
+// The forks a named database may be comes from `MIDS_DATABASE_FOR_DATASET`, which the WRITER
+// stamps from — one table, both directions, so a file we wrote is a file we can read. It was
+// two hand-written else-branches, and they disagreed by construction: the writer stamped
+// `Homecoming` on everything that was not Rebirth, and this refused the result with "made for
+// Homecoming, but the planner is currently running Homecoming" — the same branch printing both
+// halves of the sentence. Brainstorm and Thunderspy were unopenable by us for that reason.
+// See DATA-GAP MBDEXPORT-2.
 
 /**
  * Per-server full-path remaps for Mids power names whose meaning has shifted
@@ -111,6 +109,7 @@ import {
   mapEnhancementByDisplayName,
   MIDS_SILENT_SKIP_PATHS,
   midsNameIsRetired,
+  datasetsForMidsDatabase,
 } from './mappers';
 
 /**
@@ -184,24 +183,35 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
   // exist in HC's registry (and vice-versa for HC's Sentinel sets), so
   // the importer can't proceed cross-dataset. Caller should switch the
   // server picker first.
-  const detectedServer = detectServerFromMbd(mbd.BuiltWith?.Database);
+  const namedDatabase = mbd.BuiltWith?.Database;
+  const forkCandidates = datasetsForMidsDatabase(namedDatabase);
   const activeServer = (() => {
     try { return getActiveDataset().id; } catch { return null; }
   })();
-  if (detectedServer && activeServer && detectedServer !== activeServer) {
-    const detectedLabel = detectedServer === 'rebirth' ? 'Rebirth' : 'Homecoming';
-    const activeLabel = activeServer === 'rebirth' ? 'Rebirth' : 'Homecoming';
+  if (forkCandidates.length && activeServer && !forkCandidates.includes(activeServer)) {
+    const label = (id: DatasetId) =>
+      getAllDatasetMetadata().find((meta) => meta.id === id)?.displayName ?? id;
     return {
       success: false,
       build: null,
       warnings: [{
         type: 'general',
-        midsName: mbd.BuiltWith?.Database ?? '',
-        message: `This build was made for ${detectedLabel}, but the planner is currently running ${activeLabel}. Switch servers via the Build Identity picker and retry the import.`,
+        midsName: namedDatabase ?? '',
+        message: `This build names Mids' ${namedDatabase} database, which this planner reads as `
+          + `${forkCandidates.map(label).join(' or ')}, but you are running ${label(activeServer)}. `
+          + 'Switch servers via the Build Identity picker and retry the import.',
       }],
       summary,
     };
   }
+
+  // Which fork this build is being read INTO. The guard above has already refused any file
+  // whose database names a fork other than the one loaded, so the active dataset is the answer
+  // whenever there is one; a database naming exactly one fork answers for a session that has
+  // none. `Generic` and every unknown name answer nothing and read under whatever is loaded —
+  // a plain CoH build is not evidence of a fork.
+  const importFork: DatasetId | null =
+    activeServer ?? (forkCandidates.length === 1 ? forkCandidates[0] : null);
 
   // 3. Map archetype
   const archetypeId = mapArchetype(mbd.Class);
@@ -491,7 +501,7 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
       branchSecondarySetIds,
       warnings,
       summary,
-      detectedServer,
+      importFork,
     );
 
     if (!result) continue;
@@ -693,11 +703,9 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
   // 12. Construct the Build object
   const build: Build = {
     name: mbd.Name || `${archetype.name} Import`,
-    // Server identifier — detected from `BuiltWith.Database` when present,
-    // otherwise falls back to the active dataset. The dataset-mismatch
-    // guard above (step 2a) ensures we never import a Rebirth build into
-    // an HC session or vice-versa, so this stamps the right id either way.
-    serverId: detectedServer ?? activeServer ?? 'homecoming',
+    // Server identifier — the fork this build was read INTO, which the mismatch guard above
+    // (step 2a) has already made agree with the file's own claim wherever the file makes one.
+    serverId: importFork ?? 'homecoming',
     archetype: {
       id: archetypeId,
       name: archetype.name,

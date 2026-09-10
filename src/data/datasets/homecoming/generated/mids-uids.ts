@@ -2,7 +2,8 @@
  * GENERATED — do not edit. Regenerate with:
  *   python3 tools/mids-oracle/emit_mids_uids.py --dataset homecoming
  *
- * Source: MidsReborn-master/MidsReborn/Databases/Homecoming/EnhDB.mhd (Mids Reborn enhancement database).
+ * Source: MidsReborn-master/MidsReborn/Databases/Homecoming/EnhDB.mhd, which is:
+ * Mids Reborn's own Homecoming database.
  *
  * Mids resolves a slotted enhancement by UID substring match and leaves the
  * slot empty on a miss, so the export path reads these rather than deriving

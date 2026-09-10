@@ -2,7 +2,10 @@
  * GENERATED — do not edit. Regenerate with:
  *   python3 tools/mids-oracle/emit_mids_uids.py --dataset brainstorm
  *
- * Source: MidsReborn-master/MidsReborn/Databases/Homecoming/EnhDB.mhd (Mids Reborn enhancement database).
+ * Source: MidsReborn-master/MidsReborn/Databases/Homecoming/EnhDB.mhd, which is:
+ * Mids Reborn's HOMECOMING database. Mids ships no Brainstorm one, and
+ * Brainstorm is Homecoming's open beta sharing its enhancement namespace, so
+ * this is the fork's database in everything but name.
  *
  * Mids resolves a slotted enhancement by UID substring match and leaves the
  * slot empty on a miss, so the export path reads these rather than deriving

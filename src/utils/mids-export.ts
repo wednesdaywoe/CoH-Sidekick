@@ -18,32 +18,94 @@ import {
   midsPowersetPathForExport,
   midsPowersetPathsKnown,
 } from '@/data/mids-name-map';
-import { MIDS_STAT_MAP, MIDS_ORIGIN_TIER } from '@/utils/mids-import/mappers';
+import { MIDS_STAT_MAP, MIDS_ORIGIN_TIER, MIDS_DATABASE_FOR_DATASET } from '@/utils/mids-import/mappers';
+import { ARCHETYPE_CLASS_MAP } from '@/utils/enhancement-uid';
+import { getArchetype } from '@/data/archetypes';
+import { isDatasetId, getAllDatasetMetadata } from '@/data/dataset';
 import { getInherentPowers, getArchetypeInherentPowers, POWER_PICK_LEVELS, getPicksGrantedAtLevel, GRANTED_POWER_GROUPS } from '@/data';
 import { computeExportSlotLevels, type SlotLevel } from '@/utils/slot-levels';
 import { powerKey, type PowerCategory } from '@/utils/power-key';
 
 // ============================================
-// REVERSE ARCHETYPE MAP (app ID → Mids Class_*)
+// ARCHETYPE AND FORK, AS MIDS NAMES THEM
 // ============================================
 
-const REVERSE_ARCHETYPE_MAP: Record<string, string> = {
-  blaster: 'Class_Blaster',
-  brute: 'Class_Brute',
-  controller: 'Class_Controller',
-  corruptor: 'Class_Corruptor',
-  defender: 'Class_Defender',
-  dominator: 'Class_Dominator',
-  mastermind: 'Class_Mastermind',
-  scrapper: 'Class_Scrapper',
-  sentinel: 'Class_Sentinel',
-  stalker: 'Class_Stalker',
-  tanker: 'Class_Tanker',
-  peacebringer: 'Class_Peacebringer',
-  warshade: 'Class_Warshade',
-  'arachnos-soldier': 'Class_Arachnos_Soldier',
-  'arachnos-widow': 'Class_Arachnos_Widow',
-};
+/**
+ * Mids' `Class_*` token for this build's archetype — the game's own token, read off the
+ * dataset rather than restated here.
+ *
+ * This was a hand table of fifteen `Class_` strings with `|| 'Class_Blaster'` behind it, and
+ * the fallback was not theoretical: Rebirth's Guardian was never in it, so a Guardian `.mbd`
+ * that MIDS ITSELF wrote came back out of here as `Class_Blaster` — and Mids has a
+ * `Class_Guardian`. The export owns the token (`archetype.stats.className`, the string the
+ * game's own effect gates compare against) and it agrees with all fifteen hand rows on every
+ * fork, so it is read: CLAUDE.md Rule 0.
+ *
+ * An archetype no Mids database holds is still written under its real name, and reported.
+ * `ARCHETYPE_CLASS_MAP` is the roster of classes MIDS knows — the reader's vocabulary, read
+ * here as the vocabulary question it is — so "can Mids name this class" has one home rather
+ * than a second list to drift from. The table, not `mapArchetypeClass`: the day that function
+ * learns to answer from our own datasets (which is the reading side's business, not this
+ * one's), it would answer for Primalist and quietly delete this warning. Measured in Mids
+ * 3.8.6 under Wine: an unknown `Class_Primalist` opens with no error at all, unlike an unknown
+ * `Database` string, so the honest token costs nothing the Blaster lie was buying.
+ */
+function midsClassForBuild(build: Build, warnings: MidsExportWarning[]): string {
+  const archetypeId = build.archetype.id;
+  const className = (archetypeId ? getArchetype(archetypeId)?.stats?.className : undefined)
+    ?? build.archetype.stats?.className
+    ?? '';
+  if (!className) {
+    warnings.push({
+      power: build.archetype.name || String(archetypeId ?? 'archetype'),
+      slot: 0,
+      detail: 'this archetype states no class token, so Mids gets an empty Class and opens its default build',
+    });
+    return '';
+  }
+  if (!ARCHETYPE_CLASS_MAP[className]) {
+    warnings.push({
+      power: build.archetype.name || className,
+      slot: 0,
+      detail: `no Mids database has an archetype ${className} — Mids will not resolve the class or anything under it`,
+    });
+  }
+  return className;
+}
+
+/**
+ * `BuiltWith.Database`, and the warning owed when Mids has no database for this fork.
+ *
+ * The string used to be `serverId === 'rebirth' ? 'Rebirth' : 'Homecoming'`, so a Thunderspy
+ * build asserted the one fork it definitely is not. `MIDS_DATABASE_FOR_DATASET` answers both
+ * this and the reader's "which fork is this file", which is the pairing that broke: the writer
+ * stamped Homecoming and the reader believed it, and our own Thunderspy export came back
+ * refused. See DATA-GAP MBDEXPORT-2.
+ */
+function midsDatabaseForBuild(build: Build, warnings: MidsExportWarning[]): string {
+  const stated = isDatasetId(build.serverId) ? build.serverId : null;
+  if (!stated) {
+    // A build that does not say which fork it is gets the export's oldest guess, and says so
+    // rather than letting the guess pass as a fact — the whole shape of this row.
+    warnings.push({
+      power: String(build.serverId ?? 'no server'),
+      slot: 0,
+      detail: 'this build names no fork the planner ships, so the file is written as Homecoming',
+    });
+  }
+  const fork = stated ?? 'homecoming';
+  const { database, own } = MIDS_DATABASE_FOR_DATASET[fork];
+  if (!own) {
+    const label = getAllDatasetMetadata().find((d) => d.id === fork)?.displayName ?? fork;
+    warnings.push({
+      power: label,
+      slot: 0,
+      detail: `Mids has no ${label} database and never has, so this file names its ${database} one — `
+        + 'every name below is read against that database, and what only this fork has cannot be resolved',
+    });
+  }
+  return database;
+}
 
 // ============================================
 // GENERIC IO STAT → MIDS UID SUFFIX
@@ -691,8 +753,12 @@ export function exportToMidsWithReport(
   levelUpMode: boolean,
 ): { json: string; warnings: MidsExportWarning[] } {
   const archetypeId = build.archetype.id || '';
-  const midsClass = REVERSE_ARCHETYPE_MAP[archetypeId] || 'Class_Blaster';
   const warnings: MidsExportWarning[] = [];
+  // The two file-level claims first, so a report that opens with "Mids has no Thunderspy
+  // database" reads in the order the reader needs it: the fork, then the archetype, then the
+  // sets and pieces that could not be named because of them.
+  const databaseLabel = midsDatabaseForBuild(build, warnings);
+  const midsClass = midsClassForBuild(build, warnings);
   // Outside Level Up mode a slot carries no real level (SLOT-3). Mids' own
   // .mbd format requires a Level per slot regardless, so this is a synthetic,
   // schedule-legal placement — not a claim about the build's actual leveling
@@ -807,9 +873,6 @@ export function exportToMidsWithReport(
     });
   }
 
-  // Database string mirrors what Mids Reborn writes for each server, so
-  // round-tripping between us and Mids preserves the dataset on import.
-  const databaseLabel = build.serverId === 'rebirth' ? 'Rebirth' : 'Homecoming';
   const mbdFile: MbdFile = {
     BuiltWith: {
       App: 'CoH Planner',
