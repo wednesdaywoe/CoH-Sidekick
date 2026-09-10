@@ -57,20 +57,21 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 281 entries.** MBDIMPORT-11, opened 2026-09-10 by MBDIMPORT-8's closure: a `.mbd`'s
-placements follow Mids' respec table and the export carries only the levelling one, so the new
-level derivation grades them against the wrong schedule. One Rebirth build, the Guardian, places
-75 budget slots — two above even the respec table's 73 — and has no explanation yet.
+**0 open, of 281 entries.** MBDIMPORT-11 opened and closed on 2026-09-10: the raise was reading
+the right table already, and the Rebirth Guardian's 75 budget slots are Mids' two tables — its
+Rebirth database double-carries Rebirth's four Fitness freebies, and its respec rows at 47/49 add
+the rest. A build that does not fit at the cap now says so.
 
-Both of the day's other rows closed into it: MBDIMPORT-8 on Mids having no persisted character
-level, MBDIMPORT-9 on Mids marking attunement positively.
+It was opened by MBDIMPORT-8, on Mids having no persisted character level, which closed the same
+day alongside MBDIMPORT-9 on Mids marking attunement positively.
 
-**One owed check rides on that second closure.** Its evidence includes how Mids renders those
-pieces, which is the author's recollection rather than a captured artifact, to be verified
-against a live Mids.
+**Two checks are owed, neither blocking, both needing a live Mids.** MBDIMPORT-9's evidence
+includes how Mids renders unmarked set pieces, which is the author's recollection rather than a
+captured artifact. MBDIMPORT-11's account of Mids' Rebirth table is inferred from where builds
+place slots, not read out of `RLevels.mhd`.
 
-Everything before it is closed, the last on 2026-09-09, found by what found the rest: eight real
-`.mbd` files and a working Mids ([fixtures/mids](../fixtures/mids/README.md)).
+Every entry is closed. What found the last three is what found the rest: eight real `.mbd` files
+and a working Mids ([fixtures/mids](../fixtures/mids/README.md)).
 
 Reading a `.mbd` is done. The name map's join was blind to a whole category, which is why the
 corpus Guardian lost six enhancements (MBDIMPORT-7); nothing said so because a declined entry
@@ -716,7 +717,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 73 of 74 closed
+[Full detail](gaps/pipeline-provenance.md) — 74 of 74 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -764,21 +765,11 @@ measurement went, and where a closure for the residual belongs too.
   `#[serde(default)]` filled it empty on all four forks: `MidsUids::family` could never answer
   `GenericIo`. Nothing saw it — the sibling rosters parse and a vaguer refusal is still a correct
   one; an explicit rename, plus a per-fork census of all three rosters
-- [ ] **MBDIMPORT-11** — a `.mbd`'s slot placements follow Mids' RESPEC table (`RLevels.mhd`, 73
-  slots) and the export carries only the normal one (`assignable_boost`, 67), so MBDIMPORT-8's
-  level raise grades placements against a table they were not planned on. Costs nothing on the
-  corpus — all eight resolve to 50 either way — but the tables differ by 6, and a sub-50 build
-  placing between the two budgets would be raised to a level it has not reached. Census: HC ×5
-  and the Night Widow place 67; the Mastermind 72 (ordinary under respec); the Guardian **75**,
-  which exceeds even 73 by two and has no explanation — Rebirth granting more than we read, Mids'
-  Rebirth database being wrong, or an illegal build Mids wrote anyway.
-  **Goal** — placements are graded against the table Mids planned them on, and the Guardian's two
-  extra slots are attributed.
-  **Done when** — the export carries the respec schedule (or the binary is shown to hold only
-  one), the raise reads the right table, and the Guardian resolves to one of the three readings.
-  **Check** — `npx vitest run src/utils/mids-import/mbd-corpus.test.ts` states the population:
-  the files carrying an `overBudget` pin are exactly the Mastermind at 72 and the Guardian at 75.
-  A third joining them, or either leaving, breaks the census this row is sized from.
+- [x] **MBDIMPORT-11** — the premise inverted: `schedules.bin` holds one schedule, `NLevels.mhd`
+  is byte-identical to it, and the export's schedule is the right table for a question about a
+  CHARACTER — the respec table is Mids' own and could only under-raise. The Guardian's 75 is
+  67 + 4 + 4: Mids' Rebirth database double-carries Rebirth's four Fitness freebies, plus four
+  respec rows at 47/49. Illegal by 8, and now warned about rather than imported in silence
 
 - [x] **MBDEXPORT-3** — the export applied no reverse name rotation, so a power the game had renamed
   left here under a name Mids has no record of and arrived as a blank row still holding its slots;
