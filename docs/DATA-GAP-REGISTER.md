@@ -57,10 +57,14 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 281 entries.** MBDIMPORT-11 opened and closed on 2026-09-10: the raise was reading
-the right table already, and the Rebirth Guardian's 75 budget slots are Mids' two tables — its
-Rebirth database double-carries Rebirth's four Fitness freebies, and its respec rows at 47/49 add
-the rest. A build that does not fit at the cap now says so.
+**0 open, of 283 entries.** MBDIMPORT-12 and -13 opened and closed on 2026-09-10, both found by
+converting the `.mbd` corpus into builds: 86 respelled Homecoming sets carried no alias row and
+resolved to nothing, and one separator drift is left open by the name map by design.
+
+Earlier the same day, MBDIMPORT-11 closed: the raise was reading the right table already, and the Rebirth
+Guardian's 75 budget slots are Mids' two tables — its Rebirth database double-carries Rebirth's
+four Fitness freebies, and its respec rows at 47/49 add the rest. A build that does not fit at the
+cap now says so.
 
 It was opened by MBDIMPORT-8, on Mids having no persisted character level, which closed the same
 day alongside MBDIMPORT-9 on Mids marking attunement positively.
@@ -717,7 +721,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 74 of 74 closed
+[Full detail](gaps/pipeline-provenance.md) — 76 of 76 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -770,6 +774,17 @@ measurement went, and where a closure for the residual belongs too.
   CHARACTER — the respec table is Mids' own and could only under-raise. The Guardian's 75 is
   67 + 4 + 4: Mids' Rebirth database double-carries Rebirth's four Fitness freebies, plus four
   respec rows at 47/49. Illegal by 8, and now warned about rather than imported in silence
+
+- [x] **MBDIMPORT-12** — `powersetAlias` is emitted only for a pair that also carries a rotated
+  power name, so a set Mids merely RESPELLS (`Epic.Fire_Mastery_Guardian` for our
+  `Epic.Guardian_Fire_Mastery`) had no row and resolved to nothing, taking its picks with it — 10
+  holdable sets on Homecoming, 18 on Rebirth; `powersetPath` states the pairing the writer's way
+  round, so the reader inverts it as a second door, trimmed and refusing a contested path
+- [x] **MBDIMPORT-13** — Mids spells one Rebirth power `Moon_Beam` where the export says
+  `Moonbeam`, and the name map's display join folds separators to a space rather than deleting
+  them ON PURPOSE, leaving the drift to a matcher ladder the Rust reader omits by design — so
+  MBDEXPORT-8's finding holds on the reader's side too, and its key already counts the population
+  (1 reachable, 0 ambiguous, four forks); answered inside the one set the pick resolved to
 
 - [x] **MBDEXPORT-3** — the export applied no reverse name rotation, so a power the game had renamed
   left here under a name Mids has no record of and arrived as a blank row still holding its slots;
