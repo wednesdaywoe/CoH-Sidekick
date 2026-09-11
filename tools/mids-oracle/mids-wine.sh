@@ -26,8 +26,8 @@
 #   # "Mids Reborn Patch Data" container: [str header][i32 count]
 #   # then count × ([i32 size][str name][str folder][size bytes]).
 #   # The app .mru holds a mids<ver>+db<ver>.zip; unzip that over drive_c/MidsReborn.
-# BROKEN ON THIS MACHINE as of 2026-09-10, in two stages, and the second stage
-# looks like a working oracle until you read the dialog:
+# WAS BROKEN 2026-09-10 TO 2026-09-11, in what looked like two stages. It was
+# one, and the record is kept because the false second stage cost a day:
 #
 #   1. Bare `wine MidsReborn.exe` logs "Could not load ICU data. UErrorCode: 2"
 #      and the process is gone in ~5s, before any window. Wine 11.0 Staging ships
@@ -38,16 +38,26 @@
 #      an exception", down through Power.ProcessExecutesInner(IPower, Int32
 #      rLevel) to MainWindow2.frmMain_Load. No build is displayed.
 #
-# The `rLevel` in that trace invites the reading that the loaded file did it. It
-# did not: our writer's .mbd and the Mids-written twin of the same build produce
-# the dialog PIXEL-IDENTICALLY (spectacle + `magick compare -metric AE` = 0), and
-# it fires in frmMain_Load regardless of what is loaded. Do not read this crash as
-# evidence about a build file.
+# FIXED 2026-09-11 by app-local ICU, which was the first untried remedy listed
+# here and resolves BOTH lines at once:
 #
-# Untried, in the order worth trying: app-local ICU (the
-# Microsoft.ICU.ICU4C.Runtime package into drive_c/MidsReborn plus
-# DOTNET_SYSTEM_GLOBALIZATION_APPLOCALICU), or an older Wine than 11.0 — this
-# route worked for MBDEXPORT-4 and -5, so something under it moved.
+#   curl -sL -o icu.nupkg \
+#     https://www.nuget.org/api/v2/package/Microsoft.ICU.ICU4C.Runtime.win-x64/72.1.0.3
+#   unzip -j icu.nupkg 'runtimes/win-x64/native/*.dll' -d $PREFIX/drive_c/MidsReborn
+#   # then DOTNET_SYSTEM_GLOBALIZATION_APPLOCALICU=72.1.0.3 — set below.
+#
+# Note the metapackage (Microsoft.ICU.ICU4C.Runtime, 33 KB) carries no DLLs. The
+# win-x64 one is 14 MB and holds icudt72.dll, which is the data Wine is missing.
+#
+# **Stage 2 was never real.** The FastDeepCloner crash is what INVARIANT mode
+# does to Mids, not a second defect under it: give .NET real ICU data and the
+# main window comes up clean on the same Wine, same prefix, same build of Mids
+# that produced the dialog. So the two workarounds were not additive, they were
+# alternatives, and the invariant one is simply wrong. The earlier note that the
+# dialog fires "regardless of what is loaded" was correct and is why it should
+# have been read as environmental sooner — a crash that ignores its input is not
+# telling you about its input. Do not read that dialog as evidence about a build
+# file, and do not set DOTNET_SYSTEM_GLOBALIZATION_INVARIANT.
 #
 set -euo pipefail
 
@@ -83,8 +93,19 @@ fi
 #   WINE=~/.local/share/lutris/runners/wine/wine-11.10-amd64/bin/wine
 WINE="${WINE:-wine}"
 
+# The ICU version must match the DLLs sitting next to MidsReborn.exe; .NET
+# resolves icuuc<major>.dll off it. Refuse rather than fall back, because the
+# fallback is the invariant mode that produces a plausible-looking broken window.
+ICU_VERSION="${MIDS_ICU_VERSION:-72.1.0.3}"
+if [ ! -f "$APP/icudt${ICU_VERSION%%.*}.dll" ]; then
+  echo "no app-local ICU at $APP/icudt${ICU_VERSION%%.*}.dll — see setup above" >&2
+  exit 1
+fi
+
 cd "$APP"
-WINEPREFIX="$PREFIX" WINEDEBUG=-all setsid nohup "$WINE" MidsReborn.exe >/tmp/mids-wine.log 2>&1 </dev/null &
+WINEPREFIX="$PREFIX" WINEDEBUG=-all \
+  DOTNET_SYSTEM_GLOBALIZATION_APPLOCALICU="$ICU_VERSION" \
+  setsid nohup "$WINE" MidsReborn.exe >/tmp/mids-wine.log 2>&1 </dev/null &
 echo "launched; window appears in ~40s. Screenshot with:"
 echo "  W=\$(DISPLAY=:0 xdotool search --name \"Mids' Reborn\" | head -1)"
 echo "  DISPLAY=:0 import -window \$W /tmp/mids.png"

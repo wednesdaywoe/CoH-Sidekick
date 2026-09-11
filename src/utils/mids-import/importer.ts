@@ -478,6 +478,13 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
           // else off, which predates the StatInclude mirror and outlived its reason: it threw
           // away the author's flag on ten of the Warshade's form attacks (MBDEXPORT-13), and
           // for an Auto it was never needed — the calc gate reads `isAuto || isActive`.
+          // This block `continue`s, so the generic capture below never sees a form
+          // sub-power and its slider was the one power's the round trip kept losing
+          // (MBDEXPORT-19). Keyed on the resolved power's own internalName, which is what
+          // the UI store and the writer both address it by.
+          if (entry.VariableValue && match.internalName) {
+            targetsHitValues[match.internalName] = entry.VariableValue;
+          }
           const targetList = primaryMatch ? primaryPowers : secondaryPowers;
           if (!targetList.some((p) => p.internalName === match.internalName)) {
             targetList.push(subPower);
@@ -926,6 +933,13 @@ function processEntry(
       category: 'inherent',
       power: {
         name: powerInternalName.replace(/_/g, ' '),
+        // Carried so the slider capture in the main loop can key on it (MBDEXPORT-19). This
+        // struct is a transport — step 11b merges it back by DISPLAY name and reads only
+        // `isActive`, `slots` and `inherentSlotCount` — so nothing else consumes this field;
+        // without it the capture guard fails its `internalName` test and an inherent's
+        // `VariableValue` is dropped on the way in. A Warshade's Dark Sustenance is the
+        // corpus case. `claimSlot` is never called for an inherent, so dedup is untouched.
+        internalName: powerInternalName,
         powerSet: 'Inherent',
         level: 1,
         available: -1,

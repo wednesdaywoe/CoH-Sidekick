@@ -57,29 +57,42 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**7 open, of 295 entries.** One is the parser, and the mandate puts it first. **TSPY-12** —
-Thunderspy's slot budget is 71 in our export and 76 in Mids' table, and Mids' table is its
-pre-fork `Generic` one hand-edited twice, so it abstains rather than grades. Nothing outside our
-own reader grades that 71, and the importer's over-budget warning divides by it.
+**6 open, of 298 entries.** **One is the reader** — MBDEXPORT-18, re-diagnosed 2026-09-11: the
+importer discards `SlotEntries[].Level`, so by the mandate it outranks the rest of this list and
+the feature tracker. The "none is the parser" line it replaces was true of the bin parser and
+false about the `.mbd` reader, which the row had filed as a writer defect.
 
-Its sibling is **MBDIMPORT-14** — Mids grants 3 slots at 47 and 3 at 49 where the game's schedule
-grants none. Censused across all four Mids databases it is invariant, so it is the respec table's
+**The Wine oracle is back up, and that is what moved this list.** Recorded as down from
+2026-09-10; fixed 2026-09-11 by app-local ICU next to `MidsReborn.exe`.
+
+The second symptom was never real — the FastDeepCloner crash is what invariant mode does to Mids,
+not a defect under it. `tools/mids-oracle/mids-wine.sh` carries the setup and the diagnosis.
+
+Beside the reader row sits **MBDIMPORT-14** — Mids grants 3 slots at 47 and 3 at 49 where the
+game's schedule grants none. Censused across all four Mids databases it is invariant, so it is the respec table's
 convention and not any fork's data; what is unadjudicated is whether the game has a respec
 schedule at all, which our export structurally cannot say.
 
-Three more are our own `.mbd` WRITER, opened 2026-09-10 by the first thing that has ever read
-what it writes: `fixtures/mids/ours/` holds our exporter's spelling of each of the eight corpus
-builds, and `mbd_writer_roundtrip` compares the two against one database.
+The residual census under MBDEXPORT-18 widens it: Rebirth places 3 slots at 9, 13, 17 and 23
+where our table grants 2. Same family, not adjudicated.
 
-Calling the reader the instrument and not a suspect is wrong three times now: MBDEXPORT-13 closed
-through it, -15 was entirely its, and -14 was neither hop's — a hand list of set names one layer
-above both. The round trip measures the pair, never the hop.
+Three carry an `MBDEXPORT-` id, and only two are the writer's. Calling the reader the instrument
+and not a suspect is wrong four times now: MBDEXPORT-13 closed through it, -15 was entirely its,
+-14 was neither hop's, and -18 is the reader's outright. The round trip measures the pair, never
+the hop — and none of the three below it can measure at all.
 
 In the order they cost a user something:
 
-- **MBDEXPORT-11** — `LastPower` fixed to the COUNT and graded on Mids' files; awaiting Wine
-- **MBDEXPORT-17** — every level-less piece goes out at `IoLevel: 0`; 253 slots, invisible to the round trip
-- **MBDEXPORT-16** — a VEAT's branch filing is re-derived, not carried; 24 attributions, nothing lost
+- **MBDEXPORT-18** — the READER drops each slot's level; 126 powers, 8 of 8 files (126 → 47 from
+  the import hop alone, measured)
+- **MBDEXPORT-20** — the archetype inherent is never written; 8 inherents, 8 of 8 files
+- **MBDEXPORT-16** — a VEAT's branch filing is re-derived; 24 attributions, decided, code owed
+
+-18 was opened 2026-09-11 by the restored oracle and is invisible to `mbd_writer_roundtrip`:
+our reader shares the writer's convention, so the two agree while both diverge from the file. -20
+was opened by MBDEXPORT-19's closure — a field census cannot see a row we never write. -16 is
+pinned by its POPULATION in that test and closes by DELETING its pin; the other two census the
+FILES.
 
 Two are not the writer's. **ACCOLADE-3** — two accolade ids predate the internal-name
 convention and only `buildStore` renames them, so a `.skif` opened from a file loses those
@@ -90,16 +103,8 @@ canonical's TS drops two set-bonus stat keys the contract maps and the Rust rout
 fixtures are emitted from that TS, so the port is graded by an oracle blind to two stats it
 models. No fixture build slots either, so nothing reds.
 
--16 is pinned by its POPULATION in that test, so a deviation widens reds while its row is open,
-and it closes by DELETING its pin. -17 cannot have one: the round trip is green on every slot it
-names, because our reader normalises the field back. Its key is a census of the FILES.
-
-What none of them can answer is whether a real Mids parses what we write — that half is Wine
-(`tools/mids-oracle/mids-wine.sh`), and it is what MBDEXPORT-4 and -5 took. **That route is down
-as of 2026-09-10**: the prefix dies on ICU, and the invariant-globalization workaround reaches the
-main window and then throws. Diagnosis and what is untried are in the script's header.
-
-The reader half is done. MBDIMPORT-12 and -13 opened and closed on 2026-09-10, both found by
+The reader half was called done, and MBDEXPORT-18 reopens it. MBDIMPORT-12 and -13 opened and
+closed on 2026-09-10, both found by
 converting the `.mbd` corpus into builds: 86 respelled Homecoming sets carried no alias row and
 resolved to nothing, and one separator drift is left open by the name map by design.
 
@@ -415,7 +420,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Parser + binary fidelity
 
-[Full detail](gaps/parser-fidelity.md) — 46 of 47 closed
+[Full detail](gaps/parser-fidelity.md) — 47 of 47 closed
 
 - [x] **ATTRTYPE-1** — `mapAttribType` maps three of the parser's four `ATTRIB_MOD_TYPE` values
   and falls through, so `Constant` reaches the wire as `Magnitude` and 4,746 Homecoming templates
@@ -426,24 +431,10 @@ measurement went, and where a closure for the residual belongs too.
   carriers out of `powers.bin`, the `magnitude_expression` is genuinely count=0 on the wire so the
   parser is faithful and "Varies" is correct. Guarded by `test_exprmag.py` (export census, per-fork
   floors + mutation-scored). Full narrative in [parser-fidelity.md](gaps/parser-fidelity.md).
-- [ ] **TSPY-12** — our Thunderspy slot schedule is graded by nothing outside our own reader:
-  MBDIMPORT-11's oracle ("`NLevels.mhd` is byte-identical to our export's schedule") was measured
-  on Homecoming and Rebirth and written with no fork on it, and on Thunderspy the two differ at 5
-  levels and by 5 slots — ours 71, Mids 76. Mids' Thunderspy table is its pre-fork `Generic` table
-  with two cells moved (17 and 19, each 2 -> 4), still carrying `Generic`'s 3 slots at level 16
-  where its own Homecoming table grants 0, so it abstains rather than disagrees. That 71 is the
-  ceiling the planner refuses placements against and the denominator of the importer's
-  over-budget warning on a shipping fork.
-  **Goal** — a reader that is not ours grades Thunderspy's `assignable_boost`, or the row closes
-  as a written adjudication that our read stands with its oracle named as absent.
-  **Done when** — the four levels where our Thunderspy schedule exceeds Homecoming's (9, 23, 29,
-  43) are each confirmed out of the Thunderspy binary by a read that is not the crawler's decode
-  path, and the verdict is written; and every place MBDIMPORT-11's byte-identical sentence is
-  cited carries the population it was measured on.
-  **Check** — `node scripts/keys/tspy12-schedule-oracle-census.cjs` — Homecoming and Rebirth
-  identical to ours, Thunderspy differing at 16/17/19/29/43, Mids' Thunderspy table `Generic` plus
-  edits at 17 and 19. Either of the first two diverging, or Mids' table ceasing to be `Generic`
-  plus those two, BREAKS the row: the oracle would then be grading us after all.
+- [x] **TSPY-12** — Mids' Thunderspy table is its pre-fork `Generic` one and abstains, so our 71
+  rested on one decoder; a second reader assuming no header size and no field offsets, finding the
+  unique 7-array tiling of `schedules.bin`, reads 71 on Thunderspy and 67 on the other three,
+  byte-identical to our export and differing at exactly 9/23/29/43. Oracle named as absent
 - [x] **TSPY-8** — `guardThunderspyAppliedMez`'s protection carve-out tested signed SCALE alone,
   but protection is also spelled as signed magnitude on `Duration` templates and as an `Expression`
   magnitude whose sign never reaches the wire, so real protection read as applied control and was
@@ -794,7 +785,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 81 of 86 closed
+[Full detail](gaps/pipeline-provenance.md) — 84 of 89 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -843,7 +834,8 @@ measurement went, and where a closure for the residual belongs too.
   `GenericIo`. Nothing saw it — the sibling rosters parse and a vaguer refusal is still a correct
   one; an explicit rename, plus a per-fork census of all three rosters
 - [x] **MBDIMPORT-11** — the premise inverted: `schedules.bin` holds one schedule, `NLevels.mhd`
-  is byte-identical to it, and the export's schedule is the right table for a question about a
+  is byte-identical to it (on Homecoming and Rebirth; not Thunderspy, TSPY-12), and the export's
+  schedule is the right table for a question about a
   CHARACTER — the respec table is Mids' own and could only under-raise. The Guardian's 75 is
   67 + 4 + 4: Mids' Rebirth database double-carries Rebirth's four Fitness freebies, plus four
   respec rows at 47/49. Illegal by 8, and now warned about rather than imported in silence
@@ -939,21 +931,10 @@ measurement went, and where a closure for the residual belongs too.
   four left with none — 12 across the three corpus files that carry any, MBDIMPORT-1's hole on the
   writer's side; the roster now goes out through the same set-path and power-name lookups every
   other name does, and an id no accolade answers to is reported rather than dropped
-- [ ] **MBDEXPORT-11** — the writer stated `LastPower` as the INDEX of the last pick where Mids'
-  own files hold the COUNT, so the last power picked went into the granted run and came back at
-  level 0 — 8 of 8 corpus files. Fixed 2026-09-10 (`powerEntries.length`), and the convention is
-  now graded on Mids' own eight files rather than reasoned about: each holds exactly 24 picks, all
-  STRICTLY BELOW `LastPower`, with an inherent at `LastPower` and no separator entry between the
-  two. The pin is deleted and our files state 24 picks. What is left is the half this repo cannot
-  see: whether a real Mids parses ours that way.
-  **Goal** — a build written here opens in Mids holding every pick its author made.
-  **Done when** — `fixtures/mids/ours/blaster-assault-rifle-tactical-arrow-v3861.mbd` opens in
-  Mids under Wine (`tools/mids-oracle/mids-wine.sh`) with 24 picks and Stealth at 49 inside the
-  level-up grid, not in the granted run. No `wine` and no prefix exist on the machine this was
-  fixed on, which is why the row stays open rather than closing on green tests.
-  **Check** — `npx vitest run src/utils/mids-import/mbd-roundtrip.test.ts` — the three
-  MBDEXPORT-11 cases grade the count on Mids' files and on ours. If the corpus census stops
-  reading 24 picks per file, the convention this was fixed to is wrong, not the fixture.
+- [x] **MBDEXPORT-11** — the writer stated `LastPower` as the INDEX of the last pick where Mids'
+  files hold the COUNT, so the last power picked went into the granted run and came back at level
+  0, 8 of 8 corpus files. Fixed 2026-09-10; the Wine leg closed 2026-09-11 when a real Mids opened
+  our file with all 24 picks in the level-up grid and Stealth at 49, not in the granted run
 - [x] **MBDEXPORT-13** — a power the author excluded came back included, and Brawl, Sprint and Rest arrived switched on: the reader stores the excluded case as `undefined` and the writer tested `isActive !== false`, which `undefined` passes. Mids' own files chose which side moves; two reader-side halves of the same seam closed with it — `StatInclude` diffs 30 → 0
 - [x] **MBDEXPORT-14** — not the writer and not one piece: Winter's Gift is a craftable set that `isInherentlyAttuned` called attuned, off a hand list of DISPLAY NAMES, so the planner dropped the level from every piece of it and the writer sent the `IoLevel: 0` it stamps on anything level-less. The export states attunement per piece — a set naming no `Crafted_*` boost has nothing to slot at a level — and now ships it as `attunedOnly`; Rust's `max_level <= 1` twin reads it too. Slots 3 → 0, and 5 reward sets the heuristic had missed
 - [x] **MBDEXPORT-15** — the empty placements were dropped on the way IN, not on the way out: the importer's inherent branch returned early on an entry holding no piece anywhere, so Rebirth's Health and Stamina arrived as bare roster rows and then vanished whole on the round trip. `buildSlotEntries`, which this row named as the site, was already emitting one slot per placement — empty placements 12 → 0, and six of the eight corpus files now reconcile with no skipped slots at all
@@ -963,28 +944,45 @@ measurement went, and where a closure for the residual belongs too.
   writer re-derives the filing from the build instead of carrying what the file said. Nothing is
   lost — every power and every piece is still there — so this is the lowest of the six.
   **Goal** — a build comes back filed where its author filed it.
-  **Done when** — it is decided whether the branch filing is information or presentation, because
-  the two answers are different work: if Mids resolves both spellings to the same record it is
-  presentation and this row closes as a written adjudication; if it does not, the writer carries
-  the file's own set per pick. Measured in a real Mids, not reasoned about.
+  **Done when** — the writer carries the file's own set per pick. DECIDED 2026-09-11: measured in
+  a real Mids, it is INFORMATION. Changing only `PowerSets[]` leaves the power/slot grid at delta
+  0 (nothing lost) but re-labels the build from *Night Widow Training / Widow Teamwork* to
+  *Widow Training / Teamwork* and drops the branch section headers — Mids holds both records and
+  renders them differently, so the presentation arm is closed.
   **Check** — `cargo test -p coh_data --test mbd_writer_roundtrip` — the pin counts 24 (2
   selections + 22 powers) on the one file. A count on a second file means this is not VEAT-shaped
   and the row is describing the wrong thing.
-- [ ] **MBDEXPORT-17** — every piece that carries no craft level goes out as `IoLevel: 0` where
-  Mids states one: 253 slots over 6 of the 8 corpus files, both forks — 150 attuned set pieces
-  (Mids writes 49, or 9 for a level-10 placement), 82 origins and 21 specials (Mids writes 1).
-  The round trip is green on all 253: our reader normalises all three kinds back, so the two
-  spellings import to the same build and only a real Mids can say whether the field is read.
-  **Goal** — our file spells a level-less piece the way Mids spells it, or the row closes as a
-  written adjudication that Mids ignores the field for these three kinds.
-  **Done when** — all three kinds are opened in Mids under Wine
-  (`tools/mids-oracle/mids-wine.sh`) and what it shows for each is written down; measured, not
-  reasoned about, because the three kinds may not have one answer. NO corpus file holds all three
-  (measured 2026-09-10), so it takes a pair: on Homecoming the Blaster (io-set + special) and the
-  Warshade (io-set + origin), on Rebirth the Guardian (io-set + special) and the Night Widow
-  (origin). Blocked while the Wine route is down — see Current frontier.
-  **Check** — `node scripts/keys/mbdexport17-iolevel-spelling-census.cjs` — 253, all of them
-  `ours 0`. Anything our writer states a level for BREAKS the claim that this is one convention.
+- [x] **MBDEXPORT-17** — every level-less piece went out at `IoLevel: 0` where Mids states 49/9/1,
+  253 slots invisible to our round trip; a real Mids ignores the field for all three kinds — five
+  controlled variants of Mids' OWN files, zeroing only those slots, render pixel-identically over
+  the whole window, against a same-bytes control of 0 and a different-builds control of 1.6e9
+- [ ] **MBDEXPORT-18** — the READER discards `SlotEntries[].Level` and the importer overwrites it
+  with a respec packing, so a build arrives already carrying a levelling history its author never
+  made: 126 powers over 8 of 8 corpus files, both forks. RE-DIAGNOSED 2026-09-11 — the row opened
+  blaming the writer and citing MBDIMPORT-8, which is the top-level `Level` and a different field;
+  nothing retains a slot's level. Seeding it at import alone takes the key 126 → 47, measured. The
+  writer half is real but second, and the id is now a misnomer.
+  **Goal** — a build exported here carries the slot levels its author placed.
+  **Done when** — the importer retains the file's per-slot level, the writer emits what the build
+  then carries, the 126 is a pin that reaches 0 with `EXPECTED_TOTAL` updated, and it is written
+  down what a build AUTHORED here should state, since those slots have no Mids history and are
+  what `computeAllSlotLevels` exists for.
+  **Check** — `node scripts/keys/mbdexport18-slot-level-drift-census.cjs` — 126 powers over 8 of 8
+  files. A fall without an importer change means the CORPUS moved, not the defect.
+- [x] **MBDEXPORT-19** — `VariableValue` went out as a literal 0 in four places, so 10 sliders
+  over 5 files died silently both ways; the writer now takes the slider as an argument (it lives
+  in `useUIStore`, not on `Build`), and TWO of the ten were the READER's — a form sub-power's
+  `continue` and an inherent struct with no `internalName` each dropped it on the way in
+- [ ] **MBDEXPORT-20** — every corpus build's archetype inherent is in Mids' file and absent from
+  ours — Defiance, Assassination, Dark Sustenance, Resolve, Supremacy, Widow Conditioning, 8 over
+  8 of 8 files, both forks. Found by MBDEXPORT-19's grade, not by looking: Dark Sustenance carries
+  a slider our reader now captures and still cannot return it, because the entry is never written.
+  A field census is structurally blind to a missing row, so -19's key never counted these.
+  **Goal** — a build exported here carries the archetype inherent the planner calculated with.
+  **Done when** — the writer emits it, the 8 is a pin that reaches 0, and the known-absence case
+  in `mbd-roundtrip.test.ts` (which reds when this closes) is replaced by the slider surviving.
+  **Check** — `node scripts/keys/mbdexport20-missing-inherent-census.cjs` — 8 inherents over 8 of
+  8 files. A fall without a writer change means the CORPUS moved, not the defect.
 - [x] **PARTSTAT-2** — the Dominator `Domination` node in `archetypes.json` hand-copied three values the export owns and had drifted, stating `recharge` 200 on the fork whose export says 180; TS gained the name-join to the `Inherent.Inherent` twin that Rust already had, the card's window is now the longest span its caster-side atoms hold open rather than the bag's modal vote, and the four hand-authored `effects` blocks are gone — atom-less bags 4 → 0
 
 - [x] **PARTSTAT-1** — four converters wrote a power's execution stats into the `effects` bag
