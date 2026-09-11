@@ -44,7 +44,7 @@ import type { LegacyPowerPoolRegistry } from '../../power-pools';
 import { ENHANCEMENT_CURVES } from './generated/enhancement-curves';
 import { SPECIAL_ENHANCEMENTS } from './generated/special-enhancements';
 import { LEVELING_SCHEDULE } from './generated/leveling-schedule';
-import { GENERATED_ARCHETYPE_INHERENTS } from './generated/archetype-inherents';
+import { GENERATED_ARCHETYPE_INHERENTS, HEADLINE_ARCHETYPE_INHERENTS } from './generated/archetype-inherents';
 
 const dataset: Dataset = {
   id: 'brainstorm',
@@ -75,6 +75,7 @@ const dataset: Dataset = {
     availabilityOverrides: {},
     autoGrantedSlotLevels: LEVELING_SCHEDULE.autoGrantedSlotLevels,
     archetypeInherents: GENERATED_ARCHETYPE_INHERENTS,
+    headlineArchetypeInherents: HEADLINE_ARCHETYPE_INHERENTS,
   },
 
   petEntities: PET_ENTITIES,

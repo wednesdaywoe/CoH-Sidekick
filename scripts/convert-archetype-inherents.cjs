@@ -111,6 +111,20 @@ function registeredArchetypeIds() {
   return new Set([...body.matchAll(/^ {2}'?([a-z0-9_-]+)'?: \{/gm)].map((m) => m[1]));
 }
 
+/**
+ * Archetype id → the inherent NAME it declares, from the same registry source
+ * `registeredArchetypeIds` reads. This is the join key for the headline emit
+ * below: the registry names the inherent, the export ships the power.
+ */
+function declaredInherentNames() {
+  const src = fs.readFileSync(datasetPath(datasetId, 'archetypes.ts'), 'utf-8');
+  const body = src.slice(src.indexOf('export const ARCHETYPES'));
+  const out = new Map();
+  const re = /^ {2}'?([a-z0-9_-]+)'?: \{\n\s+name: '[^']+',[\s\S]*?inherent: \{\n\s+name: '([^']+)'/gm;
+  for (const m of body.matchAll(re)) out.set(m[1], m[2]);
+  return out;
+}
+
 /** Class stem (`arachnos_soldier`) → archetype id (`arachnos-soldier`). */
 function archetypeIdForClass(stem, registered) {
   for (const candidate of [stem, stem.replace(/_/g, '-')]) {
@@ -179,6 +193,108 @@ function resolveMaxSlots(json, power) {
   return json.max_boosts === undefined || json.max_boosts === null ? 6 : json.max_boosts;
 }
 
+/**
+ * Archetypes whose declared inherent name reaches the right power through no
+ * derivable rule. ONE entry, and it is the one canonical's `convert-inherents.cjs`
+ * documents at length: the Brute declares "Fury", there is no `Fury` power, and the
+ * mechanic is implemented by `Rage_Buff` — an Auto gated `@Class_Brute` whose
+ * `display_name` IS "Fury", sitting among four siblings (`Rage`, `Rage_Dampen`,
+ * `Rage_Proc_Grant`, `Rage_Strengthen`) that share that display name. No field
+ * separates them on every fork: `Rage_Buff`'s damage atoms carry the
+ * `kRage source> .02 *` magnitude expression on Homecoming, and Rebirth and
+ * Thunderspy drop it.
+ *
+ * Canonical's table has THREE entries; this has one, because the two `Conditioning`
+ * rows resolve here off the export's own `@Class_` gate rather than off a filename.
+ * Both Arachnos archetypes declare that name, and `Spider_Conditioning` and
+ * `Widow_Conditioning` each gate to exactly one of them.
+ */
+const HEADLINE_INHERENT_ALIASES = {
+  brute: 'Rage_Buff',
+};
+
+/**
+ * Archetype id → the `Inherent.Inherent` full name of its HEADLINE inherent —
+ * Defiance, Fury, Dark Sustenance, the power the archetype is built around.
+ *
+ * Clause 3 of `selectPowers` rejects every one of these on purpose: they reach the
+ * build through the archetype record's own `inherent:` field, so emitting them as
+ * roster rows would double them. But the `.mbd` writer has to NAME this power for
+ * another program, and the name it needs is the export's, not the
+ * `Inherent.<Archetype>.<Name>` that `createArchetypeInherentPower` synthesises.
+ * That is MBDEXPORT-20: the writer emitted no archetype inherent at all, on 8 of 8
+ * corpus builds. So this emits the NAME and nothing else — no stats, no atoms, which
+ * is what keeps it clear of PARTSTAT-2's territory. There is no number here to drift.
+ *
+ * The rule, in order:
+ *   1. auto-issued, gated on player archetype classes only — clauses 1 and 2 above.
+ *   2. `display_name` equals the name this archetype DECLARES, and the gate names
+ *      this archetype. That alone is ambiguous for 15 of 60 archetype-fork pairs:
+ *      every headline inherent sits beside its own meter/dampen/mode bookkeeping,
+ *      which shares its display name.
+ *   3. prefer the candidate whose internal name IS the declared name with spaces
+ *      underscored. That settles 13 of the 15 — `Domination` over `Domination_Meter`
+ *      and four more, `Vigilance` over `Vigilance_PerTeamEndAdjustment`,
+ *      `Opportunity` over `Opportunity_Meter`.
+ *   4. failing that, the alias above.
+ *
+ * Anything still ambiguous emits NOTHING, and the writer warns rather than guessing.
+ * Exactly one archetype lands there — Thunderspy's Primalist, whose fork ships
+ * `Primal_Energy_Meter` and `Primal_Energy_Dampen` and no canonical power. That is
+ * INHERENT-10, and emitting either half would be the silent wrong answer the row
+ * exists to keep visible.
+ */
+function selectHeadlineInherents() {
+  const registered = registeredArchetypeIds();
+  const playerClasses = new Set(derivePlayerArchetypes(TABLES_DIR));
+  const declaredNames = declaredInherentNames();
+
+  const candidates = new Map(); // archetype id → raw json[]
+  for (const file of fs
+    .readdirSync(INHERENT_DIR)
+    .filter((f) => f.endsWith('.json') && f !== 'index.json')
+    .sort()) {
+    const json = JSON.parse(fs.readFileSync(path.join(INHERENT_DIR, file), 'utf-8'));
+    if (!json.auto_issue) continue; // 1
+    const classes = [...String(json.requires || '').matchAll(/@Class_([A-Za-z0-9_-]+)/g)].map(
+      (m) => m[1].toLowerCase(),
+    );
+    if (!classes.length || !classes.every((c) => playerClasses.has(c))) continue; // 2
+    for (const stem of classes) {
+      const archetypeId = archetypeIdForClass(stem, registered);
+      if (!archetypeId) continue; // selectPowers throws on this; it is not this emit's call
+      if (json.display_name !== declaredNames.get(archetypeId)) continue; // 2
+      if (!candidates.has(archetypeId)) candidates.set(archetypeId, []);
+      candidates.get(archetypeId).push(json);
+    }
+  }
+
+  const resolved = new Map();
+  const ambiguous = [];
+  for (const [archetypeId, rows] of candidates) {
+    let pick = rows.length === 1 ? rows[0] : undefined;
+    if (!pick) {
+      const exact = String(declaredNames.get(archetypeId)).replace(/\s+/g, '_'); // 3
+      const byName = rows.filter((r) => r.name === exact);
+      pick = byName.length === 1 ? byName[0] : undefined;
+    }
+    if (!pick && HEADLINE_INHERENT_ALIASES[archetypeId]) {
+      const aliased = rows.filter((r) => r.name === HEADLINE_INHERENT_ALIASES[archetypeId]); // 4
+      pick = aliased.length === 1 ? aliased[0] : undefined;
+    }
+    if (!pick) {
+      ambiguous.push(`${archetypeId}/${declaredNames.get(archetypeId)} → ${rows.map((r) => r.name).join(', ')}`);
+      continue;
+    }
+    resolved.set(archetypeId, pick.full_name);
+  }
+  // Declared but never a candidate at all — the fork ships no power by that name.
+  for (const [archetypeId, name] of declaredNames) {
+    if (!candidates.has(archetypeId)) ambiguous.push(`${archetypeId}/${name} → (no power)`);
+  }
+  return { resolved, ambiguous };
+}
+
 function selectPowers() {
   if (!fs.existsSync(INHERENT_DIR)) {
     throw new Error(
@@ -239,7 +355,7 @@ function selectPowers() {
   return byArchetype;
 }
 
-function emit(byArchetype) {
+function emit(byArchetype, headline) {
   const entries = [...byArchetype.entries()].sort(([a], [b]) => a.localeCompare(b));
   const total = entries.reduce((n, [, powers]) => n + powers.length, 0);
 
@@ -250,6 +366,16 @@ function emit(byArchetype) {
   const summary = entries.length
     ? entries.map(([id, powers]) => ` *   ${id}: ${powers.map((p) => p.name).join(', ')}`).join('\n')
     : ' *   (none — every archetype inherent on this server is already reachable)';
+
+  const headlineEntries = [...headline.resolved.entries()].sort(([a], [b]) => a.localeCompare(b));
+  const headlineBody = headlineEntries.map(([id, full]) => `  '${id}': '${full}',`).join('\n');
+  const headlineSummary = [
+    `${headlineEntries.length} archetype(s) named`,
+    ...(headline.ambiguous.length
+      ? [` *`, ` * Unresolved, and left unnamed on purpose — the writer warns rather than guessing:`,
+         ...headline.ambiguous.map((a) => ` *   ${a}`)]
+      : []),
+  ].join('\n');
 
   const content = `/**
  * Archetype inherents — GENERATED LAYER
@@ -270,18 +396,32 @@ import type { InherentPowerDef } from '@/data/datasets/homecoming/levels';
 export const GENERATED_ARCHETYPE_INHERENTS: Record<string, InherentPowerDef[]> = {
 ${body}
 };
+
+/**
+ * Archetype id → the \`Inherent.Inherent\` full name of its HEADLINE inherent, for
+ * the \`.mbd\` writer, which has to name this power for Mids (MBDEXPORT-20). The
+ * NAME only — no stats and no atoms, so there is nothing here that can drift into a
+ * wrong number. See the converter's \`selectHeadlineInherents\` for the rule.
+ *
+ * ${headlineSummary}
+ */
+export const HEADLINE_ARCHETYPE_INHERENTS: Record<string, string> = {
+${headlineBody}
+};
 `;
 
   fs.mkdirSync(path.dirname(OUTPUT_FILE), { recursive: true });
   fs.writeFileSync(OUTPUT_FILE, content);
   console.log(`Wrote ${OUTPUT_FILE} — ${total} power(s) across ${entries.length} archetype(s)`);
+  console.log(`  headline inherents named: ${headlineEntries.length}`);
+  for (const a of headline.ambiguous) console.log(`  UNNAMED ${a}`);
   for (const [id, powers] of entries) {
     console.log(`  ${id}: ${powers.map((p) => `${p.name} (L${p.available + 1})`).join(', ')}`);
   }
 }
 
 if (require.main === module) {
-  emit(selectPowers());
+  emit(selectPowers(), selectHeadlineInherents());
 }
 
-module.exports = { selectPowers };
+module.exports = { selectPowers, selectHeadlineInherents };

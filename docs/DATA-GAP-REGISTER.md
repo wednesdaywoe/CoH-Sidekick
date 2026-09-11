@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**6 open, of 298 entries.** **None is now the reader.** MBDEXPORT-18's reader half landed
+**6 open, of 299 entries.** **None is now the reader.** MBDEXPORT-18's reader half landed
 2026-09-11, 126 → 44, so it no longer outranks the list: what is left of it is writer work and
 three other rows' adjudications.
 
@@ -84,14 +84,16 @@ In the order they cost a user something:
 
 - **MBDEXPORT-18** — the READER dropped each slot's level; the import hop landed 2026-09-11 and
   took 126 → 44, and the writer half plus four named residual causes are what is left
-- **MBDEXPORT-20** — the archetype inherent is never written; 8 inherents, 8 of 8 files
 - **MBDEXPORT-16** — a VEAT's branch filing is re-derived; 24 attributions, decided, code owed
 
 -18 was invisible to `mbd_writer_roundtrip` while the reader shared the writer's convention; the
-import hop broke that tie. -20
-was opened by MBDEXPORT-19's closure — a field census cannot see a row we never write. -16 is
-pinned by its POPULATION in that test and closes by DELETING its pin; the other two census the
-FILES.
+import hop broke that tie. -16 is pinned by its POPULATION in that test and closes by DELETING
+its pin; -18 censuses the FILES.
+
+The newest and the cheapest to read is **INHERENT-10**: 59 of 60 archetypes reach a power
+through their declared inherent name, and Thunderspy's Primalist does not. Its fork ships a
+meter/dampen pair under that display name and no canonical power. Visible at both ends — a card
+with no numbers, a writer that warns — which is why nothing had gone red. Adjudication, not code.
 
 Two are not the writer's. **ACCOLADE-3** — two accolade ids predate the internal-name
 convention and only `buildStore` renames them, so a `.skif` opened from a file loses those
@@ -354,7 +356,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Sets, boosts, incarnates, inherents
 
-[Full detail](gaps/sets-boosts-incarnates.md) — 27 of 28 closed
+[Full detail](gaps/sets-boosts-incarnates.md) — 27 of 29 closed
 
 - [x] **HYBRID-2** — Homecoming and its Brainstorm beta dropped the Melee Hybrid's status-protection
   rows at Total Radial Graft and both T4 Embodiments while the tooltip still promises them, where
@@ -366,6 +368,21 @@ measurement went, and where a closure for the residual belongs too.
   either calc; the cap now derives from `max_targets_hit` minus the caster's own slot (byte-identical
   output on all four forks), and the layer stacks against a foe-count input the beta exposes as a
   slider
+- [ ] **INHERENT-10** — Thunderspy's Primalist declares `Primal Energy` and its export ships no
+  `Inherent.Inherent` power under that name: the two answering to it by display name are
+  `Primal_Energy_Meter` and `Primal_Energy_Dampen`, the meter/dampen pair `convert-inherents.cjs`
+  excludes by the same rule that correctly picks Domination over `Domination_Meter`. 1 archetype
+  of 60, on 1 of 4 forks. Both consequences are visible rather than silent — the card shows an
+  inherent with no numbers, and MBDEXPORT-20's writer arm warns and names nothing. Found
+  2026-09-11 by that row's roster sweep, which is the first thing to ask all 60 at once.
+  **Goal** — the Primalist's declared inherent reaches a power, or the declaration is adjudicated
+  as naming a MECHANIC that has no single power.
+  **Done when** — it is decided whether a fork whose inherent is a meter/dampen pair should pair
+  the declared name to one of them, carry the pair, or state that this archetype has none; the
+  converter's exclusion rule says which it is doing either way; and the miss pinned in
+  `archetype-inherent-naming.test.ts` reaches 0 or is restated as the adjudicated shape.
+  **Check** — `node scripts/keys/inherent10-declared-inherent-with-no-power.cjs` — 1 miss, 59
+  paired. MISSES rising is a second archetype in the same state, and it is not this one.
 - [x] **INHERENT-9** — the basic-inherent converter dropped the same four mode arrays ACCOLADE-2
   closed, so Sprint, Rest, Brawl and the prestige travel toggles published none of the Kheldian
   form gating the game gives them on every fork; the call landed with the script's FORK-1
@@ -784,7 +801,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 84 of 89 closed
+[Full detail](gaps/pipeline-provenance.md) — 85 of 89 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -974,16 +991,11 @@ measurement went, and where a closure for the residual belongs too.
   over 5 files died silently both ways; the writer now takes the slider as an argument (it lives
   in `useUIStore`, not on `Build`), and TWO of the ten were the READER's — a form sub-power's
   `continue` and an inherent struct with no `internalName` each dropped it on the way in
-- [ ] **MBDEXPORT-20** — every corpus build's archetype inherent is in Mids' file and absent from
-  ours — Defiance, Assassination, Dark Sustenance, Resolve, Supremacy, Widow Conditioning, 8 over
-  8 of 8 files, both forks. Found by MBDEXPORT-19's grade, not by looking: Dark Sustenance carries
-  a slider our reader now captures and still cannot return it, because the entry is never written.
-  A field census is structurally blind to a missing row, so -19's key never counted these.
-  **Goal** — a build exported here carries the archetype inherent the planner calculated with.
-  **Done when** — the writer emits it, the 8 is a pin that reaches 0, and the known-absence case
-  in `mbd-roundtrip.test.ts` (which reds when this closes) is replaced by the slider surviving.
-  **Check** — `node scripts/keys/mbdexport20-missing-inherent-census.cjs` — 8 inherents over 8 of
-  8 files. A fall without a writer change means the CORPUS moved, not the defect.
+- [x] **MBDEXPORT-20** — every corpus build's archetype inherent was in Mids' file and absent from
+  ours, one per build over 8 of 8 files and both forks, taking Dark Sustenance's slider with it;
+  the writer had an arm for the seven grid inherents and none for this one, and the name it owed
+  was the export's `Inherent.Inherent` row, not the `Inherent.<Archetype>.<Name>` the roster
+  synthesises — two archetypes share a `Conditioning`, so the tie-break is the `@Class_` gate
 - [x] **PARTSTAT-2** — the Dominator `Domination` node in `archetypes.json` hand-copied three values the export owns and had drifted, stating `recharge` 200 on the fork whose export says 180; TS gained the name-join to the `Inherent.Inherent` twin that Rust already had, the card's window is now the longest span its caster-side atoms hold open rather than the bag's modal vote, and the four hand-authored `effects` blocks are gone — atom-less bags 4 → 0
 
 - [x] **PARTSTAT-1** — four converters wrote a power's execution stats into the `effects` bag

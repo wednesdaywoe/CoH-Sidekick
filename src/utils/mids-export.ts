@@ -22,6 +22,7 @@ import {
 import { MIDS_STAT_MAP, MIDS_ORIGIN_TIER, MIDS_DATABASE_FOR_DATASET } from '@/utils/mids-import/mappers';
 import { ARCHETYPE_CLASS_MAP } from '@/utils/enhancement-uid';
 import { getArchetype } from '@/data/archetypes';
+import { headlineArchetypeInherentName } from '@/data/inherent-rules';
 import { isDatasetId, getAllDatasetMetadata } from '@/data/dataset';
 import { getInherentPowers, getArchetypeInherentPowers, POWER_PICK_LEVELS, getPicksGrantedAtLevel, GRANTED_POWER_GROUPS } from '@/data';
 import { computeExportSlotLevels, type SlotLevel } from '@/utils/slot-levels';
@@ -878,6 +879,56 @@ export function exportToMidsWithReport(
       continue;
     }
     powerEntries.push(buildPowerEntry(power, fullName, 'inherent', slotLevels, targetsHitValues, warnings));
+  }
+
+  // The archetype inherent, which is not one of the seven above: `SortGridPowers`
+  // indexes those by position, and this one Mids addresses by name — its own files
+  // put it in the middle of that run, and moving it makes no difference. It went
+  // unwritten entirely until MBDEXPORT-20, and a build handed over without it is a
+  // build Mids totals differently than we do: Defiance's damage floor, Supremacy's
+  // pet buff, Dark Sustenance's mez protection. It carries the slider too, which is
+  // how the gap surfaced — MBDEXPORT-19's grade had one survivor it could not
+  // explain, because a census that diffs a FIELD cannot see a missing ROW.
+  //
+  // Mids' spelling is the export's own `Inherent.Inherent` row, never the
+  // `Inherent.<Archetype>.<Name>` the roster synthesises: the export files Fury
+  // under `Rage_Buff` and gives both Arachnos archetypes a `Conditioning`, so
+  // neither the declared name nor an archetype prefix reaches the right row alone.
+  // The name comes off the generated headline map rather than canonical's
+  // `Inherent.Inherent` powerset, which this repo does not carry — the two are
+  // graded against each other over all 60 archetype-fork pairs.
+  //
+  // The registry is the authority and the build's copy is a cache — same order
+  // `midsClassForBuild` takes, and for the same reason: a stored build carries
+  // whatever its fork said when it was saved.
+  const declaredInherent = (archetypeId ? getArchetype(archetypeId)?.inherent?.name : undefined)
+    ?? build.archetype.inherent?.name;
+  const atInherent = declaredInherent
+    ? build.inherents.find((p) => p.name === declaredInherent)
+    : undefined;
+  const atInherentName = archetypeId ? headlineArchetypeInherentName(archetypeId) : undefined;
+  if (atInherent && atInherentName) {
+    const segments = atInherentName.split('.');
+    powerEntries.push(buildPowerEntry(
+      atInherent,
+      rotateFullName(atInherentName, `${segments[0]}.${segments[1]}`),
+      'inherent',
+      slotLevels,
+      targetsHitValues,
+      warnings,
+    ));
+  } else if (declaredInherent) {
+    // The archetype declares an inherent and we cannot name the power behind it, so
+    // the file goes out a power short. Said, not swallowed: the synthesised name
+    // would resolve to nothing in Mids and read as a silent drop either way.
+    warnings.push({
+      power: declaredInherent,
+      slot: 0,
+      detail: atInherent
+        ? `no Inherent.Inherent power this fork ships answers to ${declaredInherent} for this archetype, `
+          + 'so the file carries no archetype inherent and Mids totals the build without it'
+        : `this build carries no ${declaredInherent} row to write, so the file goes out without it`,
+    });
   }
 
   // The form sub-powers, after the inherent grid and in the order they were collected —

@@ -17,3 +17,29 @@ import type { InherentPowerDef } from '@/data/datasets/homecoming/levels';
 export const GENERATED_ARCHETYPE_INHERENTS: Record<string, InherentPowerDef[]> = {
 
 };
+
+/**
+ * Archetype id → the `Inherent.Inherent` full name of its HEADLINE inherent, for
+ * the `.mbd` writer, which has to name this power for Mids (MBDEXPORT-20). The
+ * NAME only — no stats and no atoms, so there is nothing here that can drift into a
+ * wrong number. See the converter's `selectHeadlineInherents` for the rule.
+ *
+ * 15 archetype(s) named
+ */
+export const HEADLINE_ARCHETYPE_INHERENTS: Record<string, string> = {
+  'arachnos-soldier': 'Inherent.Inherent.Spider_Conditioning',
+  'arachnos-widow': 'Inherent.Inherent.Widow_Conditioning',
+  'blaster': 'Inherent.Inherent.Defiance',
+  'brute': 'Inherent.Inherent.Rage_Buff',
+  'controller': 'Inherent.Inherent.Containment',
+  'corruptor': 'Inherent.Inherent.Scourge',
+  'defender': 'Inherent.Inherent.Vigilance',
+  'dominator': 'Inherent.Inherent.Domination',
+  'mastermind': 'Inherent.Inherent.Supremacy',
+  'peacebringer': 'Inherent.Inherent.Cosmic_Balance',
+  'scrapper': 'Inherent.Inherent.Critical_Hit',
+  'sentinel': 'Inherent.Inherent.Opportunity',
+  'stalker': 'Inherent.Inherent.Assassination',
+  'tanker': 'Inherent.Inherent.Gauntlet',
+  'warshade': 'Inherent.Inherent.Dark_Sustenance',
+};

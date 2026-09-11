@@ -43,3 +43,21 @@ export function getInherentAutoGrantedSlotCount(internalName: string, level: num
   }
   return count;
 }
+
+/**
+ * The `Inherent.Inherent` full name of an archetype's HEADLINE inherent — the
+ * power it is built around, by the name the EXPORT files it under.
+ *
+ * Needed wherever this power has to be named for another program. Our own roster
+ * carries `Inherent.<Archetype>.<Name>`, synthesised by
+ * `createArchetypeInherentPower` from the archetype's display name, and no other
+ * planner resolves that: Mids reads `Inherent.Inherent.Rage_Buff` where we would
+ * say `Inherent.Brute.Fury`. The `.mbd` writer wrote no archetype inherent at all
+ * until it had this (MBDEXPORT-20).
+ *
+ * `undefined` when this fork ships no single power for the archetype's declared
+ * inherent — a real gap the caller reports rather than fills (INHERENT-10).
+ */
+export function headlineArchetypeInherentName(archetypeId: string): string | undefined {
+  return getActiveDataset().inherentRules.headlineArchetypeInherents?.[archetypeId];
+}
