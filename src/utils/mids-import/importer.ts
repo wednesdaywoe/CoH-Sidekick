@@ -473,8 +473,11 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
           );
           subPower.isAutoGranted = true;
           subPower.grantedByPower = parentName;
-          subPower.isActive =
-            subPower.powerType === 'Toggle' || subPower.powerType === 'Auto' ? true : undefined;
+          // `isActive` is whatever `buildSelectedPower` read off `StatInclude`, and it is not
+          // re-derived here. This used to force Toggle and Auto sub-powers on and everything
+          // else off, which predates the StatInclude mirror and outlived its reason: it threw
+          // away the author's flag on ten of the Warshade's form attacks (MBDEXPORT-13), and
+          // for an Auto it was never needed — the calc gate reads `isAuto || isActive`.
           const targetList = primaryMatch ? primaryPowers : secondaryPowers;
           if (!targetList.some((p) => p.internalName === match.internalName)) {
             targetList.push(subPower);
@@ -691,7 +694,13 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
     const match = inherents.find(
       (inh) => inh.name.toLowerCase() === slotPower.name.toLowerCase()
     );
-    if (match && slotPower.slots.length > 0) {
+    if (!match) continue;
+    // The include flag comes off the file even when the entry brought no slots with it; the
+    // synthesised inherent is a roster row, so the file is the only thing that ever states it.
+    if (slotPower.isActive) {
+      match.isActive = true;
+    }
+    if (slotPower.slots.length > 0) {
       match.slots = slotPower.slots;
       // Carry over inherent slot count (Rebirth Health/Stamina auto-grants)
       if (slotPower.inherentSlotCount) {
@@ -880,11 +889,25 @@ function processEntry(
   // Process inherent powers for their slot data (powers are auto-populated,
   // but we need to preserve any slotted enhancements from the import)
   if (PowerName.startsWith('Inherent.')) {
-    if (segments.length < 3 || !SlotEntries || !SlotEntries.some(s => s.Enhancement)) {
-      return null; // No meaningful slot data to preserve
+    if (segments.length < 3 || !SlotEntries) {
+      return null;
     }
     const powerInternalName = segments[2];
-    // Build a minimal SelectedPower with just enough info to match and merge slots
+    // An inherent entry carries two things the roster cannot: the author's include flag, and
+    // the slots they spent on it. Both used to be conditional on a piece sitting in one of
+    // those slots — the test here was `!SlotEntries.some(s => s.Enhancement)` and an all-empty
+    // entry was dropped whole. That lost the flag (MBDEXPORT-13): Swift and Hurdle hold one
+    // empty slot each, so on the round trip the entry stopped carrying anything and both powers
+    // disappeared. It also lost the placements (MBDEXPORT-15) — Rebirth grants Health and
+    // Stamina two slots each and the file is the only record of them, so an entry of three
+    // empty slots came back a bare roster row.
+    //
+    // So every entry goes through the loop below now. A placement survives whether or not it
+    // holds anything, and `slotsImported` counts it where the early return left it to
+    // `slotsSkipped` — the MBDIMPORT-5 reconciliation is the same sum either way, but the
+    // slots are on the side that says they arrived.
+    //
+    // Ported from canonical, whose `.mbd` round trip against its own writer measured both.
     const slots: (Enhancement | null)[] = [];
     let inherentSlotCount = 0;
     for (const slotEntry of SlotEntries) {
@@ -910,6 +933,7 @@ function processEntry(
         slots,
         effects: {},
         inherentSlotCount: inherentSlotCount > 0 ? inherentSlotCount : undefined,
+        isActive: StatInclude ? true : undefined,
       } as SelectedPower,
     };
   }

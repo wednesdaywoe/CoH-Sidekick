@@ -57,20 +57,21 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**6 open, of 290 entries.** Five are our own `.mbd` WRITER, opened 2026-09-10 by the first
+**4 open, of 290 entries.** Three are our own `.mbd` WRITER, opened 2026-09-10 by the first
 thing that has ever read what it writes: `fixtures/mids/ours/` holds our exporter's spelling of
-each of the eight corpus builds, and `mbd_writer_roundtrip` reads both spellings against one
-database and compares the builds. The reader is not implicated — it is the instrument.
+each of the eight corpus builds, and `mbd_writer_roundtrip` compares the two against one
+database.
+
+Calling the reader the instrument and not a suspect is wrong twice now: MBDEXPORT-13 closed
+through it, and -15 was entirely its. The round trip measures the pair, never the hop.
 
 In the order they cost a user something:
 
 - **MBDEXPORT-11** — `LastPower` fixed to the COUNT and graded on Mids' files; awaiting Wine
-- **MBDEXPORT-13** — an excluded power comes back included; `undefined` vs `false` across the seam
-- **MBDEXPORT-15** — only slots holding something are written; 8 empty placements go
 - **MBDEXPORT-14** — one piece's level written as 0; 3 slots
 - **MBDEXPORT-16** — a VEAT's branch filing is re-derived, not carried; 24 attributions, nothing lost
 
-The sixth is not the writer's. **ACCOLADE-3** — two accolade ids predate the internal-name
+The fourth is not the writer's. **ACCOLADE-3** — two accolade ids predate the internal-name
 convention and only `buildStore` renames them, so a `.skif` opened from a file loses those
 accolades from the totals in silence. MBDEXPORT-12's warning arm surfaced it on 2026-09-10.
 
@@ -756,7 +757,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 77 of 82 closed
+[Full detail](gaps/pipeline-provenance.md) — 79 of 82 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -899,21 +900,7 @@ measurement went, and where a closure for the residual belongs too.
   **Check** — `npx vitest run src/utils/mids-import/mbd-roundtrip.test.ts` — the three
   MBDEXPORT-11 cases grade the count on Mids' files and on ours. If the corpus census stops
   reading 24 picks per file, the convention this was fixed to is wrong, not the fixture.
-- [ ] **MBDEXPORT-13** — a power the author excluded from their totals is written back as
-  included, on 2 to 20 powers per corpus file. It is a SEAM rather than a side: the importer
-  stores `isActive: undefined` for an excluded power (deliberately — the calc gate reads
-  `isAuto || isActive` and the JSON stays minimal) and the writer tests `isActive !== false`,
-  which `undefined` passes. It also shows up as EXTRA powers, since an entry a build says nothing
-  else about is carried on `StatInclude` alone, so Brawl, Sprint and Rest arrive switched on.
-  **Goal** — a power the author excluded comes back excluded.
-  **Done when** — the two halves agree on ONE representation of "excluded", decided rather than
-  patched on whichever side is nearer: `undefined` is load-bearing on the reader's side, so
-  `isActive === true` on the writer's is the cheap answer and the reason to check it is that
-  `isAuto` powers are true-by-default in the calc and may not be in the file; and the round-trip
-  pin is deleted, which also removes the extras it drops.
-  **Check** — `grep -n "isActive !== false" src/utils/mids-export.ts` and `grep -n
-  "effectiveIsActive" src/utils/mids-import/importer.ts` — one site each, and they are the two
-  ends of the seam. If either is gone, the seam was closed and this row is stale.
+- [x] **MBDEXPORT-13** — a power the author excluded came back included, and Brawl, Sprint and Rest arrived switched on: the reader stores the excluded case as `undefined` and the writer tested `isActive !== false`, which `undefined` passes. Mids' own files chose which side moves; two reader-side halves of the same seam closed with it — `StatInclude` diffs 30 → 0
 - [ ] **MBDEXPORT-14** — a piece placed below its own level is written at `IoLevel: 0`, which
   reads back as a level-1 IO: Mids states the Winter's Gift slow-resistance unique in Long Jump at
   49 and we send 0 — one slot, in each of the three Homecoming corpus files that hold it.
@@ -923,17 +910,7 @@ measurement went, and where a closure for the residual belongs too.
   changed; and the round-trip pin's count moves from 3 to 0.
   **Check** — `cargo test -p coh_data --test mbd_writer_roundtrip` — the corpus-wide count is
   asserted at 3. Any other number means the population moved and this row's measurement is stale.
-- [ ] **MBDEXPORT-15** — a slot with nothing in it is not written, so Rebirth's Health and Stamina
-  come back with one slot each where the file states three — 8 empty slots across the two Rebirth
-  corpus files. A placement is the author's even when the slot is empty: it is spent budget, and
-  it is where the next enhancement goes.
-  **Goal** — the slots a build spent come back, filled or not.
-  **Done when** — `buildSlotEntries` emits a slot per PLACEMENT rather than per enhancement; the
-  slot count is reconciled in the export report against what the build holds; and the round-trip
-  pin's count moves from 8 to 0.
-  **Check** — `cargo test -p coh_data --test mbd_writer_roundtrip` — the summary arm derives its
-  expected slot delta from the two builds rather than from a literal, so a slot lost anywhere else
-  reds it rather than being absorbed into this row's 8.
+- [x] **MBDEXPORT-15** — the empty placements were dropped on the way IN, not on the way out: the importer's inherent branch returned early on an entry holding no piece anywhere, so Rebirth's Health and Stamina arrived as bare roster rows and then vanished whole on the round trip. `buildSlotEntries`, which this row named as the site, was already emitting one slot per placement — empty placements 12 → 0, and six of the eight corpus files now reconcile with no skipped slots at all
 - [ ] **MBDEXPORT-16** — a VEAT's picks come back filed under a different branch: Mids'
   `night-widow-training` / `widow-teamwork` become `widow-training` / `teamwork`, and 22 of the
   corpus Night Widow's powers swap which side of that line their `powerset` override sits on. The

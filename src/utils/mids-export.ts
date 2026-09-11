@@ -640,7 +640,24 @@ function buildSlotEntries(
   });
 }
 
-/** One .mbd power entry, with its slots resolved. */
+/**
+ * One .mbd power entry, with its slots resolved.
+ *
+ * `StatInclude` is the author's include flag and it maps to `isActive` exactly, so only `true`
+ * may write `true`. The importer stores the excluded case as `undefined` rather than `false`
+ * (the calc gate reads `isAuto || isActive`, so a third state buys nothing and the JSON stays
+ * minimal) — and `!== false`, which this used to test, let every one of those back in.
+ *
+ * The other candidate was to write what the calc gate answers, `isAuto || isActive === true`.
+ * The corpus refuses it: Mids writes the four Fitness autos `true` in all five Homecoming files
+ * and `false` in all three Rebirth ones, and Rebirth's Swift plainly still grants run speed. The
+ * flag is not Mids' record of what contributes — auto powers contribute either way — so folding
+ * `isAuto` in would state something the field does not carry, and would overwrite the author's
+ * flag on every power Mids wrote `false`.
+ *
+ * Ported from canonical (MBDEXPORT-13). The fixtures that measured it are canonical-only, so the
+ * argument above is the record here.
+ */
 function buildPowerEntry(
   power: SelectedPower,
   powerName: string,
@@ -653,7 +670,7 @@ function buildPowerEntry(
   return {
     PowerName: powerName,
     Level: power.level,
-    StatInclude: power.isActive !== false,
+    StatInclude: power.isActive === true,
     ProcInclude: false,
     VariableValue: 0,
     InherentSlotsUsed: inherentSlots,
