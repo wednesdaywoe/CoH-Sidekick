@@ -1640,7 +1640,13 @@ export function ExportImportModal({ isOpen, onClose }: ExportImportModalProps) {
                     variant="secondary"
                     size="sm"
                     onClick={() => {
-                      const { json, warnings } = exportToMidsWithReport(build, levelUpMode);
+                      // The slider lives in the UI store, not on the build, so the writer
+                      // has to be handed it or it goes out as zero (MBDEXPORT-19).
+                      const { json, warnings } = exportToMidsWithReport(
+                        build,
+                        levelUpMode,
+                        useUIStore.getState().targetsHitValues,
+                      );
                       setMidsExportWarnings(warnings);
                       const blob = new Blob([json], { type: 'application/json' });
                       const url = URL.createObjectURL(blob);

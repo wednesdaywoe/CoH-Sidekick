@@ -663,6 +663,7 @@ function buildPowerEntry(
   powerName: string,
   category: PowerCategory,
   slotLevels: Map<string, SlotLevel[]>,
+  targetsHitValues: Record<string, number>,
   warnings: MidsExportWarning[],
 ): MbdPowerEntry {
   const inherentSlots = power.inherentSlotCount ?? 0;
@@ -672,7 +673,7 @@ function buildPowerEntry(
     Level: power.level,
     StatInclude: power.isActive === true,
     ProcInclude: false,
-    VariableValue: 0,
+    VariableValue: targetsHitValues[power.internalName] ?? 0,
     InherentSlotsUsed: inherentSlots,
     SubPowerEntries: [],
     SlotEntries: buildSlotEntries(power, levels, inherentSlots, warnings),
@@ -713,7 +714,9 @@ function pickSchedule(): number[] {
   return slots;
 }
 
-/** An unfilled pick. Mids writes one of these for a skipped slot and reads it back as `NIDPower < 0`. */
+/** An unfilled pick. Mids writes one of these for a skipped slot and reads it back as `NIDPower < 0`.
+ *  `VariableValue` is 0 because there is no power here to carry a slider — not the MBDEXPORT-19
+ *  literal, which was the same zero standing in for one. */
 function blankPowerEntry(): MbdPowerEntry {
   return {
     PowerName: '',
@@ -765,10 +768,19 @@ function orderByPickSchedule(chosen: { level: number; entry: MbdPowerEntry }[]):
  * caller can say what the file is missing. Mids drops an unresolvable slot in
  * silence, so an unreported warning here is a build the user gets back with
  * holes and no explanation.
+ *
+ * `targetsHitValues` is Mids' per-power `VariableValue` — Siphon Speed's stack count, Follow
+ * Up's, the number of corpses a Mire is standing in — keyed by `internalName`. It is passed in
+ * rather than read off the build because the build does not hold it: the importer returns it
+ * beside the build and the UI store owns it from there, which is the same key `InfoPanel`
+ * writes the slider under. A caller with no slider state passes nothing and every power goes
+ * out at 0, which is what an unset slider means (MBDEXPORT-19). Hand-ported from canonical;
+ * the fixtures that measured it are canonical-only, so the argument above is the record here.
  */
 export function exportToMidsWithReport(
   build: Build,
   levelUpMode: boolean,
+  targetsHitValues: Record<string, number> = {},
 ): { json: string; warnings: MidsExportWarning[] } {
   const archetypeId = build.archetype.id || '';
   const warnings: MidsExportWarning[] = [];
@@ -822,7 +834,7 @@ export function exportToMidsWithReport(
     for (const power of powers) {
       const owner = setForPower(power, powersetId, archetypeId, category, set, resolve);
       const powerName = buildPowerName(power, owner.powersetId, owner.set, category);
-      const entry = buildPowerEntry(power, powerName, category, slotLevels, warnings);
+      const entry = buildPowerEntry(power, powerName, category, slotLevels, targetsHitValues, warnings);
       if (isFormSubPower(power)) granted.push(entry);
       else chosen.push({ level: power.level, entry });
     }
@@ -865,7 +877,7 @@ export function exportToMidsWithReport(
       powerEntries.push({ ...blankPowerEntry(), PowerName: `Inherent.Inherent.${name}`, Level: 1 });
       continue;
     }
-    powerEntries.push(buildPowerEntry(power, fullName, 'inherent', slotLevels, warnings));
+    powerEntries.push(buildPowerEntry(power, fullName, 'inherent', slotLevels, targetsHitValues, warnings));
   }
 
   // The form sub-powers, after the inherent grid and in the order they were collected —
@@ -889,6 +901,9 @@ export function exportToMidsWithReport(
       Level: 50,
       StatInclude: true,
       ProcInclude: false,
+      // An incarnate is not addressed by `internalName` and our reader routes no slider to
+      // one, so there is nothing to look up here. Mids writes none either — the MBDEXPORT-19
+      // census diffs every entry by name and no incarnate is among the ten.
       VariableValue: 0,
       InherentSlotsUsed: 0,
       SubPowerEntries: [],
@@ -1013,6 +1028,9 @@ function accoladeEntries(
       Level: build.level,
       StatInclude: true,
       ProcInclude: false,
+      // Accolades come in through `processAccoladeEntry`, which reads no slider, so writing
+      // one here would be inventing a value the reader cannot return. Symmetric and measured:
+      // no accolade is among MBDEXPORT-19's ten.
       VariableValue: 0,
       InherentSlotsUsed: 0,
       SubPowerEntries: [],
@@ -1046,6 +1064,10 @@ function inherentFullName(power: SelectedPower, archetypeId: string): string | n
  * Export a Sidekick Build to Mids Reborn .mbd JSON format.
  * Returns the JSON string ready to save as a .mbd file.
  */
-export function exportToMids(build: Build, levelUpMode: boolean): string {
-  return exportToMidsWithReport(build, levelUpMode).json;
+export function exportToMids(
+  build: Build,
+  levelUpMode: boolean,
+  targetsHitValues: Record<string, number> = {},
+): string {
+  return exportToMidsWithReport(build, levelUpMode, targetsHitValues).json;
 }
