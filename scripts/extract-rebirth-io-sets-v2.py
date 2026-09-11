@@ -962,6 +962,34 @@ _MEZ_ATTRIB_TO_TYPE = {
 }
 
 
+def _binary_attuned_only(set_id: str, ctx: dict | None) -> bool:
+    """`attunedOnly` for a set whose entry is copied from the hand file wholesale.
+
+    Those copies exist because `build_sets` skips the record for its rarity tier,
+    not because the record is unreadable — so the piece membership that states
+    attunement is right there, the same as `rarity` and the piece names. Reading
+    it here rather than inheriting the copied value also keeps the hand file from
+    being its own source: the entry it copies is the last run's output.
+    """
+    record = _binary_record(set_id, ctx)
+    if record is None:
+        raise SystemExit(
+            f"whole-set copy '{set_id}': no binary record, so nothing states whether "
+            f'the set is attuned-only'
+        )
+    return _attuned_only(record)
+
+
+def _binary_record(set_id: str, ctx: dict | None):
+    """The boostset record a set id came from, or None."""
+    if not ctx:
+        return None
+    return next(
+        (s for s in ctx['sets'] if s.name.lower().replace('-', '').replace('__', '_') == set_id),
+        None,
+    )
+
+
 def _binary_piece_names(set_id: str, ctx: dict | None) -> dict[int, str]:
     """Piece number → the game's name for it, read straight from the boost powers.
 
@@ -1569,12 +1597,63 @@ def build_sets(
             'type': type_,
             'minLevel': s.min_level or 1,
             'maxLevel': s.max_level or 50,
+            'attunedOnly': _attuned_only(s),
             'bonuses': bonuses_out,
             'pieces': pieces,
             'icon': _resolve_icon(set_id, hc_sets.get(set_id, {}).get('icon')),
         }
 
     return out_sets, skipped
+
+
+def _attuned_only(record: BoostSetRecord) -> bool:
+    """Whether the game ships this set ONLY attuned — no craftable variant exists.
+
+    The export states it per piece and nowhere else: every BoostList member is a
+    boost record named `Crafted_*`, `Attuned_*` or `Superior_Attuned_*`, and a set
+    with no `Crafted_*` member has nothing to slot at a fixed level. Uniform across
+    a set's pieces on all four datasets, and asserted so, because a set that is
+    half-craftable would mean the fact belongs on the piece and not here.
+
+    This replaces two guesses. `maxLevel <= 1` was the marker the planner read, and
+    it is right for most of the roster but misses the reward sets that keep a 10-50
+    range; the hand list that patched those was keyed on DISPLAY NAME, so it called
+    Winter's Gift attuned-only (it is not, on any fork — MBDEXPORT-14). A display
+    name cannot carry the fact anyway: Thunderspy prints "Subaluwa" for two
+    different records, its craftable `KB` set and an `Overwhelming_Force` one that
+    is attuned-only, and they differ on exactly this field.
+    """
+    crafted_by_piece = []
+    for i, bl in enumerate(record.boostlists):
+        if not bl.boosts:
+            continue
+        kinds = set()
+        for full in bl.boosts:
+            name = full.split('.')[-1]
+            low = name.lower()
+            if low.startswith('crafted_'):
+                kinds.add(False)
+            elif low.startswith('attuned_') or low.startswith('superior_attuned_'):
+                kinds.add(True)
+            else:
+                raise SystemExit(
+                    f"{record.name} piece {i + 1}: boost '{name}' carries no "
+                    f'crafted/attuned prefix, so the export no longer states whether '
+                    f'the set is attuned-only'
+                )
+        crafted_by_piece.append(False in kinds)
+    if not crafted_by_piece:
+        raise SystemExit(
+            f'{record.name}: states no piece membership, so the export says nothing '
+            f'about whether it is attuned-only'
+        )
+    if len(set(crafted_by_piece)) > 1:
+        raise SystemExit(
+            f'{record.name}: pieces disagree on whether a crafted variant exists '
+            f'({crafted_by_piece}) — attunement is a per-PIECE fact on this set, '
+            f'not a per-set one'
+        )
+    return not crafted_by_piece[0]
 
 
 def _resolve_icon(set_id: str, inherited: str | None) -> str:
@@ -1632,6 +1711,7 @@ def _reuse_hand_entry(out_sets: dict[str, dict], set_id: str, hc_entry: dict) ->
     preserved_icon = ICON_OVERRIDES.get(set_id)
     binary_rarity = out_sets[set_id].get('rarity')
     binary_type = out_sets[set_id].get('type')
+    binary_attuned_only = out_sets[set_id].get('attunedOnly')
     binary_names = {p.get('num'): p.get('name') for p in out_sets[set_id].get('pieces', [])}
     binary_bonuses = out_sets[set_id].get('bonuses')
     out_sets[set_id] = dict(hc_entry)
@@ -1645,6 +1725,11 @@ def _reuse_hand_entry(out_sets: dict[str, dict], set_id: str, hc_entry: dict) ->
         out_sets[set_id]['rarity'] = binary_rarity
     if binary_type:
         out_sets[set_id]['type'] = binary_type
+    # Same reason as `rarity`: the fork's own binary owns it. The forks agree with
+    # HC on every shared set today, so this preserves rather than changes — but the
+    # fork is the one that gets to say.
+    if binary_attuned_only is not None:
+        out_sets[set_id]['attunedOnly'] = binary_attuned_only
     # Copied per piece, because `dict(hc_entry)` shares HC's piece dicts and the
     # later override passes mutate them in place.
     pieces = [dict(piece) for piece in out_sets[set_id].get('pieces', [])]
@@ -1727,6 +1812,7 @@ def _apply_homecoming_overrides(out_sets: dict[str, dict], hc_sets: dict[str, di
         if hand:
             out_sets[set_id] = dict(hand)
             out_sets[set_id]['rarity'] = 'ECUniversalDamage'
+            out_sets[set_id]['attunedOnly'] = _binary_attuned_only(set_id, ctx)
             out_sets[set_id]['bonuses'] = json.loads(json.dumps(hand.get('bonuses', [])))
             # The record is skipped for its rarity, not for its readability: its
             # boost powers name their pieces, so the hand entry's names give way.
@@ -1953,6 +2039,10 @@ def _tspy_build_only_set(set_id: str, record, power_index, prior: dict) -> dict:
         'type': _resolve_category(record),
         'minLevel': prior.get('minLevel', record.min_level or 1),
         'maxLevel': prior.get('maxLevel', record.max_level or 50),
+        # Not `prior.get` — this fork states it for itself, and the reason the
+        # hand list it replaces was wrong is that it read one fork's answer onto
+        # another's set of the same shape.
+        'attunedOnly': _attuned_only(record),
         'bonuses': bonuses,
         'pieces': pieces,
         # ICON_OVERRIDES first: tspy-only sets have no HC set_id to inherit an
@@ -2005,6 +2095,7 @@ def _apply_thunderspy_overrides(out_sets: dict[str, dict], hc_sets: dict[str, di
                 # rather than inherited from the hand entry — same reason as
                 # `_reuse_hand_entry`.
                 out_sets[set_id]['type'] = _resolve_category(by_id[set_id])
+                out_sets[set_id]['attunedOnly'] = _attuned_only(by_id[set_id])
                 wholeset += 1
 
         for set_id in _TSPY_ONLY_SETS:
@@ -2141,6 +2232,8 @@ type LegacyIOSet = {{
   type: string;
   minLevel: number;
   maxLevel: number;
+  /** The game ships this set only attuned — no `Crafted_*` piece exists. */
+  attunedOnly: boolean;
   bonuses: LegacySetBonus[];
   pieces: LegacyIOSetPiece[];
   icon: string;

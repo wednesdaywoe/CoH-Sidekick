@@ -57,27 +57,34 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**4 open, of 290 entries.** Three are our own `.mbd` WRITER, opened 2026-09-10 by the first
+**5 open, of 292 entries.** Three are our own `.mbd` WRITER, opened 2026-09-10 by the first
 thing that has ever read what it writes: `fixtures/mids/ours/` holds our exporter's spelling of
 each of the eight corpus builds, and `mbd_writer_roundtrip` compares the two against one
 database.
 
-Calling the reader the instrument and not a suspect is wrong twice now: MBDEXPORT-13 closed
-through it, and -15 was entirely its. The round trip measures the pair, never the hop.
+Calling the reader the instrument and not a suspect is wrong three times now: MBDEXPORT-13 closed
+through it, -15 was entirely its, and -14 was neither hop's — a hand list of set names one layer
+above both. The round trip measures the pair, never the hop.
 
 In the order they cost a user something:
 
 - **MBDEXPORT-11** — `LastPower` fixed to the COUNT and graded on Mids' files; awaiting Wine
-- **MBDEXPORT-14** — one piece's level written as 0; 3 slots
+- **MBDEXPORT-17** — every level-less piece goes out at `IoLevel: 0`; 253 slots, invisible to the round trip
 - **MBDEXPORT-16** — a VEAT's branch filing is re-derived, not carried; 24 attributions, nothing lost
 
-The fourth is not the writer's. **ACCOLADE-3** — two accolade ids predate the internal-name
+Two are not the writer's. **ACCOLADE-3** — two accolade ids predate the internal-name
 convention and only `buildStore` renames them, so a `.skif` opened from a file loses those
 accolades from the totals in silence. MBDEXPORT-12's warning arm surfaced it on 2026-09-10.
 
-Each is pinned by its POPULATION in that test rather than waved through, so a deviation that
-widens reds even while its row is open, and a row closes by DELETING its pin. What none of them
-can answer is whether a real Mids parses what we write — that half is Wine
+The fifth is neither repo's pipeline but the seam between them. **FORK-7** — 34 of the 142
+`src/data` paths the two repos share differ and none was adjudicated; MBDEXPORT-14 was one of
+them, fixed in the beta six weeks before canonical could have known.
+
+-16 is pinned by its POPULATION in that test, so a deviation widens reds while its row is open,
+and it closes by DELETING its pin. -17 cannot have one: the round trip is green on every slot it
+names, because our reader normalises the field back. Its key is a census of the FILES.
+
+What none of them can answer is whether a real Mids parses what we write — that half is Wine
 (`tools/mids-oracle/mids-wine.sh`), and it is what MBDEXPORT-4 and -5 took.
 
 The reader half is done. MBDIMPORT-12 and -13 opened and closed on 2026-09-10, both found by
@@ -757,7 +764,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 79 of 82 closed
+[Full detail](gaps/pipeline-provenance.md) — 80 of 84 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -901,15 +908,7 @@ measurement went, and where a closure for the residual belongs too.
   MBDEXPORT-11 cases grade the count on Mids' files and on ours. If the corpus census stops
   reading 24 picks per file, the convention this was fixed to is wrong, not the fixture.
 - [x] **MBDEXPORT-13** — a power the author excluded came back included, and Brawl, Sprint and Rest arrived switched on: the reader stores the excluded case as `undefined` and the writer tested `isActive !== false`, which `undefined` passes. Mids' own files chose which side moves; two reader-side halves of the same seam closed with it — `StatInclude` diffs 30 → 0
-- [ ] **MBDEXPORT-14** — a piece placed below its own level is written at `IoLevel: 0`, which
-  reads back as a level-1 IO: Mids states the Winter's Gift slow-resistance unique in Long Jump at
-  49 and we send 0 — one slot, in each of the three Homecoming corpus files that hold it.
-  **Goal** — a piece comes back at the level its author placed it at.
-  **Done when** — the case is characterised rather than patched: it is one PIECE, not one set, so
-  what the writer does with a piece whose level is not the build's is measured before it is
-  changed; and the round-trip pin's count moves from 3 to 0.
-  **Check** — `cargo test -p coh_data --test mbd_writer_roundtrip` — the corpus-wide count is
-  asserted at 3. Any other number means the population moved and this row's measurement is stale.
+- [x] **MBDEXPORT-14** — not the writer and not one piece: Winter's Gift is a craftable set that `isInherentlyAttuned` called attuned, off a hand list of DISPLAY NAMES, so the planner dropped the level from every piece of it and the writer sent the `IoLevel: 0` it stamps on anything level-less. The export states attunement per piece — a set naming no `Crafted_*` boost has nothing to slot at a level — and now ships it as `attunedOnly`; Rust's `max_level <= 1` twin reads it too. Slots 3 → 0, and 5 reward sets the heuristic had missed
 - [x] **MBDEXPORT-15** — the empty placements were dropped on the way IN, not on the way out: the importer's inherent branch returned early on an entry holding no piece anywhere, so Rebirth's Health and Stamina arrived as bare roster rows and then vanished whole on the round trip. `buildSlotEntries`, which this row named as the site, was already emitting one slot per placement — empty placements 12 → 0, and six of the eight corpus files now reconcile with no skipped slots at all
 - [ ] **MBDEXPORT-16** — a VEAT's picks come back filed under a different branch: Mids'
   `night-widow-training` / `widow-teamwork` become `widow-training` / `teamwork`, and 22 of the
@@ -924,6 +923,18 @@ measurement went, and where a closure for the residual belongs too.
   **Check** — `cargo test -p coh_data --test mbd_writer_roundtrip` — the pin counts 24 (2
   selections + 22 powers) on the one file. A count on a second file means this is not VEAT-shaped
   and the row is describing the wrong thing.
+- [ ] **MBDEXPORT-17** — every piece that carries no craft level goes out as `IoLevel: 0` where
+  Mids states one: 253 slots over 6 of the 8 corpus files, both forks — 150 attuned set pieces
+  (Mids writes 49, or 9 for a level-10 placement), 82 origins and 21 specials (Mids writes 1).
+  The round trip is green on all 253: our reader normalises all three kinds back, so the two
+  spellings import to the same build and only a real Mids can say whether the field is read.
+  **Goal** — our file spells a level-less piece the way Mids spells it, or the row closes as a
+  written adjudication that Mids ignores the field for these three kinds.
+  **Done when** — a file holding all three is opened in Mids under Wine
+  (`tools/mids-oracle/mids-wine.sh`) and what it shows for each is written down; measured, not
+  reasoned about, because the three kinds may not have one answer.
+  **Check** — `node scripts/keys/mbdexport17-iolevel-spelling-census.cjs` — 253, all of them
+  `ours 0`. Anything our writer states a level for BREAKS the claim that this is one convention.
 - [x] **PARTSTAT-2** — the Dominator `Domination` node in `archetypes.json` hand-copied three values the export owns and had drifted, stating `recharge` 200 on the fork whose export says 180; TS gained the name-join to the `Inherent.Inherent` twin that Rust already had, the card's window is now the longest span its caster-side atoms hold open rather than the bag's modal vote, and the four hand-authored `effects` blocks are gone — atom-less bags 4 → 0
 
 - [x] **PARTSTAT-1** — four converters wrote a power's execution stats into the `effects` bag
@@ -1058,6 +1069,21 @@ measurement went, and where a closure for the residual belongs too.
 - [x] **FORK-6** — FORK-4's coverage invariant is only as wide as the population it discovers: `TRACKED_ROOTS` reaches `src/utils/mids-import` because someone seeded that
   directory, so `mids-export.ts` and `slot-levels.ts` one level up were adjudicated by nothing while their test twins already carried SLOT-3 declarations; both are `forked` now with an
   exit re-cut against the Rust `.mbd` port, added as file paths because `src/utils` shares 132 paths with the beta and 61 of them differ
+- [ ] **FORK-7** — `src/data` is 142 shared paths outside the manifest and 34 of them differ,
+  found because one was MBDEXPORT-14: `enhancement-registry.ts` holds `isInherentlyAttuned`, a
+  rule about what the export MEANS that both engines obey, and the beta took Winter's Gift off
+  its attuned-only list on 2026-07-30 after a user report while canonical's copy kept it for six
+  weeks. The declared surface mis-called it too — its test twin sits in the `beta-authored`
+  cluster, whose reason says the one file where the beta held a fix canonical lacked was
+  reconciled instead. It was not the one.
+  **Goal** — a rule the two engines share is adjudicated, not undiscoverable.
+  **Done when** — the 34 are censused by KIND (data the regen owns, a rule both engines apply,
+  a beta feature canonical never took) and each kind is either added to `TRACKED_ROOTS` or
+  argued out of it in writing; and the `beta-authored` cluster is re-read for a second file
+  holding a fix canonical lacks, since its reason claims that was checked.
+  **Check** — `node scripts/verify-sync.cjs --sibling ../CoH-Sidekick --gate` — 198 paths. A
+  count that has not grown means no kind has been taken yet; `src/data/enhancement-registry.ts`
+  joined on 2026-09-10 and is the only one of the 34 inside.
 - [x] **FIXTURE-1** — the manually-emitted gate fixtures (procs, movement, set-bonus) drifted on
   sampling identity and labels only, no values; all three re-emitted, gates green, and the
   emitters now run in `npm run regen` so the drift class is closed

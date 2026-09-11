@@ -141,6 +141,17 @@ const TRACKED_ROOTS = [
   // IS watched is that someone seeded its directory as a root above.
   'src/utils/mids-export.ts',
   'src/utils/slot-levels.ts',
+  // Joined 2026-09-10 under FORK-7, reconciled the same day. It holds
+  // `isInherentlyAttuned`, a rule about what the game data MEANS that both
+  // engines' slotting paths obey, and the two copies had disagreed since
+  // 2026-07-30: the beta took Winter's Gift off the attuned-only list after a
+  // user report and canonical's copy kept it, which is MBDEXPORT-14. Nothing
+  // could have seen that — `pipelineSources` reaches `src/` by require edges out
+  // of the .cjs converters and none of them loads this file, so it was
+  // undiscoverable rather than overlooked, FORK-6's shape one directory over. A
+  // file path and not `src/data`: that tree shares 142 paths with the beta and
+  // 34 of them differ, which is FORK-7's own population, not this entry's.
+  'src/data/enhancement-registry.ts',
   // Joined 2026-09-09 under MBDIMPORT-7, at zero drift — five files, every hash equal. The
   // `.mbd` name map: the accessor, and the four generated tables it reads. Nothing discovered
   // them. `pipelineSources` follows `require('../src/…')` out of the converters and

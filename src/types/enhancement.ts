@@ -180,6 +180,12 @@ export interface IOSet {
   minLevel: number;
   /** Maximum level */
   maxLevel: number;
+  /**
+   * The game ships this set only attuned — no `Crafted_*` piece exists for it.
+   * Read off the export's piece membership by the io-sets converter; see
+   * `isInherentlyAttuned`.
+   */
+  attunedOnly: boolean;
   /** Set bonuses by piece count */
   bonuses: SetBonus[];
   /** Individual pieces in the set */

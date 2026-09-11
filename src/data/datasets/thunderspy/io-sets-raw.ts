@@ -64,6 +64,8 @@ type LegacyIOSet = {
   type: string;
   minLevel: number;
   maxLevel: number;
+  /** The game ships this set only attuned — no `Crafted_*` piece exists. */
+  attunedOnly: boolean;
   bonuses: LegacySetBonus[];
   pieces: LegacyIOSetPiece[];
   icon: string;
@@ -73,6 +75,7 @@ type LegacyIOSetRegistry = Record<string, LegacyIOSet>;
 
 export const IO_SETS_RAW: LegacyIOSetRegistry = {
   "absolute_amazement": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -219,6 +222,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Stuns"
   },
   "achilles_heel": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -283,6 +287,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Debuff"
   },
   "adjusted_targeting": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -431,6 +436,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "To Hit Buff"
   },
   "adrenal_adjustment": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -494,6 +500,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Endurance Modification"
   },
   "aegis": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -650,6 +657,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Resist Damage"
   },
   "air_burst": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -746,6 +754,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Targeted AoE Damage"
   },
   "analyze_weakness": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -893,6 +902,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Accurate Defense Debuff"
   },
   "annihilation": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -1035,6 +1045,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Targeted AoE Damage"
   },
   "annoyance": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -1103,6 +1114,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Taunt"
   },
   "apocalypse": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -1223,6 +1235,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "armageddon": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -1369,6 +1382,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "PBAoE Damage"
   },
   "ascendency_of_the_dominator": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -1525,6 +1539,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Dominator Archetype Sets"
   },
   "assassins_mark": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -1657,6 +1672,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Stalker Archetype Sets"
   },
   "avalanche": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -1807,6 +1823,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "PBAoE Damage"
   },
   "basilisks_gaze": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -1948,6 +1965,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Holds"
   },
   "befuddling_aura": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -2065,6 +2083,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Confuse"
   },
   "blasters_wrath": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -2197,6 +2216,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Blaster Archetype Sets"
   },
   "blessing_of_the_zephyr": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -2266,6 +2286,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Universal Travel"
   },
   "blistering_cold": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -2416,6 +2437,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "blood_mandate": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -2566,6 +2588,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Pet Damage"
   },
   "bonesnap": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -2642,6 +2665,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "brilliant_leadership": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -2790,6 +2814,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Pet Damage"
   },
   "bruising_blow": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -2853,6 +2878,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "brutes_fury": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -2998,6 +3024,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Brute Archetype Sets"
   },
   "cacophany": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -3142,6 +3169,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Confuse"
   },
   "calibrated_accuracy": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -3276,6 +3304,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Sniper Attacks"
   },
   "call_of_the_sandman": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -3410,6 +3439,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Sleep"
   },
   "call_to_arms": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -3550,6 +3580,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Recharge Intensive Pets"
   },
   "celerity": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -3621,6 +3652,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Running"
   },
   "cleaving_blow": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -3709,6 +3741,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "PBAoE Damage"
   },
   "cloud_senses": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -3848,6 +3881,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Accurate To-Hit Debuff"
   },
   "coercive_persuasion": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -3973,6 +4007,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Confuse"
   },
   "command_of_the_mastermind": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -4126,6 +4161,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Mastermind Archetype Sets"
   },
   "commanding_presence": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -4232,6 +4268,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Pet Damage"
   },
   "critical_strikes": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -4364,6 +4401,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Scrapper Archetype Sets"
   },
   "crushing_impact": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -4516,6 +4554,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "curtail_speed": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -4638,6 +4677,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Slow Movement"
   },
   "dampened_spirits": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -4786,6 +4826,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "To Hit Debuff"
   },
   "dark_watchers_despair": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -4919,6 +4960,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "To Hit Debuff"
   },
   "debiliative_action": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -5071,6 +5113,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Immobilize"
   },
   "decimation": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -5219,6 +5262,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "defenders_bastion": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -5351,6 +5395,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defender Archetype Sets"
   },
   "defiant_barrage": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -5483,6 +5528,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Blaster Archetype Sets"
   },
   "deflated_ego": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -5542,6 +5588,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "To Hit Debuff"
   },
   "detonation": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -5711,6 +5758,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Targeted AoE Damage"
   },
   "devastation": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -5847,6 +5895,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "discouraging_words": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -5928,6 +5977,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "To Hit Debuff"
   },
   "doctored_wounds": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -6093,6 +6143,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Healing"
   },
   "dominating_grasp": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -6262,6 +6313,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Dominator Archetype Sets"
   },
   "dominion_of_arachnos": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -6402,6 +6454,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Soldiers of Arachnos Archetype Sets"
   },
   "edict_of_the_master": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -6561,6 +6614,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Pet Damage"
   },
   "efficacy_adaptor": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -6684,6 +6738,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Endurance Modification"
   },
   "encouraged_accuracy": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -6747,6 +6802,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "To Hit Buff"
   },
   "energy_manipulator": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -6806,6 +6862,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Endurance Modification"
   },
   "enfeebled_operation": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -6953,6 +7010,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Immobilize"
   },
   "entomb": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -7102,6 +7160,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Holds"
   },
   "entropic_chaos": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -7216,6 +7275,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "eradication": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -7348,6 +7408,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "PBAoE Damage"
   },
   "essence_of_curare": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -7516,6 +7577,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Holds"
   },
   "essence_transfer": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -7653,6 +7715,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Kheldian Archetype Sets"
   },
   "executioners_contract": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -7804,6 +7867,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Sniper Attacks"
   },
   "expedient_reinforcement": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -7944,6 +8008,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Recharge Intensive Pets"
   },
   "exploit_weakness": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -8032,6 +8097,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Sniper Attacks"
   },
   "exploited_vulnerability": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -8100,6 +8166,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Debuff"
   },
   "explosive_strike": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -8165,6 +8232,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Knockback"
   },
   "extreme_measures": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -8302,6 +8370,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Sniper Attacks"
   },
   "far_strike": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -8378,6 +8447,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "focused_smite": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -8509,6 +8579,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "force_feedback": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -8648,6 +8719,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Knockback"
   },
   "fortunata_hypnosis": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -8794,6 +8866,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Sleep"
   },
   "freebird": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -8852,6 +8925,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Flight"
   },
   "frozen_blast": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -9002,6 +9076,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Targeted AoE Damage"
   },
   "fury_of_the_gladiator": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -9188,6 +9263,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "PBAoE Damage"
   },
   "gauntleted_fist": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -9351,6 +9427,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Tanker Archetype Sets"
   },
   "gaussians_synchronized_firecontrol": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -9496,6 +9573,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "To Hit Buff"
   },
   "ghost_widows_embrace": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -9630,6 +9708,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Holds"
   },
   "gift_of_the_ancients": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -9792,6 +9871,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Sets"
   },
   "gladiators_armor": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -9974,6 +10054,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Resist Damage"
   },
   "gladiators_javelin": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -10162,6 +10243,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "gladiators_net": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -10334,6 +10416,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Holds"
   },
   "gladiators_strike": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -10521,6 +10604,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "glimpse_of_the_abyss": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -10655,6 +10739,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Fear"
   },
   "gravitational_anchor": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -10801,6 +10886,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Immobilize"
   },
   "harmonized_healing": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -10958,6 +11044,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Healing"
   },
   "hecatomb": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -11104,6 +11191,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "hibernation": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -11221,6 +11309,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Sleep"
   },
   "horror": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -11338,6 +11427,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Fear"
   },
   "impeded_swiftness": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -11503,6 +11593,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Slow Movement"
   },
   "impervious_skin": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -11617,6 +11708,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Resist Damage"
   },
   "impervium_armor": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -11763,6 +11855,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Resist Damage"
   },
   "induced_coma": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -11889,6 +11982,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Sleep"
   },
   "jaunt": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -11950,6 +12044,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Teleport"
   },
   "javelin_volley": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -12138,6 +12233,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Targeted AoE Damage"
   },
   "karma": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -12198,6 +12294,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Sets"
   },
   "kb": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -12317,6 +12414,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Universal Damage Sets"
   },
   "kheldians_grace": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -12470,6 +12568,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Kheldian Archetype Sets"
   },
   "kinetic_combat": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -12589,6 +12688,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "kinetic_crash": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -12727,6 +12827,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Knockback"
   },
   "kismet": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -12841,6 +12942,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Sets"
   },
   "lethargic_repose": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -12993,6 +13095,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Sleep"
   },
   "lockdown": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -13139,6 +13242,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Holds"
   },
   "luck_of_the_gambler": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -13288,6 +13392,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Sets"
   },
   "maelstroms_fury": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -13390,6 +13495,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "makos_bite": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -13544,6 +13650,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "malaises_illusions": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -13670,6 +13777,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Confuse"
   },
   "malice_of_the_corruptor": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -13802,6 +13910,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Corruptor Archetype Sets"
   },
   "mark_of_supremacy": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -13953,6 +14062,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Mastermind Archetype Sets"
   },
   "might_of_the_tanker": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -14106,6 +14216,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Tanker Archetype Sets"
   },
   "miracle": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -14235,6 +14346,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Healing"
   },
   "mocking_beratement": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -14380,6 +14492,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Taunt"
   },
   "multi_strike": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -14554,6 +14667,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "PBAoE Damage"
   },
   "neuronic_shutdown": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -14693,6 +14807,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Holds"
   },
   "nightmare": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -14848,6 +14963,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Fear"
   },
   "numinas_convalesence": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -14990,6 +15106,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Healing"
   },
   "obliteration": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -15130,6 +15247,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "PBAoE Damage"
   },
   "overpowering_presence": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -15299,6 +15417,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Controller Archetype Sets"
   },
   "overwhelming_force": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -15431,6 +15550,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Universal Damage Sets"
   },
   "pacing_of_the_turtle": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -15583,6 +15703,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Slow Movement"
   },
   "panacea": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -15771,6 +15892,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Healing"
   },
   "paralytic": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -15888,6 +16010,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Holds"
   },
   "perfect_zinger": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -16026,6 +16149,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Taunt"
   },
   "performance_shifter": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -16151,6 +16275,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Endurance Modification"
   },
   "perplex": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -16293,6 +16418,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Confuse"
   },
   "positrons_blast": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -16440,6 +16566,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Targeted AoE Damage"
   },
   "pounding_slugfest": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -16525,6 +16652,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "preventive_medicine": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -16675,6 +16803,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Healing"
   },
   "primalists_nature": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -16819,6 +16948,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Primalist Archetype Sets"
   },
   "pulverizing_fisticuffs": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -16903,6 +17033,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "quickfoot": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -16977,6 +17108,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Running"
   },
   "ragnarok": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -17123,6 +17255,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Targeted AoE Damage"
   },
   "razzle_dazzle": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -17254,6 +17387,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Stuns"
   },
   "reactive_armor": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -17417,6 +17551,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Resist Damage"
   },
   "reactive_defenses": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -17564,6 +17699,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Sets"
   },
   "rectified_reticle": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -17628,6 +17764,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "To Hit Buff"
   },
   "red_fortune": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -17781,6 +17918,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Sets"
   },
   "regenerative_tissue": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -17885,6 +18023,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Healing"
   },
   "rooting_grasp": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -17989,6 +18128,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Immobilize"
   },
   "rope_a_dope": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -18139,6 +18279,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Stuns"
   },
   "ruin": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -18262,6 +18403,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "salvo": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -18354,6 +18496,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "sciroccos_dervish": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -18493,6 +18636,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "PBAoE Damage"
   },
   "scourging_blast": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -18625,6 +18769,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Corruptor Archetype Sets"
   },
   "scrappers_strike": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -18770,6 +18915,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Scrapper Archetype Sets"
   },
   "serendipity": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -18910,6 +19056,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Sets"
   },
   "shield_breaker": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -19054,6 +19201,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Accurate Defense Debuff"
   },
   "shield_wall": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -19244,6 +19392,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Sets"
   },
   "siphon_insight": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -19375,6 +19524,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Accurate To-Hit Debuff"
   },
   "smashing_haymaker": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -19477,6 +19627,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "soaring": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -19538,6 +19689,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Flight"
   },
   "soulbound_allegiance": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -19671,6 +19823,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Pet Damage"
   },
   "sovereign_right": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -19822,6 +19975,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Pet Damage"
   },
   "spiders_bite": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -19954,6 +20108,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Soldiers of Arachnos Archetype Sets"
   },
   "springfoot": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -20015,6 +20170,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Leaping"
   },
   "stagger": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -20124,6 +20280,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Stuns"
   },
   "stalkers_guile": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -20269,6 +20426,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Stalker Archetype Sets"
   },
   "steadfast_protection": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -20329,6 +20487,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Resist Damage"
   },
   "sting_of_the_manticore": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -20470,6 +20629,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Sniper Attacks"
   },
   "stupefy": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -20596,6 +20756,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Stuns"
   },
   "superior_ascendency_of_the_dominator": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -20752,6 +20913,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Dominator Archetype Sets"
   },
   "superior_assassins_mark": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -20884,6 +21046,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Stalker Archetype Sets"
   },
   "superior_avalanche": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -21034,6 +21197,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "PBAoE Damage"
   },
   "superior_blasters_wrath": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -21166,6 +21330,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Blaster Archetype Sets"
   },
   "superior_blistering_cold": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -21316,6 +21481,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "superior_brutes_fury": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -21461,6 +21627,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Brute Archetype Sets"
   },
   "superior_command_of_the_mastermind": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -21614,6 +21781,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Mastermind Archetype Sets"
   },
   "superior_critical_strikes": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -21746,6 +21914,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Scrapper Archetype Sets"
   },
   "superior_defenders_bastion": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -21878,6 +22047,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defender Archetype Sets"
   },
   "superior_defiant_barrage": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -22010,6 +22180,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Blaster Archetype Sets"
   },
   "superior_dominating_grasp": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -22179,6 +22350,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Dominator Archetype Sets"
   },
   "superior_dominion_of_arachnos": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -22319,6 +22491,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Soldiers of Arachnos Archetype Sets"
   },
   "superior_entomb": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -22468,6 +22641,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Holds"
   },
   "superior_essence_transfer": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -22605,6 +22779,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Kheldian Archetype Sets"
   },
   "superior_frozen_blast": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -22755,6 +22930,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Targeted AoE Damage"
   },
   "superior_gauntleted_fist": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -22918,6 +23094,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Tanker Archetype Sets"
   },
   "superior_kheldians_grace": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -23071,6 +23248,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Kheldian Archetype Sets"
   },
   "superior_malice_of_the_corruptor": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -23203,6 +23381,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Corruptor Archetype Sets"
   },
   "superior_mark_of_supremacy": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -23354,6 +23533,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Mastermind Archetype Sets"
   },
   "superior_might_of_the_tanker": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -23507,6 +23687,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Tanker Archetype Sets"
   },
   "superior_overpowering_presence": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -23676,6 +23857,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Controller Archetype Sets"
   },
   "superior_primalists_nature": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -23820,6 +24002,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Primalist Archetype Sets"
   },
   "superior_scourging_blast": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -23952,6 +24135,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Corruptor Archetype Sets"
   },
   "superior_scrappers_strike": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -24097,6 +24281,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Scrapper Archetype Sets"
   },
   "superior_spiders_bite": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -24229,6 +24414,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Soldiers of Arachnos Archetype Sets"
   },
   "superior_stalkers_guile": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -24374,6 +24560,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Stalker Archetype Sets"
   },
   "superior_unrelenting_fury": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -24529,6 +24716,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Brute Archetype Sets"
   },
   "superior_vigilant_assault": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -24661,6 +24849,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defender Archetype Sets"
   },
   "superior_will_of_the_controller": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -24817,6 +25006,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Controller Archetype Sets"
   },
   "superior_winters_bite": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -24967,6 +25157,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "tempered_readiness": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -25097,6 +25288,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Slow Movement"
   },
   "tempest": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -25203,6 +25395,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "theft_of_essence": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -25341,6 +25534,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Accurate Healing"
   },
   "thunderstrike": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -25477,6 +25671,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "timespace_manipulation": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -25535,6 +25730,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Teleport"
   },
   "titanium_coating": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -25688,6 +25884,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Resist Damage"
   },
   "touch_of_death": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -25841,6 +26038,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Melee Damage"
   },
   "touch_of_lady_grey": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -25961,6 +26159,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Debuff"
   },
   "touch_of_the_nictus": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -26099,6 +26298,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Accurate Healing"
   },
   "trap_of_the_hunter": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -26238,6 +26438,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Immobilize"
   },
   "triage": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -26325,6 +26526,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Healing"
   },
   "triumphant_insult": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -26389,6 +26591,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Taunt"
   },
   "unbounded_leap": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -26447,6 +26650,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Leaping"
   },
   "unbreakable_constraint": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -26593,6 +26797,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Holds"
   },
   "unbreakable_guard": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -26757,6 +26962,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Resist Damage"
   },
   "undermined_defenses": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -26884,6 +27090,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defense Debuff"
   },
   "unquestioning_loyalty": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -26981,6 +27188,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Pet Damage"
   },
   "unrelenting_fury": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -27136,6 +27344,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Brute Archetype Sets"
   },
   "unspeakable_terror": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -27283,6 +27492,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Fear"
   },
   "vigilant_assault": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -27415,6 +27625,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Defender Archetype Sets"
   },
   "volley_fire": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -27478,6 +27689,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "volley_of_velocity": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [
@@ -27541,6 +27753,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Knockback"
   },
   "will_of_the_controller": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -27697,6 +27910,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Controller Archetype Sets"
   },
   "winters_bite": {
+    "attunedOnly": true,
     "bonuses": [
       {
         "effects": [
@@ -27847,6 +28061,7 @@ export const IO_SETS_RAW: LegacyIOSetRegistry = {
     "type": "Ranged Damage"
   },
   "winters_gift": {
+    "attunedOnly": false,
     "bonuses": [
       {
         "effects": [

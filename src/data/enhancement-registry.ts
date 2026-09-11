@@ -228,40 +228,34 @@ export function getTierBorderColor(tier: string): string {
 // ============================================
 
 /**
- * Reward / event sets that are ATTUNED-ONLY in-game but whose data carries a
- * 10–50 level range instead of the usual attuned `maxLevel <= 1` marker. They're
- * obtained already-attuned (Summer Blockbuster, Valentine, Winter events + reward-
- * merit vendors) and are NOT craftable at a fixed level — the range in the data is
- * never exposed to players as a craft option. (Verified in-game 2026-07-02:
- * Overwhelming Force.) Keyed by display name, which is stable across datasets.
+ * Whether the game ships this set only attuned. Attuned pieces have no fixed
+ * level and can't be boosted, so slotting one at a level would misstate its
+ * enhancement values and let it be erroneously boosted — the picker hides the
+ * level slider for these, and every slotting path forces the flag on.
  *
- * NB this is deliberately a name list, NOT an icon-prefix rule: Thunderspy's
- * Subaluwa is a `UD_` universal-damage set that IS crafted-only (verified in the
- * in-game AH), so it must stay OFF this list and remain level-craftable.
+ * The export states it and the converter carries it: a set whose pieces name no
+ * `Crafted_*` boost record has nothing to slot at a level. Two guesses stood in
+ * for that field, and the second outlived its own correction by six weeks.
  *
- * Winter's Gift was on this list until 2026-07-30 on exactly the icon-prefix
- * reasoning the paragraph above forbids — it is the lone `SEO_`-iconned set with
- * maxLevel>1, and that was read as "Superior Event Origin". It is not an event set:
- * it is the level 10-50 `rare` / `Universal Travel` run-speed set, structurally
- * identical to Blessing of the Zephyr (`Zephyr.png`, never listed here), whereas
- * every genuine Winter-event set (Blistering Cold, Frozen Blast, Avalanche, Entomb,
- * Winter's Bite) is `1-1` / `event`. Only the art is wintry.
+ * `maxLevel <= 1` is the marker most of the roster carries, and it misses the
+ * reward sets that keep their 10–50 range. The hand list that patched those was
+ * keyed on DISPLAY NAME, and Winter's Gift went onto it on exactly the
+ * icon-prefix reasoning the list's own comment forbade (`SEO_` read as "Superior
+ * Event Origin"). It is a craftable Universal Travel set — `Crafted_Winters_Gift_*`
+ * sits in the export beside the attuned copies on all four datasets — and it came
+ * off the list on 2026-07-30 after a user reported it behaving as a normal IO.
+ * It was still on canonical's copy of the list six weeks later, where it cost
+ * every Winter's Gift piece its level on a `.mbd` write (MBDEXPORT-14), because
+ * this file sits outside the shared-surface guard and nothing measured the two
+ * lists against each other.
+ *
+ * A name list gets the other direction wrong too, quietly: Thunderspy carries
+ * TWO records displaying "Subaluwa" — its own craftable `KB` set and an
+ * `Overwhelming_Force` record that is attuned-only — and no rule keyed on what
+ * the game PRINTS can tell those apart.
  */
-const ATTUNED_ONLY_SET_NAMES: ReadonlySet<string> = new Set([
-  'Overwhelming Force',
-  "Cupid's Crush",
-]);
-
-/**
- * ATO and event (Winter/Summer/Anniversary) sets are always attuned in-game —
- * they have no fixed level and can't be boosted. The data encodes most as
- * `maxLevel <= 1` (they scale freely above their listed cap); the reward sets in
- * ATTUNED_ONLY_SET_NAMES keep a 10–50 range but are equally attuned-only. Slotting
- * one at a fixed level would bork its enhancement values and let it be erroneously
- * boosted, so we always treat these as attuned regardless of the picker slider.
- */
-export function isInherentlyAttuned(set: Pick<IOSet, 'maxLevel' | 'name'>): boolean {
-  return set.maxLevel <= 1 || ATTUNED_ONLY_SET_NAMES.has(set.name);
+export function isInherentlyAttuned(set: Pick<IOSet, 'attunedOnly'>): boolean {
+  return set.attunedOnly;
 }
 
 /**

@@ -102,6 +102,7 @@ interface LegacyIOSet {
   type: string;
   minLevel: number;
   maxLevel: number;
+  attunedOnly: boolean;
   bonuses: LegacySetBonus[];
   pieces: LegacyIOSetPiece[];
   icon: string;
@@ -125,6 +126,7 @@ function transformIOSet(id: string, legacy: LegacyIOSet): IOSet {
     type: legacy.type,
     minLevel: legacy.minLevel,
     maxLevel: legacy.maxLevel,
+    attunedOnly: legacy.attunedOnly,
     bonuses: legacy.bonuses.map((b) => ({
       pieces: b.pieces,
       effects: b.effects.map((e) => ({
