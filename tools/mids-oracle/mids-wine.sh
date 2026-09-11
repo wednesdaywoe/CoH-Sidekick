@@ -26,6 +26,29 @@
 #   # "Mids Reborn Patch Data" container: [str header][i32 count]
 #   # then count × ([i32 size][str name][str folder][size bytes]).
 #   # The app .mru holds a mids<ver>+db<ver>.zip; unzip that over drive_c/MidsReborn.
+# BROKEN ON THIS MACHINE as of 2026-09-10, in two stages, and the second stage
+# looks like a working oracle until you read the dialog:
+#
+#   1. Bare `wine MidsReborn.exe` logs "Could not load ICU data. UErrorCode: 2"
+#      and the process is gone in ~5s, before any window. Wine 11.0 Staging ships
+#      icu.dll/icuin.dll/icuuc.dll in system32, but not the data .NET 8 wants.
+#   2. DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 gets past that — the main window
+#      really does appear, titled and sized — and then an "OMIGODHAX" dialog says
+#      "The type initializer for 'FastDeepCloner.FastDeepClonerCachedItems' threw
+#      an exception", down through Power.ProcessExecutesInner(IPower, Int32
+#      rLevel) to MainWindow2.frmMain_Load. No build is displayed.
+#
+# The `rLevel` in that trace invites the reading that the loaded file did it. It
+# did not: our writer's .mbd and the Mids-written twin of the same build produce
+# the dialog PIXEL-IDENTICALLY (spectacle + `magick compare -metric AE` = 0), and
+# it fires in frmMain_Load regardless of what is loaded. Do not read this crash as
+# evidence about a build file.
+#
+# Untried, in the order worth trying: app-local ICU (the
+# Microsoft.ICU.ICU4C.Runtime package into drive_c/MidsReborn plus
+# DOTNET_SYSTEM_GLOBALIZATION_APPLOCALICU), or an older Wine than 11.0 — this
+# route worked for MBDEXPORT-4 and -5, so something under it moved.
+#
 set -euo pipefail
 
 PREFIX="${MIDS_WINEPREFIX:-$HOME/Games/mids-reborn}"

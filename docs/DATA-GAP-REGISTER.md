@@ -57,10 +57,19 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**5 open, of 292 entries.** Three are our own `.mbd` WRITER, opened 2026-09-10 by the first
-thing that has ever read what it writes: `fixtures/mids/ours/` holds our exporter's spelling of
-each of the eight corpus builds, and `mbd_writer_roundtrip` compares the two against one
-database.
+**7 open, of 294 entries.** One is the parser, and the mandate puts it first. **TSPY-12** —
+Thunderspy's slot budget is 71 in our export and 76 in Mids' table, and Mids' table is its
+pre-fork `Generic` one hand-edited twice, so it abstains rather than grades. Nothing outside our
+own reader grades that 71, and the importer's over-budget warning divides by it.
+
+Its sibling is **MBDIMPORT-14** — Mids grants 3 slots at 47 and 3 at 49 where the game's schedule
+grants none. Censused across all four Mids databases it is invariant, so it is the respec table's
+convention and not any fork's data; what is unadjudicated is whether the game has a respec
+schedule at all, which our export structurally cannot say.
+
+Three more are our own `.mbd` WRITER, opened 2026-09-10 by the first thing that has ever read
+what it writes: `fixtures/mids/ours/` holds our exporter's spelling of each of the eight corpus
+builds, and `mbd_writer_roundtrip` compares the two against one database.
 
 Calling the reader the instrument and not a suspect is wrong three times now: MBDEXPORT-13 closed
 through it, -15 was entirely its, and -14 was neither hop's — a hand list of set names one layer
@@ -76,7 +85,7 @@ Two are not the writer's. **ACCOLADE-3** — two accolade ids predate the intern
 convention and only `buildStore` renames them, so a `.skif` opened from a file loses those
 accolades from the totals in silence. MBDEXPORT-12's warning arm surfaced it on 2026-09-10.
 
-The fifth is neither repo's pipeline but the seam between them. **FORK-7** — 34 of the 142
+The last is neither repo's pipeline but the seam between them. **FORK-7** — 34 of the 142
 `src/data` paths the two repos share differ and none was adjudicated; MBDEXPORT-14 was one of
 them, fixed in the beta six weeks before canonical could have known.
 
@@ -85,7 +94,9 @@ and it closes by DELETING its pin. -17 cannot have one: the round trip is green 
 names, because our reader normalises the field back. Its key is a census of the FILES.
 
 What none of them can answer is whether a real Mids parses what we write — that half is Wine
-(`tools/mids-oracle/mids-wine.sh`), and it is what MBDEXPORT-4 and -5 took.
+(`tools/mids-oracle/mids-wine.sh`), and it is what MBDEXPORT-4 and -5 took. **That route is down
+as of 2026-09-10**: the prefix dies on ICU, and the invariant-globalization workaround reaches the
+main window and then throws. Diagnosis and what is untried are in the script's header.
 
 The reader half is done. MBDIMPORT-12 and -13 opened and closed on 2026-09-10, both found by
 converting the `.mbd` corpus into builds: 86 respelled Homecoming sets carried no alias row and
@@ -403,7 +414,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Parser + binary fidelity
 
-[Full detail](gaps/parser-fidelity.md) — 46 of 46 closed
+[Full detail](gaps/parser-fidelity.md) — 46 of 47 closed
 
 - [x] **ATTRTYPE-1** — `mapAttribType` maps three of the parser's four `ATTRIB_MOD_TYPE` values
   and falls through, so `Constant` reaches the wire as `Magnitude` and 4,746 Homecoming templates
@@ -414,6 +425,24 @@ measurement went, and where a closure for the residual belongs too.
   carriers out of `powers.bin`, the `magnitude_expression` is genuinely count=0 on the wire so the
   parser is faithful and "Varies" is correct. Guarded by `test_exprmag.py` (export census, per-fork
   floors + mutation-scored). Full narrative in [parser-fidelity.md](gaps/parser-fidelity.md).
+- [ ] **TSPY-12** — our Thunderspy slot schedule is graded by nothing outside our own reader:
+  MBDIMPORT-11's oracle ("`NLevels.mhd` is byte-identical to our export's schedule") was measured
+  on Homecoming and Rebirth and written with no fork on it, and on Thunderspy the two differ at 5
+  levels and by 5 slots — ours 71, Mids 76. Mids' Thunderspy table is its pre-fork `Generic` table
+  with two cells moved (17 and 19, each 2 -> 4), still carrying `Generic`'s 3 slots at level 16
+  where its own Homecoming table grants 0, so it abstains rather than disagrees. That 71 is the
+  ceiling the planner refuses placements against and the denominator of the importer's
+  over-budget warning on a shipping fork.
+  **Goal** — a reader that is not ours grades Thunderspy's `assignable_boost`, or the row closes
+  as a written adjudication that our read stands with its oracle named as absent.
+  **Done when** — the four levels where our Thunderspy schedule exceeds Homecoming's (9, 23, 29,
+  43) are each confirmed out of the Thunderspy binary by a read that is not the crawler's decode
+  path, and the verdict is written; and every place MBDIMPORT-11's byte-identical sentence is
+  cited carries the population it was measured on.
+  **Check** — `node scripts/keys/tspy12-schedule-oracle-census.cjs` — Homecoming and Rebirth
+  identical to ours, Thunderspy differing at 16/17/19/29/43, Mids' Thunderspy table `Generic` plus
+  edits at 17 and 19. Either of the first two diverging, or Mids' table ceasing to be `Generic`
+  plus those two, BREAKS the row: the oracle would then be grading us after all.
 - [x] **TSPY-8** — `guardThunderspyAppliedMez`'s protection carve-out tested signed SCALE alone,
   but protection is also spelled as signed magnitude on `Duration` templates and as an `Expression`
   magnitude whose sign never reaches the wire, so real protection read as applied control and was
@@ -764,7 +793,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 80 of 84 closed
+[Full detail](gaps/pipeline-provenance.md) — 80 of 85 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -823,6 +852,23 @@ measurement went, and where a closure for the residual belongs too.
   `Epic.Guardian_Fire_Mastery`) had no row and resolved to nothing, taking its picks with it — 10
   holdable sets on Homecoming, 18 on Rebirth; `powersetPath` states the pairing the writer's way
   round, so the reader inverts it as a second door, trimmed and refusing a contested path
+- [ ] **MBDIMPORT-14** — Mids grants 3 slots at level 47 and 3 at 49 where the game's schedule
+  grants none, and the surplus is the respec table's on every fork: over all four Mids databases
+  (Generic, Homecoming, Rebirth, Thunderspy) `NLevels` grants 0 at both levels and `RLevels`
+  grants 3 at both, invariant, while our four exports grant 0. So it is not Rebirth-shaped, not a
+  fork divergence and not an author's editing — the three readings MBDIMPORT-11 left open. It has
+  sat inside that CLOSED entry's narrative since 2026-09-10, where the frontier cannot see it.
+  **Goal** — the 6-slot respec surplus is adjudicated in writing: Mids' own invention, or a grant
+  the game makes that our export structurally cannot carry.
+  **Done when** — the question is answered against something outside our pipeline, because the
+  binary holds one schedule (`ParseSchedules`, single member) and absence from the export is not
+  evidence of absence from the game — a live Mids under Wine, a respec observed on a live server,
+  or a written adjudication that 67 stands on Rule 0; and `excessOverServerBudget`'s message is
+  re-read against whichever way it lands, since a respec-planned Homecoming build spends 73 and is
+  told it is over the server's budget by six.
+  **Check** — `node scripts/keys/mbdimport14-respec-rows-census.cjs` — 4 databases, `NLevels` 0/0
+  and `RLevels` 3/3 at 47 and 49 on every one. Any `NLevels` or any export granting there BREAKS
+  the claim that these rows are respec-only, and puts a second schedule back in play.
 - [x] **MBDIMPORT-13** — Mids spells one Rebirth power `Moon_Beam` where the export says
   `Moonbeam`, and the name map's display join folds separators to a space rather than deleting
   them ON PURPOSE, leaving the drift to a matcher ladder the Rust reader omits by design — so
@@ -930,9 +976,12 @@ measurement went, and where a closure for the residual belongs too.
   spellings import to the same build and only a real Mids can say whether the field is read.
   **Goal** — our file spells a level-less piece the way Mids spells it, or the row closes as a
   written adjudication that Mids ignores the field for these three kinds.
-  **Done when** — a file holding all three is opened in Mids under Wine
+  **Done when** — all three kinds are opened in Mids under Wine
   (`tools/mids-oracle/mids-wine.sh`) and what it shows for each is written down; measured, not
-  reasoned about, because the three kinds may not have one answer.
+  reasoned about, because the three kinds may not have one answer. NO corpus file holds all three
+  (measured 2026-09-10), so it takes a pair: on Homecoming the Blaster (io-set + special) and the
+  Warshade (io-set + origin), on Rebirth the Guardian (io-set + special) and the Night Widow
+  (origin). Blocked while the Wine route is down — see Current frontier.
   **Check** — `node scripts/keys/mbdexport17-iolevel-spelling-census.cjs` — 253, all of them
   `ours 0`. Anything our writer states a level for BREAKS the claim that this is one convention.
 - [x] **PARTSTAT-2** — the Dominator `Domination` node in `archetypes.json` hand-copied three values the export owns and had drifted, stating `recharge` 200 on the fork whose export says 180; TS gained the name-join to the `Inherent.Inherent` twin that Rust already had, the card's window is now the longest span its caster-side atoms hold open rather than the bag's modal vote, and the four hand-authored `effects` blocks are gone — atom-less bags 4 → 0
@@ -1077,10 +1126,14 @@ measurement went, and where a closure for the residual belongs too.
   cluster, whose reason says the one file where the beta held a fix canonical lacked was
   reconciled instead. It was not the one.
   **Goal** — a rule the two engines share is adjudicated, not undiscoverable.
-  **Done when** — the 34 are censused by KIND (data the regen owns, a rule both engines apply,
-  a beta feature canonical never took) and each kind is either added to `TRACKED_ROOTS` or
-  argued out of it in writing; and the `beta-authored` cluster is re-read for a second file
-  holding a fix canonical lacks, since its reason claims that was checked.
+  **Censused by kind 2026-09-10** (table in the gaps file): 16 of the 34 are `.test.ts` already
+  declared under FORK-4, so the unwatched surface is 17 sources and a README — 5 cosmetic, 6 beta
+  features, 1 canonical-ahead, 1 changelog, 4 rules both engines apply. The `beta-authored` re-read
+  found its second mis-filed fix, `proc-global-recharge.test.ts`.
+  **Done when** — each kind is added to `TRACKED_ROOTS` or argued out BY ACTION, and the
+  `beta-authored` reason is re-cut so it stops claiming a check it failed twice. Blocked first on
+  whether canonical's `src/` app still ships beside the Dioxus one, which decides if the 4 rule
+  forks are live defects or expected lag.
   **Check** — `node scripts/verify-sync.cjs --sibling ../CoH-Sidekick --gate` — 198 paths. A
   count that has not grown means no kind has been taken yet; `src/data/enhancement-registry.ts`
   joined on 2026-09-10 and is the only one of the 34 inside.
