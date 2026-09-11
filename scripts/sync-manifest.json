@@ -217,7 +217,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "18c3529198abf9474028f37d61fef434f879301dd527c913d96751e81f4c23d4"
+      "sha256": "354d5f7c78f656f9e3a979f1dc7b49d53924aeb36bf6fff10352ef2d07da73e3"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -528,7 +528,40 @@
     {
       "path": "scripts/verify-sync.cjs",
       "status": "identical",
-      "sha256": "bccbd7797594e052bde19aba200904032b2e7e7e5371dbb6c0557ce8c9e0670b"
+      "sha256": "a268f064f2685b3b651834c8bcb88149fdb3fea92553aafa7593ddddca2067b4"
+    },
+    {
+      "path": "src/data/README.md",
+      "status": "per-repo",
+      "sha256": {
+        "canonical": "906c87e82352e8e7baee3ad5e6b8d224a967df6454e1d29d26e24ab4824a9a80",
+        "beta": "97b16cce2eb50f6f3429e3e41400883b1fba43bf31f19fdf76db54e1b2546209"
+      },
+      "reason": "Two doc links that resolve to different places because the repos are laid out differently: the beta points at `streams/HOMECOMING_PARSER.md` and `GAME-DATA-PRINCIPLES.md` at its root, canonical at its own `docs/` tree. Reconciling would break a link on one side. The prose is otherwise identical, and any drift in it should be read as a fork — this declaration is about the paths, not a licence for the text.",
+      "exit": null,
+      "gap": "FORK-7"
+    },
+    {
+      "path": "src/data/at-tables.ts",
+      "status": "per-repo",
+      "sha256": {
+        "canonical": "f0ead4efa188885bda4e803a63842359f1c99059e7578c93931e9d0185f03b87",
+        "beta": "e432a0a4fd3c746f145bcdc624412900198ee5688cef42c07526a513776040ae"
+      },
+      "reason": "The beta grew one accessor canonical's copy does not have, `getRechargeBounds`, reading `atTables.archetypes[<at>].rechargeBounds` out of the active dataset. The RULE underneath it — a build's recharge floor and cap come from the archetype rather than a constant — is not owed here: canonical's engine already holds it, in `coh_math::projection::ReductionClamps::for_build`, which reads the same rows off the archetype's stats. What differs is an accessor a shipping TS app needs and a frozen oracle never will. Declared rather than forked because no convergence is coming: canonical's `src/` does not grow accessors, it gets read.",
+      "exit": null,
+      "gap": "FORK-7"
+    },
+    {
+      "path": "src/data/changelog-manual.ts",
+      "status": "per-repo",
+      "sha256": {
+        "canonical": "e18c7d32f074bcbcd96b0891ba143b0e450ea7f0e05a01183688902dc63ac305",
+        "beta": "cc799989e8eb81390706d1b5656d8eeba1d83c27fafa2971b2139d884f04fec2"
+      },
+      "reason": "Hand-maintained per-repo content: the beta accrued 157 lines of user-facing changelog for the app it ships, and canonical ships no app to have a changelog for. There is no consumer that could diverge — nothing computes on these strings. Declared here rather than left out of the roots on purpose: an argued-out path that is simply absent from the manifest is indistinguishable from one nobody looked at, which is the failure FORK-7 opened on.",
+      "exit": null,
+      "gap": "FORK-7"
     },
     {
       "path": "src/data/core/atom-query.ts",
@@ -539,6 +572,44 @@
       "path": "src/data/core/atomic-effect.ts",
       "status": "identical",
       "sha256": "8f07d0b407210066e6b489c190e2544e03f787376d0656818b7bedf575fea7cd"
+    },
+    {
+      "path": "src/data/core/effect-registry.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "44578eea78584bd18b140ba01d94145cc4b6c5bf53e1f5c3d905a522f83dcc82",
+        "beta": "6ac1e72379a61e92b4c982ffa16b56765b98fb0a394f637d2e2f8558d4f7e8fa"
+      },
+      "reason": "Five entries' `format` is `value` here and `percent` in the beta, and a format flip is a displayed number off by 100×. Measured 2026-09-11: all five are movement keys (fly, flySpeed, runSpeed, jumpSpeed, jumpHeight) and `contract/effect-registry.json` — the file `coh_math::effect_registry` include_str!s and the beta reads too — already says `percent` on every one. So the shipping pair agrees and canonical's TS is a third copy, alone and wrong, with no gate between the three. That is the fork: the JSON's own header says the sync gate it used to describe no longer exists. The beta also holds four table-reading flags canonical never took (`valueFromTable`, `scalarFromTablePercent`, `maxHpFractionPercentForm`, `strengthAspect`) and the split-slot `Unenhanced` fallback, which is canonical's ENT-6 arriving from the other direction.",
+      "exit": "Canonical's five formats take the contract's spelling — this file is supposed to be the TS face of that JSON — or a gate makes the JSON the only copy and both TS registries read it. Checkable: for each of the five keys, `EFFECT_REGISTRY[k].format` equals `contract/effect-registry.json`'s, in both repos.",
+      "gap": "FORK-7"
+    },
+    {
+      "path": "src/data/core/incarnate-registry.ts",
+      "status": "identical",
+      "sha256": "b273ca227afd2ff1f561f21e1384c0fdd03e886774a6222c3d4bee692a1e2bad"
+    },
+    {
+      "path": "src/data/core/movement-constants.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "1f615298238ce859064cff21ac80c8dc7ed5b7aaea5bde1d9f1eccff2a30b6eb",
+        "beta": "283f3a865b27d29ac206f557d7f29e02f37f59cd4553ae77dcfe192204b731fe"
+      },
+      "reason": "The beta's copy is the measured one and canonical's is the pre-fix transplant. `jumpSpeed: 21.0` mislabels the ft/s figure as mph and inflates every jump readout by 21/14.32 ≈ 1.47× (Hurdle's +190.485% reads 61 mph where the game says 41.59); `flySpeed: 0.0` denies fly its 1.5-unit base. The beta fixed both on 2026-07-27 against a Small Longbow Jetpack reading, superseding an earlier one that took the in-game Combat Attributes number at face value. Measured 2026-09-11: nothing canonical SHIPS reads this file. The Dioxus app projects movement from the archetype's own class table (`coh_math::movement::project_axis`, floor and ceiling per class), which is the data read Rule 0 asks for; this table is the hardcode it forbids. So the stale copy is an oracle, not a wrong number in front of a user — on this side. On the beta's side the fix is live and correct.",
+      "exit": "Canonical's two bases take the beta's (`jumpSpeed: 14.32`, `flySpeed: 1.5 * MPH_PER_SCALE`), or the file leaves with the frozen TS half. Binding either way: no Rust is ported FROM this table. `project_axis` already reads the class rows, and a port that took these constants would re-import the hardcode — which is why `crates/app/src/panels/stat_registry.rs` names it.",
+      "gap": "FORK-7"
+    },
+    {
+      "path": "src/data/core/stat-definitions.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "70ae2094da0d2de4a07a8660a58f87c8de61b77c7cef0bac56dcb136955dd22e",
+        "beta": "3348e883f9d5275f52bfb21c324818fcc6f81d9854746e49382bcc185c0c5899"
+      },
+      "reason": "Dashboard vocabulary for the TS app: the movement rule restated in two tooltips (so it carries `movement-constants.ts`'s error forward in prose), an Absorb-cap sentence, and two debuff-resistance stats (`debuff_accuracy`, `debuff_range`) the beta shows and canonical does not. The Dioxus app has its own vocabulary in `crates/app/src/panels/stat_registry.rs` and reads nothing here.",
+      "exit": "Converges when `movement-constants.ts` does — the tooltips quote it — or leaves with the frozen TS half. The two extra stats are the beta's to keep either way; they are rows in a dashboard, not a rule.",
+      "gap": "FORK-7"
     },
     {
       "path": "src/data/dataset.ts",
@@ -578,8 +649,13 @@
         "beta": "a7f0b6320743a7ef883fcb63d8c1ce81dc451291f39b1e2d524743cb65bd43ef"
       },
       "reason": "Joined 2026-09-10 under FORK-7 and still differs, but no longer on the thing that mattered: `isInherentlyAttuned` is now one shared block in both copies, reading the export's `attunedOnly` instead of the hand list of set names the two repos had disagreed about since 2026-07-30 (MBDEXPORT-14). What remains is older drift the 80e28b2b6a transplant left — the beta imports `genericIOValueAtLevel` where canonical imports `getAspectSchedule`/`getIOValueAtLevel`, four slotting-category headings sit in a different order behind the same set, and several comments are reflowed. Neither copy is the older form of the other; both sides authored.",
-      "exit": null,
+      "exit": "The two copies converge on the import (`genericIOValueAtLevel` against `getAspectSchedule`/`getIOValueAtLevel`) and on one order for the four slotting-category headings; `isInherentlyAttuned`, the part that mattered, is already one shared block reading the export's `attunedOnly`. Nothing here is a rule any more, so this exit is a tidy: whichever side is touched next takes the other's spelling. Written 2026-09-11 — the row carried a null exit from the day it was declared, which is what made the guard start requiring one.",
       "gap": "FORK-7"
+    },
+    {
+      "path": "src/data/enhancements.ts",
+      "status": "identical",
+      "sha256": "328c1f0b784dada10aad4ad914ced058f03fa48d1ebf21122313ee5f184dfbe7"
     },
     {
       "path": "src/data/epic-pools.ts",
@@ -587,9 +663,47 @@
       "sha256": "e288c5ce08f408afe4318802ef858e28d16a06c9a3b6499cc1a55881ce1ea82a"
     },
     {
+      "path": "src/data/export-manifests.ts",
+      "status": "identical",
+      "sha256": "e8cd67ca79661649b848763e1369d78f834c39b0a1f65c3682e11b39290167c1"
+    },
+    {
       "path": "src/data/incarnate-effects.ts",
       "status": "identical",
       "sha256": "e614ce3a32b29918f9f5a07da65910f48027b4398891baba23eebf56e1ff3c48"
+    },
+    {
+      "path": "src/data/incarnate-procs.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "46f04c3944412accabeb35396a0ff6bbe942888f3bda665c4a42dee279b2a8fd",
+        "beta": "747acde6e4da7cbdd848d67c8c1bc4864420e1e5a70d7d38560a02bbe2441f9d"
+      },
+      "reason": "The one of FORK-7's four rule forks with a live consumer. The beta threads `globalRechargeBonus` into the PPM window and canonical does not: global recharge dilutes the slotted-recharge penalty, so this copy under-reports Interface proc chance on any build carrying global recharge. Canonical's RUST has the rule — `crates/coh_math/src/procs.rs` computes `base × (1 + global) / (1 + global + local)`, which is PPM-2, closed — but `computeIncarnateProcContributions` has NO Rust port, so this file is still a port SOURCE rather than dead oracle. That is the whole difference between this row and the other three.",
+      "exit": "The Rust port of the incarnate damage-proc pass is taken from the BETA's six-argument `calculateProcChance` call, not from this copy — the same condition SLOT-3 records on `mids-export.ts`, and this row is where it is written down. Until then the fork stands; canonical's TS will not adopt it on its own, because canonical's `src/` is not tooling that adopts things.",
+      "gap": "FORK-7"
+    },
+    {
+      "path": "src/data/incarnates.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "08bffeef9ce5114bac270fbc414937c6909095724fe3d90eb101849d131d49cd",
+        "beta": "89578bc1c391c6d1d5c26957243fd838b9ed51cabf10b9134ac42dd7d66a8c38"
+      },
+      "reason": "The one path in FORK-7's 34 where CANONICAL is the copy that moved: it reads per-dataset generated slot-index modules behind a fail-loud dataset guard, where the beta still imports seven static JSONs. Same shape as every other entry here, pointing the other way — the lag is the beta's.",
+      "exit": "The beta takes canonical's generated-module read; the regen already writes those modules in both repos, so this is a carry rather than a merge. Then `--write` records the converged hash.",
+      "gap": "FORK-7"
+    },
+    {
+      "path": "src/data/index.ts",
+      "status": "per-repo",
+      "sha256": {
+        "canonical": "c2bcad92c9f0731283eaa4e3c5711b4c0ee1c3a6d0402190f483fc9da875e998",
+        "beta": "69ca35f7e0eac72c1278941260683bad283f88185e62117329fc169a279c4a97"
+      },
+      "reason": "The barrel face of the four feature files above: the beta re-exports what they added (`toStancePowers`, `getMostCommonSetSize`, `getLevelShiftGrants`, the proc roll-site and roll-schedule surface, `DESCRIPTION_NOTES`). A barrel cannot converge while its members are declared apart, and it carries no rule of its own — every line is a re-export.",
+      "exit": null,
+      "gap": "FORK-7"
     },
     {
       "path": "src/data/io-sets.ts",
@@ -612,9 +726,68 @@
       "sha256": "35739e78bb7f83b0cc8e59f4cb3d0898534efc8f1da382ae005a176ec48bd0d1"
     },
     {
+      "path": "src/data/pet-entities.ts",
+      "status": "identical",
+      "sha256": "2619d1ad65b045e9606e08f57841220301cc8b3aaf2482a926ecba63421cb7ff"
+    },
+    {
       "path": "src/data/power-pools.ts",
       "status": "identical",
       "sha256": "1b2f4b5f177a87d3bba4a83dcbbd0e861de54662960c1cbe6afdf38ba4a6be79"
+    },
+    {
+      "path": "src/data/proc-data.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "10201bdf91da39aa7d274113c2bfb7c7ffec707b7d2d8cd14fcc3e9f9a46594a",
+        "beta": "04de31c14a55083610e2f233379e37d2e5a29616f216b4bb25e7ebed88e9046c"
+      },
+      "reason": "A contract input, and invisible to this guard until 2026-09-11: `emit-contract.cjs` loads it through `require(path.join(REPO, …))` and emits `PROC_DATABASE` as the `proc-data` section the Rust engine consumes, while the discovery walk read only the literal `require('../src/…')` spelling. The two copies' database ROWS agree. Canonical is ahead on the half the contract carries — it stamps `activatePeriod` from the generated table, which the beta has not taken — and the beta is ahead on code the contract does not carry: the `globalRechargeBonus` window term (see `incarnate-procs.ts`), the proc roll-site and roll-schedule pass, and `powerFiresProcs`.",
+      "exit": "Two halves, and the data half converges first because it is the half the contract emits: the beta takes `activatePeriod`. The code half converges when the incarnate proc pass is ported (see `incarnate-procs.ts`) or when the roll-schedule pass lands on both sides.",
+      "gap": "FORK-7"
+    },
+    {
+      "path": "src/data/proc-residual-effects.ts",
+      "status": "identical",
+      "sha256": "8d544758a57f72785d131e6aaa1f6421617342da46f3564bff83cedfd4a118e1"
+    },
+    {
+      "path": "src/data/proc-variable-controls.ts",
+      "status": "identical",
+      "sha256": "d04090f34e81b7794f1494f93d321e4e830eb94f2d233e94d4a1451049f15c04"
+    },
+    {
+      "path": "src/data/set-bonus-groups.ts",
+      "status": "per-repo",
+      "sha256": {
+        "canonical": "6cf69776f8c514fcc2fb331bd0d0338588ed10b52eadae3ba60f1f6f707cfeac",
+        "beta": "7c7d2cb4f8b6210d36b3c86aac1f46b983009e75253215ed8844aae8006fb897"
+      },
+      "reason": "The beta's tracked-stat targeting feature (`TRACKED_STAT_TO_BONUS_STATS`, `formatBonusValue`) and two display labels, KB Strength and End Drain Res. The shared RULE — which stat key a bonus resolves to — lives in `contract/set-bonus-stat-vocab.json`, which both engines read, and canonical's Rust models both of those keys (`set_bonuses.rs`: `KnockbackStrength`, `DebuffResistEndurance`). What differs here is how the TS app GROUPS them for a popup. Note what this entry does not cover: canonical's TS `normalizeStatName` returns null for both keys, which is FIXTURE-3, a different file and a different defect.",
+      "exit": null,
+      "gap": "FORK-7"
+    },
+    {
+      "path": "src/data/set-bonus-index.ts",
+      "status": "per-repo",
+      "sha256": {
+        "canonical": "34266bb6a870847eee3e25a25ab87ae5db18022d8f390f1cd5156cda76f8a9a3",
+        "beta": "9821fd731965d2d071c7c789c9754c9834c595b697f8ee6392db0901f1fad70a"
+      },
+      "reason": "The index half of `set-bonus-groups.ts`'s feature: the beta returns `buildTrackedStatTargets` (a stat → tracked-key map) where canonical returns `getSetTrackedMatches` (a set of matched ids), because the beta's popup tracks stats and canonical's does not. Same argument as its twin — the vocabulary rule is the contract's, the grouping is the app's.",
+      "exit": null,
+      "gap": "FORK-7"
+    },
+    {
+      "path": "src/data/stance-groups.ts",
+      "status": "per-repo",
+      "sha256": {
+        "canonical": "cdf64c3cdfcea8b5ae2772577226dcd89eb0a8d080bf6e91108f72db1f50c5c4",
+        "beta": "3f9e5c81cbd15b55e2eb155e1b53cf10e959488e4ab06acef76915242d9e3269"
+      },
+      "reason": "The beta added a `mechanicType` tie-break for picking a stance group's parent when several candidates match, plus `toStancePowers`. Canonical's engine needs no stance-group option table at all — `coh_math::gather` expands stances from the data (the identity/def split) and `coh_data::power` already reads the wire's `mechanicType` vocabulary, including `parentMechanic` and `hiddenPassive`, as an exhaustive enum. So this is TS-side option-table glue with no Rust counterpart to owe, and the table is what the Rust side deliberately does not have.",
+      "exit": null,
+      "gap": "FORK-7"
     },
     {
       "path": "src/types/archetype.ts",

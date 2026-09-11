@@ -3,7 +3,7 @@
  *
  * Provides:
  * - Slot configuration (colors, icon folders, toggleability, effect types)
- * - Tier configuration (colors, display names, level shifts, ED bypass ratios)
+ * - Tier configuration (colors, display names, level shifts)
  * - Tree descriptions for all slots
  * - Tree layout configuration (5-column grid positions)
  * - Display helpers (name abbreviation, rare power sorting)

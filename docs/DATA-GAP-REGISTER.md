@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**7 open, of 294 entries.** One is the parser, and the mandate puts it first. **TSPY-12** —
+**7 open, of 295 entries.** One is the parser, and the mandate puts it first. **TSPY-12** —
 Thunderspy's slot budget is 71 in our export and 76 in Mids' table, and Mids' table is its
 pre-fork `Generic` one hand-edited twice, so it abstains rather than grades. Nothing outside our
 own reader grades that 71, and the importer's over-budget warning divides by it.
@@ -85,9 +85,10 @@ Two are not the writer's. **ACCOLADE-3** — two accolade ids predate the intern
 convention and only `buildStore` renames them, so a `.skif` opened from a file loses those
 accolades from the totals in silence. MBDEXPORT-12's warning arm surfaced it on 2026-09-10.
 
-The last is neither repo's pipeline but the seam between them. **FORK-7** — 34 of the 142
-`src/data` paths the two repos share differ and none was adjudicated; MBDEXPORT-14 was one of
-them, fixed in the beta six weeks before canonical could have known.
+The last is neither the writer's nor the reader's but the oracle behind both. **FIXTURE-3** —
+canonical's TS drops two set-bonus stat keys the contract maps and the Rust routes, and the
+fixtures are emitted from that TS, so the port is graded by an oracle blind to two stats it
+models. No fixture build slots either, so nothing reds.
 
 -16 is pinned by its POPULATION in that test, so a deviation widens reds while its row is open,
 and it closes by DELETING its pin. -17 cannot have one: the round trip is green on every slot it
@@ -793,7 +794,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 80 of 85 closed
+[Full detail](gaps/pipeline-provenance.md) — 81 of 86 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -1118,25 +1119,26 @@ measurement went, and where a closure for the residual belongs too.
 - [x] **FORK-6** — FORK-4's coverage invariant is only as wide as the population it discovers: `TRACKED_ROOTS` reaches `src/utils/mids-import` because someone seeded that
   directory, so `mids-export.ts` and `slot-levels.ts` one level up were adjudicated by nothing while their test twins already carried SLOT-3 declarations; both are `forked` now with an
   exit re-cut against the Rust `.mbd` port, added as file paths because `src/utils` shares 132 paths with the beta and 61 of them differ
-- [ ] **FORK-7** — `src/data` is 142 shared paths outside the manifest and 34 of them differ,
-  found because one was MBDEXPORT-14: `enhancement-registry.ts` holds `isInherentlyAttuned`, a
-  rule about what the export MEANS that both engines obey, and the beta took Winter's Gift off
-  its attuned-only list on 2026-07-30 after a user report while canonical's copy kept it for six
-  weeks. The declared surface mis-called it too — its test twin sits in the `beta-authored`
-  cluster, whose reason says the one file where the beta held a fix canonical lacked was
-  reconciled instead. It was not the one.
-  **Goal** — a rule the two engines share is adjudicated, not undiscoverable.
-  **Censused by kind 2026-09-10** (table in the gaps file): 16 of the 34 are `.test.ts` already
-  declared under FORK-4, so the unwatched surface is 17 sources and a README — 5 cosmetic, 6 beta
-  features, 1 canonical-ahead, 1 changelog, 4 rules both engines apply. The `beta-authored` re-read
-  found its second mis-filed fix, `proc-global-recharge.test.ts`.
-  **Done when** — each kind is added to `TRACKED_ROOTS` or argued out BY ACTION, and the
-  `beta-authored` reason is re-cut so it stops claiming a check it failed twice. Blocked first on
-  whether canonical's `src/` app still ships beside the Dioxus one, which decides if the 4 rule
-  forks are live defects or expected lag.
-  **Check** — `node scripts/verify-sync.cjs --sibling ../CoH-Sidekick --gate` — 198 paths. A
-  count that has not grown means no kind has been taken yet; `src/data/enhancement-registry.ts`
-  joined on 2026-09-10 and is the only one of the 34 inside.
+- [x] **FORK-7** — 34 of the 153 `src/data` paths the repos share differed and none was watched,
+  one being MBDEXPORT-14; all 18 non-test paths carry a verdict now (4 reconciled, 6 `forked`,
+  7 `per-repo`; 198 → 217 watched), canonical's `src/` measured to ship nothing so the 4 rule
+  forks are a stale oracle, the walk reads the composed `require` the contract emitter uses, and
+  `beta-authored` was re-read by RUNNING its 21 copies — 6 hold a rule canonical's TS lacks
+- [ ] **FIXTURE-3** — the set-bonus oracle is narrower than the engine it grades:
+  canonical's `normalizeStatName` returns null for `knockback_strength` and
+  `endurance_drain_resistance`, both of which `contract/set-bonus-stat-vocab.json` maps and
+  `coh_math::set_bonuses` routes. The fixtures are emitted from that TS, so the Rust is graded by
+  an oracle blind to two stats it models. 5 corpus sets carry the first (Homecoming's Air Burst
+  states +2.0%), 1 Thunderspy row the second, and 0 fixture lines carry either — the gate is not
+  suppressing a red, the population never stages the question.
+  **Goal** — the set-bonus oracle can state which stats it covers, and cannot quietly cover fewer
+  than the engine.
+  **Done when** — canonical's TS models both keys AND a fixture build slots each (so the sides are
+  staged against one another), or the emitter stamps the uncovered keys into `manifest.json` and
+  the gate holds the fixture to that census — FIXTURE-2's shape, where a vacuous branch says so.
+  **Check** — `grep -c 'knockbackstrength\|debuffresistendurance' fixtures/set-bonuses/*.jsonl`
+  returns 0 while `coh_math::set_bonuses` names both. A non-zero count, or a manifest census of
+  uncovered keys, breaks the claim that the oracle is silently narrower.
 - [x] **FIXTURE-1** — the manually-emitted gate fixtures (procs, movement, set-bonus) drifted on
   sampling identity and labels only, no values; all three re-emitted, gates green, and the
   emitters now run in `npm run regen` so the drift class is closed

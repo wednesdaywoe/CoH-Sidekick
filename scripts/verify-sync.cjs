@@ -149,8 +149,9 @@ const TRACKED_ROOTS = [
   // could have seen that — `pipelineSources` reaches `src/` by require edges out
   // of the .cjs converters and none of them loads this file, so it was
   // undiscoverable rather than overlooked, FORK-6's shape one directory over. A
-  // file path and not `src/data`: that tree shares 142 paths with the beta and
-  // 34 of them differ, which is FORK-7's own population, not this entry's.
+  // file path and not `src/data`: that tree shares 153 paths with the beta and
+  // 34 of them differ, which is FORK-7's own population, not this entry's — and
+  // all 18 of its non-test paths are adjudicated below as of 2026-09-11.
   'src/data/enhancement-registry.ts',
   // Joined 2026-09-09 under MBDIMPORT-7, at zero drift — five files, every hash equal. The
   // `.mbd` name map: the accessor, and the four generated tables it reads. Nothing discovered
@@ -162,6 +163,36 @@ const TRACKED_ROOTS = [
   // shape this entry is fixing.
   'src/data/mids-name-map.ts',
   'src/data/datasets/*/generated/mids-name-map.ts',
+  // Joined 2026-09-11 under FORK-7, with a verdict written for each in one commit. `src/data`
+  // shares 153 paths with the beta outside `generated/` and `datasets/` and 34 of them differ;
+  // 16 are `.test.ts` already adjudicated under FORK-4, which leaves these. They are listed as
+  // FILES for the same reason `src/utils` is: the tree is not addable, because `git ls-files
+  // src/data` is the whole dataset corpus. `proc-data.ts` and `enhancements.ts` are NOT here —
+  // they arrive through `pipelineSources` now that it reads the composed require form, which is
+  // where they always belonged: the contract emitter loads them.
+  //
+  // Adding a path reds the gate until its two copies are reconciled or declared, so the roots
+  // list is a queue and not a verdict. What emptied the queue was the answer to the question the
+  // row was blocked on: canonical's `src/` ships nothing. There is no `index.html`, no vite
+  // config, no `dev`/`build` script and no `react-dom` here, and canonical's CI builds one app —
+  // `crates/app`, `dx build --platform web`. So a rule that differs between these copies is not
+  // a wrong number in front of a user on this side; it is a stale ORACLE, which is the tree the
+  // Rust port reads and the fixtures are emitted from. Each entry's reason says which it is.
+  'src/data/at-tables.ts',
+  'src/data/changelog-manual.ts',
+  'src/data/core/effect-registry.ts',
+  'src/data/core/incarnate-registry.ts',
+  'src/data/core/movement-constants.ts',
+  'src/data/core/stat-definitions.ts',
+  'src/data/export-manifests.ts',
+  'src/data/incarnate-procs.ts',
+  'src/data/incarnates.ts',
+  'src/data/index.ts',
+  'src/data/pet-entities.ts',
+  'src/data/README.md',
+  'src/data/set-bonus-groups.ts',
+  'src/data/set-bonus-index.ts',
+  'src/data/stance-groups.ts',
   'docs',
 ];
 
@@ -220,6 +251,15 @@ function pipelineSources(root) {
     if (!fs.existsSync(path.join(root, f))) continue;
     const src = fs.readFileSync(path.join(root, f), 'utf8');
     for (const m of src.matchAll(/require\('\.\.\/(src\/[^']+)'\)/g)) queue.push(m[1]);
+    // The same edge with the path composed instead of written: `require(path.join(REPO,
+    // 'src/…'))`. Missing this form was not cosmetic. `emit-contract.cjs` loads
+    // `src/data/proc-data.ts` and `src/data/enhancements.ts` that way, so the two files the
+    // CONTRACT is emitted from — the contract the shipping Rust engine consumes — were the two
+    // `src/data` files this walk could not see, and both sat in FORK-7's 34. A discovery walk
+    // that reads one spelling of an edge reports green about the other, which is FORK-6's
+    // sentence for the third time (FORK-7).
+    for (const m of src.matchAll(/require\(path\.join\([A-Za-z_$][\w$]*, *'(src\/[^']+)'\)\)/g))
+      queue.push(m[1]);
   }
   const seen = new Set();
   while (queue.length) {
@@ -288,6 +328,16 @@ for (const e of manifest.entries) {
       );
     if (!e.gap)
       errors.push(`${e.path}: forked with no gap id — an undeclared fork is debt, not precedent`);
+    // The exit was owed in the paragraph below from the day this guard shipped and checked
+    // nowhere, so `forked` with a null exit passed for three weeks — the status that MEANS
+    // "converging, not yet" was accepted without the sentence saying what converging would be.
+    // A stated obligation nothing measures is the shape of every row in this register.
+    if (!e.exit)
+      errors.push(
+        `${e.path}: forked with no exit condition — "should converge, hasn't yet" owes the ` +
+          `sentence that says when it has; a fork with no exit is a per-repo declaration ` +
+          `nobody was willing to write down`
+      );
   }
   // `forked` and `per-repo` are the same shape and opposite claims. A fork says the two copies
   // OUGHT to be one file and are not yet, so it owes an exit condition. A per-repo entry says

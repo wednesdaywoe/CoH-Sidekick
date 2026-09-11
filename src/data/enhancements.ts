@@ -3,6 +3,9 @@
  *
  * The special registries (Hamidon/Titan/Hydra/D-Sync/prestige) are per-dataset
  * generated data — `src/data/special-enhancements.ts` (SOURCE-1 item 9).
+ * Origin-tier values are per-aspect data from the dataset's enhancement
+ * curves — `getOriginTierValue` (SOURCE-1 SW8). Common-IO values are exact
+ * per-level curve reads — `getIOValueAtLevel` (SOURCE-1 SW5).
  */
 
 import type {
