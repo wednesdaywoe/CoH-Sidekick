@@ -319,6 +319,24 @@ describe('mids-export regression: therm/water defender', () => {
       ]);
   });
 
+  /**
+   * MBDEXPORT-20. Not one of the seven above — `SortGridPowers` indexes those by
+   * position and this one Mids addresses by name — and it had no arm at all, so every
+   * exported build arrived at Mids without the power its own archetype is built around.
+   *
+   * Asserted by the name the EXPORT files it under. Our roster synthesises
+   * `Inherent.<Archetype>.<Name>` for this power and Mids resolves none of that, so a
+   * case that read the name off our own side would have passed throughout the defect.
+   */
+  it("carries the archetype inherent, under the export's own Inherent.Inherent name", () => {
+    const { mbd } = exported();
+    // Directly after the seven-power grid, which is where the writer puts it. Position is
+    // free here — everything past `LastPower` is addressed by name — so this grades the
+    // name and the presence, and pins the placement only so a move is deliberate.
+    expect(mbd.PowerEntries[mbd.LastPower + 7].PowerName).toBe('Inherent.Inherent.Vigilance');
+    expect(mbd.PowerEntries[mbd.LastPower + 7].Level).toBe(1);
+  });
+
   it('carries the alpha slot', () => {
     const { mbd } = exported();
     expect(mbd.PowerEntries.map((pe) => pe.PowerName))

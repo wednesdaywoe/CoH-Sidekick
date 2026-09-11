@@ -294,6 +294,33 @@ export interface InherentRules {
    * datasets leave this absent and lose nothing.
    */
   archetypeInherents?: Record<string, readonly InherentPowerDef[]>;
+
+  /**
+   * Archetype id → the `Inherent.Inherent` full name of its HEADLINE inherent —
+   * Defiance, Fury, Dark Sustenance. The NAME only: no stats, no atoms, so there is
+   * nothing here that can drift into a wrong number.
+   *
+   * Deliberately NOT the same list as `archetypeInherents` above, which is the powers
+   * that reach the build from nowhere else. A headline inherent reaches it through the
+   * archetype record's own `inherent:` field, so it is absent there on purpose — and
+   * `createArchetypeInherentPower` synthesises `Inherent.<Archetype>.<Name>` for it,
+   * which is OUR spelling and resolves to nothing in another planner. The `.mbd`
+   * writer needs the export's, and wrote no archetype inherent at all until it had one
+   * (MBDEXPORT-20, 8 of 8 corpus builds, both forks).
+   *
+   * OPTIONAL for the same reason `archetypeInherents` is: the two repos reach this
+   * name at different layers. The beta populates it from a generated map, derived by
+   * `convert-archetype-inherents.cjs` from the declared inherent name and the export's
+   * `@Class_` gate. Canonical leaves it absent and reads the same name off the whole
+   * `Inherent.Inherent` Power in `archetypeInherentPowerset`, which the beta does not
+   * carry. The two are graded against each other over all 60 archetype-fork pairs, in
+   * the beta's `archetype-inherent-oracle.test.ts`.
+   *
+   * An archetype may be absent from a populated map: a fork that ships no single power
+   * for a declared inherent leaves it out, and the caller reports rather than guessing
+   * (INHERENT-10, Thunderspy's Primalist).
+   */
+  headlineArchetypeInherents?: Record<string, string>;
 }
 
 // ============================================

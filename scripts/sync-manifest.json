@@ -72,7 +72,8 @@
       "mentions": [
         "scripts/convert-accolades.cjs",
         "src/data/dataset.ts",
-        "scripts/detect-chance-mod-selectors.cjs"
+        "scripts/detect-chance-mod-selectors.cjs",
+        "scripts/convert-archetype-inherents.cjs"
       ]
     },
     {
@@ -217,7 +218,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "33a342fc2fcf2dcb3330d0ce9cd78af4170853b6cc505667d9c620f371832526"
+      "sha256": "1f4a1c822e44e4ee61872ee7b5ee74fe05a28c158cadc3151c3e40940cb4d1d2"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -614,7 +615,7 @@
     {
       "path": "src/data/dataset.ts",
       "status": "identical",
-      "sha256": "73e72e3d6af7c35a2268936242100b6182911837647366b4a6d5eba1f817640e"
+      "sha256": "053f3f11be253250da0774f7f093720fc24145e8aee4ce93a2705d629e5d6e50"
     },
     {
       "path": "src/data/datasets/brainstorm/generated/mids-name-map.ts",
@@ -859,10 +860,10 @@
       "path": "src/utils/mids-export.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "fbee6848667aabec6e7eb8ac900fe8c6dc67e2951c94147dec58f6f431648fdb",
-        "beta": "d115bf60ea2bd917c8f75275114cce05a8bfe6bcfe51ef9bbb667136806753cc"
+        "canonical": "c1186836e45df008b97ff05bf03847684cc49e548611e79b3706fe5c58d0dece",
+        "beta": "a4a328e44cabeecf90be3d55bc962c78394f995b66ed584439b233c00991984a"
       },
-      "reason": "SLOT-3 (beta commit d59d7d3d5c): beta's `exportToMids` / `exportToMidsWithReport` take a second `levelUpMode` parameter and resolve slot levels through `computeExportSlotLevels`, so off-mode placement stops enforcing a pick-level schedule floor and says once in the UI that the Level it writes is synthetic. Canonical's copy keeps the one-arg form and `computeAllSlotLevels`. Three hunks, all slot levels — name rotation, enhancement UID mapping and warning emission are byte-identical, so every MBDEXPORT pin taken against canonical's copy holds for the beta's except a claim about a slot's `Level`. Canonical's copy is not app code: it is the source the Rust `.mbd` writer will be ported from, and `crates/app/src/build_io.rs` still lists `.mbd`/`.mxd` as not in the rebuild. Port THIS copy and Rust inherits the floor SLOT-3 removed, stamping every exported slot with a levelling history the build never had — a Rule 1 soft-wrong value written into a file another planner reads as authoritative. CARRIED 2026-09-10, and the sentence above is why it had to be: MBDEXPORT-13 changed `StatInclude` in canonical's copy on 2026-09-10 and that is not a slot-level hunk, so \"every MBDEXPORT pin holds for the beta's copy except a claim about a slot's `Level`\" was false for a day while `verify:sync` read as ordinary stamp lag. The beta ships this writer to users (`ExportImportModal.tsx`), so the cost was a real one: a power the author excluded came back included. The `isActive === true` hunk was hand-ported to the beta and the fork is slot-levels-only again. A correctness fix crossing this fork is a hand port by construction — `sync:shared` skips a declared fork — so the claim is maintained, not automatic.",
+      "reason": "SLOT-3 (beta commit d59d7d3d5c): beta's `exportToMids` / `exportToMidsWithReport` take a second `levelUpMode` parameter and resolve slot levels through `computeExportSlotLevels`, so off-mode placement stops enforcing a pick-level schedule floor and says once in the UI that the Level it writes is synthetic. Canonical's copy keeps the one-arg form and `computeAllSlotLevels`. Three hunks, all slot levels — name rotation, enhancement UID mapping and warning emission are byte-identical, so every MBDEXPORT pin taken against canonical's copy holds for the beta's except a claim about a slot's `Level`. Canonical's copy is not app code: it is the source the Rust `.mbd` writer will be ported from, and `crates/app/src/build_io.rs` still lists `.mbd`/`.mxd` as not in the rebuild. Port THIS copy and Rust inherits the floor SLOT-3 removed, stamping every exported slot with a levelling history the build never had — a Rule 1 soft-wrong value written into a file another planner reads as authoritative. CARRIED 2026-09-10, and the sentence above is why it had to be: MBDEXPORT-13 changed `StatInclude` in canonical's copy on 2026-09-10 and that is not a slot-level hunk, so \"every MBDEXPORT pin holds for the beta's copy except a claim about a slot's `Level`\" was false for a day while `verify:sync` read as ordinary stamp lag. The beta ships this writer to users (`ExportImportModal.tsx`), so the cost was a real one: a power the author excluded came back included. The `isActive === true` hunk was hand-ported to the beta and the fork is slot-levels-only again. A correctness fix crossing this fork is a hand port by construction — `sync:shared` skips a declared fork — so the claim is maintained, not automatic. PORTED 2026-09-11, and the sentence above is no longer the whole story: the beta now has MBDEXPORT-20's arm. It could not take canonical's route — it carries no `archetypeInherentPowerset` and no `src/data/archetype-inherent.ts` — so it derives the same name in its own `convert-archetype-inherents.cjs`, from the same `exported_powers/` tree, by the archetype's declared inherent name and the export's `@Class_` gate. Two derivations of one fact is the drift shape this project keeps getting bitten by, so they are GRADED rather than trusted: the beta's `archetype-inherent-oracle.test.ts` pins canonical's answer for all 60 archetype-fork pairs, nulls included. So this fork is slot-levels-only again, and the sentence above has ONE exception, not two.",
       "exit": "canonical's vendored TS half takes SLOT-3 through all ten `slot-levels.ts` consumers (Header, PowerRow, useSlotLevels, useBuildBudget, uiStore, buildStore, export-print, forum-export, mids-export, mids-import/importer), or that half is retired once the Rust writer lands. Not a carry either way: `--write` cannot converge a fork and `sync:shared` refuses to clobber a beta-authored edit, so this side will not converge on its own. Whichever comes first, the Rust `.mbd` writer must be ported from the BETA's two-arg form, and this row is where that is recorded.",
       "gap": "SLOT-3"
     },

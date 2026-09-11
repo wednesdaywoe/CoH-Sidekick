@@ -27,7 +27,7 @@ import { getBaseToHit, getCombatModifier, getDefenseSoftcap } from './purple-pat
 import { GRANTED_POWER_GROUPS } from './granted-powers';
 import { ENHANCEMENT_CURVES } from './generated/enhancement-curves';
 import { SPECIAL_ENHANCEMENTS } from './generated/special-enhancements';
-import { GENERATED_ARCHETYPE_INHERENTS } from './generated/archetype-inherents';
+import { GENERATED_ARCHETYPE_INHERENTS, HEADLINE_ARCHETYPE_INHERENTS } from './generated/archetype-inherents';
 import { PET_ENTITIES } from './pet-entities';
 import { MODULAR_POWERSETS } from './powersets/index';
 import { IO_SETS_RAW } from './io-sets-raw';
@@ -78,6 +78,7 @@ const dataset: Dataset = {
       Stamina: [12, 22],
     },
     archetypeInherents: GENERATED_ARCHETYPE_INHERENTS,
+    headlineArchetypeInherents: HEADLINE_ARCHETYPE_INHERENTS,
   },
 
   petEntities: PET_ENTITIES,
