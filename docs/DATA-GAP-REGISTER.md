@@ -57,10 +57,9 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**6 open, of 298 entries.** **One is the reader** — MBDEXPORT-18, re-diagnosed 2026-09-11: the
-importer discards `SlotEntries[].Level`, so by the mandate it outranks the rest of this list and
-the feature tracker. The "none is the parser" line it replaces was true of the bin parser and
-false about the `.mbd` reader, which the row had filed as a writer defect.
+**6 open, of 298 entries.** **None is now the reader.** MBDEXPORT-18's reader half landed
+2026-09-11, 126 → 44, so it no longer outranks the list: what is left of it is writer work and
+three other rows' adjudications.
 
 **The Wine oracle is back up, and that is what moved this list.** Recorded as down from
 2026-09-10; fixed 2026-09-11 by app-local ICU next to `MidsReborn.exe`.
@@ -68,13 +67,13 @@ false about the `.mbd` reader, which the row had filed as a writer defect.
 The second symptom was never real — the FastDeepCloner crash is what invariant mode does to Mids,
 not a defect under it. `tools/mids-oracle/mids-wine.sh` carries the setup and the diagnosis.
 
-Beside the reader row sits **MBDIMPORT-14** — Mids grants 3 slots at 47 and 3 at 49 where the
+Beside it sits **MBDIMPORT-14** — Mids grants 3 slots at 47 and 3 at 49 where the
 game's schedule grants none. Censused across all four Mids databases it is invariant, so it is the respec table's
 convention and not any fork's data; what is unadjudicated is whether the game has a respec
 schedule at all, which our export structurally cannot say.
 
 The residual census under MBDEXPORT-18 widens it: Rebirth places 3 slots at 9, 13, 17 and 23
-where our table grants 2. Same family, not adjudicated.
+where our table grants 2. Same family, not adjudicated. 17 of that row's 44 are these two.
 
 Three carry an `MBDEXPORT-` id, and only two are the writer's. Calling the reader the instrument
 and not a suspect is wrong four times now: MBDEXPORT-13 closed through it, -15 was entirely its,
@@ -83,13 +82,13 @@ the hop — and none of the three below it can measure at all.
 
 In the order they cost a user something:
 
-- **MBDEXPORT-18** — the READER drops each slot's level; 126 powers, 8 of 8 files (126 → 47 from
-  the import hop alone, measured)
+- **MBDEXPORT-18** — the READER dropped each slot's level; the import hop landed 2026-09-11 and
+  took 126 → 44, and the writer half plus four named residual causes are what is left
 - **MBDEXPORT-20** — the archetype inherent is never written; 8 inherents, 8 of 8 files
 - **MBDEXPORT-16** — a VEAT's branch filing is re-derived; 24 attributions, decided, code owed
 
--18 was opened 2026-09-11 by the restored oracle and is invisible to `mbd_writer_roundtrip`:
-our reader shares the writer's convention, so the two agree while both diverge from the file. -20
+-18 was invisible to `mbd_writer_roundtrip` while the reader shared the writer's convention; the
+import hop broke that tie. -20
 was opened by MBDEXPORT-19's closure — a field census cannot see a row we never write. -16 is
 pinned by its POPULATION in that test and closes by DELETING its pin; the other two census the
 FILES.
@@ -103,8 +102,8 @@ canonical's TS drops two set-bonus stat keys the contract maps and the Rust rout
 fixtures are emitted from that TS, so the port is graded by an oracle blind to two stats it
 models. No fixture build slots either, so nothing reds.
 
-The reader half was called done, and MBDEXPORT-18 reopens it. MBDIMPORT-12 and -13 opened and
-closed on 2026-09-10, both found by
+The reader half was called done, MBDEXPORT-18 reopened it, and its import hop closed it
+again. Before that, MBDIMPORT-12 and -13 opened and closed on 2026-09-10, both found by
 converting the `.mbd` corpus into builds: 86 respelled Homecoming sets carried no alias row and
 resolved to nothing, and one separator drift is left open by the name map by design.
 
@@ -956,19 +955,21 @@ measurement went, and where a closure for the residual belongs too.
   253 slots invisible to our round trip; a real Mids ignores the field for all three kinds — five
   controlled variants of Mids' OWN files, zeroing only those slots, render pixel-identically over
   the whole window, against a same-bytes control of 0 and a different-builds control of 1.6e9
-- [ ] **MBDEXPORT-18** — the READER discards `SlotEntries[].Level` and the importer overwrites it
-  with a respec packing, so a build arrives already carrying a levelling history its author never
+- [ ] **MBDEXPORT-18** — the READER discarded `SlotEntries[].Level` and the importer overwrote it
+  with a respec packing, so a build arrived already carrying a levelling history its author never
   made: 126 powers over 8 of 8 corpus files, both forks. RE-DIAGNOSED 2026-09-11 — the row opened
-  blaming the writer and citing MBDIMPORT-8, which is the top-level `Level` and a different field;
-  nothing retains a slot's level. Seeding it at import alone takes the key 126 → 47, measured. The
-  writer half is real but second, and the id is now a misnomer.
+  blaming the writer and citing MBDIMPORT-8, which is the top-level `Level` and a different field.
+  IMPORT HOP LANDED 2026-09-11, 126 → 44, no writer change. The residual is four causes: 20 an
+  inherent's pick level, 9 MBDIMPORT-14's rows at 47/49, 8 its Rebirth family, and 7 NEW — form
+  sub-powers are auto-granted, so they never reach the solver and every slot holds the form's own
+  pick level. The id is a misnomer.
   **Goal** — a build exported here carries the slot levels its author placed.
-  **Done when** — the importer retains the file's per-slot level, the writer emits what the build
-  then carries, the 126 is a pin that reaches 0 with `EXPECTED_TOTAL` updated, and it is written
-  down what a build AUTHORED here should state, since those slots have no Mids history and are
-  what `computeAllSlotLevels` exists for.
-  **Check** — `node scripts/keys/mbdexport18-slot-level-drift-census.cjs` — 126 powers over 8 of 8
-  files. A fall without an importer change means the CORPUS moved, not the defect.
+  **Done when** — the writer carries what the build holds past the solver, the form sub-power arm
+  reaches the solver at all, each of the key's four per-cause pins reaches 0 or is adjudicated to
+  its owning row, and it is written down what a build AUTHORED here should state, since those
+  slots have no Mids history and are what `computeAllSlotLevels` exists for.
+  **Check** — `node scripts/keys/mbdexport18-slot-level-drift-census.cjs` — 44 powers over 8 of 8
+  files, split 20/9/8/7. A fall without a reader change means the CORPUS moved, not the defect.
 - [x] **MBDEXPORT-19** — `VariableValue` went out as a literal 0 in four places, so 10 sliders
   over 5 files died silently both ways; the writer now takes the slider as an argument (it lives
   in `useUIStore`, not on `Build`), and TWO of the ten were the READER's — a form sub-power's
