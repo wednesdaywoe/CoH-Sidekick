@@ -91,6 +91,7 @@ function remapMidsPath(path: string, server: DatasetId | null): string {
 import type {
   MbdFile,
   MbdPowerEntry,
+  MbdSlotEntry,
   MidsImportResult,
   MidsImportWarning,
   MidsImportSummary,
@@ -366,6 +367,22 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
    * can tell a duplicate apart from a collision. See `claimSlot` below.
    */
   const claimedBy = new Map<string, string>();
+  /**
+   * The slot rows the file wrote for each power we resolved, kept so step 13b can seed
+   * `slotOrder` with the level the AUTHOR placed each slot at (MBDEXPORT-18).
+   *
+   * `SlotEntries[].Level` was read nowhere but `midsMaxUsedLevel`, which takes a max over the
+   * whole file and throws the individual levels away. So every imported build reached
+   * `ensureSlotOrderPopulated` with an empty `slotOrder`, fell into respec mode, and had a
+   * levelling history synthesised over the top of the one it arrived with — 126 powers over
+   * all eight corpus files disagreed with their own source, and display, print, forum export
+   * and the `.mbd` writer all read that synthesis because all four share the solver.
+   *
+   * Keyed by the resolved `SelectedPower` object rather than by name: the inherent merge
+   * below re-homes slot data onto a different object, and a name is not unique across
+   * categories. An entry whose claim then fails is simply never walked.
+   */
+  const fileSlotRows = new Map<SelectedPower, MbdSlotEntry[]>();
   // Capture Mids' per-power slider (VariableValue) for things like Siphon
   // Speed stacks or Domination duration. Keyed by power internalName so the
   // caller can write directly to uiStore.targetsHitValues after applying
@@ -515,6 +532,11 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
     );
 
     if (!result) continue;
+
+    // The one place both the file's rows and the power they resolved to are in hand. Form
+    // sub-powers `continue` above and never reach here, which costs nothing: they are
+    // auto-granted, and `collectAllPowers` keeps auto-granted powers out of `slotOrder`.
+    if (entry.SlotEntries?.length) fileSlotRows.set(result.power, entry.SlotEntries);
 
     // Capture the slider value Mids exports for this power (stacks /
     // targets hit). Only record non-zero so we don't clutter the UI
@@ -709,6 +731,10 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
     }
     if (slotPower.slots.length > 0) {
       match.slots = slotPower.slots;
+      // The slots move to the roster row, so the file rows that describe them move with
+      // them — `slotPower` itself is dropped here and never reaches step 13b.
+      const rows = fileSlotRows.get(slotPower);
+      if (rows) fileSlotRows.set(match, rows);
       // Carry over inherent slot count (Rebirth Health/Stamina auto-grants)
       if (slotPower.inherentSlotCount) {
         match.inherentSlotCount = slotPower.inherentSlotCount;
@@ -762,6 +788,10 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
   // 13. Recompute set tracking
   build.sets = computeSetTracking(build);
 
+  // 13b. Seed slotOrder with the level the FILE places each slot at, before step 14 gets a
+  // chance to invent one (MBDEXPORT-18).
+  seedSlotOrderFromFile(build, fileSlotRows);
+
   // 14. Populate slotOrder with one entry per non-base slot, anchored at the
   // respec-computed level. Without this, the first add/remove slot
   // interaction flips slot-level computation into leveling mode with only
@@ -772,6 +802,9 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
   // (SLOT-3) — `false` here is a permanent no-op; the store's own
   // `importMidsBuild` action re-runs this same call against the live mode
   // right after, which is the one that can actually populate real levels.
+  //
+  // It now runs over a slotOrder step 13b has already seeded, and only fills what the file
+  // did not state — a slot on a power no entry resolved to, or one the file left short.
   ensureSlotOrderPopulated(build, false);
 
   // Counted from the finished build rather than tallied on the way in, so the number the
@@ -805,6 +838,61 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
     detectedBranch,
     targetsHit: Object.keys(targetsHitValues).length > 0 ? targetsHitValues : undefined,
   };
+}
+
+/**
+ * Write the file's own slot levels into `slotOrder`, one entry per placed slot.
+ *
+ * Mids states a level on every `SlotEntry`, and it is the only record of when the author
+ * actually put that slot there. Nothing downstream can re-derive it: the grant schedule says
+ * which levels were AVAILABLE, never which one this slot took, so a solver handed an empty
+ * `slotOrder` packs the slots as a respec would and the result is a levelling history the
+ * author never made (MBDEXPORT-18). Display, print, forum export and the `.mbd` writer all
+ * read `computeAllSlotLevels`, so seeding here corrects all four at once.
+ *
+ * Two kinds of slot are skipped, and both are skipped because they are not allocations:
+ * index 0 comes free with the power pick, and a row the file marks `IsInherent` is an
+ * auto-granted freebie sitting at a fixed level (Rebirth's Health and Stamina). Those are the
+ * same two `userSlotFloor` excludes, read off the file rather than re-derived.
+ *
+ * The seeded level is a preference, not a guarantee, and under SLOT-1's matching solver that
+ * is a stronger preference than canonical's copy can offer: `assignGrants` seeds every legal
+ * stored level first and only displaces one when leaving it would cost another slot its grant
+ * entirely. A level the schedule grants nothing at — Mids' respec rows at 47 and 49 — is
+ * cleared by `scrubFabricatedSlotLevels` before the store's own pass ever sees it, which is
+ * the honest outcome: the file states a placement this fork cannot house.
+ *
+ * Returns how many entries it wrote.
+ */
+function seedSlotOrderFromFile(
+  build: Build,
+  fileSlotRows: Map<SelectedPower, MbdSlotEntry[]>,
+): number {
+  const walk: { power: SelectedPower; category: string }[] = [
+    ...build.inherents.map((power) => ({ power, category: 'inherent' })),
+    ...build.primary.powers.map((power) => ({ power, category: 'primary' })),
+    ...build.secondary.powers.map((power) => ({ power, category: 'secondary' })),
+    ...build.pools.flatMap((pool) => pool.powers.map((power) => ({ power, category: 'pool' }))),
+    ...(build.epicPool?.powers ?? []).map((power) => ({ power, category: 'epic' })),
+  ];
+
+  const seeded: Build['slotOrder'] = [];
+  for (const { power, category } of walk) {
+    const rows = fileSlotRows.get(power);
+    if (!rows) continue;
+    // `buildSelectedPower` pushes one slot per row, so the two are parallel — except for the
+    // empty-entry case, which synthesises a base slot the file did not write. Bound by both.
+    const n = Math.min(power.slots.length, rows.length);
+    for (let s = 1; s < n; s++) {
+      const row = rows[s];
+      if (row.IsInherent) continue;
+      if (typeof row.Level !== 'number') continue;
+      seeded.push({ powerName: power.internalName, slotIndex: s, category, level: row.Level });
+    }
+  }
+
+  build.slotOrder = [...build.slotOrder, ...seeded];
+  return seeded.length;
 }
 
 // ============================================
