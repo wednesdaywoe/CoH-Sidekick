@@ -57,7 +57,7 @@ import {
   pruneProcOverridesForRemovedPowers,
   reindexProcOverridesForRemovedSlot,
 } from '@/data/proc-data';
-import { slimBuild, hydrateBuild, type HydrationNote } from '@/utils/build-serialization';
+import { slimBuild, hydrateBuild, normalizeAccoladeIds, type HydrationNote } from '@/utils/build-serialization';
 import { encodeImportFragment } from '@/utils/import-url';
 import { getActiveDataset, getAllDatasetMetadata, isDatasetId } from '@/data/dataset';
 import { toCanonicalStatKey } from '@/data/set-bonus-groups';
@@ -3228,6 +3228,12 @@ export const useBuildStore = create<BuildStore>()(
             ][];
             build = {
               ...data.build,
+              // v1 is the one arm that does not reach `hydrateBuild`, so it is the one arm
+              // that never folded its accolade objects to ids — and v1 is exactly the era
+              // that wrote them as objects (the exporter stamped `version: 1` while the store
+              // held `{ id, bonuses, … }`). Left raw, EVERY accolade in such a file misses the
+              // roster and drops out of the totals, not just the two ACCOLADE-3 renames.
+              accolades: normalizeAccoladeIds(data.build.accolades),
               sets: Object.fromEntries(
                 setsEntries.map(([setId, tracking]) => [
                   setId,
@@ -3611,18 +3617,12 @@ export const useBuildStore = create<BuildStore>()(
             state.build.slotOrder = [];
           }
 
-          // Migration: accolades were stored as full { id, bonuses, … } objects; they are
-          // now selected ids (internal name, lower-cased). Fold any legacy object to its id,
-          // renaming the two ids that predate the game-internal-name convention.
+          // Migration: accolades written by an older Sidekick — the object fold and the two
+          // pre-convention ids, both through the one normaliser `hydrateBuild` uses. The table
+          // used to live here AND there, in two spellings; one of them is how ACCOLADE-3's
+          // door census found the third copy that was missing (`importBuild`'s v1 arm).
           if (Array.isArray(state.build.accolades) && state.build.accolades.length > 0) {
-            const accoladeIdMap: Record<string, string> = {
-              'atlas_medallion': 'the_atlas_medallion',
-              'freedom_phalanx': 'freedom_phalanx_reserve',
-            };
-            state.build.accolades = (state.build.accolades as Array<string | { id: string }>).map((a) => {
-              const id = typeof a === 'string' ? a : a.id;
-              return accoladeIdMap[id] ?? id;
-            });
+            state.build.accolades = normalizeAccoladeIds(state.build.accolades);
           }
 
           // Migration: Normalize VEAT branch powersets to base powersets
