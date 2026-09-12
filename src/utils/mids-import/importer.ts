@@ -30,6 +30,7 @@ import {
   GRANTED_POWER_GROUPS,
   STANCE_GROUPS,
   findStanceParent,
+  getInherentGrantLevel,
 } from '@/data';
 import { getActiveDataset, getAllDatasetMetadata, type DatasetId } from '@/data/dataset';
 import type { InherentPowerDef } from '@/data';
@@ -502,6 +503,11 @@ export function importMidsBuild(jsonString: string): MidsImportResult {
           if (entry.VariableValue && match.internalName) {
             targetsHitValues[match.internalName] = entry.VariableValue;
           }
+          // Step 13b seeds `slotOrder` from this map, and this branch `continue`s before the
+          // generic capture that fills it — so a form attack reached the solver with no stored
+          // level and was packed greedily (MBDEXPORT-18's fourth cause; `collectAllPowers`
+          // already lets these powers in here, which is the half SLOT-1 had done).
+          if (entry.SlotEntries?.length) fileSlotRows.set(subPower, entry.SlotEntries);
           const targetList = primaryMatch ? primaryPowers : secondaryPowers;
           if (!targetList.some((p) => p.internalName === match.internalName)) {
             targetList.push(subPower);
@@ -1408,7 +1414,7 @@ function createInherentSelectedPower(def: InherentPowerDef): SelectedPower {
   return {
     ...def,
     powerSet: 'Inherent',
-    level: 1,
+    level: getInherentGrantLevel(def),
     slots,
     isLocked: def.isLocked ?? true,
     inherentCategory: def.category,

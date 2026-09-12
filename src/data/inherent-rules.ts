@@ -20,6 +20,34 @@ export function getInherentAvailabilityOverride(internalName: string): number | 
 }
 
 /**
+ * The 1-based level the game hands an inherent over at.
+ *
+ * Three facts, in the order they win. `grantedAtLevel` is the fork's own
+ * `available_level` + 1, carried by the generated basic-inherent modules —
+ * `character_GrantAutoIssuePowers` gates an auto-issued power on
+ * `available <= level`, so that field IS the grant level and Homecoming's Rest
+ * arrives at 2 while Thunderspy's arrives at 1. The dataset override is next,
+ * which is where Rebirth's L2 Fitness lives. The hand-authored `available`
+ * is last, and its `-1` means "never offered in the picker" rather than
+ * "arrives at level 1" — the basic-inherent converter stamps that marker over
+ * every one of its powers, which is why they need the first field at all.
+ *
+ * Four separate `createInherentSelectedPower` copies spelled this `level: 1`
+ * until 2026-09-12 and only one of them consulted the dataset; the importer's
+ * copy is the one the .mbd corpus goes through (MBDEXPORT-18, 20 of its 44).
+ */
+export function getInherentGrantLevel(def: {
+  internalName: string;
+  available: number;
+  grantedAtLevel?: number;
+}): number {
+  if (def.grantedAtLevel !== undefined) return def.grantedAtLevel;
+  const override = getInherentAvailabilityOverride(def.internalName);
+  const available = override !== undefined ? override : def.available;
+  return available != null && available > 0 ? available + 1 : 1;
+}
+
+/**
  * Returns the auto-granted slot levels for a given inherent power
  * `internalName` on the active server. These slots come outside the
  * 67-slot user budget. Empty array (the default) means the power has

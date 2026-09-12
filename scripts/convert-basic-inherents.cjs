@@ -284,6 +284,14 @@ function convertBasicInherent(rawJson, entry, granter) {
   // — the records' own `available_level` is 0 or 3 and describes when the GAME
   // grants, which the planner (a level-50 tool) does not gate on.
   power.available = -1;
+  // The level the game actually hands it over at, 1-based and separate from the
+  // marker above because that one is spoken for. `character_GrantAutoIssuePowers`
+  // gates on `available <= level`, so this record's own `available_level` IS the
+  // grant level — Rest's 1 means level 2, which is what Mids' own files state and
+  // what the planner stamped as 1 for as long as nothing carried the field
+  // (MBDEXPORT-18). Read off the GRANTER for the same reason `autoIssue` is:
+  // the toggle is not what the gate is evaluated on.
+  power.grantedAtLevel = ((granter ?? rawJson).available_level ?? 0) + 1;
   // Read off the GRANTER where the fork uses one. The Homecoming toggle sitting
   // in `Prestige` is not itself auto-issued — the `Auto` record that hands it
   // over is — so reading the toggle's own flag would report a power the game
@@ -512,10 +520,12 @@ function main() {
   out += ` * Powers: ${powers.length}, atoms: ${totalAtoms}\n`;
   out += ` */\n\n`;
   out += `import type { Power } from '@/types';\n\n`;
-  out += `/** A universal inherent: an ordinary Power plus the two planner-side facts. */\n`;
+  out += `/** A universal inherent: an ordinary Power plus the three planner-side facts. */\n`;
   out += `export type BasicInherentDef = Power & {\n`;
   out += `  isLocked?: boolean;\n`;
   out += `  category?: 'basic' | 'prestige';\n`;
+  out += `  /** 1-based level the game grants it at; 'available' is the picker's marker, not this. */\n`;
+  out += `  grantedAtLevel?: number;\n`;
   out += `};\n\n`;
   out += `export const BASIC_INHERENTS: BasicInherentDef[] = ${serializeValue(powers, 0)};\n`;
 

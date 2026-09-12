@@ -35,6 +35,7 @@ import {
   createOriginEnhancement,
   createSpecialEnhancement,
   getSpecialRegistry,
+  getInherentGrantLevel,
 } from '@/data';
 import { GRANTED_POWER_GROUPS } from '@/data/granted-powers';
 import type { InherentPowerDef } from '@/data';
@@ -1055,7 +1056,7 @@ function createInherentSelectedPower(def: InherentPowerDef): SelectedPower {
   return {
     ...def,
     powerSet: 'Inherent',
-    level: 1,
+    level: getInherentGrantLevel(def),
     slots,
     isLocked: def.isLocked ?? true,
     inherentCategory: def.category,

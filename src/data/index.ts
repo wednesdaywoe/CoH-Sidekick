@@ -353,6 +353,7 @@ export type { GrantedPowerGroup } from './granted-powers';
 // Inherent power rules (per-server Fitness availability + auto-granted slots)
 export {
   getInherentAvailabilityOverride,
+  getInherentGrantLevel,
   getInherentAutoGrantedSlotLevels,
   getInherentAutoGrantedSlotCount,
 } from './inherent-rules';
