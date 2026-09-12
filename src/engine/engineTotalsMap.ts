@@ -294,6 +294,12 @@ export interface EngineTotals {
   power_breakdown: EnginePowerBreakdownSource[];
   incarnate_breakdown: EngineIncarnateBreakdownSource[];
   power_projection: EnginePowerProjection[];
+  /** The hardest hit this build's CHOSEN POWERSETS can produce with a power's own slots filled
+   *  for damage — the scale a damage bar reads against. Deliberately not the hardest hit the
+   *  build has PICKED: a maximum over picks is attained by construction, so exactly one power
+   *  read full on every build and the bar's range went to the gap between best and second-best.
+   *  `null` when nothing in reach resolves to damage, including the ordinary no-target case. */
+  damage_ceiling: number | null;
   /** What the what-if TEAM-BUFF layer moved in producing these totals. Measured by the engine's
    *  own injection, so a "simulated" marker cannot disagree with the numbers it marks. */
   what_if: { moved: Record<string, number> };

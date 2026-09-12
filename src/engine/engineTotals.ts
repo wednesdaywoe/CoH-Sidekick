@@ -172,6 +172,7 @@ export function engineCalculate(build: Build, ctx: AdapterCalcContext): Characte
     setBonuses: {},
     bonusTracking: mapBonusTracking(totals.set_bonus_tracking, resolveName),
     powerProjection: mapPowerProjection(totals.power_projection),
+    damageCeiling: totals.damage_ceiling ?? null,
     // The accumulator keys the what-if layer moved. Carried through so a stat row can mark
     // itself SIMULATED from the engine's own record rather than by re-reading the sliders.
     whatIfMoved: totals.what_if?.moved ?? {},

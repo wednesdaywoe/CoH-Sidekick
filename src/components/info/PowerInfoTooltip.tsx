@@ -8,10 +8,9 @@ import { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } fr
 import { createPortal } from 'react-dom';
 import { useUIStore, useBuildStore, useDominationActive, useScourgeActive, useFuryLevel, useSupremacyActive, useVigilanceTeamSize, useCriticalHitsActive, useStalkerHidden, useStalkerTeamSize, useStalkerCritActive, useContainmentActive, useSentinelCritActive, useGlobalAdjuster } from '@/stores';
 import { getBaseToHit } from '@/data/purple-patch';
-import { useGlobalBonuses, usePowerDamageVsRank, usePowerProjection } from '@/hooks/useCalculatedStats';
+import { useCharacterCalculation, useGlobalBonuses, usePowerDamageVsRank, usePowerProjection } from '@/hooks/useCalculatedStats';
 import { magnitudesFromProjection } from './magnitudesFromProjection';
 import { critBranchSummary, critComponents, VS_HIGHER_RANK_SEGMENT, VS_MINION_RANK_SEGMENT } from '@/utils/calculations/power-at-mechanics';
-import { useBuildMaxAttackDamage } from '@/hooks/useBuildMaxAttackDamage';
 import { lookupPower, getIOSet, getPowerset } from '@/data';
 import type { Power } from '@/types';
 import {
@@ -79,7 +78,9 @@ function PowerInfoContent({ powerName, powerSet }: PowerInfoContentProps) {
   const mechanicAdjusters = useUIStore((s) => s.mechanicAdjusters);
   const globalAdjusters = useUIStore((s) => s.globalAdjusters);
   const globalBonuses = useGlobalBonuses();
-  const maxBuildDamage = useBuildMaxAttackDamage();
+  // Same scale the panel reads — see `InfoPanel`. Shared so the tooltip and the panel can never
+  // draw the same power at two different lengths.
+  const maxBuildDamage = useCharacterCalculation().damageCeiling ?? 0;
   const targetLevelOffset = useUIStore((s) => s.targetLevelOffset);
   const incarnateActive = useUIStore((s) => s.incarnateActive);
   const dominationActive = useDominationActive();

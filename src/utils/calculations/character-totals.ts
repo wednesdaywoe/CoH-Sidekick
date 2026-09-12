@@ -216,6 +216,19 @@ export interface CharacterCalculationResult {
    *  answer could describe a different calculation than the one on screen. Empty on every
    *  build with nothing simulated. */
   whatIfMoved: Record<string, number>;
+  /** The scale the damage bars read against — the hardest hit the build's chosen powersets can
+   *  produce, each power asked what it would deal with its OWN slots filled for damage
+   *  (`coh_math::projection::damage_ceiling`).
+   *
+   *  A property of the BUILD rather than of any power, which is why it rides here instead of
+   *  being derived per bar. It replaced `useBuildMaxAttackDamage`, which folded over the powers
+   *  the build had PICKED — a maximum that is always attained, so every build had exactly one
+   *  power pegged at 100% and learned nothing from seeing it there. Measured against the sets
+   *  instead, a full bar is something a build can fail to reach.
+   *
+   *  `null` when nothing in reach resolves to damage; callers fall back to a per-power
+   *  reference, as they did when the hook returned 0. */
+  damageCeiling: number | null;
 }
 
 // ============================================
@@ -991,6 +1004,7 @@ export function calculateCharacterTotals(
     powerProjection: new Map(),
     engineStateJson: null,
     whatIfMoved: {},
+    damageCeiling: null,
   };
 }
 

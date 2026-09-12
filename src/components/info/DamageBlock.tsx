@@ -363,15 +363,34 @@ function DamageBar({ calculatedDamage, archetypeId, procDamagePerActivation, max
     ? dot.final * et
     : calculatedDamage.final + (dot ? dot.final * et : 0);
 
-  // Normalize to the build's highest-damage attack (Mids-style) so bar length
-  // is comparable across powers: the hardest hitter fills the bar and the rest
-  // scale relative to it. The reference is shared across every power, so it
-  // tracks ABSOLUTE damage (a per-power "% of cap" reference made same-strength
-  // powers look identical — the bug this replaces). Fall back to the AT's
-  // scale-1.0 capped damage when the build has no damaging powers yet.
-  const referenceDamage = maxBuildDamage && maxBuildDamage > 0
+  // Normalize to the build's damage CEILING — the hardest hit its chosen powersets can produce
+  // with a power's own slots filled for damage (`coh_math::projection::damage_ceiling`). Shared
+  // across every power, so bar length tracks ABSOLUTE damage and two attacks can be compared by
+  // eye; a per-power "% of cap" reference made same-strength powers look identical.
+  //
+  // The ceiling is the SETS rather than the build's picks. A maximum over picked powers is
+  // attained by construction — something is always the biggest — so exactly one attack read full
+  // on every build, not because it hit hard but because it won a field of whatever you happened
+  // to choose, and the bar spent its whole range on the gap between best and second-best. A full
+  // bar has to be something a build can fail to be.
+  //
+  // Fall back to the AT's scale-1.0 capped damage when the engine states no ceiling (no target
+  // chosen, or a build whose sets hold no attack).
+  const ceilingReference = maxBuildDamage && maxBuildDamage > 0
     ? maxBuildDamage
     : (calculatedDamage.base / calculatedDamage.scale) * damageCap;
+
+  // The safety valve, not the scale. The ceiling already covers every power in the build's own
+  // sets, so a hit that exceeds it came from somewhere that pass does not reach: a quick-snipe
+  // form (the ceiling reads set definitions, where `resolveEffectivePower` reads the combat-mode
+  // one), a power whose damage the ceiling could not resolve, or this block's own DoT/proc
+  // arithmetic landing a hair above the engine's. WIDENING rather than clamping means nothing is
+  // ever shown a full bar that is really an overflow — `Math.min(…, 100)` below would have drawn
+  // those identically to a genuine ceiling hit and said nothing.
+  const referenceDamage = Math.max(
+    ceilingReference,
+    totalFinal + Math.max(0, procDamagePerActivation),
+  );
 
   const basePercent = Math.min((totalBase / referenceDamage) * 100, 100);
   const enhPercent = Math.min((totalEnhanced / referenceDamage) * 100, 100);

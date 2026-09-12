@@ -74,67 +74,108 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "label": "Hold",
       "category": "control",
       "format": "mag",
-      "priority": 1
+      "priority": 1,
+      "summaryTokens": [
+        "hold"
+      ]
     },
     "stun": {
       "label": "Stun",
       "category": "control",
       "format": "mag",
-      "priority": 2
+      "priority": 2,
+      "summaryTokens": [
+        "stun",
+        "disorient"
+      ]
     },
     "immobilize": {
       "label": "Immobilize",
       "category": "control",
       "format": "mag",
-      "priority": 3
+      "priority": 3,
+      "summaryTokens": [
+        "immobilize",
+        "immob"
+      ]
     },
     "sleep": {
       "label": "Sleep",
       "category": "control",
       "format": "mag",
-      "priority": 4
+      "priority": 4,
+      "summaryTokens": [
+        "sleep"
+      ]
     },
     "fear": {
       "label": "Fear",
       "category": "control",
       "format": "mag",
-      "priority": 5
+      "priority": 5,
+      "summaryTokens": [
+        "fear",
+        "terrorize"
+      ]
     },
     "confuse": {
       "label": "Confuse",
       "category": "control",
       "format": "mag",
-      "priority": 6
+      "priority": 6,
+      "summaryTokens": [
+        "confuse"
+      ]
     },
     "taunt": {
       "label": "Taunt",
       "category": "control",
       "format": "mag",
-      "priority": 7
+      "priority": 7,
+      "summaryTokens": [
+        "taunt",
+        "threat"
+      ]
     },
     "placate": {
       "label": "Placate",
       "category": "control",
       "format": "mag",
-      "priority": 8
+      "priority": 8,
+      "summaryTokens": [
+        "placate"
+      ]
     },
     "knockback": {
       "label": "Knockback",
       "category": "control",
       "format": "mag",
-      "priority": 10
+      "priority": 10,
+      "summaryTokens": [
+        "knockback",
+        "knockdown",
+        "kb"
+      ]
     },
     "knockup": {
       "label": "Knockup",
       "category": "control",
       "format": "mag",
-      "priority": 11
+      "priority": 11,
+      "summaryTokens": [
+        "knockup",
+        "knockback",
+        "knockdown"
+      ]
     },
     "repel": {
       "label": "Repel",
       "category": "control",
       "format": "mag",
-      "priority": 12
+      "priority": 12,
+      "summaryTokens": [
+        "repel"
+      ]
     },
     "tohitDebuff": {
       "label": "-ToHit",
@@ -142,14 +183,23 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "enhancementAspect": "tohitDebuff",
       "calculation": "debuff",
-      "priority": 1
+      "priority": 1,
+      "summaryTokens": [
+        "to hit",
+        "tohit",
+        "to-hit"
+      ]
     },
     "accuracyDebuff": {
       "label": "-Accuracy",
       "category": "debuff",
       "format": "percent",
       "calculation": "debuff",
-      "priority": 1
+      "priority": 1,
+      "summaryTokens": [
+        "acc",
+        "accuracy"
+      ]
     },
     "defenseDebuff": {
       "label": "-Defense",
@@ -158,7 +208,11 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "enhancementAspect": "defenseDebuff",
       "calculation": "debuff",
       "priority": 2,
-      "canBeByType": true
+      "canBeByType": true,
+      "summaryTokens": [
+        "def",
+        "defense"
+      ]
     },
     "resistanceDebuff": {
       "label": "-Resist",
@@ -167,7 +221,12 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "enhancementAspect": "resistanceDebuff",
       "calculation": "debuff",
       "priority": 3,
-      "canBeByType": true
+      "canBeByType": true,
+      "summaryTokens": [
+        "res",
+        "resist",
+        "resistance"
+      ]
     },
     "damageDebuff": {
       "label": "-Damage",
@@ -175,28 +234,44 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "enhancementAspect": "damageDebuff",
       "calculation": "debuff",
-      "priority": 4
+      "priority": 4,
+      "summaryTokens": [
+        "dmg",
+        "damage",
+        "dam"
+      ]
     },
     "regenDebuff": {
       "label": "-Regen",
       "category": "debuff",
       "format": "percent",
       "priority": 5,
-      "baseMultiplier": 100
+      "baseMultiplier": 100,
+      "summaryTokens": [
+        "regen",
+        "regeneration"
+      ]
     },
     "recoveryDebuff": {
       "label": "-Recovery",
       "category": "debuff",
       "format": "percent",
       "priority": 6,
-      "baseMultiplier": 100
+      "baseMultiplier": 100,
+      "summaryTokens": [
+        "recovery"
+      ]
     },
     "rechargeDebuff": {
       "label": "-Recharge",
       "category": "debuff",
       "format": "percent",
       "calculation": "debuff",
-      "priority": 7
+      "priority": 7,
+      "summaryTokens": [
+        "recharge",
+        "rech"
+      ]
     },
     "slow": {
       "label": "-Speed",
@@ -204,7 +279,12 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "enhancementAspect": "slow",
       "priority": 8,
-      "canBeByType": true
+      "canBeByType": true,
+      "summaryTokens": [
+        "spd",
+        "speed",
+        "slow"
+      ]
     },
     "movementCapDebuff": {
       "label": "-Speed Cap",
@@ -212,38 +292,59 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "enhancementAspect": "slow",
       "priority": 8,
-      "canBeByType": true
+      "canBeByType": true,
+      "summaryTokens": [
+        "spd",
+        "speed"
+      ]
     },
     "enduranceDrain": {
       "label": "-End Drain",
       "category": "debuff",
       "format": "percent",
-      "priority": 9
+      "priority": 9,
+      "summaryTokens": [
+        "end",
+        "endurance"
+      ]
     },
     "enduranceCrash": {
       "label": "-End (Crash)",
       "category": "debuff",
       "format": "value",
-      "priority": 9
+      "priority": 9,
+      "summaryTokens": [
+        "end",
+        "endurance"
+      ]
     },
     "threatDebuff": {
       "label": "-Threat",
       "category": "debuff",
       "format": "percent",
-      "priority": 10
+      "priority": 10,
+      "summaryTokens": [
+        "threat"
+      ]
     },
     "perceptionDebuff": {
       "label": "-Perception",
       "category": "debuff",
       "format": "percent",
-      "priority": 11
+      "priority": 11,
+      "summaryTokens": [
+        "perception"
+      ]
     },
     "specialDebuff": {
       "label": "-Special",
       "category": "debuff",
       "format": "percent",
       "priority": 12,
-      "expandByType": true
+      "expandByType": true,
+      "summaryTokens": [
+        "special"
+      ]
     },
     "tohitBuff": {
       "label": "+ToHit",
@@ -251,21 +352,35 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "enhancementAspect": "tohit",
       "calculation": "buff",
-      "priority": 1
+      "priority": 1,
+      "summaryTokens": [
+        "to hit",
+        "tohit",
+        "to-hit"
+      ]
     },
     "accuracyBuff": {
       "label": "+Accuracy",
       "category": "buff",
       "format": "percent",
       "calculation": "buff",
-      "priority": 1
+      "priority": 1,
+      "summaryTokens": [
+        "acc",
+        "accuracy"
+      ]
     },
     "damageBuff": {
       "label": "+Damage",
       "category": "buff",
       "format": "percent",
       "calculation": "buff",
-      "priority": 2
+      "priority": 2,
+      "summaryTokens": [
+        "dmg",
+        "damage",
+        "dam"
+      ]
     },
     "defenseBuff": {
       "label": "+Defense",
@@ -274,7 +389,11 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "enhancementAspect": "defense",
       "priority": 3,
       "canBeByType": true,
-      "expandByType": true
+      "expandByType": true,
+      "summaryTokens": [
+        "def",
+        "defense"
+      ]
     },
     "defenseBuffSuppressible": {
       "label": "+Defense (Suppressible)",
@@ -283,14 +402,22 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "enhancementAspect": "defense",
       "priority": 3,
       "canBeByType": true,
-      "expandByType": true
+      "expandByType": true,
+      "summaryTokens": [
+        "def",
+        "defense"
+      ]
     },
     "rechargeBuff": {
       "label": "+Recharge",
       "category": "buff",
       "format": "percent",
       "calculation": "buff",
-      "priority": 4
+      "priority": 4,
+      "summaryTokens": [
+        "recharge",
+        "rech"
+      ]
     },
     "recoveryBuff": {
       "label": "+Recovery",
@@ -298,7 +425,10 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "enhancementAspect": "enduranceMod",
       "priority": 5,
-      "baseMultiplier": 100
+      "baseMultiplier": 100,
+      "summaryTokens": [
+        "recovery"
+      ]
     },
     "regenBuff": {
       "label": "+Regen",
@@ -306,14 +436,24 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "enhancementAspect": "heal",
       "priority": 6,
-      "baseMultiplier": 100
+      "baseMultiplier": 100,
+      "summaryTokens": [
+        "regen",
+        "regeneration"
+      ]
     },
     "speedBuff": {
       "label": "+Speed",
       "category": "buff",
       "format": "percent",
       "calculation": "buff",
-      "priority": 7
+      "priority": 7,
+      "summaryTokens": [
+        "spd",
+        "speed",
+        "run speed",
+        "movement"
+      ]
     },
     "maxHPBuff": {
       "label": "+Max HP",
@@ -322,46 +462,74 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "enhancementAspect": "heal",
       "calculation": "buff",
       "priority": 8,
-      "flatPercentPerScale": 10
+      "flatPercentPerScale": 10,
+      "summaryTokens": [
+        "max hp",
+        "hp",
+        "health"
+      ]
     },
     "maxEndBuff": {
       "label": "+Max End",
       "category": "buff",
       "format": "percent",
       "calculation": "buff",
-      "priority": 9
+      "priority": 9,
+      "summaryTokens": [
+        "max end",
+        "end"
+      ]
     },
     "rangeBuff": {
       "label": "+Range",
       "category": "buff",
       "format": "percent",
       "calculation": "buff",
-      "priority": 10
+      "priority": 10,
+      "summaryTokens": [
+        "range"
+      ]
     },
     "enduranceDiscount": {
       "label": "-End Cost",
       "category": "buff",
       "format": "percent",
       "calculation": "buff",
-      "priority": 11
+      "priority": 11,
+      "summaryTokens": [
+        "end",
+        "endurance",
+        "end cost"
+      ]
     },
     "enduranceGain": {
       "label": "+End Gain",
       "category": "buff",
       "format": "percent",
-      "priority": 12
+      "priority": 12,
+      "summaryTokens": [
+        "end",
+        "endurance"
+      ]
     },
     "threatBuff": {
       "label": "+Threat",
       "category": "buff",
       "format": "percent",
-      "priority": 13
+      "priority": 13,
+      "summaryTokens": [
+        "threat",
+        "taunt"
+      ]
     },
     "perceptionBuff": {
       "label": "+Perception",
       "category": "buff",
       "format": "percent",
-      "priority": 14
+      "priority": 14,
+      "summaryTokens": [
+        "perception"
+      ]
     },
     "absorb": {
       "label": "Absorb",
@@ -371,67 +539,108 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "strengthAspect": "absorb",
       "priority": 15,
       "valueFromTable": true,
-      "maxHpFractionPercentForm": true
+      "maxHpFractionPercentForm": true,
+      "summaryTokens": [
+        "absorb"
+      ]
     },
     "specialBuff": {
       "label": "+Special",
       "category": "buff",
       "format": "percent",
       "priority": 20,
-      "expandByType": true
+      "expandByType": true,
+      "summaryTokens": [
+        "special"
+      ]
     },
     "fly": {
       "label": "Fly",
       "category": "movement",
       "format": "percent",
       "enhancementAspect": "fly",
-      "priority": 1
+      "priority": 1,
+      "summaryTokens": [
+        "fly",
+        "flight"
+      ]
     },
     "flySpeed": {
       "label": "Fly Speed",
       "category": "movement",
       "format": "percent",
       "enhancementAspect": "fly",
-      "priority": 1
+      "priority": 1,
+      "summaryTokens": [
+        "fly",
+        "flight",
+        "fly speed"
+      ]
     },
     "runSpeed": {
       "label": "Run Speed",
       "category": "movement",
       "format": "percent",
       "enhancementAspect": "run",
-      "priority": 2
+      "priority": 2,
+      "summaryTokens": [
+        "spd",
+        "speed",
+        "run speed"
+      ]
     },
     "jumpSpeed": {
       "label": "Jump Speed",
       "category": "movement",
       "format": "percent",
       "enhancementAspect": "jump",
-      "priority": 3
+      "priority": 3,
+      "summaryTokens": [
+        "jump",
+        "jump speed"
+      ]
     },
     "jumpHeight": {
       "label": "Jump Height",
       "category": "movement",
       "format": "percent",
       "enhancementAspect": "jump",
-      "priority": 4
+      "priority": 4,
+      "summaryTokens": [
+        "jump",
+        "jump height"
+      ]
     },
     "teleport": {
       "label": "Teleport",
       "category": "movement",
       "format": "value",
-      "priority": 5
+      "priority": 5,
+      "summaryTokens": [
+        "teleport"
+      ]
     },
     "untouchable": {
       "label": "Intangible",
       "category": "movement",
       "format": "duration",
-      "priority": 6
+      "priority": 6,
+      "summaryTokens": [
+        "intangible",
+        "untouchable",
+        "phase"
+      ]
     },
     "summon": {
       "label": "Summon",
       "category": "special",
       "format": "custom",
-      "priority": 1
+      "priority": 1,
+      "summaryTokens": [
+        "summon",
+        "pet",
+        "pets"
+      ]
     },
     "healing": {
       "label": "Heal",
@@ -447,7 +656,11 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "enhancementAspect": "defense",
       "priority": 1,
-      "expandByType": true
+      "expandByType": true,
+      "summaryTokens": [
+        "def",
+        "defense"
+      ]
     },
     "resistance": {
       "label": "Res",
@@ -455,7 +668,12 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "enhancementAspect": "resistance",
       "priority": 2,
-      "expandByType": true
+      "expandByType": true,
+      "summaryTokens": [
+        "res",
+        "resist",
+        "resistance"
+      ]
     },
     "elusivity": {
       "label": "DDR",
@@ -463,14 +681,23 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "priority": 3,
       "expandByType": true,
-      "scalarFromTablePercent": true
+      "scalarFromTablePercent": true,
+      "summaryTokens": [
+        "ddr",
+        "elusivity"
+      ]
     },
     "protection": {
       "label": "Prot",
       "category": "protection",
       "format": "mag",
       "priority": 4,
-      "expandByType": true
+      "expandByType": true,
+      "summaryTokens": [
+        "prot",
+        "protection",
+        "status"
+      ]
     },
     "debuffResistance": {
       "label": "Debuff Res",
@@ -478,7 +705,10 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "priority": 5,
       "canBeByType": true,
-      "expandByType": true
+      "expandByType": true,
+      "summaryTokens": [
+        "debuff res"
+      ]
     },
     "mezResistance": {
       "label": "Status Res",
@@ -486,7 +716,12 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
       "format": "percent",
       "priority": 6,
       "canBeByType": true,
-      "expandByType": true
+      "expandByType": true,
+      "summaryTokens": [
+        "status",
+        "status res",
+        "mez"
+      ]
     }
   };
 

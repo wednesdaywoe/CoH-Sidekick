@@ -4058,5 +4058,9 @@ export function legacyCalculateCharacterTotals(
     // the engine over builds with nothing simulated (PROD7). An entry here would be a second
     // implementation of the injection, which is exactly what the quarantine exists to prevent.
     whatIfMoved: {},
+    // Same reason as `powerProjection`: the ceiling is the engine's own pass over the build's
+    // powersets, and the legacy calculator is graded on dashboard totals rather than on the
+    // per-power bars this scales. `null` is what a caller already handles.
+    damageCeiling: null,
   };
 }
