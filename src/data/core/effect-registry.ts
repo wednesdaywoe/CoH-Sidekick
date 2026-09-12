@@ -35,6 +35,7 @@ export type EffectFormat =
   | 'scale'       // Display scale value
   | 'damage'      // Use damage calculation system
   | 'degrees'     // Display as degrees (e.g., 30°)
+  | 'distance'    // Display as whole feet (20ft) — `range`, `radius`
   | 'custom';     // Needs special handling
 
 export interface EffectDisplayConfig {
@@ -137,6 +138,7 @@ const DEFAULT_EFFECT_PRECISION: Record<EffectFormat, number> = {
   damage: 1,
   mag: 1,
   degrees: 0,
+  distance: 0,
   custom: 2,
 };
 
@@ -204,7 +206,7 @@ export const EFFECT_REGISTRY: Record<string, EffectDisplayConfig> = {
     label: 'Pwr Range',
     category: 'execution',
     colorClass: STAT_COLORS.range,
-    format: 'value',
+    format: 'distance',
     enhancementAspect: 'range',
     priority: 4,
   },
@@ -226,7 +228,7 @@ export const EFFECT_REGISTRY: Record<string, EffectDisplayConfig> = {
     label: 'Radius',
     category: 'execution',
     colorClass: STAT_COLORS.radius,
-    format: 'value',
+    format: 'distance',
     priority: 7,
   },
   arc: {
@@ -752,12 +754,13 @@ export const EFFECT_REGISTRY: Record<string, EffectDisplayConfig> = {
     priority: 1,
   },
   healing: {
+    summaryTokens: ['heal', 'healing', 'heal over time', 'healing over time'],
     label: 'Heal',
-    category: 'execution',
+    category: 'buff',
     colorClass: STAT_COLORS.healing,
     format: 'value',
     enhancementAspect: 'heal',
-    priority: 2,
+    priority: 0.5,
     valueFromTable: true,
   },
 
@@ -936,6 +939,12 @@ export function formatEffectValue(
       return `${formatPrecision(value, dp)} scale`;
     case 'degrees':
       return `${Math.round(value)}°`;
+    // Carried from the contract at PR8: a distance is a UNIT the registry declares, not a
+    // label the renderer recognises. The canonical side used to append feet on
+    // `label === 'Range' || 'Radius'` and no key is labelled `Range` — `range` is `Pwr Range`
+    // — so a power's range read as a bare number beside a radius reading `20ft`.
+    case 'distance':
+      return `${Math.round(value)}ft`;
     case 'value':
     default:
       return formatPrecision(value, dp);
