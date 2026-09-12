@@ -57,10 +57,10 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**8 open, of 303 entries.** **None is the reader, and none is a defect anyone can measure.** Two
+**7 open, of 303 entries.** **None is the reader, and none is a defect anyone can measure.** Two
 `.mbd` rows closed 2026-09-12 — the slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24 —
-and `mbd_writer_roundtrip` now forgives no register row at all. Every row below is an
-adjudication.
+and `mbd_writer_roundtrip` now forgives no register row at all. ACCOLADE-3 closed the same day and
+took the last measurable one with it. Every row below is an adjudication.
 
 **The Wine oracle is back up, and that is what moved this list.** Recorded as down from
 2026-09-10; fixed 2026-09-11 by app-local ICU next to `MidsReborn.exe`.
@@ -105,10 +105,6 @@ The newest and the cheapest to read is **INHERENT-10**: 59 of 60 archetypes reac
 through their declared inherent name, and Thunderspy's Primalist does not. Its fork ships a
 meter/dampen pair under that display name and no canonical power. Visible at both ends — a card
 with no numbers, a writer that warns — which is why nothing had gone red. Adjudication, not code.
-
-Two are not the writer's. **ACCOLADE-3** — two accolade ids predate the internal-name
-convention and only `buildStore` renames them, so a `.skif` opened from a file loses those
-accolades from the totals in silence. MBDEXPORT-12's warning arm surfaced it on 2026-09-10.
 
 The last is neither the writer's nor the reader's but the oracle behind both. **FIXTURE-3** —
 canonical's TS drops two set-bonus stat keys the contract maps and the Rust routes, and the
@@ -369,7 +365,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Sets, boosts, incarnates, inherents
 
-[Full detail](gaps/sets-boosts-incarnates.md) — 27 of 29 closed
+[Full detail](gaps/sets-boosts-incarnates.md) — 28 of 29 closed
 
 - [x] **HYBRID-2** — Homecoming and its Brainstorm beta dropped the Melee Hybrid's status-protection
   rows at Total Radial Graft and both T4 Embodiments while the tooltip still promises them, where
@@ -401,19 +397,11 @@ measurement went, and where a closure for the residual belongs too.
   form gating the game gives them on every fork; the call landed with the script's FORK-1
   reconciliation, and a two-legged guard now derives the emitter roster and grades all 10,502
   emitted powers against their own export records
-- [ ] **ACCOLADE-3** — two accolade ids predate the internal-name convention (`atlas_medallion`,
-  `freedom_phalanx`) and the rename lives ONLY in `buildStore`'s persisted-state migration: a
-  `.skif` opened from a file goes through `hydrateBuild`, which folds the legacy OBJECT to its id
-  and leaves the id alone, so `getAccolade` answers undefined and `character-totals` filters the
-  pick out of the totals in silence. Surfaced 2026-09-10 by MBDEXPORT-12's warning arm. The Rust
-  engine already reports it; the TS one does not.
-  **Goal** — a build naming an accolade the roster does not hold either resolves or says so, on
-  both engines and whichever door it came through.
-  **Done when** — the rename is censused (how many stored ids predate the convention, and where
-  else a build enters that is not the store's rehydrate), a decision is written on where it
-  belongs, and the TS totals path reports an id it cannot resolve instead of filtering it away.
-  **Check** — `grep -n "atlas_medallion" src/utils/build-serialization.ts` prints nothing while
-  this row is open; a hit means the migration reached the file reader and the row is stale.
+- [x] **ACCOLADE-3** — the rename for the two ids that predate the internal-name convention lived
+  only in `buildStore`'s persisted-state migration, so every other door dropped those accolades
+  from the totals in silence; the census closed the id vocabulary at two entries and found a v1
+  import arm losing ALL four, one `normalizeAccoladeIds` now serves every door on both engines,
+  and the TS totals partition reports an id it cannot resolve instead of filtering it away
 - [x] **ACCOLADE-2** — the accolade converter was the one tree that never called `assignModes`, so
   the Labyrinth pair's `modes_required` zone gate was dropped and a buff you only have in one zone
   presented as permanent; the picker now warns from the field, in both UIs

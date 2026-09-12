@@ -266,6 +266,53 @@ export interface HydrationNote {
 }
 
 /**
+ * An accolade list written by an older Sidekick, read as selected ids.
+ *
+ * Two migrations, and they are one question — "what did a previous version of this app store
+ * here?" — so they live in one place rather than one each:
+ *
+ *  - **the fold.** Accolades were stored as whole `{ id, bonuses, … }` objects; only the id
+ *    survives, because the export owns those values (Rule 0).
+ *  - **the rename.** Two ids predate the game-internal-name convention. The table is CLOSED,
+ *    not a best effort: the id vocabulary has had exactly two shapes, the four of 2026-01-20
+ *    (`atlas_medallion`, `freedom_phalanx`, `task_force_commander`, `portal_jockey`) and the
+ *    eight of 2026-03-21 that renamed two of them, so these two entries are the whole delta
+ *    and no third legacy id can exist.
+ *
+ * Not a Rule 0 violation, though a table of CoH proper nouns looks like one. These are not
+ * names the export ever used — no fork spells an accolade either way — they are ids this
+ * app's own serializer wrote, and the table is a record of Sidekick's storage history rather
+ * than a game fact hardcoded out of the data.
+ *
+ * Here rather than in `buildStore`'s persisted-state migration, which is where the rename used
+ * to live alone: localStorage is one door of five, and the other four (share link, JSON paste,
+ * `.skif` open, a cloud build) come through `hydrateBuild` — DATA-GAP ACCOLADE-3. A migration
+ * on one door is not a migration. `importBuild`'s v1 arm is the fifth and reaches neither, so
+ * it calls this directly.
+ *
+ * Renaming is not resolving. An id this table does not know is returned unchanged and left for
+ * the engine to REPORT (`coh_math::gather::resolve_accolades`); guessing here would put the
+ * silence back one layer down.
+ */
+export function normalizeAccoladeIds(raw: unknown): string[] {
+  const legacyIds: Record<string, string> = {
+    atlas_medallion: 'the_atlas_medallion',
+    freedom_phalanx: 'freedom_phalanx_reserve',
+  };
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((entry: unknown) =>
+      typeof entry === 'string'
+        ? entry
+        : typeof (entry as { id?: unknown })?.id === 'string'
+          ? ((entry as { id: string }).id)
+          : null
+    )
+    .filter((id): id is string => id !== null)
+    .map((id) => legacyIds[id] ?? id);
+}
+
+/**
  * Reconstruct a full Build from a v2 slim export.
  *
  * Pass `notes` to collect what this dataset could not carry. Optional because most callers
@@ -397,17 +444,7 @@ export function hydrateBuild(slim: Record<string, any>, notes?: HydrationNote[])
     pools,
     epicPool,
     inherents,
-    // Accolades are selected ids now; fold any legacy { id, … } object from an older code.
-    // Two ids predate the game-internal-name convention and need renaming
-    // (`atlas_medallion`→`the_atlas_medallion`) before a calculate pass can resolve them.
-    // Share links, JSON/.skif imports and localStorage all pass through hydrateBuild,
-    // so this lives here alongside the fold rather than in one storage migration.
-    accolades: (slim.accolades ?? []).map((a: string | { id: string }) => {
-      const id = typeof a === 'string' ? a : a.id;
-      if (id === 'atlas_medallion') return 'the_atlas_medallion';
-      if (id === 'freedom_phalanx') return 'freedom_phalanx_reserve';
-      return id;
-    }),
+    accolades: normalizeAccoladeIds(slim.accolades),
     settings: slim.settings ?? { origin: 'Natural' },
     sets,
     incarnates: slim.incarnates ?? createEmptyIncarnateBuildState(),
