@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**5 open, of 303 entries.** **None is the reader, and none is a defect anyone can measure.** Three
+**5 open, of 304 entries.** **None is the reader, and none is a defect anyone can measure.** Three
 `.mbd` rows closed 2026-09-12 — the slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24,
 and -21 by deciding the claim — so `mbd_writer_roundtrip` now forgives no register row at all,
 and ACCOLADE-3 closed the same day and took the last measurable one with it. Every row below is
@@ -804,7 +804,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 88 of 92 closed
+[Full detail](gaps/pipeline-provenance.md) — 89 of 93 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -1249,6 +1249,13 @@ measurement went, and where a closure for the residual belongs too.
   for the power, so the claim now grades an empty population. Restated as the measured
   absence (guard: `redirect-info-damage.test.ts` asserts no `"knockback"`); narrative in
   `docs/gaps/stat-routing.md`.
+
+- [x] **STALE-1** — the staleness gate never hashed the three `contract/*.json` its crates
+  `include_str!` into the wasm, so a commit touching only one shipped a changed engine that
+  `beta-engine-staleness` certified as fresh. It never fired — two commits did this and both
+  touched crate source too. Closed 2026-09-12: the set is DERIVED from the macros, checked
+  against cargo's dep-info, and graded by five mutations.
+  story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
 - [x] **Advisory checks** — adjudicated binary-first; Mids retired as an authority
 
