@@ -78,7 +78,7 @@ describe('mids-export powerset paths', () => {
   beforeAll(async () => { await loadDataset('homecoming'); }, 120000);
 
   it('strips the .ico extension from powerset icons (thermal/water defender)', () => {
-    const mbd = JSON.parse(exportToMids(buildFor('defender/thermal-radiation', 'defender/water-blast'), true));
+    const mbd = JSON.parse(exportToMids(buildFor('defender/thermal-radiation', 'defender/water-blast')));
     // Second segment must be the bare Mids internal name, no extension, no "_set".
     expect(mbd.PowerSets[0]).toBe('Defender_Buff.Thermal_Radiation');
     expect(mbd.PowerSets[1]).toBe('Defender_Ranged.Water_Blast');
@@ -92,7 +92,7 @@ describe('mids-export powerset paths', () => {
   it('still works for .png icons', () => {
     // Force a .png icon through the same path (future-proofing against
     // datasets that keep .png icons).
-    const mbd = JSON.parse(exportToMids(buildFor('defender/thermal-radiation', 'defender/water-blast'), true));
+    const mbd = JSON.parse(exportToMids(buildFor('defender/thermal-radiation', 'defender/water-blast')));
     expect(mbd.PowerSets[0]).not.toMatch(/\.png/);
     expect(mbd.PowerSets[0]).not.toMatch(/\.ico/);
   });
@@ -173,7 +173,7 @@ describe('mids-export enhancement UIDs', () => {
         for (const set of Object.values(getAllIOSets())) {
           for (const [index, piece] of set.pieces.entries()) {
             const enh = createIOSetEnhancement(set, piece, index, { attuned: false, level: 50 });
-            const mbd = JSON.parse(exportToMids(buildWithSlot(enh), true));
+            const mbd = JSON.parse(exportToMids(buildWithSlot(enh)));
             const uid = firstSlottedUid(mbd);
             if (!uid || !known.has(uid)) missing.push(`${set.id} piece ${piece.num}`);
           }
@@ -184,7 +184,7 @@ describe('mids-export enhancement UIDs', () => {
       it('names every common IO with a UID Mids has', () => {
         const known = knownUids();
         const missing = COMMON_IO_TYPES.filter((stat) => {
-          const uid = firstSlottedUid(JSON.parse(exportToMids(buildWithSlot(createGenericIOEnhancement(stat, 50)), true)));
+          const uid = firstSlottedUid(JSON.parse(exportToMids(buildWithSlot(createGenericIOEnhancement(stat, 50)))));
           return !uid || !known.has(uid);
         });
         expect(missing).toEqual([]);
@@ -196,7 +196,7 @@ describe('mids-export enhancement UIDs', () => {
         for (const category of ['hamidon', 'titan', 'hydra', 'd-sync'] as const) {
           for (const [id, def] of Object.entries(getSpecialRegistry(category))) {
             const enh = createSpecialEnhancement(id, def, category);
-            const uid = firstSlottedUid(JSON.parse(exportToMids(buildWithSlot(enh), true)));
+            const uid = firstSlottedUid(JSON.parse(exportToMids(buildWithSlot(enh))));
             if (!uid || !known.has(uid)) missing.push(`${category}/${id}`);
           }
         }
@@ -223,7 +223,7 @@ describe('mids-export → mids-import round trip', () => {
     for (const set of Object.values(getAllIOSets())) {
       for (const [index, piece] of set.pieces.entries()) {
         const enh = createIOSetEnhancement(set, piece, index, { attuned: false, level: 50 });
-        const uid = firstSlottedUid(JSON.parse(exportToMids(buildWithSlot(enh), true)));
+        const uid = firstSlottedUid(JSON.parse(exportToMids(buildWithSlot(enh))));
         if (!uid) continue;
         const back = resolveMidsUid(uid);
         if (back?.setId !== (set.id ?? '').replace(/-/g, '') || back?.pieceNum !== piece.num) {
@@ -267,7 +267,7 @@ describe('mids-export regression: therm/water defender', () => {
   function exported() {
     const raw = readFileSync(new URL('./mids-fixtures/therm-water-defender.skif', import.meta.url), 'utf8');
     const build = hydrateBuild(JSON.parse(raw).build);
-    const { json, warnings } = exportToMidsWithReport(build, true);
+    const { json, warnings } = exportToMidsWithReport(build);
     return { mbd: JSON.parse(json) as MbdFile, warnings };
   }
 
@@ -406,7 +406,7 @@ describe('mids-export origin enhancements', () => {
     for (const tier of ['TO', 'DO', 'SO'] as const) {
       for (const stat of COMMON_IO_TYPES) {
         const enh = createOriginEnhancement(stat, tier);
-        const mbd = JSON.parse(exportToMids(buildWithSlot(enh), true));
+        const mbd = JSON.parse(exportToMids(buildWithSlot(enh)));
         const uid = firstSlottedUid(mbd);
         if (!uid || !known.has(uid)) missing.push(`${tier} ${stat}`);
       }
@@ -428,7 +428,7 @@ describe('mids-export origin enhancements', () => {
    * through a branch no real file could reach.
    */
   it('carries the tier in Grade, spelled as Mids spells it', () => {
-    const mbd = JSON.parse(exportToMids(buildWithSlot(createOriginEnhancement('Accuracy', 'SO')), true));
+    const mbd = JSON.parse(exportToMids(buildWithSlot(createOriginEnhancement('Accuracy', 'SO'))));
     const slot = mbd.PowerEntries.flatMap((pe: { SlotEntries: unknown[] }) => pe.SlotEntries)
       .find((se: { Enhancement: { Grade: string } | null }) => se.Enhancement)!;
     expect(slot.Enhancement.Grade).toBe('SingleO');
@@ -482,7 +482,7 @@ describe('mids-export — a VEAT branch is one choice with two sets', () => {
   beforeAll(async () => { await loadDataset('homecoming'); }, 120000);
 
   it('names the base sets for a Widow that never specialised', () => {
-    const mbd = JSON.parse(exportToMids(widow(BASE_PRIMARY, BASE_SECONDARY), false)) as MbdFile;
+    const mbd = JSON.parse(exportToMids(widow(BASE_PRIMARY, BASE_SECONDARY))) as MbdFile;
     expect(mbd.PowerSets.slice(0, 2))
       .toEqual(['Widow_Training.Widow_Training', 'Teamwork.Teamwork']);
   });
@@ -491,7 +491,7 @@ describe('mids-export — a VEAT branch is one choice with two sets', () => {
     // Specialising is what put that pick there, and the archetype pairs the branch's two
     // sets — so a build whose branch evidence is all in the secondary is still filed under
     // the branch primary. Mids has no half-branched header to write.
-    const mbd = JSON.parse(exportToMids(widow(BASE_PRIMARY, BRANCH_SECONDARY), false)) as MbdFile;
+    const mbd = JSON.parse(exportToMids(widow(BASE_PRIMARY, BRANCH_SECONDARY))) as MbdFile;
     expect(mbd.PowerSets.slice(0, 2))
       .toEqual(['Widow_Training.Night_Widow_Training', 'Teamwork.Widow_Teamwork']);
   });
@@ -500,7 +500,7 @@ describe('mids-export — a VEAT branch is one choice with two sets', () => {
     // The header moves and the picks do not. Dragging them along renames a base pick into
     // the branch set, which is a power Mids will not bind — the loudest way to "fix" this row
     // wrongly, and what the round trip reds on when the two are wired together.
-    const mbd = JSON.parse(exportToMids(widow(BASE_PRIMARY, BRANCH_PRIMARY, BASE_SECONDARY), false)) as MbdFile;
+    const mbd = JSON.parse(exportToMids(widow(BASE_PRIMARY, BRANCH_PRIMARY, BASE_SECONDARY))) as MbdFile;
     const picks = mbd.PowerEntries.map((e) => e.PowerName).filter((n) => !n.startsWith('Inherent.'));
     expect(picks.filter((n) => n.startsWith('Widow_Training.Widow_Training.'))).toHaveLength(1);
     expect(picks.filter((n) => n.startsWith('Widow_Training.Night_Widow_Training.'))).toHaveLength(1);
@@ -510,7 +510,6 @@ describe('mids-export — a VEAT branch is one choice with two sets', () => {
   it('reports a build holding two branches rather than picking one', () => {
     const { json, warnings } = exportToMidsWithReport(
       widow(BRANCH_PRIMARY, 'arachnos-widow/fortunata-teamwork'),
-      false,
     );
     expect(warnings.map((w) => w.detail).join('\n')).toMatch(/holds powers from 2 branches/);
     expect((JSON.parse(json) as MbdFile).PowerSets.slice(0, 2))

@@ -2307,7 +2307,8 @@ export const useBuildStore = create<BuildStore>()(
             category,
             // Click order is still worth keeping even without a level — it's
             // what a later switch into Level Up mode backfills from (SLOT-3).
-            ...(assignedLevel !== null ? { level: assignedLevel } : {}),
+            // A slot the user just placed: this level IS the history (MBDEXPORT-21).
+            ...(assignedLevel !== null ? { level: assignedLevel, levelSource: 'authored' as const } : {}),
           };
           newBuild.slotOrder = [...newBuild.slotOrder, newEntry];
           return { build: newBuild };
@@ -2467,7 +2468,8 @@ export const useBuildStore = create<BuildStore>()(
             powerName: target.powerName,
             slotIndex: targetNewIndex,
             category: targetCategory,
-            ...(assignedLevel !== null ? { level: assignedLevel } : {}),
+            // Moving a slot is a placement too — the author chose this grant.
+            ...(assignedLevel !== null ? { level: assignedLevel, levelSource: 'authored' as const } : {}),
           };
           newBuild.slotOrder = [...newBuild.slotOrder, newEntry];
 
