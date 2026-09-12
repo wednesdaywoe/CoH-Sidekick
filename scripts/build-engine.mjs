@@ -22,7 +22,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, copyFileSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { fingerprintRebuild } from './engine-fingerprint.mjs';
+import { assertIncludesMatchDepInfo, fingerprintRebuild } from './engine-fingerprint.mjs';
 import { fileURLToPath } from 'node:url';
 
 const betaRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -78,6 +78,18 @@ run('cargo', ['build', '--release', '--target', 'wasm32-unknown-unknown', '-p', 
 
 const wasmArtifact = join(rebuildDir, 'target', 'wasm32-unknown-unknown', 'release', 'coh_wasm.wasm');
 if (!existsSync(wasmArtifact)) die(`cargo did not produce ${wasmArtifact}.`);
+
+// The fingerprint's compile-time include set is a regex over Rust source, because CI verifies
+// with node alone and cannot build. Cargo has just written down every file it ACTUALLY read, so
+// this is the one moment the authoritative answer is in hand — compare the two here rather than
+// let a drifted scan quietly hash the wrong set and certify a stale engine as fresh.
+const depInfo = join(rebuildDir, 'target', 'wasm32-unknown-unknown', 'release', 'coh_wasm.d');
+try {
+  const included = assertIncludesMatchDepInfo(rebuildDir, depInfo);
+  console.log(`[build-engine] ${included} compile-time include(s) match cargo's dep-info`);
+} catch (error) {
+  die(error.message);
+}
 
 const wasmOutDir = join(betaRoot, 'src', 'engine', 'wasm');
 mkdirSync(wasmOutDir, { recursive: true });

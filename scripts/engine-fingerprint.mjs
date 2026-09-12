@@ -21,19 +21,152 @@
  * workspace lock, and the toolchain pin — plus each contract bundle, which is a separate
  * output of the rebuild's `npm run regen` and goes stale independently.
  *
+ * And every file those crates pull in at COMPILE time. `coh_math` `include_str!`s
+ * `contract/effect-registry.json` and `contract/set-bonus-stat-vocab.json`, `coh_wasm` does the
+ * same with `contract/schema-version.json`: their BYTES are compiled into the .wasm, so editing
+ * one changes the shipped engine while touching no crate source. Until 2026-09-12 none of the
+ * three was hashed, so a commit that moved only a contract JSON left both halves of this
+ * fingerprint identical and this check certified a stale engine as fresh — the exact failure the
+ * job exists to catch, one input further up than it was looking. It never fired, because the two
+ * commits that did it (`d42784cdd7`, `6d5793d50b`) happened to touch crate source as well; that
+ * is luck, and luck is what this file is here to replace.
+ *
+ * The set is DERIVED by scanning for the macros rather than listed, so a fourth `include_str!`
+ * is covered the day it is written instead of reopening the hole silently. `#[cfg(test)]` items
+ * are skipped: a release build never compiles them, so hashing `coh_wasm`'s test-only
+ * `include_bytes!` of the app crate's vendored bundle would report staleness for a file the
+ * shipped artifact does not contain — an unequal for the wrong reason, which this module already
+ * treats as its own failure mode.
+ *
+ * A regex over Rust is a heuristic, and the authoritative answer exists only while a build is in
+ * hand: cargo writes every file it actually read to `target/<triple>/release/coh_wasm.d`. So
+ * `build-engine.mjs` calls {@link assertIncludesMatchDepInfo} straight after its cargo build, and
+ * a scan that has drifted from what the compiler read fails there rather than silently hashing
+ * the wrong set.
+ *
  * Usage as a script (this is what the rebuild's CI runs):
  *   node scripts/engine-fingerprint.mjs --rebuild-dir <path> [--compare <manifest.json>]
  */
 
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 
 /** Crates whose source compiles into the shipped .wasm. `app` (Dioxus UI) is not one. */
 const ENGINE_CRATES = ['coh_data', 'coh_math', 'coh_wasm'];
 
 /** Repo-root files that change the compiled output without changing any crate source. */
 const ROOT_INPUTS = ['Cargo.lock', 'Cargo.toml', 'rust-toolchain.toml'];
+
+/** `include_str!("…")` / `include_bytes!("…")` with a plain string literal. */
+const INCLUDE_RE = /\binclude_(?:str|bytes)!\s*\(\s*"((?:[^"\\]|\\.)*)"/g;
+
+/**
+ * Rust source with `#[cfg(test)]`-guarded items removed.
+ *
+ * Brace-matched from the guarded item's opening `{`, and a `;` reached first means the item had
+ * no block (`#[cfg(test)] use foo;`) so only that statement is dropped. Braces inside string
+ * literals or comments would fool this; `assertIncludesMatchDepInfo` is what notices.
+ */
+function withoutTestItems(source) {
+  const marker = '#[cfg(test)]';
+  let out = '';
+  let i = 0;
+  for (;;) {
+    const at = source.indexOf(marker, i);
+    if (at === -1) return out + source.slice(i);
+    out += source.slice(i, at);
+    const brace = source.indexOf('{', at);
+    const semi = source.indexOf(';', at);
+    if (brace === -1 && semi === -1) return out;
+    if (semi !== -1 && (brace === -1 || semi < brace)) {
+      i = semi + 1;
+      continue;
+    }
+    let depth = 0;
+    let j = brace;
+    for (; j < source.length; j += 1) {
+      if (source[j] === '{') depth += 1;
+      else if (source[j] === '}') {
+        depth -= 1;
+        if (depth === 0) { j += 1; break; }
+      }
+    }
+    i = j;
+  }
+}
+
+/**
+ * Every file the engine crates compile in, as repo-relative POSIX paths, sorted and deduped.
+ *
+ * Throws on a referenced file that is missing or that resolves outside the rebuild — a
+ * fingerprint over an input we cannot read is worse than no fingerprint, since it would compare
+ * unequal for a reason nobody can act on (Rule 1: fail loud).
+ */
+export function compileTimeIncludes(rebuildDir) {
+  const found = new Set();
+  for (const crate of ENGINE_CRATES) {
+    const srcDir = join(rebuildDir, 'crates', crate, 'src');
+    if (!existsSync(srcDir)) throw new Error(`engine-fingerprint: no ${crate}/src under ${rebuildDir}`);
+    for (const rel of filesUnder(srcDir)) {
+      if (!rel.endsWith('.rs')) continue;
+      const file = join(srcDir, rel);
+      const source = withoutTestItems(readFileSync(file, 'utf8'));
+      for (const match of source.matchAll(INCLUDE_RE)) {
+        const resolved = resolve(dirname(file), match[1]);
+        const label = relative(rebuildDir, resolved).split(sep).join('/');
+        if (label.startsWith('..')) {
+          throw new Error(`engine-fingerprint: ${crate}/src/${rel} includes ${match[1]}, outside ${rebuildDir}`);
+        }
+        if (!existsSync(resolved)) {
+          throw new Error(`engine-fingerprint: ${crate}/src/${rel} includes ${match[1]}, which does not exist`);
+        }
+        found.add(label);
+      }
+    }
+  }
+  return [...found].sort();
+}
+
+/**
+ * The same question answered by the compiler instead of by a regex: cargo's dep-info lists every
+ * file the build read. Called by `build-engine.mjs` while the build is still in hand, because
+ * that is the only moment the authoritative answer exists — CI verifies with node alone and
+ * cannot build.
+ *
+ * Only the non-crate-source includes are compared. Dep-info also lists every .rs file, which
+ * {@link fingerprintRebuild} already hashes by walking the tree.
+ */
+export function assertIncludesMatchDepInfo(rebuildDir, depInfoPath) {
+  if (!existsSync(depInfoPath)) {
+    throw new Error(`engine-fingerprint: no dep-info at ${depInfoPath} — expected cargo to have just written it.`);
+  }
+  // `<target>: <space-separated inputs>`, with `\ ` escaping a space inside a path.
+  const body = readFileSync(depInfoPath, 'utf8')
+    .split('\n')
+    .filter((line) => line.includes(':') && !line.startsWith(' '))
+    .map((line) => line.slice(line.indexOf(':') + 1))
+    .join(' ');
+  const read = new Set();
+  for (const raw of body.split(/(?<!\\) /)) {
+    const token = raw.replace(/\\ /g, ' ').trim();
+    if (!token) continue;
+    const label = relative(rebuildDir, resolve(rebuildDir, token)).split(sep).join('/');
+    if (label.startsWith('..') || label.endsWith('.rs') || !label.includes('/')) continue;
+    if (label.startsWith('crates/') && label.includes('/src/')) continue;
+    read.add(label);
+  }
+  const scanned = new Set(compileTimeIncludes(rebuildDir));
+  const missed = [...read].filter((f) => !scanned.has(f)).sort();
+  const phantom = [...scanned].filter((f) => !read.has(f)).sort();
+  if (missed.length === 0 && phantom.length === 0) return scanned.size;
+  throw new Error(
+    `engine-fingerprint: the compile-time include scan disagrees with what cargo read.\n` +
+      (missed.length ? `  cargo read but the scan missed: ${missed.join(', ')}\n` : '') +
+      (phantom.length ? `  the scan found but cargo never read: ${phantom.join(', ')}\n` : '') +
+      `  A missed file is a hole in the staleness gate; fix the scan in engine-fingerprint.mjs.`,
+  );
+}
 
 /** Every file under `dir`, recursively, as paths relative to `dir`, sorted. */
 function filesUnder(dir) {
@@ -85,6 +218,15 @@ export function fingerprintRebuild(rebuildDir) {
     const path = join(rebuildDir, name);
     if (!existsSync(path)) throw new Error(`engine-fingerprint: no ${name} under ${rebuildDir}`);
     entries.push([name, readFileSync(path)]);
+  }
+
+  // Files the crates compile in by path — their bytes are in the .wasm, so they belong to the
+  // SOURCE hash, not the bundle map. Deduped against what the crate walk already pushed, so an
+  // include that points back into a crate's own src is not counted twice.
+  const alreadyHashed = new Set(entries.map(([label]) => label));
+  for (const label of compileTimeIncludes(rebuildDir)) {
+    if (alreadyHashed.has(label)) continue;
+    entries.push([label, readFileSync(join(rebuildDir, label))]);
   }
 
   // Contract bundles, hashed individually so a mismatch names the dataset that drifted.
