@@ -528,6 +528,72 @@ export function computeExportSlotLevels(build: Build, levelUpMode: boolean): Map
 }
 
 /**
+ * What this build's own schedule would issue, regardless of what the grid is drawing.
+ *
+ * The `true` is not "the user is in Level Up mode" — it is "solve for real". A `.mbd` needs a
+ * concrete assignment whichever mode the UI happens to be in, and MBDEXPORT-21's decision is
+ * that the file's claim must come off the BUILD and never off a per-device toggle the `.skif`
+ * does not carry. Print and forum text keep `computeExportSlotLevels`, because those draw what
+ * the user is looking at rather than making a claim another planner will read as authoritative.
+ */
+export function solvedSlotLevels(build: Build): Map<string, SlotLevel[]> {
+  return computeAllSlotLevels(build, true);
+}
+
+/**
+ * The slot levels a build CARRIES, as against the ones its own schedule would solve for.
+ *
+ * `solvedSlotLevels` answers "where could this slot legally have come from", and it re-houses
+ * anything it cannot pair with a free grant — the right answer for the grid, where a level the
+ * schedule never issued would be a lie about the build's legality. It is the wrong answer for
+ * the `.mbd` writer: a slot's level is the author's record of when they placed it, and
+ * re-solving it hands the file back a levelling history its author never made (MBDEXPORT-18).
+ *
+ * So an AUTHORED stored level wins wherever the build holds one, and the solver fills the rest.
+ * The two disagree on exactly the population MBDIMPORT-14 is open on — Mids' respec rows at 47
+ * and 49, and Rebirth's extra slot at 9/13/17/23 — and that disagreement is real rather than a
+ * rounding: our schedule issues no grant there. The writer says so per slot instead of silently
+ * picking a side.
+ *
+ * A PACKED level is skipped, which is MBDEXPORT-21's whole decision: it was written by
+ * `ensureSlotOrderPopulated` from the same solver this function starts from, so preferring it
+ * would be carrying the solver's answer back to itself while calling it the author's. Skipping
+ * means the solver's current answer stands — which is what a build with no levelling history
+ * honestly has — and `hasPackedSlotLevels` tells the caller to say so once.
+ *
+ * An UNSTATED level (no `levelSource`) is carried like an authored one. It is not a default:
+ * the entry predates the field and its provenance is genuinely unknown. Every build in the wild
+ * was already exported this way, so carrying is the reading that stops making a new claim rather
+ * than the one that rewrites an old one.
+ */
+export function carriedSlotLevels(build: Build): Map<string, SlotLevel[]> {
+  const levels = solvedSlotLevels(build);
+  for (const entry of build.slotOrder ?? []) {
+    if (entry.level === undefined) continue;
+    if (entry.levelSource === 'packed') continue;
+    const cat = resolveSlotCategory(build, entry.powerName, entry.category);
+    if (!cat) continue;
+    const powerLevels = levels.get(powerKey(cat, entry.powerName));
+    if (!powerLevels || entry.slotIndex >= powerLevels.length) continue;
+    powerLevels[entry.slotIndex] = entry.level;
+  }
+  return levels;
+}
+
+/**
+ * Whether this build's exported slot levels include any the author never placed.
+ *
+ * The once-in-the-UI disclosure SLOT-3 asked for, derived from the BUILD rather than from a UI
+ * mode. That distinction is the point of MBDEXPORT-21: this repo gated the same disclosure on
+ * `useUIStore.levelUpMode`, which is per-device state the `.skif` does not carry, so the same
+ * file exported by two people made two different claims. A fact the writer needs that the build
+ * does not hold is MBDEXPORT-19's shape.
+ */
+export function hasPackedSlotLevels(build: Build): boolean {
+  return (build.slotOrder ?? []).some((entry) => entry.levelSource === 'packed');
+}
+
+/**
  * Rewrite stored slot levels the solver could not honor to the level it actually
  * assigned. Mutates the build in place; returns whether anything changed.
  *
@@ -560,6 +626,11 @@ export function reconcileStoredSlotLevels(build: Build, levelUpMode: boolean): b
     if (level === null || level === undefined) continue;
     if (entry.level === level) continue;
     entry.level = level;
+    // Packed, and the paragraph above is the reason rather than an exception to it: the
+    // stored level was already dead, so what lands here is the SOLVER's answer and not the
+    // author's. Repairing a level nobody can honour is still not a record of a placement
+    // (MBDEXPORT-21) — `levelSource` describes the level, not the entry.
+    entry.levelSource = 'packed';
     changed = true;
   }
   return changed;
@@ -618,6 +689,9 @@ export function ensureSlotOrderPopulated(build: Build, levelUpMode: boolean): bo
         slotIndex: s,
         category,
         level,
+        // The solver's packing, not the author's chronology. Stamped so the `.mbd` writer
+        // can tell it from a real placement instead of guessing from a proxy (MBDEXPORT-21).
+        levelSource: 'packed',
       });
     }
   }
@@ -653,6 +727,10 @@ export function backfillSlotOrderLevels(build: Build, levelUpMode: boolean): boo
     // level-less so the solver can re-house it once the pressure lifts.
     if (level === null) continue;
     entry.level = level;
+    // The ENTRY is a real placement — it exists because someone put a slot there — but this
+    // LEVEL is the solver's, invented now because the entry was written before levels were
+    // stored at all. `levelSource` describes the level, so it is packed (MBDEXPORT-21).
+    entry.levelSource = 'packed';
     changed = true;
   }
   return changed;
@@ -678,6 +756,9 @@ export function scrubFabricatedSlotLevels(build: Build): boolean {
     if (entry.level === undefined) continue;
     if ((grants[entry.level] ?? 0) > 0) continue;
     delete entry.level;
+    // The provenance goes with the level it describes. Left behind it would claim an origin
+    // for a level that is no longer there, and the next backfill would read it as settled.
+    delete entry.levelSource;
     changed = true;
   }
   return changed;

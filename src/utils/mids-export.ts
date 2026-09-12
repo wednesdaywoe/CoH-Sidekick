@@ -26,7 +26,7 @@ import type { ArchetypeBranch, ArchetypeBranchId } from '@/types/archetype';
 import { headlineArchetypeInherentName } from '@/data/inherent-rules';
 import { isDatasetId, getAllDatasetMetadata } from '@/data/dataset';
 import { getInherentPowers, getArchetypeInherentPowers, POWER_PICK_LEVELS, getPicksGrantedAtLevel, GRANTED_POWER_GROUPS } from '@/data';
-import { computeExportSlotLevels, type SlotLevel } from '@/utils/slot-levels';
+import { solvedSlotLevels, carriedSlotLevels, hasPackedSlotLevels, type SlotLevel } from '@/utils/slot-levels';
 import { powerKey, type PowerCategory } from '@/utils/power-key';
 
 // ============================================
@@ -663,12 +663,17 @@ function buildSpecialEnhancement(enh: SpecialEnhancement): MbdEnhancement | null
  * six-slotted level-2 power claim six slots at level 2, which Mids draws (with
  * "Slot Levels: On") as an illegal build.
  *
- * `computeAllSlotLevels` is the same solver the print and forum exports use, so
- * all three agree on what the build says.
+ * `levels` is what the build CARRIES (`carriedSlotLevels`); `solved` is what its
+ * own schedule would issue (`solvedSlotLevels`), which is what the grid and
+ * the print and forum exports draw. The file gets the carried one, because that
+ * is the author's record and re-solving it invents a history — and where the two
+ * disagree the slot gets a warning, since our schedule issues no grant at the
+ * level the file is about to state.
  */
 function buildSlotEntries(
   power: SelectedPower,
   levels: SlotLevel[] | undefined,
+  solved: SlotLevel[] | undefined,
   inherentSlots: number,
   warnings: MidsExportWarning[],
 ): MbdSlotEntry[] {
@@ -681,8 +686,17 @@ function buildSlotEntries(
         detail: `${describeEnhancement(slot)} — Mids has no enhancement by that name`,
       });
     }
+    const carried = levels?.[index] ?? power.level;
+    const schedule = solved?.[index] ?? power.level;
+    if (index > inherentSlots && index > 0 && carried !== schedule) {
+      warnings.push({
+        power: power.name,
+        slot: index + 1,
+        detail: `placed at level ${carried}, which this server's slot schedule does not grant — the planner shows it at ${schedule}`,
+      });
+    }
     return {
-      Level: levels?.[index] ?? power.level,
+      Level: carried,
       IsInherent: index > 0 && index <= inherentSlots,
       Enhancement: enhancement,
       FlippedEnhancement: null,
@@ -713,11 +727,13 @@ function buildPowerEntry(
   powerName: string,
   category: PowerCategory,
   slotLevels: Map<string, SlotLevel[]>,
+  solvedLevels: Map<string, SlotLevel[]>,
   targetsHitValues: Record<string, number>,
   warnings: MidsExportWarning[],
 ): MbdPowerEntry {
   const inherentSlots = power.inherentSlotCount ?? 0;
-  const levels = slotLevels.get(powerKey(category, power.internalName || power.name));
+  const key = powerKey(category, power.internalName || power.name);
+  const levels = slotLevels.get(key);
   return {
     PowerName: powerName,
     Level: power.level,
@@ -726,7 +742,7 @@ function buildPowerEntry(
     VariableValue: targetsHitValues[power.internalName] ?? 0,
     InherentSlotsUsed: inherentSlots,
     SubPowerEntries: [],
-    SlotEntries: buildSlotEntries(power, levels, inherentSlots, warnings),
+    SlotEntries: buildSlotEntries(power, levels, solvedLevels.get(key), inherentSlots, warnings),
   };
 }
 
@@ -829,7 +845,6 @@ function orderByPickSchedule(chosen: { level: number; entry: MbdPowerEntry }[]):
  */
 export function exportToMidsWithReport(
   build: Build,
-  levelUpMode: boolean,
   targetsHitValues: Record<string, number> = {},
 ): { json: string; warnings: MidsExportWarning[] } {
   const archetypeId = build.archetype.id || '';
@@ -839,11 +854,25 @@ export function exportToMidsWithReport(
   // sets and pieces that could not be named because of them.
   const databaseLabel = midsDatabaseForBuild(build, warnings);
   const midsClass = midsClassForBuild(build, warnings);
-  // Outside Level Up mode a slot carries no real level (SLOT-3). Mids' own
-  // .mbd format requires a Level per slot regardless, so this is a synthetic,
-  // schedule-legal placement — not a claim about the build's actual leveling
-  // history. The caller is expected to say so once in the UI, not per slot.
-  const slotLevels = computeExportSlotLevels(build, levelUpMode);
+  const slotLevels = carriedSlotLevels(build);
+  // What our own schedule would issue, kept beside it only so a slot the file is
+  // about to state at an ungranted level can say so.
+  const solvedLevels = solvedSlotLevels(build);
+  // Said ONCE, and derived from the build rather than from a UI mode (MBDEXPORT-21).
+  // Mids' format requires a Level on every slot, so a build whose levels were packed
+  // wholesale by the solver still has to state numbers; this is the file admitting that
+  // those numbers are a legal packing and not the author's chronology. Not per slot:
+  // a warning on every slot of an unlevelled build is noise the reader learns to skip.
+  if (hasPackedSlotLevels(build)) {
+    warnings.push({
+      power: '',
+      slot: 0,
+      detail:
+        'some slot levels in this build were filled in by the planner rather than placed '
+        + 'one at a time, so the levels written to the file are a legal packing, not a '
+        + 'record of how the character was levelled',
+    });
+  }
 
   // Build PowerSets array: always 8 entries
   // [0]=primary, [1]=secondary, [2]="" (reserved), [3-6]=pools, [7]=epic
@@ -894,7 +923,7 @@ export function exportToMidsWithReport(
     for (const power of powers) {
       const owner = setForPower(power, powersetId, archetypeId, category, set, resolve);
       const powerName = buildPowerName(power, owner.powersetId, owner.set, category);
-      const entry = buildPowerEntry(power, powerName, category, slotLevels, targetsHitValues, warnings);
+      const entry = buildPowerEntry(power, powerName, category, slotLevels, solvedLevels, targetsHitValues, warnings);
       if (isFormSubPower(power)) granted.push(entry);
       else chosen.push({ level: power.level, entry });
     }
@@ -937,7 +966,7 @@ export function exportToMidsWithReport(
       powerEntries.push({ ...blankPowerEntry(), PowerName: `Inherent.Inherent.${name}`, Level: 1 });
       continue;
     }
-    powerEntries.push(buildPowerEntry(power, fullName, 'inherent', slotLevels, targetsHitValues, warnings));
+    powerEntries.push(buildPowerEntry(power, fullName, 'inherent', slotLevels, solvedLevels, targetsHitValues, warnings));
   }
 
   // The archetype inherent, which is not one of the seven above: `SortGridPowers`
@@ -973,6 +1002,7 @@ export function exportToMidsWithReport(
       rotateFullName(atInherentName, `${segments[0]}.${segments[1]}`),
       'inherent',
       slotLevels,
+      solvedLevels,
       targetsHitValues,
       warnings,
     ));
@@ -1174,10 +1204,6 @@ function inherentFullName(power: SelectedPower, archetypeId: string): string | n
  * Export a Sidekick Build to Mids Reborn .mbd JSON format.
  * Returns the JSON string ready to save as a .mbd file.
  */
-export function exportToMids(
-  build: Build,
-  levelUpMode: boolean,
-  targetsHitValues: Record<string, number> = {},
-): string {
-  return exportToMidsWithReport(build, levelUpMode, targetsHitValues).json;
+export function exportToMids(build: Build, targetsHitValues: Record<string, number> = {}): string {
+  return exportToMidsWithReport(build, targetsHitValues).json;
 }

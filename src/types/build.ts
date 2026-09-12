@@ -189,7 +189,31 @@ export interface Build {
    *  Storing it lets removeSlot + re-add behave like Mids: the freed level returns
    *  to a pool rather than cascading subsequent slots downward. Optional for legacy
    *  builds; missing values are back-filled greedily on load. */
-  slotOrder: { powerName: string; slotIndex: number; category?: string; level?: number }[];
+  slotOrder: {
+    powerName: string;
+    slotIndex: number;
+    category?: string;
+    level?: number;
+    /**
+     * Where `level` came from — the discriminator MBDEXPORT-21 is about.
+     *
+     * Three code paths write a level into this array and they do not mean the same thing:
+     * a placement in the UI and MBDIMPORT's `seedSlotOrderFromFile` are both a record of
+     * when an author put the slot there, while `ensureSlotOrderPopulated` fills the whole
+     * array at once from the respec solver, which is a PACKING and not a history. Until
+     * this field existed nothing downstream could tell them apart, so the `.mbd` writer
+     * had to guess provenance from a proxy — canonical from "is there a stored entry",
+     * the beta from a UI toggle the file does not even carry — and each proxy was wrong
+     * for at least one of the three.
+     *
+     * Absent means UNSTATED, not a default: it is an entry written before this field, and
+     * its provenance is genuinely unknown rather than known to be either one. The writer
+     * carries an unstated level for the same reason it carries an authored one — every
+     * build already in the wild was exported that way, and re-solving them all would
+     * rewrite history rather than stop claiming it.
+     */
+    levelSource?: 'authored' | 'packed';
+  }[];
 
   /**
    * Caster modes the player has switched on — the ids a selected power's `modeVariants` is

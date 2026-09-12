@@ -893,7 +893,15 @@ function seedSlotOrderFromFile(
       const row = rows[s];
       if (row.IsInherent) continue;
       if (typeof row.Level !== 'number') continue;
-      seeded.push({ powerName: power.internalName, slotIndex: s, category, level: row.Level });
+      // The file's own record of when its author placed the slot — a history, just not one
+      // made here, so it rides back out unchanged rather than being re-solved (MBDEXPORT-21).
+      seeded.push({
+        powerName: power.internalName,
+        slotIndex: s,
+        category,
+        level: row.Level,
+        levelSource: 'authored',
+      });
     }
   }
 

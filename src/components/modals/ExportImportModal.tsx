@@ -22,6 +22,7 @@ import { crossDatasetChoice } from '@/utils/build-open-route';
 import { generatePopmenu } from '@/utils/export-popmenu';
 import { openPrintView } from '@/utils/export-print';
 import { exportToMidsWithReport, type MidsExportWarning } from '@/utils/mids-export';
+import { hasPackedSlotLevels } from '@/utils/slot-levels';
 import { findIllegalSlots } from '@/utils/build-enhancement-validation';
 
 interface ExportImportModalProps {
@@ -1628,7 +1629,13 @@ export function ExportImportModal({ isOpen, onClose }: ExportImportModalProps) {
             ) : (
               /* Export Utilities */
               <div className="space-y-4">
-                {!levelUpMode && (
+                {/* Two readings of one sentence, because the two exports below no longer
+                    answer the question the same way (MBDEXPORT-21). The print sheet draws
+                    whatever the grid draws, so Level Up mode still governs it. The `.mbd`
+                    asks the BUILD instead — a per-device toggle is not something a file can
+                    carry, and the same `.skif` opened by two people must not make two
+                    different claims. Either being true makes the sentence true. */}
+                {(!levelUpMode || hasPackedSlotLevels(build)) && (
                   <p className="text-[11px] text-amber-400/90 bg-amber-400/10 border border-amber-400/20 rounded px-2 py-1.5">
                     This build wasn't planned in a specific leveling order, so the slot levels in
                     the Mids export and print sheet below are a computed placement, not your
@@ -1644,7 +1651,6 @@ export function ExportImportModal({ isOpen, onClose }: ExportImportModalProps) {
                       // has to be handed it or it goes out as zero (MBDEXPORT-19).
                       const { json, warnings } = exportToMidsWithReport(
                         build,
-                        levelUpMode,
                         useUIStore.getState().targetsHitValues,
                       );
                       setMidsExportWarnings(warnings);

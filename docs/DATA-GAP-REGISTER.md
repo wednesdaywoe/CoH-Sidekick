@@ -57,10 +57,11 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**7 open, of 303 entries.** **None is the reader, and none is a defect anyone can measure.** Two
-`.mbd` rows closed 2026-09-12 — the slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24 —
-and `mbd_writer_roundtrip` now forgives no register row at all. ACCOLADE-3 closed the same day and
-took the last measurable one with it. Every row below is an adjudication.
+**6 open, of 303 entries.** **None is the reader, and none is a defect anyone can measure.** Three
+`.mbd` rows closed 2026-09-12 — the slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24,
+and -21 by deciding the claim — so `mbd_writer_roundtrip` now forgives no register row at all,
+and ACCOLADE-3 closed the same day and took the last measurable one with it. Every row below is
+an adjudication.
 
 **The Wine oracle is back up, and that is what moved this list.** Recorded as down from
 2026-09-10; fixed 2026-09-11 by app-local ICU next to `MidsReborn.exe`.
@@ -88,21 +89,16 @@ A second shape sits in the same family and is no more adjudicated: Rebirth place
 than answered — the writer states the file's level and warns per slot, so the question is visible
 instead of rehoused into silence.
 
-Two carry an `MBDEXPORT-` id, and neither is the writer's alone. Calling the reader the instrument
-and not a suspect was wrong four times: MBDEXPORT-13 closed through it, -15 was entirely its, -14
-was neither hop's, and -18 was the reader's outright. The round trip measures the pair, never the
-hop — and neither of the two below it can measure at all.
+No `MBDEXPORT-` id is left open. Calling the reader the instrument and not a suspect was wrong
+four times: MBDEXPORT-13 closed through it, -15 was entirely its, -14 was neither hop's, and -18
+was the reader's outright. The round trip measures the pair, never the hop.
 
-In the order they cost a user something:
+The last of them closed by deciding rather than measuring: three code paths wrote a slot level
+and nothing recorded which, so each writer inferred provenance from a proxy. The entry states it
+now, and the two writers stopped disagreeing.
 
-- **MBDEXPORT-21** — a build authored HERE has no levelling history, and the writer now states
-  `slotOrder`'s levels as though it had one; the beta already answers this differently
-
--21 is pinned by nothing, which is why it is a row: it is the clause of MBDEXPORT-18's Done-when
-that a census of files Mids wrote structurally cannot reach, and it is the seam SLOT-3 is held at.
-
-The newest and the cheapest to read is **INHERENT-10**: 59 of 60 archetypes reach a power
-through their declared inherent name, and Thunderspy's Primalist does not. Its fork ships a
+The cheapest to read is **INHERENT-10**: 59 of 60 archetypes reach a power through their
+declared inherent name, and Thunderspy's Primalist does not. Its fork ships a
 meter/dampen pair under that display name and no canonical power. Visible at both ends — a card
 with no numbers, a writer that warns — which is why nothing had gone red. Adjudication, not code.
 
@@ -818,7 +814,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 87 of 92 closed
+[Full detail](gaps/pipeline-provenance.md) — 88 of 92 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -1028,20 +1024,11 @@ measurement went, and where a closure for the residual belongs too.
   the writer had an arm for the seven grid inherents and none for this one, and the name it owed
   was the export's `Inherent.Inherent` row, not the `Inherent.<Archetype>.<Name>` the roster
   synthesises — two archetypes share a `Conditioning`, so the tie-break is the `@Class_` gate
-- [ ] **MBDEXPORT-21** — a build AUTHORED here has no levelling history to carry, and the writer
-  now states `slotOrder`'s levels as though it did. Where the user placed slots one at a time that
-  record is real; where `ensureSlotOrderPopulated` filled it wholesale it is a respec packing
-  wearing the same field, and nothing in the file or the UI tells the two apart. Split out of
-  MBDEXPORT-18 rather than closed with it, because it is the one clause of that row's Done-when
-  no census can grade. The beta has already chosen: SLOT-3's `computeExportSlotLevels` calls
-  itself synthetic and says so once in the UI, and that fork is held open on this question.
-  **Goal** — it is decided in writing what a natively-authored build's slot levels claim, and the
-  two repos' writers stop answering it differently.
-  **Done when** — the decision is written in [gaps/pipeline-provenance.md](gaps/pipeline-provenance.md),
-  canonical and the beta share one answer, and `sync-manifest.json`'s SLOT-3 reason on
-  `src/utils/mids-export.ts` either loses this hunk or names why it keeps it.
-  **Check** — `node scripts/verify-sync.cjs --gate` names the fork; the row closes when that
-  reason no longer cites an undecided question, not when the hashes match.
+- [x] **MBDEXPORT-21** — three code paths wrote a level into `slotOrder` and nothing recorded
+  which, so each repo's writer inferred provenance from a proxy — canonical from "is there a
+  stored entry", the beta from a per-device UI toggle the `.skif` cannot carry; the entry now
+  states `levelSource`, an authored level rides out and a packed one is re-solved and disclosed
+  once, and `mids-export.ts` no longer forks on slot levels at all
 
 - [x] **PARTSTAT-2** — the Dominator `Domination` node in `archetypes.json` hand-copied three values the export owns and had drifted, stating `recharge` 200 on the fork whose export says 180; TS gained the name-join to the `Inherent.Inherent` twin that Rust already had, the card's window is now the longest span its caster-side atoms hold open rather than the bag's modal vote, and the four hand-authored `effects` blocks are gone — atom-less bags 4 → 0
 
