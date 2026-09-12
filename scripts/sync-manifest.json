@@ -218,7 +218,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "1f4a1c822e44e4ee61872ee7b5ee74fe05a28c158cadc3151c3e40940cb4d1d2"
+      "sha256": "c5be2fc2206cb53eb37737d8594e19928296f2036695590342487afc0a3b6a83"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -578,10 +578,10 @@
       "path": "src/data/core/effect-registry.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "44578eea78584bd18b140ba01d94145cc4b6c5bf53e1f5c3d905a522f83dcc82",
-        "beta": "6ac1e72379a61e92b4c982ffa16b56765b98fb0a394f637d2e2f8558d4f7e8fa"
+        "canonical": "deb4d30c3d72f6534e930351a03e099d2af8f7fe906162f5bfedfe6092f0e7f1",
+        "beta": "9b23c7197105047446d9a87b95d328f3b37576d476053221c963768df55d8f2b"
       },
-      "reason": "Five entries' `format` is `value` here and `percent` in the beta, and a format flip is a displayed number off by 100×. Measured 2026-09-11: all five are movement keys (fly, flySpeed, runSpeed, jumpSpeed, jumpHeight) and `contract/effect-registry.json` — the file `coh_math::effect_registry` include_str!s and the beta reads too — already says `percent` on every one. So the shipping pair agrees and canonical's TS is a third copy, alone and wrong, with no gate between the three. That is the fork: the JSON's own header says the sync gate it used to describe no longer exists. The beta also holds four table-reading flags canonical never took (`valueFromTable`, `scalarFromTablePercent`, `maxHpFractionPercentForm`, `strengthAspect`) and the split-slot `Unenhanced` fallback, which is canonical's ENT-6 arriving from the other direction.",
+      "reason": "Five entries' `format` is `value` here and `percent` in the beta, and a format flip is a displayed number off by 100×. Measured 2026-09-11: all five are movement keys (fly, flySpeed, runSpeed, jumpSpeed, jumpHeight) and `contract/effect-registry.json` — the file `coh_math::effect_registry` include_str!s and the beta reads too — already says `percent` on every one. So the shipping pair agrees and canonical's TS is a third copy, alone and wrong, with no gate between the three. That is the fork: the JSON's own header says the sync gate it used to describe no longer exists. The beta also holds four table-reading flags canonical never took (`valueFromTable`, `scalarFromTablePercent`, `maxHpFractionPercentForm`, `strengthAspect`) and the split-slot `Unenhanced` fallback, which is canonical's ENT-6 arriving from the other direction. The contract's 58 `summaryTokens` were mirrored into BOTH copies together (2026-09-12) rather than into the one that needed them, so this field is not a third place the three registries can disagree; the beta's `effectRegistryDrift.test.ts` now grades it against the JSON. Neither TS copy reads them — the gate that does (`coh_math::effect_registry::summary_gate`) is Rust. The fork itself is unchanged: still the five movement formats and the four table-reading flags below.",
       "exit": "Canonical's five formats take the contract's spelling — this file is supposed to be the TS face of that JSON — or a gate makes the JSON the only copy and both TS registries read it. Checkable: for each of the five keys, `EFFECT_REGISTRY[k].format` equals `contract/effect-registry.json`'s, in both repos.",
       "gap": "FORK-7"
     },

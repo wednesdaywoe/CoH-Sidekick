@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**6 open, of 299 entries.** **None is now the reader.** MBDEXPORT-18's reader half landed
+**9 open, of 302 entries.** **None is now the reader.** MBDEXPORT-18's reader half landed
 2026-09-11, 126 → 44, so it no longer outranks the list: what is left of it is writer work and
 three other rows' adjudications.
 
@@ -66,6 +66,16 @@ three other rows' adjudications.
 
 The second symptom was never real — the FastDeepCloner crash is what invariant mode does to Mids,
 not a defect under it. `tools/mids-oracle/mids-wine.sh` carries the setup and the diagnosis.
+
+**2026-09-11, the first session to drive that Mids rather than read its files**, opened three
+rows at once: PROV-3, MBDIMPORT-15 and STATFMT-1, each below with its own line. The through-line
+is that a working Mids grades surfaces our own gates cannot see — none of the three is a parse
+gap, and the PARSER frontier stays clear.
+
+Mids' calc engine is a NEW oracle axis and is not what the trust boundary distrusts: on a
+Mids-authored Blaster the two agree on all 11 defence vectors and all 8 resistances. The bin stays
+the tiebreaker where it always was. [Why that axis is separate, and the 1.15 Max HP
+gap](gaps/method-notes.md#mids-calc-engine-as-an-oracle-axis-2026-09-11).
 
 Beside it sits **MBDIMPORT-14** — Mids grants 3 slots at 47 and 3 at 49 where the
 game's schedule grants none. Censused across all four Mids databases it is invariant, so it is the respec table's
@@ -644,7 +654,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Stat routing + caps
 
-[Full detail](gaps/stat-routing.md) — 70 of 70 closed
+[Full detail](gaps/stat-routing.md) — 70 of 71 closed
 
 - [x] **PERMA-5** — closed 2026-09-05: the veto read the power's own `targetsAffected` leniently
   — a `Target` atom reached the caster unless the list named a FOE — which inverts the one
@@ -796,12 +806,28 @@ measurement went, and where a closure for the residual belongs too.
 - [x] **PASS2B-15** — stacking magnitudes, settled from the binary and the server source
 - [x] **PASS2B-16** — stealth radius, gather-then-resolve
 - [x] **TEAMBUFF-1** — Grant Cover's team-only defense landed in the caster's own totals on all three forks
+- [ ] **STATFMT-1** — `StatFormat::HitPoints` floors where its neighbours round, so one computed
+  number renders two ways: the corpus Blaster's Max HP comes to 1621.91 from the panel's own
+  breakdown (+34.625% on a 1204.7588 base), the Survival panel shows `1621`, and the ledger arm
+  eight lines down — `HitPoints | Points | LevelShift` under a bare `{value:.0}` — shows 1622.
+  Max HP and Absorb carry the floor; Max Endurance, one line away in the same `match`, does not.
+  Against live Mids on the same file the floor is the larger half of the gap: 0.91 of 1.15.
+  Nothing states the intent, and `trim`'s doc comment below argues the other way.
+  **Goal** — one value renders one way, and the floor/round choice is written down with what it
+  is matching.
+  **Done when** — panel and ledger agree on every `HitPoints` stat; the choice is justified
+  against the game's own display rather than left implicit; and Absorb is decided with Max HP
+  rather than inheriting it.
+  **Check** — `grep -n 'value.floor()' crates/app/src/panels/stat_registry.rs` — one hit, and
+  line 279 groups `HitPoints` with `Points` under a bare `{value:.0}`. Both arms agreeing, or the
+  floor gaining a comment naming what it matches, BREAKS the claim that this is unexplained
+  divergence rather than a decision.
 
 ---
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 85 of 89 closed
+[Full detail](gaps/pipeline-provenance.md) — 85 of 91 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -878,6 +904,38 @@ measurement went, and where a closure for the residual belongs too.
   **Check** — `node scripts/keys/mbdimport14-respec-rows-census.cjs` — 4 databases, `NLevels` 0/0
   and `RLevels` 3/3 at 47 and 49 on every one. Any `NLevels` or any export granting there BREAKS
   the claim that these rows are respec-only, and puts a second schedule back in play.
+- [ ] **MBDIMPORT-15** — the importer moves a build's level and three of eight corpus files are
+  moved without a word: `settle_level` raises Mids' floor until the placed slots fit the export's
+  schedule — MBDIMPORT-8's design working — but only `over_budget_at_cap` writes a note, so a
+  raise that lands inside budget writes nothing. The Blaster and both Warshades import at 50 from
+  a floor of 49 and the dialog says only that everything resolved. `raised_from_floor` is set at
+  both return sites and read by nothing but the corpus test. Level is not cosmetic: the same
+  Blaster reads Max HP 1621 at 50 and 1617 at 49.
+  **Goal** — a build whose level the importer moved says so, in the report that already lists
+  what did not resolve.
+  **Done when** — `raised_from_floor` reaches `OpenedReport` the way `over_budget_at_cap` does;
+  the wording separates "re-levelled to fit this server's schedule" from "over budget"; and the
+  three silent corpus files are the fixture that proves it.
+  **Check** — `crates/coh_data/tests/mbd_import_build.rs`'s `expected` table: the blaster and both
+  warshade rows read `(49, 50, true, 0)` — raised, zero excess, therefore no note. Any of the
+  three reading `false`, or gaining a non-zero excess, BREAKS the claim that a silent raise is
+  reachable at all.
+- [ ] **PROV-3** — the structural baseline names its oracle by PATH, the name bridge names its own
+  by VERSION, and only one of them can be checked. `mids-power-names.homecoming.json` carries
+  `version 2026.5.1337`, `powerCount 11002` and the `.mhd`'s sha256 — byte-identical to the
+  database in the Wine prefix. `oracle_divergence_rules.json` carries
+  `MidsReborn-master/.../Homecoming/I12.mhd` and nothing else. They are not the same database: the
+  harness README reports 10,986 powers / 73,553 effects where the current one reads 11,002 /
+  73,431. Master's `I12.mhd` is gitignored and absent from the tree, so DSH5 cannot run as
+  checked out; `read_i12.py` parses the current DB unchanged, self-check passing.
+  **Goal** — the structural baseline states which database produced it, and is produced by the
+  current one.
+  **Done when** — `oracle_divergence_rules.json` carries version + sha256 the way the name bridge
+  does; the baseline is regenerated against 2026.5.1337; and the 2,542-power residual is
+  re-measured against it, since part of it may be DB vintage rather than schema divergence.
+  **Check** — `grep -o '"powerCount": [0-9]*' tools/mids-oracle/mids-power-names.homecoming.json`
+  reads 11002 against the harness README's own 10,986. Those two agreeing BREAKS the claim that
+  the two oracles are different databases, and the re-point is already done.
 - [x] **MBDIMPORT-13** — Mids spells one Rebirth power `Moon_Beam` where the export says
   `Moonbeam`, and the name map's display join folds separators to a space rather than deleting
   them ON PURPOSE, leaving the drift to a matcher ladder the Rust reader omits by design — so

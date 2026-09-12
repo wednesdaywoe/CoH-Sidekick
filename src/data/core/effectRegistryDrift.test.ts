@@ -36,6 +36,9 @@ const RESOLUTION_FIELDS = [
   'scalarFromTablePercent',
   'valueFromTable',
   'maxHpFractionPercentForm',
+  // Authored in the contract and mirrored here. Graded like any other resolution field: an
+  // ungraded field is how this copy drifted into being a third registry in the first place.
+  'summaryTokens',
 ] as const;
 
 /** Fields that stay beta-side because they describe rendering, not resolution. */

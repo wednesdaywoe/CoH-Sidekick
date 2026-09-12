@@ -8,9 +8,15 @@
  *  - `resolveEffectivePower` evaluates `power.quickSnipe.condition` for real (SNIPE-2 —
  *    Homecoming gates on combat engagement, Rebirth/Thunderspy on ToHit ≥ 97%) before calling
  *    this, since it's answering "what does the build show RIGHT NOW".
- *  - `attack-chain-powers.ts` and `useBuildMaxAttackDamage.ts` are answering a different
- *    question ("what does this attack chain look like once the fast form is reachable") and
- *    pass their own simplified boolean deliberately — not a stale copy of this gate.
+ *  - `attack-chain-powers.ts` is answering a different question ("what does this attack chain
+ *    look like once the fast form is reachable") and passes its own simplified boolean
+ *    deliberately — not a stale copy of this gate.
+ *  - The damage-bar SCALE no longer consults this at all. It used to, through
+ *    `useBuildMaxAttackDamage`, which folded over the build's picked powers and had to apply the
+ *    fast form or a fast snipe would self-clamp at 100%. The scale is now the engine's
+ *    `damage_ceiling` over the build's whole powersets, read from set definitions — and
+ *    `DamageBlock` widens its reference to cover any power that out-hits it, which is what
+ *    absorbs the fast form without a second copy of this gate.
  *
  * Single-sourced so every caller applies the SAME stats/damage merge once it decides the fast
  * form is active. If that merge diverged, a fast snipe's bar numerator (boosted damage) would be

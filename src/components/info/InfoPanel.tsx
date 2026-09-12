@@ -31,8 +31,7 @@ import {
   powerFiresProcs,
   getActiveDamageConversion,
 } from '@/data';
-import { useGlobalBonuses, usePowerProjection, usePowerDamageVsRank } from '@/hooks/useCalculatedStats';
-import { useBuildMaxAttackDamage } from '@/hooks/useBuildMaxAttackDamage';
+import { useCharacterCalculation, useGlobalBonuses, usePowerProjection, usePowerDamageVsRank } from '@/hooks/useCalculatedStats';
 import { calculatePowerEnhancementBonuses, combineWithAlphaED, calculatePowerDamage, getAlphaEnhancementBonuses, getAlphaEdBypassBonuses, abbreviateDamageType, calculateArcanaTime, dotTickCount, calculateDamageWithATTable, type EnhancementBonuses, type PowerDamageResult, isControllerPower, isCorruptorAttackPower, isBruteAttackPower, isScrapperAttackPower, isStalkerAttackPower, calculateFuryDamageBonus, calculateAssassinationDamageBonus, getContainmentInfo, getScourgeInfo, getFuryInfo, getEffectiveLevel, areIncarnatesSuppressed } from '@/utils/calculations';
 import { resolveAtMechanic, applyAtMechanicBonus, critBranchSummary, critComponents, VS_HIGHER_RANK_SEGMENT, VS_MINION_RANK_SEGMENT } from '@/utils/calculations/power-at-mechanics';
 import type { IOSetEnhancement } from '@/types';
@@ -161,7 +160,10 @@ function PowerInfo({ powerName, powerSet }: PowerInfoProps) {
   // powered-up state applies (WindSpeed debuffs + lightning folded into damage).
   const stormCellActive = useGlobalAdjuster('stormblast_instormcell', false);
   const globalBonuses = useGlobalBonuses();
-  const maxBuildDamage = useBuildMaxAttackDamage();
+  // The damage-bar scale, off the engine's own totals rather than a second fold in TS. It used
+  // to be `useBuildMaxAttackDamage`, a maximum over the build's PICKED powers — always attained,
+  // so one power read full on every build no matter how hard it actually hit.
+  const maxBuildDamage = useCharacterCalculation().damageCeiling ?? 0;
   const targetLevelOffset = useUIStore((s) => s.targetLevelOffset);
   const incarnateActive = useUIStore((s) => s.incarnateActive);
   const dominationActive = useDominationActive();

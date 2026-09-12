@@ -223,7 +223,11 @@ describe('BPORT4 census — what the strip costs, per seam', () => {
     // `power.effects` — the sweep's grep sees a bag read, the corrected finder sees no slot,
     // and the asymmetry is BPORT4's whole point restated. Pinned as a pair so the bucket
     // cannot grow a REAL reader unnoticed.
-    expect(b.bothRead).toHaveLength(26);
+    // 26 until the damage bar took its scale from the engine: `useBuildMaxAttackDamage` read the
+    // bag to fold over the build's picked powers, and deleting it for `CalcResult.damageCeiling`
+    // took the last reader in that hook with it. A bucket that SHRINKS is the direction this
+    // census exists to measure, so the pin moves down with it.
+    expect(b.bothRead).toHaveLength(25);
     expect(b.bothRead).toContain('src/utils/calculations/character-totals.ts');
     expect(bagSeams('src/utils/calculations/character-totals.ts')).toHaveLength(0);
     // 6 until BPORT5. The sixth was the oracle, and it was never beta-only — canonical kept
