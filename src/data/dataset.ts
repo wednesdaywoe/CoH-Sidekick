@@ -449,6 +449,19 @@ export interface Dataset {
   // it, and `domination-perma-classification.test.ts` reds per fork if one stops.
   archetypeInherentPowerset?: Powerset;
 
+  // The archetypes this fork declares an inherent for and ships no power behind,
+  // as `convert-inherents.cjs` derived it from what it emitted (INHERENT-10).
+  //
+  // The converter runs the resolver's own rule over what it just emitted, so this
+  // agrees with `getArchetypeInherentPowerFor` by construction and is no second
+  // opinion on it. Its job is to be BOUNDED: the membership is a literal a test can
+  // name, so a second archetype entering this state reds instead of being absorbed.
+  //
+  // Optional on the same terms as the powerset above. Absent means "this repo did not
+  // generate the artifact" (the beta) — which is not "every declaration is backed", so
+  // callers must read absence as unknown.
+  archetypesWithoutInherentPower?: readonly { archetypeId: string; declaredName: string }[];
+
   // Raw (untransformed) IO-set registry. Same rationale as `powersetsRaw`, at
   // ~600 KB per server. The `io-sets` facade transforms it to the runtime
   // `IOSetRegistry` lazily.

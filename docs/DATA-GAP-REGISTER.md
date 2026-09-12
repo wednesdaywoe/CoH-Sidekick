@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**6 open, of 303 entries.** **None is the reader, and none is a defect anyone can measure.** Three
+**5 open, of 303 entries.** **None is the reader, and none is a defect anyone can measure.** Three
 `.mbd` rows closed 2026-09-12 — the slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24,
 and -21 by deciding the claim — so `mbd_writer_roundtrip` now forgives no register row at all,
 and ACCOLADE-3 closed the same day and took the last measurable one with it. Every row below is
@@ -97,10 +97,10 @@ The last of them closed by deciding rather than measuring: three code paths wrot
 and nothing recorded which, so each writer inferred provenance from a proxy. The entry states it
 now, and the two writers stopped disagreeing.
 
-The cheapest to read is **INHERENT-10**: 59 of 60 archetypes reach a power through their
-declared inherent name, and Thunderspy's Primalist does not. Its fork ships a
-meter/dampen pair under that display name and no canonical power. Visible at both ends — a card
-with no numbers, a writer that warns — which is why nothing had gone red. Adjudication, not code.
+The cheapest to read was **INHERENT-10**, and it closed 2026-09-12 on the third answer: the
+Primalist HAS no inherent power. Its resource lives in its own powersets, and the pair the fork
+files under the name is a readout and a decay. The fork now states the absence rather than
+leaving it as a lookup that came back empty.
 
 The last is neither the writer's nor the reader's but the oracle behind both. **FIXTURE-3** —
 canonical's TS drops two set-bonus stat keys the contract maps and the Rust routes, and the
@@ -361,7 +361,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Sets, boosts, incarnates, inherents
 
-[Full detail](gaps/sets-boosts-incarnates.md) — 28 of 29 closed
+[Full detail](gaps/sets-boosts-incarnates.md) — 29 of 29 closed
 
 - [x] **HYBRID-2** — Homecoming and its Brainstorm beta dropped the Melee Hybrid's status-protection
   rows at Total Radial Graft and both T4 Embodiments while the tooltip still promises them, where
@@ -373,21 +373,11 @@ measurement went, and where a closure for the residual belongs too.
   either calc; the cap now derives from `max_targets_hit` minus the caster's own slot (byte-identical
   output on all four forks), and the layer stacks against a foe-count input the beta exposes as a
   slider
-- [ ] **INHERENT-10** — Thunderspy's Primalist declares `Primal Energy` and its export ships no
-  `Inherent.Inherent` power under that name: the two answering to it by display name are
-  `Primal_Energy_Meter` and `Primal_Energy_Dampen`, the meter/dampen pair `convert-inherents.cjs`
-  excludes by the same rule that correctly picks Domination over `Domination_Meter`. 1 archetype
-  of 60, on 1 of 4 forks. Both consequences are visible rather than silent — the card shows an
-  inherent with no numbers, and MBDEXPORT-20's writer arm warns and names nothing. Found
-  2026-09-11 by that row's roster sweep, which is the first thing to ask all 60 at once.
-  **Goal** — the Primalist's declared inherent reaches a power, or the declaration is adjudicated
-  as naming a MECHANIC that has no single power.
-  **Done when** — it is decided whether a fork whose inherent is a meter/dampen pair should pair
-  the declared name to one of them, carry the pair, or state that this archetype has none; the
-  converter's exclusion rule says which it is doing either way; and the miss pinned in
-  `archetype-inherent-naming.test.ts` reaches 0 or is restated as the adjudicated shape.
-  **Check** — `node scripts/keys/inherent10-declared-inherent-with-no-power.cjs` — 1 miss, 59
-  paired. MISSES rising is a second archetype in the same state, and it is not this one.
+- [x] **INHERENT-10** — Thunderspy's Primalist declares `Primal Energy` and its export ships no
+  `Inherent.Inherent` power under that name; adjudicated as the export's answer rather than a
+  miss — the resource is granted and spent by the Primalist's own powersets, and the
+  meter/dampen pair filed under the name is a readout and a decay. The forks now state the
+  absence instead of leaving it as an empty lookup, and a guard reds if either half is admitted
 - [x] **INHERENT-9** — the basic-inherent converter dropped the same four mode arrays ACCOLADE-2
   closed, so Sprint, Rest, Brawl and the prestige travel toggles published none of the Kheldian
   form gating the game gives them on every fork; the call landed with the script's FORK-1
