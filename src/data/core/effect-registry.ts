@@ -152,15 +152,11 @@ export function effectValuePrecision(config: EffectDisplayConfig): number {
  * Format a resolved effect value (already in display units — percent points,
  * seconds, etc.) per its full registry config: read the config's declared
  * precision (or the format default) and round-then-strip via the bare
- * [[formatEffectValue]]. Adds the one label-dependent case (Range/Radius
- * render as feet). This is the entry point power-effect rows render through,
- * so precision is owned by the effect definition rather than each component's
- * `toFixed`.
+ * [[formatEffectValue]]. This is the entry point power-effect rows render
+ * through, so precision is owned by the effect definition rather than each
+ * component's `toFixed`.
  */
 export function formatEffectValueForConfig(value: number, config: EffectDisplayConfig): string {
-  if (config.format === 'value' && (config.label === 'Range' || config.label === 'Radius')) {
-    return `${formatPrecision(value, 0)}ft`;
-  }
   return formatEffectValue(value, config.format, effectValuePrecision(config));
 }
 
