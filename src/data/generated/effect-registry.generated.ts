@@ -36,7 +36,7 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
     "range": {
       "label": "Pwr Range",
       "category": "execution",
-      "format": "value",
+      "format": "distance",
       "enhancementAspect": "range",
       "priority": 4
     },
@@ -55,7 +55,7 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
     "radius": {
       "label": "Radius",
       "category": "execution",
-      "format": "value",
+      "format": "distance",
       "priority": 7
     },
     "arc": {
@@ -644,11 +644,17 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
     },
     "healing": {
       "label": "Heal",
-      "category": "execution",
+      "category": "buff",
       "format": "value",
       "enhancementAspect": "heal",
-      "priority": 2,
-      "valueFromTable": true
+      "priority": 0.5,
+      "valueFromTable": true,
+      "summaryTokens": [
+        "heal",
+        "healing",
+        "heal over time",
+        "healing over time"
+      ]
     },
     "defense": {
       "label": "Def",
