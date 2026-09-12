@@ -653,7 +653,8 @@ export const EFFECT_RESOLUTION: Record<string, Record<string, unknown>> =
         "heal",
         "healing",
         "heal over time",
-        "healing over time"
+        "healing over time",
+        "hp"
       ]
     },
     "defense": {

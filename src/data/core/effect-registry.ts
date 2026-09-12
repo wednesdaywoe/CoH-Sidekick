@@ -754,7 +754,7 @@ export const EFFECT_REGISTRY: Record<string, EffectDisplayConfig> = {
     priority: 1,
   },
   healing: {
-    summaryTokens: ['heal', 'healing', 'heal over time', 'healing over time'],
+    summaryTokens: ['heal', 'healing', 'heal over time', 'healing over time', 'hp'],
     label: 'Heal',
     category: 'buff',
     colorClass: STAT_COLORS.healing,
