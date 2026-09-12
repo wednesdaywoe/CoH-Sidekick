@@ -10,7 +10,7 @@
  *        Real import: parse + insert rows into shared_builds.
  *
  * Run with:
- *   npx tsx --import ./scripts/env-loader.ts scripts/bulk-import-mids.ts -- <flags>
+ *   npx tsx --import ./scripts/env-register.mjs scripts/bulk-import-mids.ts -- <flags>
  * Or via npm:
  *   npm run import-mids -- <flags>
  *
