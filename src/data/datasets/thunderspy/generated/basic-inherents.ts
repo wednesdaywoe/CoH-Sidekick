@@ -11,10 +11,12 @@
 
 import type { Power } from '@/types';
 
-/** A universal inherent: an ordinary Power plus the two planner-side facts. */
+/** A universal inherent: an ordinary Power plus the three planner-side facts. */
 export type BasicInherentDef = Power & {
   isLocked?: boolean;
   category?: 'basic' | 'prestige';
+  /** 1-based level the game grants it at; 'available' is the picker's marker, not this. */
+  grantedAtLevel?: number;
 };
 
 export const BASIC_INHERENTS: BasicInherentDef[] = [
@@ -23,6 +25,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "Brawl",
     "fullName": "Inherent.Inherent.Brawl",
     "available": -1,
+    "grantedAtLevel": 1,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -75,6 +78,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "Sprint",
     "fullName": "Inherent.Inherent.Sprint",
     "available": -1,
+    "grantedAtLevel": 1,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -126,6 +130,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "Rest",
     "fullName": "Inherent.Inherent.Rest",
     "available": -1,
+    "grantedAtLevel": 1,
     "autoIssue": true,
     "free": true,
     "isLocked": true,

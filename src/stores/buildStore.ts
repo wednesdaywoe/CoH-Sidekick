@@ -43,7 +43,7 @@ import {
   GRANTED_POWER_GROUPS,
   getExcludedPools,
   getAllPowerPools,
-  getInherentAvailabilityOverride,
+  getInherentGrantLevel,
   getInherentAutoGrantedSlotCount,
   STANCE_GROUPS,
 } from '@/data';
@@ -1347,10 +1347,7 @@ function createInherentSelectedPower(def: InherentPowerDef, characterLevel = 50)
   const slots: (Enhancement | null)[] = def.maxSlots === 0 ? [] : [null];
   // Resolve the effective `available` value: server override wins over the
   // shared default.
-  const override = getInherentAvailabilityOverride(def.internalName);
-  const effectiveAvailable = override !== undefined ? override : def.available;
-  // Use available level + 1 for display (available is 0-indexed), default to level 1
-  const level = (effectiveAvailable != null && effectiveAvailable > 0) ? effectiveAvailable + 1 : 1;
+  const level = getInherentGrantLevel(def);
 
   // Pre-fill any auto-granted inherent slots (e.g. Rebirth Health/Stamina).
   const inherentSlotCount = getInherentAutoGrantedSlotCount(def.internalName, characterLevel);

@@ -37,6 +37,7 @@ import {
   createSpecialEnhancement,
   getSpecialRegistry,
   getInherentAutoGrantedSlotCount,
+  getInherentGrantLevel,
 } from '@/data';
 import type { InherentPowerDef } from '@/data';
 import type { SpecialCategory } from '@/data';
@@ -606,7 +607,7 @@ function createInherentSelectedPower(
   return {
     ...def,
     powerSet: 'Inherent',
-    level: 1,
+    level: getInherentGrantLevel(def),
     slots,
     isLocked: def.isLocked ?? true,
     inherentCategory: def.category,

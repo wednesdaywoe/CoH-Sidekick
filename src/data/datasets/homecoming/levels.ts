@@ -398,6 +398,14 @@ export interface InherentPowerDef extends Power {
   isLocked?: boolean;
   /** Category for grouping (fitness, basic, prestige, archetype) */
   category?: 'fitness' | 'basic' | 'prestige' | 'archetype';
+  /**
+   * 1-based level the game hands this power over at, straight from the fork's
+   * own export (`available_level` + 1). Distinct from `available`, which the
+   * basic-inherent converter overwrites with `-1` to keep these out of the
+   * picker — that marker says "never offered", not "arrives at level 1".
+   * Absent on the hand-authored defs, which state `available` instead.
+   */
+  grantedAtLevel?: number;
 }
 
 /**

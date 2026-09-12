@@ -91,8 +91,14 @@ function userSlotFloor(power: SelectedPower, category: PowerCategory): number {
 }
 
 /** A power's pick level — the earliest a slot on it may be placed. */
-function powerPickLevel(power: SelectedPower, category: PowerCategory): number {
-  return category === 'inherent' ? 1 : power.level;
+function powerPickLevel(power: SelectedPower): number {
+  // This read `category === 'inherent' ? 1` until 2026-09-12, which is a value the
+  // export owns: `character_GrantAutoIssuePowers` gates an auto-issued power on
+  // `available <= level`, so Rest arrives at 2 and Rebirth's Fitness four at 2
+  // while Homecoming's arrive at 1. `createInherentSelectedPower` had already
+  // resolved all of that into `power.level`; the constant threw it away and
+  // stamped every inherent slot at 1 (MBDEXPORT-18, 20 of its 44).
+  return power.level;
 }
 
 interface CategorizedPower {
@@ -231,7 +237,7 @@ function collectRespecDemands(allPowers: CategorizedPower[]): SlotDemand[] {
   const demands: SlotDemand[] = [];
   for (const { power, category } of allPowers) {
     const key = powerKey(category, power.internalName);
-    const pickLevel = powerPickLevel(power, category);
+    const pickLevel = powerPickLevel(power);
     for (let s = userSlotFloor(power, category); s < power.slots.length; s++) {
       demands.push({ key, slotIndex: s, pickLevel });
     }
@@ -258,7 +264,7 @@ function collectLevelingDemands(build: Build, allPowers: CategorizedPower[]): Sl
   const shape = new Map<string, { pickLevel: number; slotCount: number; floor: number }>();
   for (const { power, category } of allPowers) {
     shape.set(powerKey(category, power.internalName), {
-      pickLevel: powerPickLevel(power, category),
+      pickLevel: powerPickLevel(power),
       slotCount: power.slots.length,
       floor: userSlotFloor(power, category),
     });
@@ -287,7 +293,7 @@ function collectLevelingDemands(build: Build, allPowers: CategorizedPower[]): Sl
 
   for (const { power, category } of allPowers) {
     const key = powerKey(category, power.internalName);
-    const pickLevel = powerPickLevel(power, category);
+    const pickLevel = powerPickLevel(power);
     for (let s = userSlotFloor(power, category); s < power.slots.length; s++) {
       if (claimed.has(`${key}|${s}`)) continue;
       demands.push({ key, slotIndex: s, pickLevel });
@@ -327,8 +333,7 @@ function collectAllPowers(build: Build): CategorizedPower[] {
   }
 
   // Sort by effective pick level, then by category for ties.
-  const effectiveLevel = (cp: CategorizedPower) =>
-    cp.category === 'inherent' ? 1 : cp.power.level;
+  const effectiveLevel = (cp: CategorizedPower) => powerPickLevel(cp.power);
 
   allPowers.sort((a, b) => {
     const aLvl = effectiveLevel(a);
@@ -347,7 +352,7 @@ function collectAllPowers(build: Build): CategorizedPower[] {
 function initSlotLevels(allPowers: CategorizedPower[]): Map<string, SlotLevel[]> {
   const result = new Map<string, SlotLevel[]>();
   for (const { power, category } of allPowers) {
-    const pickLevel = category === 'inherent' ? 1 : power.level;
+    const pickLevel = powerPickLevel(power);
     // Slot 0 comes free with the pick. Every later slot starts unassigned and is
     // filled in by the solver, so a slot the solver cannot serve stays visibly
     // null rather than inheriting the pick level.
@@ -760,8 +765,8 @@ export function canMoveSlotLevel(
   if (tLevel === undefined || tLevel === null) return false;
 
   // After the swap, source holds tLevel and target holds sLevel.
-  return tLevel >= powerPickLevel(s.power, s.category) &&
-    sLevel >= powerPickLevel(t.power, t.category);
+  return tLevel >= powerPickLevel(s.power) &&
+    sLevel >= powerPickLevel(t.power);
 }
 
 /**
@@ -875,5 +880,5 @@ function relocatedGrantLevel(
   const remaining = collectDemands(build, collectAllPowers(build)).filter(
     (d) => !(d.key === sourceKey && d.slotIndex === source.slotIndex)
   );
-  return probeGrantLevel(build, powerPickLevel(t.power, t.category), remaining);
+  return probeGrantLevel(build, powerPickLevel(t.power), remaining);
 }

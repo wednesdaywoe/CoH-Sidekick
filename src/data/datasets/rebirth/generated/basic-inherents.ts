@@ -11,10 +11,12 @@
 
 import type { Power } from '@/types';
 
-/** A universal inherent: an ordinary Power plus the two planner-side facts. */
+/** A universal inherent: an ordinary Power plus the three planner-side facts. */
 export type BasicInherentDef = Power & {
   isLocked?: boolean;
   category?: 'basic' | 'prestige';
+  /** 1-based level the game grants it at; 'available' is the picker's marker, not this. */
+  grantedAtLevel?: number;
 };
 
 export const BASIC_INHERENTS: BasicInherentDef[] = [
@@ -23,6 +25,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "Brawl",
     "fullName": "Inherent.Inherent.Brawl",
     "available": -1,
+    "grantedAtLevel": 1,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -135,6 +138,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "Sprint",
     "fullName": "Inherent.Inherent.Sprint",
     "available": -1,
+    "grantedAtLevel": 1,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -181,6 +185,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "Rest",
     "fullName": "Inherent.Inherent.Rest",
     "available": -1,
+    "grantedAtLevel": 2,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -247,6 +252,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "Prestige_Ninja_Run",
     "fullName": "Inherent.Inherent.Prestige_Ninja_Run",
     "available": -1,
+    "grantedAtLevel": 4,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -306,6 +312,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "Prestige_Beast_Run",
     "fullName": "Inherent.Inherent.Prestige_Beast_Run",
     "available": -1,
+    "grantedAtLevel": 4,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -363,6 +370,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "prestige_DVD_Glidep",
     "fullName": "Inherent.Inherent.prestige_DVD_Glidep",
     "available": -1,
+    "grantedAtLevel": 1,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -416,6 +424,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "prestige_Gamestop_Sprintp",
     "fullName": "Inherent.Inherent.prestige_Gamestop_Sprintp",
     "available": -1,
+    "grantedAtLevel": 1,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -468,6 +477,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "prestige_generic_Sprintp",
     "fullName": "Inherent.Inherent.prestige_generic_Sprintp",
     "available": -1,
+    "grantedAtLevel": 1,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -520,6 +530,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "prestige_BestBuy_Sprintp",
     "fullName": "Inherent.Inherent.prestige_BestBuy_Sprintp",
     "available": -1,
+    "grantedAtLevel": 1,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
@@ -572,6 +583,7 @@ export const BASIC_INHERENTS: BasicInherentDef[] = [
     "internalName": "prestige_EB_Sprintp",
     "fullName": "Inherent.Inherent.prestige_EB_Sprintp",
     "available": -1,
+    "grantedAtLevel": 1,
     "autoIssue": true,
     "free": true,
     "isLocked": true,
