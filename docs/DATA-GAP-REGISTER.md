@@ -57,9 +57,10 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**9 open, of 303 entries.** **None is the reader, and none is a defect anyone can measure.** The
-slot-level row closed 2026-09-12 at 0 of its 44, leaving MBDEXPORT-21 — the clause of it no census
-reaches. Every row below is an adjudication, or code already decided.
+**8 open, of 303 entries.** **None is the reader, and none is a defect anyone can measure.** Two
+`.mbd` rows closed 2026-09-12 — the slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24 —
+and `mbd_writer_roundtrip` now forgives no register row at all. Every row below is an
+adjudication.
 
 **The Wine oracle is back up, and that is what moved this list.** Recorded as down from
 2026-09-10; fixed 2026-09-11 by app-local ICU next to `MidsReborn.exe`.
@@ -94,13 +95,11 @@ hop — and neither of the two below it can measure at all.
 
 In the order they cost a user something:
 
-- **MBDEXPORT-16** — a VEAT's branch filing is re-derived; 24 attributions, decided, code owed
 - **MBDEXPORT-21** — a build authored HERE has no levelling history, and the writer now states
   `slotOrder`'s levels as though it had one; the beta already answers this differently
 
--16 is pinned by its POPULATION in `mbd_writer_roundtrip` and closes by DELETING its pin. -21 is
-pinned by nothing, which is why it is a row: it is the clause of MBDEXPORT-18's Done-when that a
-census of files Mids wrote structurally cannot reach, and it is the seam SLOT-3 is held at.
+-21 is pinned by nothing, which is why it is a row: it is the clause of MBDEXPORT-18's Done-when
+that a census of files Mids wrote structurally cannot reach, and it is the seam SLOT-3 is held at.
 
 The newest and the cheapest to read is **INHERENT-10**: 59 of 60 archetypes reach a power
 through their declared inherent name, and Thunderspy's Primalist does not. Its fork ships a
@@ -831,7 +830,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 86 of 92 closed
+[Full detail](gaps/pipeline-provenance.md) — 87 of 92 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -1016,20 +1015,12 @@ measurement went, and where a closure for the residual belongs too.
 - [x] **MBDEXPORT-13** — a power the author excluded came back included, and Brawl, Sprint and Rest arrived switched on: the reader stores the excluded case as `undefined` and the writer tested `isActive !== false`, which `undefined` passes. Mids' own files chose which side moves; two reader-side halves of the same seam closed with it — `StatInclude` diffs 30 → 0
 - [x] **MBDEXPORT-14** — not the writer and not one piece: Winter's Gift is a craftable set that `isInherentlyAttuned` called attuned, off a hand list of DISPLAY NAMES, so the planner dropped the level from every piece of it and the writer sent the `IoLevel: 0` it stamps on anything level-less. The export states attunement per piece — a set naming no `Crafted_*` boost has nothing to slot at a level — and now ships it as `attunedOnly`; Rust's `max_level <= 1` twin reads it too. Slots 3 → 0, and 5 reward sets the heuristic had missed
 - [x] **MBDEXPORT-15** — the empty placements were dropped on the way IN, not on the way out: the importer's inherent branch returned early on an entry holding no piece anywhere, so Rebirth's Health and Stamina arrived as bare roster rows and then vanished whole on the round trip. `buildSlotEntries`, which this row named as the site, was already emitting one slot per placement — empty placements 12 → 0, and six of the eight corpus files now reconcile with no skipped slots at all
-- [ ] **MBDEXPORT-16** — a VEAT's picks come back filed under a different branch: Mids'
-  `night-widow-training` / `widow-teamwork` become `widow-training` / `teamwork`, and 22 of the
-  corpus Night Widow's powers swap which side of that line their `powerset` override sits on. The
-  writer re-derives the filing from the build instead of carrying what the file said. Nothing is
-  lost — every power and every piece is still there — so this is the lowest of the six.
-  **Goal** — a build comes back filed where its author filed it.
-  **Done when** — the writer carries the file's own set per pick. DECIDED 2026-09-11: measured in
-  a real Mids, it is INFORMATION. Changing only `PowerSets[]` leaves the power/slot grid at delta
-  0 (nothing lost) but re-labels the build from *Night Widow Training / Widow Teamwork* to
-  *Widow Training / Teamwork* and drops the branch section headers — Mids holds both records and
-  renders them differently, so the presentation arm is closed.
-  **Check** — `cargo test -p coh_data --test mbd_writer_roundtrip` — the pin counts 24 (2
-  selections + 22 powers) on the one file. A count on a second file means this is not VEAT-shaped
-  and the row is describing the wrong thing.
+- [x] **MBDEXPORT-16** — a VEAT's picks came back filed under a re-derived branch: Mids'
+  `night-widow-training` / `widow-teamwork` became `widow-training` / `teamwork`, 24 attributions
+  on the one corpus Night Widow. Measured in a real Mids 2026-09-11, the filing is INFORMATION —
+  the grid is delta 0 but the build re-labels as a generic Arachnos Widow. The writer now names
+  the branch sets in `PowerSets[0..1]`, read back from the picks' own `powerSet`; the pin is
+  deleted and the corpus reconciles at 0
 - [x] **MBDEXPORT-17** — every level-less piece went out at `IoLevel: 0` where Mids states 49/9/1,
   253 slots invisible to our round trip; a real Mids ignores the field for all three kinds — five
   controlled variants of Mids' OWN files, zeroing only those slots, render pixel-identically over

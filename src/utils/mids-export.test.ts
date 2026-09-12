@@ -434,3 +434,86 @@ describe('mids-export origin enhancements', () => {
     expect(slot.Enhancement.Grade).toBe('SingleO');
   });
 });
+
+/**
+ * MBDEXPORT-16 — which sets a VEAT's file is FILED under.
+ *
+ * The corpus Night Widow grades the case where both roles hold a branch pick, and it is the
+ * only VEAT the corpus has. These are the arms it cannot reach: a build that specialised in
+ * one role only, a build that never specialised, and the boundary the round trip reds on if
+ * the header ever drags the picks along with it.
+ *
+ * Hand-fed, and therefore stating this author's model of the format rather than Mids' —
+ * which is how MBDIMPORT-6 survived. What keeps that honest here is that the claim being
+ * modelled is OURS (which of the build's own sets the header names), and Mids' half of it is
+ * graded against Mids' own bytes next door in `mbd_writer_roundtrip.rs`.
+ */
+describe('mids-export — a VEAT branch is one choice with two sets', () => {
+  const BASE_PRIMARY = 'arachnos-widow/widow-training';
+  const BASE_SECONDARY = 'arachnos-widow/teamwork';
+  const BRANCH_PRIMARY = 'arachnos-widow/night-widow-training';
+  const BRANCH_SECONDARY = 'arachnos-widow/widow-teamwork';
+
+  /** A Widow holding one pick per named set, each filed under the set it came from. */
+  function widow(...setIds: string[]): Build {
+    const pick = (setId: string) => {
+      const set = getPowerset(setId)!;
+      return { ...set.powers[0], powerSet: setId, level: 1, slots: [null] };
+    };
+    const inRole = (role: 'primary' | 'secondary', baseId: string) => ({
+      id: baseId,
+      name: getPowerset(baseId)!.name,
+      powers: setIds
+        .filter((id) => (role === 'primary') === (id === BASE_PRIMARY || id === BRANCH_PRIMARY))
+        .map(pick),
+    });
+    return {
+      id: 'test', name: 'Widow', serverId: 'homecoming',
+      archetype: { id: 'arachnos-widow', name: 'Arachnos Widow' },
+      level: 50, progressionMode: 'auto',
+      primary: inRole('primary', BASE_PRIMARY),
+      secondary: inRole('secondary', BASE_SECONDARY),
+      pools: [], epicPool: null, inherents: [], accolades: [],
+      settings: { globalIOLevel: 50, origin: 'Natural' },
+      sets: {}, incarnates: [], craftingChecklist: [], shoppingListAcquired: [], slotOrder: [],
+    } as unknown as Build;
+  }
+
+  beforeAll(async () => { await loadDataset('homecoming'); }, 120000);
+
+  it('names the base sets for a Widow that never specialised', () => {
+    const mbd = JSON.parse(exportToMids(widow(BASE_PRIMARY, BASE_SECONDARY), false)) as MbdFile;
+    expect(mbd.PowerSets.slice(0, 2))
+      .toEqual(['Widow_Training.Widow_Training', 'Teamwork.Teamwork']);
+  });
+
+  it('names BOTH branch sets when only one role holds a branch pick', () => {
+    // Specialising is what put that pick there, and the archetype pairs the branch's two
+    // sets — so a build whose branch evidence is all in the secondary is still filed under
+    // the branch primary. Mids has no half-branched header to write.
+    const mbd = JSON.parse(exportToMids(widow(BASE_PRIMARY, BRANCH_SECONDARY), false)) as MbdFile;
+    expect(mbd.PowerSets.slice(0, 2))
+      .toEqual(['Widow_Training.Night_Widow_Training', 'Teamwork.Widow_Teamwork']);
+  });
+
+  it('leaves every pick under the set it was filed in', () => {
+    // The header moves and the picks do not. Dragging them along renames a base pick into
+    // the branch set, which is a power Mids will not bind — the loudest way to "fix" this row
+    // wrongly, and what the round trip reds on when the two are wired together.
+    const mbd = JSON.parse(exportToMids(widow(BASE_PRIMARY, BRANCH_PRIMARY, BASE_SECONDARY), false)) as MbdFile;
+    const picks = mbd.PowerEntries.map((e) => e.PowerName).filter((n) => !n.startsWith('Inherent.'));
+    expect(picks.filter((n) => n.startsWith('Widow_Training.Widow_Training.'))).toHaveLength(1);
+    expect(picks.filter((n) => n.startsWith('Widow_Training.Night_Widow_Training.'))).toHaveLength(1);
+    expect(picks.filter((n) => n.startsWith('Teamwork.Teamwork.'))).toHaveLength(1);
+  });
+
+  it('reports a build holding two branches rather than picking one', () => {
+    const { json, warnings } = exportToMidsWithReport(
+      widow(BRANCH_PRIMARY, 'arachnos-widow/fortunata-teamwork'),
+      false,
+    );
+    expect(warnings.map((w) => w.detail).join('\n')).toMatch(/holds powers from 2 branches/);
+    expect((JSON.parse(json) as MbdFile).PowerSets.slice(0, 2))
+      .toEqual(['Widow_Training.Widow_Training', 'Teamwork.Teamwork']);
+  });
+});

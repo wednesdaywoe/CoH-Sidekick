@@ -22,6 +22,7 @@ import {
 import { MIDS_STAT_MAP, MIDS_ORIGIN_TIER, MIDS_DATABASE_FOR_DATASET } from '@/utils/mids-import/mappers';
 import { ARCHETYPE_CLASS_MAP } from '@/utils/enhancement-uid';
 import { getArchetype } from '@/data/archetypes';
+import type { ArchetypeBranch, ArchetypeBranchId } from '@/types/archetype';
 import { headlineArchetypeInherentName } from '@/data/inherent-rules';
 import { isDatasetId, getAllDatasetMetadata } from '@/data/dataset';
 import { getInherentPowers, getArchetypeInherentPowers, POWER_PICK_LEVELS, getPicksGrantedAtLevel, GRANTED_POWER_GROUPS } from '@/data';
@@ -257,6 +258,54 @@ function owningPowerset(
   return holders.length === 1
     ? { id: holders[0].id ?? powersetId, set: holders[0] }
     : { id: powersetId, set: own };
+}
+
+/**
+ * The branch a VEAT specialised into, read off the picks that name its sets.
+ *
+ * A branch is one choice with two sets, and Mids records it in `PowerSets[0..1]` — the corpus
+ * Night Widow is filed under `Widow_Training.Night_Widow_Training` and `Teamwork.Widow_Teamwork`
+ * where its base picks still spell `Widow_Training.Widow_Training.*`. Our reader normalises the
+ * two role ids to the BASE sets (the planner wants them there) and keeps the branch on the picks
+ * that came from it, so the picks are where the file's claim survives on the build.
+ *
+ * Reading it back from them is not a re-derivation: `powerSet` is what the file said, pick by
+ * pick, and `archetype.branches` is the export's own pairing of a branch to its two sets. What
+ * would be a re-derivation is asking which set HOLDS a power — that answer is the dataset's and
+ * has no memory of what the author chose (MBDEXPORT-16).
+ *
+ * One branch pick anywhere settles both roles, because specialising is what put it there. Two
+ * different branches is a build no archetype offers, so it is reported and neither is used —
+ * a half-branched header is a file Mids never writes and we would be inventing its meaning.
+ */
+function branchTaken(build: Build, warnings: MidsExportWarning[]): ArchetypeBranch | null {
+  const archetypeId = build.archetype.id;
+  const branches = (archetypeId ? getArchetype(archetypeId)?.branches : undefined) ?? null;
+  if (!branches) return null;
+
+  const branchOfSet = new Map<string, string>();
+  for (const [branchId, branch] of Object.entries(branches)) {
+    if (branch?.primarySet) branchOfSet.set(branch.primarySet, branchId);
+    if (branch?.secondarySet) branchOfSet.set(branch.secondarySet, branchId);
+  }
+
+  const taken = new Set<string>();
+  for (const power of [...build.primary.powers, ...build.secondary.powers]) {
+    const branchId = branchOfSet.get(power.powerSet);
+    if (branchId) taken.add(branchId);
+  }
+
+  if (taken.size === 0) return null;
+  if (taken.size > 1) {
+    warnings.push({
+      power: build.archetype.name || String(archetypeId ?? 'archetype'),
+      slot: 0,
+      detail: `this build holds powers from ${taken.size} branches (${[...taken].join(', ')}), `
+        + 'so the file names its base sets and Mids will not show it as either',
+    });
+    return null;
+  }
+  return branches[[...taken][0] as ArchetypeBranchId] ?? null;
 }
 
 /**
@@ -814,7 +863,17 @@ export function exportToMidsWithReport(
   // Pad to exactly 4 pool slots
   while (poolPaths.length < 4) poolPaths.push('');
 
-  const powerSets = [primary.path, secondary.path, '', ...poolPaths, epic.path];
+  // The two role headers name the BRANCH set once the build has specialised into one, and the
+  // picks underneath keep their own — which is how Mids' own file spells it, and the whole of
+  // what a VEAT's round trip used to lose (MBDEXPORT-16). Only the header moves: `collect`
+  // below still hands each role its base set, so a base pick goes on writing the base path.
+  const branch = branchTaken(build, warnings);
+  const primaryHeader = branch?.primarySet ? resolveSet(branch.primarySet, 'primary') : primary;
+  const secondaryHeader = branch?.secondarySet
+    ? resolveSet(branch.secondarySet, 'secondary')
+    : secondary;
+
+  const powerSets = [primaryHeader.path, secondaryHeader.path, '', ...poolPaths, epic.path];
 
   // Collect the chosen powers, then lay them out along the pick schedule —
   // Mids reads this array positionally, so grouping by powerset scrambles the
