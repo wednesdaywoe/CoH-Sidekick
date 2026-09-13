@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**4 open, of 304 entries.** **None is the reader, and none is a defect anyone can measure.** Three
+**3 open, of 304 entries.** **None is the reader, and none is a defect anyone can measure.** Three
 `.mbd` rows closed 2026-09-12 — the slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24,
 and -21 by deciding the claim — so `mbd_writer_roundtrip` now forgives no register row at all,
 and ACCOLADE-3 closed the same day and took the last measurable one with it. Every row below is
@@ -72,7 +72,7 @@ not a defect under it. `tools/mids-oracle/mids-wine.sh` carries the setup and th
 **2026-09-11, the first session to drive that Mids rather than read its files**, opened three
 rows at once: PROV-3, MBDIMPORT-15 and STATFMT-1. The through-line is that a working Mids grades
 surfaces our own gates cannot see — none of the three is a parse gap, and the PARSER frontier
-stays clear. MBDIMPORT-15 closed 2026-09-13; the other two are below.
+stays clear. MBDIMPORT-15 and STATFMT-1 both closed 2026-09-13; PROV-3 is below.
 
 Mids' calc engine is a NEW oracle axis and is not what the trust boundary distrusts: on a
 Mids-authored Blaster the two agree on all 11 defence vectors and all 8 resistances. The bin stays
@@ -631,7 +631,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Stat routing + caps
 
-[Full detail](gaps/stat-routing.md) — 70 of 71 closed
+[Full detail](gaps/stat-routing.md) — 71 of 71 closed
 
 - [x] **PERMA-5** — closed 2026-09-05: the veto read the power's own `targetsAffected` leniently
   — a `Target` atom reached the caster unless the list named a FOE — which inverts the one
@@ -783,22 +783,11 @@ measurement went, and where a closure for the residual belongs too.
 - [x] **PASS2B-15** — stacking magnitudes, settled from the binary and the server source
 - [x] **PASS2B-16** — stealth radius, gather-then-resolve
 - [x] **TEAMBUFF-1** — Grant Cover's team-only defense landed in the caster's own totals on all three forks
-- [ ] **STATFMT-1** — `StatFormat::HitPoints` floors where its neighbours round, so one computed
-  number renders two ways: the corpus Blaster's Max HP comes to 1621.91 from the panel's own
-  breakdown (+34.625% on a 1204.7588 base), the Survival panel shows `1621`, and the ledger arm
-  eight lines down — `HitPoints | Points | LevelShift` under a bare `{value:.0}` — shows 1622.
-  Max HP and Absorb carry the floor; Max Endurance, one line away in the same `match`, does not.
-  Against live Mids on the same file the floor is the larger half of the gap: 0.91 of 1.15.
-  Nothing states the intent, and `trim`'s doc comment below argues the other way.
-  **Goal** — one value renders one way, and the floor/round choice is written down with what it
-  is matching.
-  **Done when** — panel and ledger agree on every `HitPoints` stat; the choice is justified
-  against the game's own display rather than left implicit; and Absorb is decided with Max HP
-  rather than inheriting it.
-  **Check** — `grep -n 'value.floor()' crates/app/src/panels/stat_registry.rs` — one hit, and
-  line 279 groups `HitPoints` with `Points` under a bare `{value:.0}`. Both arms agreeing, or the
-  floor gaining a comment naming what it matches, BREAKS the claim that this is unexplained
-  divergence rather than a decision.
+- [x] **STATFMT-1** — one hit-point value rendered two ways, 1621 in the panel and 1622 in a
+  ledger, and the game's client settles it: HP becomes an integer through a truncating `(int)`
+  and nothing else (`uiRegister.c:763`), so the panel was right and one `trunc()` helper now
+  serves both — taking two the row had not measured, `{:.0}`'s half-to-even and a `-0` delta;
+  Absorb keeps the format for a stated reason
 
 ---
 
