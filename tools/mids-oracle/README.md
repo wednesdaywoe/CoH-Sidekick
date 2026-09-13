@@ -68,6 +68,10 @@ disagree numerically, the raw `.pigg` bin is the tiebreaker.
 - **`test_read_enhdb.py`** — smoke regression check for the new reader (alignment,
   count floor, and stable identity anchors).
 
+- **`test_diff_harness.py`** — pure-function checks on the DSH5 comparator's record
+  layer (the PROV-4 Enhancement fold and the complete-type-set fold). Needs no `.mhd`
+  and no canonical cache, so unlike the harness itself it runs anywhere.
+
 ## Requirements
 
 Local only — the `.mhd` databases live in a gitignored Wine prefix, so these tools do
@@ -97,6 +101,7 @@ python3 diff_enh_oracle.py --dataset homecoming --value-diff --baseline tools/mi
 python3 diff_enh_oracle.py --dataset homecoming --value-diff --strict
 python3 test_read_enhdb.py
 python3 test_diff_enh_oracle.py
+python3 test_diff_harness.py
 
 # DSH5 production harness (auto-emits the canonical export on first run):
 python3 diff_harness.py                           # full HC sweep, write rules, cohort gate
@@ -198,7 +203,8 @@ concrete power before being folded, never assumed):
 
 | canonicalization | why | where |
 | --- | --- | --- |
-| **complete-type-set fold** | an all-damage/all-position effect: Mids collapses to one `damage_type=None` record; our export lists every type (the bridge splits per-attrib). Fold a complete set → one `All` on both sides. Twin (R/U) folded independently, stays distinct. | Poison Gas Arrow (Mids 1 vs export 8) |
+| **complete-type-set fold** | an all-damage/all-position effect: Mids collapses to one `damage_type=None` record; our export lists every type (the bridge splits per-attrib). Fold a complete set → one `All` on both sides. Twin (R/U) folded independently, stays distinct, and the damage and position sets fold independently too — one group can hold both. | Poison Gas Arrow (Mids 1 vs export 8) |
+| **Enhancement fold** (PROV-4) | Mids spells a strength buff `EffectType.Enhancement` and names the enhanced attribute in a second field, `et_modifies`; our export spells the attribute itself, keeping `Enhancement` only for mez and defense strength (the two families with no effectType of their own). Read `et_modifies` and re-spell in the export's vocabulary. Where it routes is in the rules file under `enhancement_fold`. | Power Boost (SpeedRunning, SpeedFlying and Defense were one key) |
 | **ResEffect fold** | Mids' catch-all for "resistance to a secondary-attribute debuff"; our bridge keeps the affected attrib at `aspect=Res` (the DSH4/DSH6 boundary). Bucket both → `ResEffect`. | Acid Arrow (−regen/−rec/−end…) |
 | **set-not-multiset INV1** | Mids enumerates conditional/DoT/combo scale-tiers as separate records on the *same* key. Collapse drops a whole *distinct* sibling key — never duplicate copies — so compare distinct-key **presence**; count deltas on a shared key are advisory `MULTIPLICITY`. | Claw Swipe (Mids 28 vs export 6 Lethal) |
 | **INV4 resistibility-flip** | a residual key whose base `(effectType\|subType)` exists on the other side with the opposite resistible bit — the twin-collapse axis. Split into its own `RESISTIBILITY_FLIP` class (kept in the worklist; not gated wholesale — Mids self-buff records carry an unresistable convention). | Power Surge (mez-protection U-twins) |
@@ -219,3 +225,8 @@ relabeling (Enhancement = the `aspect=Str` boundary), content scope (incarnate/e
 Mace Beam Blast Smashing+Energy vs our Energy — a concrete candidate finding for the bin
 tiebreaker, DSH7). This is **local-only** (the `.mhd` is gitignored → not in CI yet, DSH7);
 `.oracle_cache/` (the canonical dump) is gitignored, the distilled rules file is committable.
+
+**Re-measured 2026-09-13** on the database PROV-3 re-pointed to, with PROV-4's Enhancement
+fold in: matched 9,198 (`boosts/` joined in July), 2,333 carrying a structural residual,
+**UNCLASSIFIED 5,679**, BY_DESIGN 1,158, RELABEL 404, INV5 89.6%, MULTIPLICITY 1,847. The
+numbers above are the 2026-07-05 snapshot and are kept as the shape of the first sweep.

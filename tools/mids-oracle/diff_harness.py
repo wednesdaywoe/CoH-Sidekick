@@ -9,7 +9,8 @@ The production successor to the DSH1 PoC (`diff_oracle.py`). Where the PoC diffe
      parser export by `full_name`;
   2. keys effects by the **DSH4 canonical identity** (real `(effectType, subType,
      pvMode, resistible)` via the tested `atomic-effect.ts` bridge — the export side
-     is canonicalized once by `emit_canonical.ts`, never re-ported into Python);
+     is canonicalized once by `emit_canonical.ts`, never re-ported into Python), with
+     Mids' `Enhancement`/`et_modifies` pair re-spelled into that vocabulary (PROV-4);
   3. checks the structural invariants (set/count equality = the collapse catcher;
      multi-type completeness; PvE/PvP twin integrity; resistibility present+correct;
      table-name + aspect/attribType agreement as advisory tiers);
@@ -138,9 +139,47 @@ def oracle_subtype(et, dmg, mez):
         return dmg
     if et in ("Mez", "MezResist"):
         return mez
-    if et == "Enhancement":
-        return dmg if dmg not in (None, "None") else mez
     return None
+
+
+# --- PROV-4: Mids' Enhancement encoding -> the attribute it enhances ----------
+# Mids spells a strength buff as `EffectType.Enhancement` and names WHICH attribute
+# in a second field, `et_modifies`. Our export spells the attribute itself, because
+# the bridge reads aspect=Str off the attrib (atomic-effect.ts) — so `Enhancement`
+# survives on our side only for the two families that have no effectType of their
+# own: mez strength (`Enhancement|Held`) and defense strength (`Enhancement|Melee`,
+# `Base_Defense` -> `Enhancement|All`). Everything else keeps its attribute's type
+# at Str: ToHit, Heal, Absorb, Endurance, Movement, RechargeTime, ...
+#
+# Unfolded, `et_modifies` was simply dropped and every Enhancement row in a power
+# collapsed onto one key — Power Boost's SpeedRunning, SpeedFlying and Defense all
+# read `Enhancement|`. So the fold reads et_modifies and re-spells the record in the
+# export's vocabulary; the two cases where our side also says `Enhancement` are the
+# two that need their subType steered off damage_type/mez_type instead.
+_ENH_KEEPS_ENHANCEMENT = {
+    "Mez": "mez_type",          # Enhancement|Held, Enhancement|Sleep, ...
+    "Defense": "damage_type",   # Enhancement|Melee, Enhancement|Smashing, |All
+}
+# et_modifies=Damage is the one name MIDS_ET would round-trip wrong: enhancing the
+# Damage attribute is a damage BUFF, which the bridge writes `<type>_Dmg`@Str ->
+# DamageBuff — not `Damage`, the dealt-damage face.
+_ENH_ET_OVERRIDE = {"Damage": "DamageBuff"}
+
+
+def enhanced_attrib(e):
+    """(effectType, subType) an oracle `Enhancement` row enhances, in export vocab.
+    Returns (None, reason) for an et_modifies with no counterpart in MIDS_ET — the
+    caller counts those into the rules artifact rather than dropping them silently."""
+    etm = e["et_modifies"]
+    vector = _ENH_KEEPS_ENHANCEMENT.get(etm)
+    if vector:
+        return "Enhancement", norm_sub(e[vector])
+    et = _ENH_ET_OVERRIDE.get(etm) or MIDS_ET.get(etm)
+    if not et:
+        return None, f"et_modifies={etm}"
+    if et == "Movement":
+        return et, ""
+    return et, norm_sub(oracle_subtype(et, e["damage_type"], e["mez_type"]))
 
 
 def rec_key(r):
@@ -153,7 +192,14 @@ def rec_key(r):
 
 def _fold_complete(recs):
     """Fold complete damage/position type-sets into a single 'All' (sub='') record,
-    per (effectType, resistible) group — symmetric across oracle and export."""
+    per (effectType, resistible) group — symmetric across oracle and export.
+
+    Both sets fold, independently. One group can hold both vectors: PROV-4's fold
+    puts defense strength in `Enhancement` alongside mez strength, and Power Boost
+    carries all 8 damage types AND all 3 positions there. Folding only the first
+    match left the positions unfolded on the side whose damage set was complete and
+    the damage types unfolded on the side whose wasn't, so a one-type difference
+    read as ten."""
     groups = defaultdict(list)
     for r in recs:
         groups[(r["et"], r["resist"])].append(r)
@@ -163,20 +209,26 @@ def _fold_complete(recs):
         for r in rs:
             by_sub[r["sub"]].append(r)
         subs = {s for s in by_sub if s}
-        fold = COMPLETE_DAMAGE if subs >= COMPLETE_DAMAGE else (
-            COMPLETE_POSITION if subs >= COMPLETE_POSITION else None)
-        if not fold:
-            out.extend(rs)
-            continue
-        k = min(len(by_sub[s]) for s in fold)          # number of complete copies
-        rep = by_sub[next(iter(fold))][0]
-        out.extend({**rep, "sub": ""} for _ in range(k))
-        for s, lst in by_sub.items():
-            out.extend(lst[k:] if s in fold else lst)  # remainders + non-fold subtypes
+        for complete in (COMPLETE_DAMAGE, COMPLETE_POSITION):
+            if not subs >= complete:
+                continue
+            k = min(len(by_sub[s]) for s in complete)  # number of complete copies
+            # the representative donates the folded record's table/scale, so pick it
+            # by name rather than by set-iteration order — the latter moved the
+            # advisory INV5 count by ±1 between runs of an unchanged tree.
+            rep = by_sub[min(complete)][0]
+            out.extend({**rep, "sub": ""} for _ in range(k))
+            for s in complete:
+                by_sub[s] = by_sub[s][k:]              # remainders stay
+        for lst in by_sub.values():
+            out.extend(lst)
     return out
 
 
-def oracle_records(power):
+def oracle_records(power, enh_fold=None):
+    """Oracle effects -> canonical records. `enh_fold` (a Counter) receives the
+    PROV-4 Enhancement census: where each `et_modifies` was routed, and which ones
+    have no counterpart to route to."""
     recs = []
     for e in power["effects"]:
         if e["effect_type"] == "ResEffect":                 # Mids' resistance catch-all
@@ -184,10 +236,21 @@ def oracle_records(power):
                          "table": e["modifier_table"], "pv": e["pv_mode"], "aspect": e["aspect"],
                          "attrib_type": e["attrib_type"], "scale": e["scale"]})
             continue
-        et = MIDS_ET.get(e["effect_type"])
+        if e["effect_type"] == "Enhancement":               # PROV-4
+            et, sub = enhanced_attrib(e)
+            if enh_fold is not None:
+                if et is None:
+                    enh_fold[f"UNROUTED {sub}"] += 1       # sub carries the reason
+                else:
+                    comp = "" if et in COMPARABLE else " (not comparable)"
+                    enh_fold[f"{e['et_modifies']} -> {et}{comp}"] += 1
+        else:
+            et = MIDS_ET.get(e["effect_type"])
+            sub = None if et is None else (
+                "" if et == "Movement"
+                else norm_sub(oracle_subtype(et, e["damage_type"], e["mez_type"])))
         if not et or et not in COMPARABLE:
             continue
-        sub = "" if et == "Movement" else norm_sub(oracle_subtype(et, e["damage_type"], e["mez_type"]))
         recs.append({"et": et, "sub": sub, "resist": e["resistible"], "table": e["modifier_table"],
                      "pv": e["pv_mode"], "aspect": e["aspect"], "attrib_type": e["attrib_type"],
                      "scale": e["scale"]})
@@ -262,7 +325,10 @@ def classify_power(only_o, only_e, od, ed, is_redirect):
 
     for side, only, detail, other_base in (
         ("oracle", only_o, od, e_base), ("export", only_e, ed, o_base)):
-        for (key, resist), n in only.items():
+        # sorted, not set order: `examples` lands in a COMMITTED artefact that
+        # verify-sync hashes across the two repos, so a re-run that reshuffles the
+        # samples of an unchanged tree reads as drift.
+        for (key, resist), n in sorted(only.items()):
             tables = sorted({d["table"] for d in detail.get((key, resist), [])})
             pvs = {d["pv"] for d in detail.get((key, resist), [])}
             et = et_of((key, resist))
@@ -339,9 +405,10 @@ def main(argv=None):
     inv5_matched = inv5_table_agree = 0   # advisory table-agreement stat
     multiplicity_keys = 0         # advisory: same key present both sides, different count
     powers_with_residual = 0
+    enh_fold = Counter()          # PROV-4: where each Mids et_modifies was routed
 
     for fn in matched:
-        od = details_of(oracle_records(oracle[fn]))
+        od = details_of(oracle_records(oracle[fn], enh_fold))
         ed = details_of(export_records(export[fn]["effects"]))
         is_redirect = bool(export[fn].get("redirect"))
         o_keys, e_keys = set(od), set(ed)
@@ -439,6 +506,11 @@ def main(argv=None):
                 "tier": "advisory (Mids string skew)",
             },
         },
+        # PROV-4: Mids' `Enhancement` + `et_modifies` re-spelled in the export's
+        # vocabulary. "(not comparable)" = routed correctly to a type COMPARABLE does
+        # not gate (EnduranceDiscount, MaxHP, Stealth) — the same exclusion a plain
+        # oracle record of that type already gets. "UNROUTED" = no MIDS_ET counterpart.
+        "enhancement_fold": dict(sorted(enh_fold.items(), key=lambda kv: (-kv[1], kv[0]))),
         "summary_by_tier": dict(tier_counts),
         "summary_by_class": dict(class_counts.most_common()),
         "examples": {k: class_examples[k] for k in class_counts},
