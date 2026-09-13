@@ -83,10 +83,10 @@ export interface EffectDisplayConfig {
    * between the buff and debuff key through `category`, so `def` sits on `defense` and
    * `defenseDebuff` alike. Absent on the `execution` rows, which are never gated.
    *
-   * Carried here to keep this copy level with `contract/effect-registry.json` — the drift gate
-   * in `effectRegistryDrift.test.ts` compares the two, and the contract is where the tokens are
-   * authored. Nothing beta-side reads them yet: the gate that consumes them
-   * (`coh_math::effect_registry::summary_gate`) is Rust, and has no TS counterpart.
+   * Authored in `contract/effect-registry.json` and mirrored into both TS copies, so this field
+   * is not a third place the three registries can disagree — `effectRegistryDrift.test.ts`
+   * grades the mirror in each repo. The gate that consumes the tokens
+   * (`coh_math::effect_registry::summary_gate`) is Rust; neither TS copy reads them.
    */
   summaryTokens?: string[];
   /** Base value to multiply by (e.g., accuracy is multiplier × 75% base to-hit) */
@@ -428,14 +428,17 @@ export const EFFECT_REGISTRY: Record<string, EffectDisplayConfig> = {
   },
   movementCapDebuff: {
     summaryTokens: ['spd', 'speed'],
-    // The other half of a slow: `slow` lowers how fast you move, this lowers how fast you are
-    // ALLOWED to move. Same attrib, different face of it (aspect Max vs Cur), so a power can
-    // carry both and they must not collapse into one row.
     label: '-Speed Cap',
     category: 'debuff',
     colorClass: STAT_COLORS.slow,
     format: 'percent',
     canBeByType: true,
+    // The Maximum-aspect half of a movement debuff — it lowers the ceiling the
+    // target's speed clamps against, not the speed itself, so a power can carry
+    // this and `slow` at once and the two must not collapse into one row. Same
+    // enhancement family as `slow`; every row the corpus ships is IgnoreStrength,
+    // so the aspect names the family rule and the per-row mark flattens each
+    // actual row (ENT-4).
     enhancementAspect: 'slow',
     priority: 8,
   },
@@ -935,10 +938,10 @@ export function formatEffectValue(
       return `${formatPrecision(value, dp)} scale`;
     case 'degrees':
       return `${Math.round(value)}°`;
-    // Carried from the contract at PR8: a distance is a UNIT the registry declares, not a
-    // label the renderer recognises. The canonical side used to append feet on
-    // `label === 'Range' || 'Radius'` and no key is labelled `Range` — `range` is `Pwr Range`
-    // — so a power's range read as a bare number beside a radius reading `20ft`.
+    // A distance is a UNIT the registry declares, not a label the renderer recognises. This
+    // used to append feet on `label === 'Range' || 'Radius'`, and no key is labelled `Range`
+    // — `range` is `Pwr Range` — so a power's range read as a bare number beside a radius
+    // reading `20ft`.
     case 'distance':
       return `${Math.round(value)}ft`;
     case 'value':
