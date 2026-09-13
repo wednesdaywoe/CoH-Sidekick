@@ -46,6 +46,98 @@ class TestDiffEnhOracle(unittest.TestCase):
         val = abs(0.1125) * diff_enh_oracle._bonus_multiplier(effect)
         self.assertAlmostEqual(val, 1.125, places=3)
 
+    # --- PROV-5: the comparator's stat vocabulary had drifted from the repo's ---
+
+    def test_aoe_defense_speaks_the_repo_s_spelling(self) -> None:
+        # MEZRES-1 renamed this stat defense_(area) -> defense_(aoe) on the repo
+        # side; the alias stayed behind and split 115 matching rows into a
+        # missing line and an extra line apiece.
+        self.assertEqual(diff_enh_oracle._damage_name("AoE"), "aoe")
+        effect = {"effect_type": "Defense", "damage_type": "AoE", "aspect": "Cur"}
+        self.assertEqual(
+            diff_enh_oracle._oracle_effect_to_stat(effect), "defense_(aoe)"
+        )
+
+    def test_repel_never_enters_the_mez_family_machinery(self) -> None:
+        # Repel is not one of the six the >=6 fold collapses, so a raw key was
+        # collected into mez_seen and dropped. It also must not be eligible to
+        # donate its scale (10.0) as the family's representative value.
+        effect = {"effect_type": "MezResist", "mez_type": "Repel", "aspect": "Res"}
+        stat = diff_enh_oracle._oracle_effect_to_stat(effect)
+        self.assertEqual(stat, "repel_resistance")
+        self.assertFalse(stat.startswith("_mez_resist_raw_"))
+        self.assertFalse(diff_enh_oracle._is_mez_family_member("_mez_resist_raw_Repel"))
+        self.assertAlmostEqual(
+            abs(10.0) * diff_enh_oracle._bonus_multiplier(effect), 1000.0, places=3
+        )
+
+    def test_knockback_protection_and_strength_split_on_aspect(self) -> None:
+        # Same attrib, two faces: a Cur magnitude is protection, an Enhancement
+        # at Str is strength. The name does not discriminate; the aspect does.
+        protection = {
+            "effect_type": "Mez",
+            "mez_type": "Knockback",
+            "aspect": "Cur",
+            "scale": -3.0,
+        }
+        strength = {
+            "effect_type": "Enhancement",
+            "et_modifies": "Mez",
+            "mez_type": "Knockback",
+            "aspect": "Str",
+        }
+        self.assertEqual(
+            diff_enh_oracle._oracle_effect_to_stat(protection), "knockback_protection"
+        )
+        self.assertEqual(
+            diff_enh_oracle._oracle_effect_to_stat(strength), "knockback_strength"
+        )
+
+    def test_res_effect_reads_et_modifies_for_the_slow_triple(self) -> None:
+        # Mids spells slow resistance as one ResEffect row per debuffed attrib,
+        # keyed by et_modifies -- the same second field PROV-4 taught the DSH5
+        # comparator to read. The repo carries one slot for the whole triple.
+        for attrib in ("SpeedRunning", "SpeedFlying", "RechargeTime"):
+            effect = {
+                "effect_type": "ResEffect",
+                "et_modifies": attrib,
+                "aspect": "Res",
+            }
+            self.assertEqual(
+                diff_enh_oracle._oracle_effect_to_stat(effect),
+                "+res(recharge_debuff)",
+                attrib,
+            )
+        # and it does not swallow every ResEffect it meets
+        self.assertIsNone(
+            diff_enh_oracle._oracle_effect_to_stat(
+                {"effect_type": "ResEffect", "et_modifies": "Regeneration", "aspect": "Res"}
+            )
+        )
+
+    def test_speedjumping_is_movement_like_its_three_siblings(self) -> None:
+        # The Enhancement branch spells all four axes; the bare-effectType
+        # branch below it listed three, leaving 24 rows unmapped.
+        for et in ("SpeedRunning", "SpeedFlying", "SpeedJumping", "JumpHeight"):
+            self.assertEqual(
+                diff_enh_oracle._oracle_effect_to_stat(
+                    {"effect_type": et, "aspect": "Cur"}
+                ),
+                "increased_movement",
+                et,
+            )
+
+    def test_stat_vocabulary_reports_a_name_with_no_counterpart(self) -> None:
+        oracle = {"a set": {2: {"defense_(area)": 1.88, "recovery": 1.0}}}
+        repo = {"a set": {2: {"defense_(aoe)": 1.88, "recovery": 1.0}}}
+        oracle_only, repo_only = diff_enh_oracle._stat_vocabularies(oracle, repo)
+        self.assertEqual(oracle_only, ["defense_(area)"])
+        self.assertEqual(repo_only, ["defense_(aoe)"])
+
+    def test_stat_vocabulary_is_silent_when_the_two_sides_agree(self) -> None:
+        both = {"a set": {2: {"defense_(aoe)": 1.88}}, "b set": {5: {"recovery": 1.0}}}
+        self.assertEqual(diff_enh_oracle._stat_vocabularies(both, both), ([], []))
+
     def test_extra_proc_classification_uses_staleness_bucket_for_missing_set(self) -> None:
         bucket, reason = diff_enh_oracle._classify_extra_proc_pair(
             "absolute resolution",

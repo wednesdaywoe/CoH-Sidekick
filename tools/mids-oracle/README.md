@@ -65,8 +65,25 @@ disagree numerically, the raw `.pigg` bin is the tiebreaker.
   This is intentionally a bootstrap worklist generator, not yet the full value-level
   DSH9 gate.
 
+  Two guards sit under `--value-diff`, both of which fail `--strict` **even behind a
+  baseline** (PROV-5). They grade the comparator, not the data, so a baseline must not
+  forgive them:
+  - **stat vocabulary** — the two sides name the same 33 stats and nothing compared
+    the lists. A repo-side rename or an unmapped effect type does not read as an
+    error; it splits one matching row into a `missing` line *and* an `extra` line.
+  - **unmapped oracle effect rows** — an effect this comparator has no name for is a
+    gap in the mapper, not an absence in the data. Prints each shape and its count.
+
+  `proc-data.ts` is one file for all three forks while the oracle DB is one fork's, so
+  procs whose set is absent from the dataset's own `io-sets-raw.ts` are excluded and
+  counted (19 Rebirth-only pairs on a Homecoming run).
+
 - **`test_read_enhdb.py`** — smoke regression check for the new reader (alignment,
   count floor, and stable identity anchors).
+
+- **`enh_oracle_residual_baseline.json`** — the DSH9 committed residual. Carries
+  `read_i12.provenance` for **both** databases it grades (`oracle.enhdb`,
+  `oracle.i12`) since PROV-5; before that it named neither.
 
 - **`test_diff_harness.py`** — pure-function checks on the DSH5 comparator's record
   layer (the PROV-4 Enhancement fold and the complete-type-set fold). Needs no `.mhd`
