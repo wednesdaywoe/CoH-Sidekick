@@ -7,35 +7,29 @@ import { useMemo, useState } from 'react';
 import { useBuildStore, useUIStore } from '@/stores';
 import { useIsTouchDevice } from '@/hooks';
 
-import { getPowerset, getPowerIconPath, MAX_POWER_PICKS, GRANTED_POWER_GROUPS, getPickShadowingInherentPowers, getPowerPicksAtLevel } from '@/data';
+import { getPowerset, getPowerIconPath, MAX_POWER_PICKS, getPickShadowingInherentPowers, getPowerPicksAtLevel } from '@/data';
 import { evaluateRequires, isBuyablePick, setKeyFromId, type RequiresContext } from '@/data/power-requires';
 import { resolvePath } from '@/utils/paths';
 import { ProcPotentialBadge } from './ProcPotentialBadge';
 import type { Power } from '@/types';
 
 /**
- * Set of form sub-power INTERNAL NAMES (auto-granted on HC; redirect-only where the game uses
- * PowerRedirector). Either way, never user-pickable — filter them from the picker.
+ * Set of mode-redirect target INTERNAL NAMES in this powerset. A power the game reaches only
+ * by redirecting from a base is not a pick, whichever fork it is on — read from the powerset's
+ * own `modeVariants` tables rather than from a list of variant names.
  *
- * Computed lazily inside the component because GRANTED_POWER_GROUPS is a
- * dataset-backed Proxy: reading it at module-load time runs before the
- * active dataset has been resolved and throws. Re-evaluated when
- * `build.serverId` changes so a dataset switch picks up the new dataset's
- * granted-power groups.
+ * This used to be seeded with the slottable members of `GRANTED_POWER_GROUPS` as well. That
+ * half is gone: a granted power is one the export marks `AutoIssue`, `isBuyablePick` reads the
+ * mark directly now, and over all four forks the hand-written list caught nothing the mark does
+ * not (ROSTER-2). The redirect half stays because it is the half the mark misses — Rebirth
+ * reaches its Nova attacks by PowerRedirector without ever granting them, 7 powers the export
+ * axis alone would offer for sale.
  *
- * Includes both:
- *   - HC's slottable granted-power members (still works for HC where forms
- *     auto-grant their variants as separate slottable picks).
- *   - Every mode-redirect target in the powerset: a power the game reaches only by redirecting
- *     from a base is not a pick, whichever fork it is on. Read from the powerset's own
- *     `modeVariants` tables rather than a list of variant names.
+ * Still computed inside the component: the dataset-backed powerset resolves per active server,
+ * so this is re-evaluated when `build.serverId` or the set changes.
  */
-function buildFormSubPowerNames(powers: Power[]): Set<string> {
-  const names = new Set<string>(
-    Object.values(GRANTED_POWER_GROUPS)
-      .filter(g => g.slottable)
-      .flatMap(g => g.grantedPowers),
-  );
+function redirectTargetNames(powers: Power[]): Set<string> {
+  const names = new Set<string>();
   for (const p of powers) {
     for (const variant of Object.values(p.modeVariants ?? {})) {
       if (variant.internalName) names.add(variant.internalName);
@@ -249,10 +243,10 @@ export function AvailablePowers({
 
   const powerset = powersetId ? getPowerset(powersetId) : null;
 
-  // Lazy because GRANTED_POWER_GROUPS is dataset-backed; recomputed when the active server
-  // changes (via build.serverId) or the powerset does — the redirect targets are its own.
-  const formSubPowerNames = useMemo(
-    () => buildFormSubPowerNames(powerset?.powers ?? []),
+  // Recomputed when the active server changes (via build.serverId) or the powerset does —
+  // the redirect targets are the set's own.
+  const redirectTargets = useMemo(
+    () => redirectTargetNames(powerset?.powers ?? []),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [build.serverId, powersetId],
   );
@@ -338,10 +332,10 @@ export function AvailablePowers({
         // reader rather than copied here, which is how the hidden-mechanic check came to be
         // wrong in two places at once (SHOWFLAGS-2).
         if (!isBuyablePick(p)) return false;
-        // Filter out form sub-powers (auto-granted on HC; redirect-only on Rebirth).
-        // Match on internalName since form-variant names use that format
-        // (`Bright_Nova_Bolt`); display name (`Bright Nova Bolt`) wouldn't.
-        if (p.internalName && formSubPowerNames.has(p.internalName)) return false;
+        // Filter out mode-redirect targets — reached from a base power, never sold. Match on
+        // internalName since variant names use that format (`Bright_Nova_Bolt`); the display
+        // name (`Bright Nova Bolt`) wouldn't.
+        if (p.internalName && redirectTargets.has(p.internalName)) return false;
         // Filter out powers already granted as archetype inherents
         if (p.internalName && archetypeInherentInternalNames.has(p.internalName)) return false;
         // Evaluate requires expression (handles negation, internal names, powersets)

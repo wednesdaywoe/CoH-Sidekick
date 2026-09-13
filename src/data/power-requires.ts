@@ -311,10 +311,18 @@ export function isBuyablePick(p: Power): boolean {
   // -1 is the auto-grant sentinel; HC's bin stores it unsigned, so it also arrives as 0xFFFFFFFF.
   if (p.available < 0 || p.available >= 0x80000000) return false;
   if (p.powerType === 'Global Enhancement') return false;
+  // The grant itself, at any level. `AutoIssue` is the game handing the power over, and the
+  // level term on it says WHEN, never whether it is bought — Clear Skies arrives once Vacuum
+  // and Vortex are trained and costs nothing (ROSTER-2). The Rust planner has read it
+  // this way all along (`pick_gate`, powers.rs); this side was still inferring the same fact
+  // from a hand-written list of granted powers, which reached neither Clear Skies nor
+  // Thunderspy's Fetid Presence. AutoIssue forces Free (`powers_load.c:950`) and the corpus
+  // agrees on all four forks, so this arm subsumes the Free half of the hidden check below.
+  if (p.autoIssue) return false;
   // Hidden from the Manage screen is not the same as not for sale — see SHOWFLAGS-2 and
-  // the picker's own copy of this filter in AvailablePowers.tsx. `free` is the axis.
-  if ((p.mechanicType === 'hiddenPassive' || p.mechanicType === 'hiddenAuto')
-      && (p.free || p.autoIssue)) return false;
+  // the picker's own copy of this filter in AvailablePowers.tsx. `free` is the axis, and it
+  // still has work to do above: Seismic Shockwaves is handed over Free without AutoIssue.
+  if ((p.mechanicType === 'hiddenPassive' || p.mechanicType === 'hiddenAuto') && p.free) return false;
   return true;
 }
 
