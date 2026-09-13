@@ -494,12 +494,31 @@ for (const { midsKey, ourKey } of paired) {
       continue;
     }
     const ourInternal = candidates[0].internalName;
-    if (ourInternal.toLowerCase() === String(midsInternal).toLowerCase()) continue;
+    // EXACTLY equal, not equal-ignoring-case. Mids resolves a `PowerName` with ordinal
+    // `==`, so its case is part of the name, and a pair differing only in case is a pair
+    // the WRITER has to be told about — skipping it emits our spelling, and Mids answers
+    // with a blank row that keeps the power's slots.
+    //
+    // This compared `toLowerCase()` on both sides and so lost Homecoming's Lingering
+    // Radiation (Mids spells it `Lingering_radiation`) and Rebirth's Wrath of Hell
+    // (`Wrath_of_Hell`) out of every build that held them. The trailing-whitespace pairs
+    // (`Shukuchi `) were never folded and have had rows all along, which is what hid it:
+    // the table plainly carried spelling-only rows while dropping a whole class of them.
+    if (ourInternal === String(midsInternal)) continue;
 
     // Withdraw the row if our target is already spoken for by an identity: Mids carries a
     // power of that exact name, unlocking at the same level. See the header.
+    //
+    // Unless the incumbent IS this row. `midsByName` is keyed case-insensitively, so a pair
+    // that differs only in case finds ITSELF here and withdraws its own row — the guard was
+    // written to stop a display coincidence from stealing a power that Mids already spells
+    // our way, and "already spells it our way" is exactly what a case-only pair is not.
+    // This is the half that kept Lingering Radiation broken after the comparison above was
+    // made exact: our `Lingering_Radiation` lowercases onto Mids' own `Lingering_radiation`,
+    // same level, same power.
     const incumbent = midsByName.get(ourInternal.toLowerCase());
-    if (incumbent && incumbent[2] !== null && candidates[0].level === incumbent[2]) {
+    const incumbentIsThisRow = incumbent && String(incumbent[0]) === String(midsInternal);
+    if (!incumbentIsThisRow && incumbent && incumbent[2] !== null && candidates[0].level === incumbent[2]) {
       stats.levelRejected.push(
         `${ourKey}: "${midsDisplay}" — ${ourInternal} is Mids' own ${incumbent[0]} `
         + `(both level ${incumbent[2]}), not ${midsInternal}`,
@@ -545,13 +564,16 @@ for (const { midsKey, ourKey } of paired) {
       continue;
     }
     const ourInternal = candidates[0].internalName;
-    if (ourInternal.toLowerCase() === String(midsInternal).toLowerCase()) continue;
+    // Exactly equal, for the reason the tight pass above states at length.
+    if (ourInternal === String(midsInternal)) continue;
     // Ours is already answered by the tight pass, or claimed by it: leave it alone.
     if (reverseRows[ourInternal.toLowerCase()] || claimed.has(ourInternal)) continue;
     // The same withdrawal the tight pass takes, and for the same reason — a display
-    // coincidence does not outrank Mids carrying that exact name at that exact level.
+    // coincidence does not outrank Mids carrying that exact name at that exact level — with
+    // the same exemption when the incumbent is this very row.
     const incumbent = midsByName.get(ourInternal.toLowerCase());
-    if (incumbent && incumbent[2] !== null && candidates[0].level === incumbent[2]) {
+    const incumbentIsThisRow = incumbent && String(incumbent[0]) === String(midsInternal);
+    if (!incumbentIsThisRow && incumbent && incumbent[2] !== null && candidates[0].level === incumbent[2]) {
       stats.levelRejected.push(
         `${ourKey}: "${midsDisplay}" (loose) — ${ourInternal} is Mids' own ${incumbent[0]} `
         + `(both level ${incumbent[2]}), not ${midsInternal}`,

@@ -401,12 +401,38 @@ describe('Mids .mbd export — the reverse name table', () => {
         `${fork}: a forward row with no reverse — the generator withdrew one as ambiguous`)
         .toBe(Object.values(map).reduce((n, rows) => n + Object.keys(rows).length, 0));
     }
-    // 95 + 37 + 86 + 94 as generated. A table that stopped being emitted would leave every
+    // 104 + 38 + 94 + 103 as generated. A table that stopped being emitted would leave every
     // loop above unentered and every assertion in it unexecuted. The four grew by 56 at
     // MBDEXPORT-9, when the roster pass reached the powersets whose two spellings share
     // nothing — a powerset with no pair carries no rows, so its rotations were invisible
-    // rather than absent.
-    expect(graded).toBe(312);
+    // rather than absent. They grew by 27 more at MBDEXPORT-23, when the join stopped
+    // folding case: a pair that differs ONLY in case is a pair the writer has to be told
+    // about, and it had been skipped as agreement.
+    expect(graded).toBe(339);
+  });
+
+  /**
+   * A pair that differs only in CASE is still a pair the writer needs (MBDEXPORT-23).
+   *
+   * Two guards conspired to drop this whole class. The join skipped a pair whose names
+   * matched case-insensitively, as agreement; and where that was fixed, the withdrawal
+   * that stops a display coincidence from stealing a power fired anyway, because its
+   * incumbent lookup is also case-insensitive and so found the row it was pairing TO.
+   * Both had to go before a single one of these appeared.
+   *
+   * Named rows rather than a count, because a count is what the assertion above already
+   * is: reverting either guard moves 339 and says nothing about which class went missing.
+   */
+  it('carries a pair that differs only in case, which Mids resolves as a different name', () => {
+    // Homecoming's Mastermind Radiation Emission — the one a whole build class loses.
+    expect(HOMECOMING_REVERSE['mastermind_buff.radiation_emission']['lingering_radiation'])
+      .toBe('Lingering_radiation');
+    // Rebirth's Guardian Hellfire Assault.
+    expect(REBIRTH_REVERSE['guardian_assault.hellfire_assault']['wrath_of_hell'])
+      .toBe('Wrath_of_Hell');
+    // And the forward direction still answers, keyed the lossy way it always was.
+    expect(HOMECOMING_MAP['mastermind_buff.radiation_emission']['lingering_radiation'])
+      .toBe('Lingering_Radiation');
   });
 
   it('keeps the spelling the forward key throws away', () => {

@@ -57,12 +57,13 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 306 entries.** **None is the reader.** Three `.mbd` rows closed 2026-09-12 — the
-slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24, and -21 by deciding the claim — so
-`mbd_writer_roundtrip` now forgives no register row at all, and ACCOLADE-3 closed the same day.
+**4 open, of 310 entries.** **None is the reader.** FIXTURE-3 is the set-bonus oracle's own
+vocabulary; MBDEXPORT-22 and MBDEXPORT-24 are writer rows; ROSTER-2 is a powerset offering two
+picks where the game sells one. All three are new on 2026-09-13, and all came from sweeps.
 
-**The Mids oracle harness is off the frontier.** PROV-3, -4 and -5 all closed 2026-09-13. The
-one open row is the set-bonus oracle, and it predates all three.
+**A corpus is a census of what someone chose to author.** The eight-file corpus holds 86
+enhancements and names about a hundred powers. The sweeps put 2,112 enhancements and all
+7,400 power names to Mids' own reader, and found four rows nobody had a report for.
 
 **A comparator's own vocabulary is data it never checks.** PROV-5's 129 lines were 122
 comparator and 7 label-rounding, none of it the database the row suspected — see the gaps file
@@ -798,7 +799,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 94 of 95 closed
+[Full detail](gaps/pipeline-provenance.md) — 95 of 99 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -987,6 +988,40 @@ measurement went, and where a closure for the residual belongs too.
   the writer had an arm for the seven grid inherents and none for this one, and the name it owed
   was the export's `Inherent.Inherent` row, not the `Inherent.<Archetype>.<Name>` the roster
   synthesises — two archetypes share a `Conditioning`, so the tie-break is the `@Class_` gate
+- [x] **MBDEXPORT-23** — the name map's join skipped a pair whose names matched
+  case-insensitively, as agreement, and Mids resolves a `PowerName` with ordinal `==`: every
+  build holding Lingering Radiation, Wrath of Hell or Tough Hide lost that power and its
+  slots, silently. Reverse rows 312 -> 339 across four forks, verified in a real Mids
+
+- [ ] **MBDEXPORT-24** — the Sentinel's archetype inherent goes out as `Opportunity`, which no
+  Mids database binds: Mids carries three rows displaying "Opportunity" and files the
+  character's own as `Opportunity_Meter`. The name map withdraws the row as a merge — three
+  Mids names onto one of ours, and nothing in the data says which was meant — so the writer
+  falls back to our spelling. Mids re-creates the inherent itself, so the power survives; the
+  row's `VariableValue` slider, which is what MBDEXPORT-20 added the row for, does not. 1 of
+  15 archetypes, 15 of 217 swept Homecoming builds; every other archetype's inherent binds.
+  **Goal** — a Sentinel's inherent row is written under a name Mids resolves, or the build is
+  told it will not be.
+  **Done when** — the merge withdrawal can tell an archetype inherent's THREE display twins
+  apart (level is no tie-break here: all three are level 1), or the writer reports the
+  fallback as a warning the way it reports an unnameable enhancement.
+  **Check** — `scripts/generate-mbd-power-sweep.ts` then the oracle; the row is open while
+  any `Inherent.Inherent.Opportunity` refusal remains.
+
+- [ ] **MBDEXPORT-22** — a crafted set piece below the level MIDS' database allows comes back
+  stronger than it left: our export states Launch, Thrust, Hypersonic and Warp at 15-50, Mids'
+  Homecoming `EnhDB` states 20-50, and Mids clamps a level-15 piece to 20 with no message on
+  either side. 4 sets, 0 corpus files, found only because `generate-mbd-sweep.ts` levels each
+  piece inside its OWN range. The other 5 HC and 2 Rebirth range disagreements are ours-narrower
+  and cannot clamp. Distinct from MBDEXPORT-17, which closed the no-craft-level case and left
+  this one alone by name.
+  **Goal** — a level we write is a level Mids reads back, or the user is told it will not be.
+  **Done when** — `emit_mids_uids.py` carries each set's `level_min`/`level_max` and the writer
+  reports a piece outside the range it is about to be clamped into, OR the range disagreement is
+  adjudicated the way MBDEXPORT-17 was — measured in a real Mids, written down, writer unchanged.
+  **Check** — `npx tsx --import ./scripts/env-register.mjs scripts/generate-mbd-sweep.ts --out
+  /tmp/sweep` then the oracle and reconciler over it; the row is open while any RESTATED remains.
+
 - [x] **MBDEXPORT-21** — three code paths wrote a level into `slotOrder` and nothing recorded
   which, so each repo's writer inferred provenance from a proxy — canonical from "is there a
   stored entry", the beta from a per-device UI toggle the `.skif` cannot carry; the entry now
@@ -1009,6 +1044,19 @@ measurement went, and where a closure for the residual belongs too.
   reloaded onto the file's own dataset, so "what does my live build look like on Brainstorm" was
   unaskable; each now parks the file and offers both opens, and a port re-stamps the build with the
   fork it was read against rather than rebuilding FORKSTAMP-1 by hand
+- [ ] **ROSTER-2** — Rebirth's Wind Control ships `Clear_Skies` and `Clear_Skies_Text`, two
+  powers with one display name ("Clear Skies"), one description, the same unlock level, both
+  `Auto` with `maxSlots: 0`, and both describing themselves as granted automatically once
+  Vacuum and Vortex are trained. The picker offers both as picks, so the set reads as 11
+  choices where the game sells 9, and the `_Text` twin is a name no Mids database carries.
+  Found by the power sweep, which named it and watched Mids refuse it.
+  **Goal** — the roster offers what the game sells, and a power it grants is not a pick.
+  **Done when** — an auto-granted powerset member is classified from the export rather than
+  from the two curated lists the picker filters on (`GRANTED_POWER_GROUPS` and the
+  `modeVariants` targets), which between them reach neither of these.
+  **Check** — `getPowerset` for that set lists 9 pickable powers, and the power sweep names
+  no `Clear_Skies_Text`.
+
 - [x] **ROSTER-1** — 23 powersets across Homecoming and its Brainstorm beta converted cleanly,
   shipped in the contract, passed every corpus gate and could be picked by nobody, because the
   archetype rosters that decide what the Build Identity menu offers are hand-maintained lists no

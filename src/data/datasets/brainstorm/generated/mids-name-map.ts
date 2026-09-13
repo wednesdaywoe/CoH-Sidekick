@@ -13,8 +13,8 @@
  * Source: mids-power-names.homecoming.json, version 2026.5.1337 (sha256 7568ff37f3a6…) — Mids Reborn's
  * own Homecoming database. Mids ships no brainstorm build, so a brainstorm .mbd carries
  * homecoming's namespace.
- * Powersets paired with the export: 3582 of 3653. Remapped names: 94.
- * Reverse rows for the writer: 94, plus 0 the display join could only reach with its separators stripped.
+ * Powersets paired with the export: 3582 of 3653. Remapped names: 103.
+ * Reverse rows for the writer: 103, plus 0 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 3582
  * Mids powersets with no counterpart here: 71 — listed by the generator on stderr.
  *
@@ -124,6 +124,14 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "epic.sentinel_leviathan_mastery": {
     "chum_spray": "Arctic_Breath"
   },
+  "incarnate.alpha_silent": {
+    "defense_debuff_half": "Defense_Debuff_Half",
+    "defense_debuff_rare": "Defense_Debuff_Rare",
+    "defense_debuff_uncommon": "Defense_Debuff_Uncommon",
+    "defense_debuff_very_rare": "Defense_Debuff_Very_Rare",
+    "tohit_debuff_rare": "ToHit_Debuff_Rare",
+    "tohit_debuff_very_rare": "ToHit_Debuff_Very_Rare"
+  },
   "mastermind_buff.kinetics": {
     "kinetic_transfer": "Fulcrum_Shift"
   },
@@ -133,6 +141,7 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "mastermind_buff.radiation_emission": {
     "emp_pulse": "EM_Pulse",
     "enervating__field": "Enervating_Field",
+    "lingering_radiation": "Lingering_Radiation",
     "radiation_emission": "Radiant_Aura"
   },
   "mastermind_buff.shock_therapy": {
@@ -256,6 +265,10 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
     "conqueror_of_the_labyrinth": "Labyrinth_Conqueror",
     "mark_and_recall": "MarkRecall",
     "sheer_willpower": "SFC_Accolade_Power"
+  },
+  "temporary_powers.temporary_powers": {
+    "enhanced_water_jet_lock": "enhanced_water_jet_lock",
+    "tidal_power": "tidal_power"
   },
   "villain_pets.spirit_tree": {
     "spirit_tree": "Spirit_Tree_Taunt"
@@ -397,6 +410,14 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "epic.sentinel_leviathan_mastery": {
     "arctic_breath": "Chum_Spray"
   },
+  "incarnate.alpha_silent": {
+    "defense_debuff_half": "Defense_DeBuff_Half",
+    "defense_debuff_rare": "Defense_DeBuff_Rare",
+    "defense_debuff_uncommon": "Defense_DeBuff_Uncommon",
+    "defense_debuff_very_rare": "Defense_DeBuff_Very_Rare",
+    "tohit_debuff_rare": "ToHit_DeBuff_Rare",
+    "tohit_debuff_very_rare": "ToHit_DeBuff_Very_Rare"
+  },
   "mastermind_buff.kinetics": {
     "fulcrum_shift": "Kinetic_Transfer"
   },
@@ -406,6 +427,7 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "mastermind_buff.radiation_emission": {
     "em_pulse": "EMP_Pulse",
     "enervating_field": "Enervating__Field",
+    "lingering_radiation": "Lingering_radiation",
     "radiant_aura": "Radiation_Emission"
   },
   "mastermind_buff.shock_therapy": {
@@ -529,6 +551,10 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
     "labyrinth_conqueror": "Conqueror_of_the_Labyrinth",
     "markrecall": "Mark_and_Recall",
     "sfc_accolade_power": "Sheer_Willpower"
+  },
+  "temporary_powers.temporary_powers": {
+    "enhanced_water_jet_lock": "Enhanced_Water_Jet_Lock",
+    "tidal_power": "Tidal_Power"
   },
   "villain_pets.spirit_tree": {
     "spirit_tree_taunt": "Spirit_Tree"

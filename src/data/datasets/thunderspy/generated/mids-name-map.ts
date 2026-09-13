@@ -16,8 +16,8 @@
  * Mids Reborn's own releases, which carry Generic, Homecoming and Rebirth; who built it is
  * unrecorded. 286 of our 305 Thunderspy powersets are in it, against 272 of Homecoming's 364.
  * DATA-GAP MBDEXPORT-2.
- * Powersets paired with the export: 3453 of 3535. Remapped names: 86.
- * Reverse rows for the writer: 86, plus 0 the display join could only reach with its separators stripped.
+ * Powersets paired with the export: 3453 of 3535. Remapped names: 94.
+ * Reverse rows for the writer: 94, plus 0 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 3453
  * Mids powersets with no counterpart here: 82 — listed by the generator on stderr.
  *
@@ -39,6 +39,7 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
     "be_gone": "Future_Pain",
     "chronos": "Chronological_Selection",
     "dangerous_acceleration": "Aging_Touch",
+    "end_of_time": "End_of_Time",
     "stable_time_loop": "Time_Lord",
     "temporal_ablation": "Temporal_Healing"
   },
@@ -83,6 +84,9 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   },
   "defender_ranged.earth_assault": {
     "aim": "Power_Boost"
+  },
+  "defender_ranged.holy_light": {
+    "mote_of_light": "Mote_Of_Light"
   },
   "defender_ranged.katana": {
     "aim": "Build_Up",
@@ -138,6 +142,9 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "epic.dominator_atomic_mastery": {
     "electron_haze": "Neutron_Bomb"
   },
+  "incarnate.alpha_silent": {
+    "defense_debuff_half": "Defense_Debuff_Half"
+  },
   "inherent.inherent": {
     "tenacity": "Mez_Resistance"
   },
@@ -147,6 +154,7 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "mastermind_buff.radiation_emission": {
     "emp_pulse": "EM_Pulse",
     "enervating__field": "Enervating_Field",
+    "lingering_radiation": "Lingering_Radiation",
     "radiation_emission": "Radiant_Aura"
   },
   "mastermind_buff.traps": {
@@ -156,6 +164,7 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
     "seeker drones": "Seeker_Drones"
   },
   "mastermind_summon.knights": {
+    "call_men_at_arms": "Call_Men_At_Arms",
     "gash": "Beheader"
   },
   "pool.fighting": {
@@ -173,12 +182,16 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   "pool.utility_belt": {
     "envenomed barrage": "Flying_Kick"
   },
+  "scrapper_defense.invulnerability": {
+    "tough_hide": "Tough_Hide"
+  },
   "scrapper_defense.super_reflexes": {
     "practiced brawler": "Practiced_Brawler"
   },
   "stalker_defense.invulnerability": {
     "resist_elements": "Hide",
-    "resist_energies": "Resist_Forces"
+    "resist_energies": "Resist_Forces",
+    "tough_hide": "Tough_Hide"
   },
   "stalker_defense.spectral_aura": {
     "spectral_shift": "Apparitional_Avoidance"
@@ -191,6 +204,9 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   },
   "tanker_defense.ice_armor": {
     "icy_bastion": "Chilling_Embrace"
+  },
+  "tanker_defense.invulnerability": {
+    "tough_hide": "Tough_Hide"
   },
   "tanker_defense.sacred_armor": {
     "centered": "Geomancy_Root_Bonus",
@@ -225,6 +241,7 @@ export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {
   "defender_ranged.broadsword": "defender_ranged.broad_sword",
   "defender_ranged.earth_combat": "defender_ranged.earth_assault",
   "defender_ranged.martial_combat": "defender_ranged.martial_assault",
+  "defender_ranged.radiant_blast": "defender_ranged.holy_light",
   "defender_ranged.street_justice": "defender_ranged.brawling",
   "dominator_assault.psychokinetic_assault": "dominator_assault.telekinetic_assault",
   "epic.atomic_mastery": "epic.dominator_atomic_mastery",
@@ -260,6 +277,7 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "blaster_support.time_manipulation": {
     "aging_touch": "Dangerous_Acceleration",
     "chronological_selection": "Chronos",
+    "end_of_time": "End_Of_Time",
     "future_pain": "Be_Gone",
     "temporal_healing": "Temporal_Ablation",
     "time_lord": "Stable_Time_Loop"
@@ -305,6 +323,9 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   },
   "defender_ranged.earth_assault": {
     "power_boost": "Aim"
+  },
+  "defender_ranged.holy_light": {
+    "mote_of_light": "Mote_of_Light"
   },
   "defender_ranged.katana": {
     "build_up": "Aim",
@@ -360,6 +381,9 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "epic.dominator_atomic_mastery": {
     "neutron_bomb": "Electron_Haze"
   },
+  "incarnate.alpha_silent": {
+    "defense_debuff_half": "Defense_DeBuff_Half"
+  },
   "inherent.inherent": {
     "mez_resistance": "Tenacity"
   },
@@ -369,6 +393,7 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "mastermind_buff.radiation_emission": {
     "em_pulse": "EMP_Pulse",
     "enervating_field": "Enervating__Field",
+    "lingering_radiation": "Lingering_radiation",
     "radiant_aura": "Radiation_Emission"
   },
   "mastermind_buff.traps": {
@@ -378,7 +403,8 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
     "seeker_drones": "Seeker Drones"
   },
   "mastermind_summon.knights": {
-    "beheader": "Gash"
+    "beheader": "Gash",
+    "call_men_at_arms": "Call_Men_at_Arms"
   },
   "pool.fighting": {
     "slam": "Weapon_Slam",
@@ -395,12 +421,16 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   "pool.utility_belt": {
     "flying_kick": "Envenomed Barrage"
   },
+  "scrapper_defense.invulnerability": {
+    "tough_hide": "Tough_hide"
+  },
   "scrapper_defense.super_reflexes": {
     "practiced_brawler": "Practiced Brawler"
   },
   "stalker_defense.invulnerability": {
     "hide": "Resist_Elements",
-    "resist_forces": "Resist_Energies"
+    "resist_forces": "Resist_Energies",
+    "tough_hide": "Tough_hide"
   },
   "stalker_defense.spectral_aura": {
     "apparitional_avoidance": "Spectral_Shift"
@@ -413,6 +443,9 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   },
   "tanker_defense.ice_armor": {
     "chilling_embrace": "Icy_Bastion"
+  },
+  "tanker_defense.invulnerability": {
+    "tough_hide": "Tough_hide"
   },
   "tanker_defense.sacred_armor": {
     "geomancy_root_bonus": "Centered",
