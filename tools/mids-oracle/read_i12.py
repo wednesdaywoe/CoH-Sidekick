@@ -352,7 +352,7 @@ def read_power(r: Reader) -> dict:
     for _ in range(r.int32() + 1):          # Ignore_Buff: count+1 int32
         r.int32()
     _skip_max = r.boolean()
-    _inherent_type = r.int32()
+    inherent_type = r.int32()
     _display_location = r.int32()
     _mutex_auto = r.boolean()
     _mutex_ignore = r.boolean()
@@ -388,6 +388,14 @@ def read_power(r: Reader) -> dict:
         "level": level,
         "power_type": enum_name(E_POWER_TYPE, power_type),
         "class_name": requires["class_name"],
+        # Mids' `eGridType` — WHICH grid the app places this power on, and 0 means none.
+        # A `.mbd` naming a power Mids grids nowhere is refused with no error, so this is
+        # the field that says whether a name the writer emits can bind at all (MBDEXPORT-24).
+        # Read off Homecoming's `Inherent` group: 2 is the archetype's own inherent (exactly
+        # one per class), 4 the universal grid `SortGridPowers` indexes by position
+        # (Brawl/Sprint/Rest and the four Fitness powers), 6 and 7 the form, toggle and
+        # slider rows Mids re-creates for itself, 8 the prestige sprints.
+        "inherent_type": inherent_type,
         "ignore_strength": ignore_strength,
         "effects": effects,
     }

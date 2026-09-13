@@ -16,6 +16,7 @@
  * Reverse rows for the writer: 104, plus 0 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 3596
  * Mids powersets with no counterpart here: 57 — listed by the generator on stderr.
+ * Archetype inherents Mids grids: 15.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset homecoming
  */
@@ -294,6 +295,43 @@ export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = {
   "mastermind_buff.electrical_affinity": "mastermind_buff.shock_therapy",
   "mastermind_pets.seeker_drone": "pets.traps_seeker",
   "redirects.arsenal_assault": "mission_maker_attacks.arsenal_assault"
+};
+
+/**
+ * Mids' `Class_X` → its own name for that archetype's inherent (DATA-GAP MBDEXPORT-24).
+ *
+ * The `.mbd` archetype-inherent row is addressed by NAME, and Mids has more names than
+ * powers: Homecoming carries `Opportunity`, `Opportunity_Icon` and `Opportunity_Meter`,
+ * all displaying "Opportunity", all level 1, all gated to `Class_Sentinel`. Neither the
+ * display join above nor its level tie-break separates three rows like that, and the merge
+ * withdrawal is right to refuse them — read backwards the names hold no answer.
+ *
+ * Mids' own `eGridType` holds it instead: it says which grid the app places a power on,
+ * and a power it grids nowhere is refused out of a build file with no error. So this is not
+ * a rotation table and must not be read as one. It carries one row per class rather than
+ * per name that MOVED, and its value is the power Mids will actually place — for fourteen
+ * of fifteen archetypes that is the same string we would have written anyway.
+ *
+ * A class MISSING from this table is a real state, not an oversight: Mids grids no inherent
+ * for it, so there is no name here that would bind and the writer says so rather than
+ * writing one that will vanish.
+ */
+export const MIDS_ARCHETYPE_INHERENT: Readonly<Record<string, string>> = {
+  "Class_Arachnos_Soldier": "Spider_Conditioning",
+  "Class_Arachnos_Widow": "Widow_Conditioning",
+  "Class_Blaster": "Defiance",
+  "Class_Brute": "Rage_Buff",
+  "Class_Controller": "Containment",
+  "Class_Corruptor": "Scourge",
+  "Class_Defender": "Vigilance",
+  "Class_Dominator": "Domination",
+  "Class_Mastermind": "Supremacy",
+  "Class_Peacebringer": "Cosmic_Balance",
+  "Class_Scrapper": "Critical_Hit",
+  "Class_Sentinel": "Opportunity_Meter",
+  "Class_Stalker": "Assassination",
+  "Class_Tanker": "Gauntlet",
+  "Class_Warshade": "Dark_Sustenance"
 };
 
 /**

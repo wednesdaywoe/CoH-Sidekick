@@ -25,6 +25,7 @@ import {
   midsNameForExport,
   midsPowersetPathForExport,
   midsPowersetPathsKnown,
+  midsArchetypeInherentName,
 } from '@/data/mids-name-map';
 import { MIDS_STAT_MAP, MIDS_ORIGIN_TIER, MIDS_DATABASE_FOR_DATASET } from '@/utils/mids-import/mappers';
 import { ARCHETYPE_CLASS_MAP } from '@/utils/enhancement-uid';
@@ -1055,15 +1056,46 @@ export function exportToMidsWithReport(
   const atInherentName = archetypeId ? headlineArchetypeInherentName(archetypeId) : undefined;
   if (atInherent && atInherentName) {
     const segments = atInherentName.split('.');
+    // The leaf comes from Mids' grid, not from the name rotation (DATA-GAP MBDEXPORT-24).
+    // `rotateFullName` answers "what does Mids call this power", and for this one row that
+    // is the wrong question twice over. Mids carries THREE `Inherent.Inherent` rows
+    // displaying "Opportunity" at level 1 under `Class_Sentinel` — the plain one, `_Icon`
+    // and `_Meter` — so the name map's display join has nothing to separate them with and
+    // rightly withdraws, leaving our own spelling. Ours is the one of the three Mids places
+    // on no grid, and a power Mids grids nowhere is refused out of a build file with no
+    // error: every Sentinel build handed over lost the row MBDEXPORT-20 added.
+    //
+    // `midsArchetypeInherentName` asks the question this row actually has: which power does
+    // Mids grid as this class's inherent. One row per class, keyed on the same token stamped
+    // into `Class` above. For fourteen of fifteen archetypes it answers what the rotation
+    // would have.
+    const gridded = midsClass ? midsArchetypeInherentName(midsClass) : undefined;
+    const midsFullName = gridded
+      ? `${segments[0]}.${segments[1]}.${gridded}`
+      : rotateFullName(atInherentName, `${segments[0]}.${segments[1]}`);
     powerEntries.push(buildPowerEntry(
       atInherent,
-      rotateFullName(atInherentName, `${segments[0]}.${segments[1]}`),
+      midsFullName,
       'inherent',
       slotLevels,
       solvedLevels,
       targetsHitValues,
       warnings,
     ));
+    if (!gridded) {
+      // A miss here is not the rotation table's "the two names agree" — that table holds one
+      // row per CLASS, so a miss means Mids grids no inherent for this archetype and no name
+      // exists that it would bind. Ours goes out anyway, because a row Mids drops still costs
+      // less than a row we never wrote, and the file says what we believe. Said, not swallowed:
+      // this is the state the Sentinel was in unreported, and the Thunderspy drop leaves the
+      // Stalker in it — `Assassination` is in its database and on none of its grids.
+      warnings.push({
+        power: declaredInherent ?? atInherent.name,
+        slot: 0,
+        detail: `Mids' database grids no archetype inherent for ${midsClass || 'this class'}, `
+          + `so ${midsFullName} is written as we spell it and may open as no row at all`,
+      });
+    }
   } else if (declaredInherent) {
     // The archetype declares an inherent and we cannot name the power behind it, so
     // the file goes out a power short. Said, not swallowed: the synthesised name
