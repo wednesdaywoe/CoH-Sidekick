@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**3 open, of 304 entries.** **None is the reader, and none is a defect anyone can measure.** Three
+**2 open, of 304 entries.** **None is the reader, and none is a defect anyone can measure.** Three
 `.mbd` rows closed 2026-09-12 — the slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24,
 and -21 by deciding the claim — so `mbd_writer_roundtrip` now forgives no register row at all,
 and ACCOLADE-3 closed the same day and took the last measurable one with it. Every row below is
@@ -79,15 +79,10 @@ Mids-authored Blaster the two agree on all 11 defence vectors and all 8 resistan
 the tiebreaker where it always was. [Why that axis is separate, and the 1.15 Max HP
 gap](gaps/method-notes.md#mids-calc-engine-as-an-oracle-axis-2026-09-11).
 
-Beside it sits **MBDIMPORT-14** — Mids grants 3 slots at 47 and 3 at 49 where the
-game's schedule grants none. Censused across all four Mids databases it is invariant, so it is the respec table's
-convention and not any fork's data; what is unadjudicated is whether the game has a respec
-schedule at all, which our export structurally cannot say.
-
-A second shape sits in the same family and is no more adjudicated: Rebirth places 3 slots at 9,
-13, 17 and 23 where our table grants 2. Both left the slot-level census by being CARRIED rather
-than answered — the writer states the file's level and warns per slot, so the question is visible
-instead of rehoused into silence.
+One slot-table shape is still unadjudicated: Rebirth places 3 slots at 9, 13, 17 and 23 where our
+table grants 2. It left the slot-level census by being CARRIED rather than answered — the writer
+states the file's level and warns per slot, so the question is visible instead of rehoused into
+silence.
 
 No `MBDEXPORT-` id is left open. Calling the reader the instrument and not a suspect was wrong
 four times: MBDEXPORT-13 closed through it, -15 was entirely its, -14 was neither hop's, and -18
@@ -793,7 +788,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 90 of 93 closed
+[Full detail](gaps/pipeline-provenance.md) — 91 of 93 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -853,23 +848,11 @@ measurement went, and where a closure for the residual belongs too.
   `Epic.Guardian_Fire_Mastery`) had no row and resolved to nothing, taking its picks with it — 10
   holdable sets on Homecoming, 18 on Rebirth; `powersetPath` states the pairing the writer's way
   round, so the reader inverts it as a second door, trimmed and refusing a contested path
-- [ ] **MBDIMPORT-14** — Mids grants 3 slots at level 47 and 3 at 49 where the game's schedule
-  grants none, and the surplus is the respec table's on every fork: over all four Mids databases
-  (Generic, Homecoming, Rebirth, Thunderspy) `NLevels` grants 0 at both levels and `RLevels`
-  grants 3 at both, invariant, while our four exports grant 0. So it is not Rebirth-shaped, not a
-  fork divergence and not an author's editing — the three readings MBDIMPORT-11 left open. It has
-  sat inside that CLOSED entry's narrative since 2026-09-10, where the frontier cannot see it.
-  **Goal** — the 6-slot respec surplus is adjudicated in writing: Mids' own invention, or a grant
-  the game makes that our export structurally cannot carry.
-  **Done when** — the question is answered against something outside our pipeline, because the
-  binary holds one schedule (`ParseSchedules`, single member) and absence from the export is not
-  evidence of absence from the game — a live Mids under Wine, a respec observed on a live server,
-  or a written adjudication that 67 stands on Rule 0; and `excessOverServerBudget`'s message is
-  re-read against whichever way it lands, since a respec-planned Homecoming build spends 73 and is
-  told it is over the server's budget by six.
-  **Check** — `node scripts/keys/mbdimport14-respec-rows-census.cjs` — 4 databases, `NLevels` 0/0
-  and `RLevels` 3/3 at 47 and 49 on every one. Any `NLevels` or any export granting there BREAKS
-  the claim that these rows are respec-only, and puts a second schedule back in play.
+- [x] **MBDIMPORT-14** — Mids planned 6 slots our export does not grant, at levels 47 and 49, and
+  a live Homecoming respec settles it: the screen hands out one flat pool of 67 with no levels in
+  it, and levelling gives a POWER at 47 and 49 and slots at 48 and 50 — which our export already
+  said, level for level. `RLevels.mhd` is Mids' `NLevels` with 3 bolted onto each of the two power
+  levels, so 67 stands on evidence rather than on Rule 0, and the over-budget warning is right
 - [x] **MBDIMPORT-15** — the importer raised a build's level to fit this server's schedule and
   only said so when the placements also overran it, so 3 of 8 corpus files moved from Mids' 49 to
   50 under a receipt reading "everything resolved" — a different row of the archetype's hit-point
