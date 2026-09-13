@@ -12,8 +12,8 @@
  *
  * Source: mids-power-names.rebirth.json, version 2023.7.445 (sha256 d4c0b142ba76…) — Mids Reborn's own
  * Rebirth database.
- * Powersets paired with the export: 3470 of 3547. Remapped names: 37.
- * Reverse rows for the writer: 37, plus 1 the display join could only reach with its separators stripped.
+ * Powersets paired with the export: 3470 of 3547. Remapped names: 38.
+ * Reverse rows for the writer: 38, plus 1 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 3470
  * Mids powersets with no counterpart here: 77 — listed by the generator on stderr.
  *
@@ -56,6 +56,9 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   },
   "guardian_assault.electricity_assault": {
     "havok_punch": "Havoc_Punch"
+  },
+  "guardian_assault.hellfire_assault": {
+    "wrath_of_hell": "Wrath_Of_Hell"
   },
   "guardian_assault.icy_assault": {
     "greater_ice_sword": "Ice_Slash"
@@ -182,6 +185,9 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   },
   "guardian_assault.electricity_assault": {
     "havoc_punch": "Havok_Punch"
+  },
+  "guardian_assault.hellfire_assault": {
+    "wrath_of_hell": "Wrath_of_Hell"
   },
   "guardian_assault.icy_assault": {
     "ice_slash": "Greater_Ice_Sword"
