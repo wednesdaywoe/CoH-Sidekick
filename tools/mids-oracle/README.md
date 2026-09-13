@@ -133,6 +133,11 @@ disagree numerically, the raw `.pigg` bin is the tiebreaker.
   ours-only across 22 of 439 Homecoming powersets — mostly Mids-side typos (`Brillant
   Barrage`, `Sonic  Repulsion`), Homecoming renames Mids has not absorbed (`Blinding Powder`
   is `Smoke Flash` now), and the Kheldian form powers Mids keeps under `Inherent`.
+  Both of those join on DISPLAY name, which is an identity only while a display name names one
+  power. `oursOnlyInternal` is the leg for when it does not: a display name our export files
+  over two powers, listed by internal name, which is what the reconciler reads first. Scoped to
+  that doubling on purpose — unscoped it forgives 104 Homecoming names (DRIFTBASE-1). Currently
+  0 on Homecoming and 2 on Rebirth, both `Clear_Skies_Text`.
   Regenerate alongside `mids-power-names.<dataset>.json`; the stamped sha256 is what makes a
   Mids database update visible in the diff.
 
