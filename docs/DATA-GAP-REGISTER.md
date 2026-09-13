@@ -57,14 +57,16 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**2 open, of 306 entries.** **None is the reader.** Three `.mbd` rows closed 2026-09-12 — the
+**1 open, of 306 entries.** **None is the reader.** Three `.mbd` rows closed 2026-09-12 — the
 slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24, and -21 by deciding the claim — so
 `mbd_writer_roundtrip` now forgives no register row at all, and ACCOLADE-3 closed the same day.
 
-**One of the two open rows is the Mids oracle harness.** PROV-3 and PROV-4 closed 2026-09-13,
-leaving PROV-5, what re-pointing the DSH9 leg found: it reads an older enhancement database than
-everything else here, and its 129 residual lines are measured but not adjudicated — do not
-re-baseline it first. The other open row is the set-bonus oracle, and it predates all three.
+**The Mids oracle harness is off the frontier.** PROV-3, -4 and -5 all closed 2026-09-13. The
+one open row is the set-bonus oracle, and it predates all three.
+
+**A comparator's own vocabulary is data it never checks.** PROV-5's 129 lines were 122
+comparator and 7 label-rounding, none of it the database the row suspected — see the gaps file
+before trusting any residual count here.
 
 **A tool nothing runs is a tool nothing checks.** DSH5 had been dead since COND-8 landed on
 2026-08-13, and stale for three weeks before that — its export side gained a namespace and a
@@ -796,7 +798,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 93 of 95 closed
+[Full detail](gaps/pipeline-provenance.md) — 94 of 95 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -878,24 +880,12 @@ measurement went, and where a closure for the residual belongs too.
   12,001 → 5,679: 6,503 resolved, 181 the collapsed key had hidden — one a taunt set's
   `Enhancement|Placate` reading as a relabel. Took `_fold_complete` folding both complete sets,
   and by name: set order had been moving INV5 ±1 between runs of one tree
-- [ ] **PROV-5** — the DSH9 enhancement oracle read a database nothing else here reads.
-  `diff_enh_oracle.py` died on PROV-3's absent `I12.mhd`; `read_enhdb.py` defaulted into the same
-  vendored tree, which DOES hold an older `EnhDB.mhd` (`bf5b978e…` against the prefix's
-  `b5b4379d…`), so it never failed loudly. Both defaults now derive from `read_i12.DEFAULT_MHD`.
-  129 new residual lines followed, and 122 of them were this comparator rather than either
-  database: five stat-vocabulary defects and a proc file read unforked. Set-bonus missing/extra
-  is now 0 and 0 — the whole residual, not just the 129's share. Both DB vintages produce the
-  same 129, so none of it was vintage. Two guards added, failing `--strict` behind a baseline.
-  7 held: the export reads `0.0101`×`SetBonusPetShare` = 2.525 where Mids stores 0.025, and
-  damage tiers 1/3/5/7 land round and agree exactly.
-  **Goal** — the DSH9 residual is measured against the database the rest of the tooling reads, and
-  its baseline says which one that was.
-  **Done when** — the 129 are adjudicated (both guesses in the original row were wrong), the 7 are
-  settled against the live server, `enh_oracle_residual_baseline.json` carries
-  `read_i12.provenance`, and it is re-emitted on the current DB.
-  **Check** — `python3 -c "import json;print(sorted(k for k,v in json.load(open('tools/mids-oracle/enh_oracle_residual_baseline.json')).items() if not isinstance(v,(list,dict))))"`
-  prints `[]`. Any provenance key appearing there BREAKS the claim that the baseline is
-  unattributed.
+- [x] **PROV-5** — DSH9 graded an EnhDB nothing else read and cited neither database; both
+  defaults derive from `read_i12.DEFAULT_MHD` now and the baseline carries `read_i12.provenance`
+  for both. 122 of the 129 residual lines were this comparator — five stat names it emitted that
+  the repo had no slot for, plus a proc file read unforked; missing/extra 58/86 → 0/0. Two guards
+  that fail `--strict` behind a baseline, because they grade the comparator. The 7 are Mids
+  storing the authored label where the scale grants 2.525
 - [x] **MBDIMPORT-13** — Mids spells one Rebirth power `Moon_Beam` where the export says
   `Moonbeam`, and the name map's display join folds separators to a space rather than deleting
   them ON PURPOSE, leaving the drift to a matcher ladder the Rust reader omits by design — so
