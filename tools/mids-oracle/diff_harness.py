@@ -322,7 +322,8 @@ def main(argv=None):
 
     # oracle (Mids) — every power in the HC main DB, keyed by full_name.
     with open(os.path.abspath(args.mhd), "rb") as fh:
-        powers, _ = read_i12.read_powers(fh.read())
+        oracle_buf = fh.read()
+    powers, oracle_power_count = read_i12.read_powers(oracle_buf)
     oracle = {p["full_name"].lower(): p for p in powers}
     export = load_canonical(args.canonical, args.emit)
 
@@ -408,7 +409,11 @@ def main(argv=None):
     total_comparable = inv5_matched + sum(tier_counts.values())
     rules = {
         "schema": "dsh5-oracle-divergence-rules/1",
-        "oracle": os.path.relpath(os.path.abspath(args.mhd), REPO),
+        # PROV-3: this was the relative path and nothing else, into a gitignored tree
+        # that no longer held the file. `read_i12.provenance` is the same primitive the
+        # name bridge stamps, so the two artefacts can be told apart — or told to be the
+        # same database — without either of them being rerun.
+        "oracle": read_i12.provenance(args.mhd, oracle_buf, oracle_power_count),
         "note": "Mids = structural oracle only (~5wk rebalance-stale, typo-carrying "
                 "strings). STRUCTURAL/UNCLASSIFIED gate; NUMERIC_DRIFT + table/aspect "
                 "skew are advisory. Regen locally; the .mhd is gitignored.",

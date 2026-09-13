@@ -29,16 +29,14 @@ import read_i12
 
 HEADER = "Mids Reborn Enhancement Database"
 
-DEFAULT_MHD = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..",
-    "..",
-    "MidsReborn-master",
-    "MidsReborn",
-    "Databases",
-    "Homecoming",
-    "EnhDB.mhd",
-)
+# The Homecoming enhancement database, beside the main one `read_i12.DEFAULT_MHD` reads,
+# so the two DSH legs are on one Mids install rather than on two by coincidence. This
+# pointed into `MidsReborn-master/` until PROV-3 (2026-09-13); that tree still HOLDS an
+# `EnhDB.mhd`, which is why nothing broke loudly — it is simply an older one
+# (bf5b978e… against the prefix's b5b4379d…), so DSH9 was grading against a database
+# nothing else here reads. The Rebirth pair is byte-identical between the two trees,
+# which is what makes the Homecoming difference signal rather than noise.
+DEFAULT_MHD = os.path.join(os.path.dirname(read_i12.DEFAULT_MHD), "EnhDB.mhd")
 
 E_EFF_MODE = ["Enhancement", "FX", "PowerEnh", "PowerProc"]
 E_BUFF_DEBUFF = ["Any", "BuffOnly", "DeBuffOnly"]

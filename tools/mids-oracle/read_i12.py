@@ -39,6 +39,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import struct
@@ -397,10 +398,57 @@ def read_power(r: Reader) -> dict:
 POWERS_MARKER = b"\x0cBEGIN:POWERS"     # .NET string: 0x0c len prefix + "BEGIN:POWERS"
 SUMMONS_MARKER = "BEGIN:SUMMONS"
 
-DEFAULT_MHD = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..", "..", "MidsReborn-master", "MidsReborn", "Databases", "Homecoming", "I12.mhd",
+# The Homecoming main database, in the Wine prefix `tools/mids-oracle/mids-wine.sh`
+# drives. This pointed into `MidsReborn-master/` until PROV-3 (2026-09-13) — a vendored,
+# gitignored source tree that holds only the two `EnhDB.mhd` files on this checkout, so the
+# default resolved to nothing and DSH5 could not be rerun as checked out. A path into a
+# gitignored tree is not a citation; `provenance()` below is what an artefact should carry.
+DEFAULT_MHD = os.path.expanduser(
+    "~/Games/mids-reborn/drive_c/MidsReborn/Databases/Homecoming/I12.mhd"
 )
+
+
+def read_header(buf: bytes) -> tuple[str, str]:
+    """The first two records are the database name and its version string."""
+    r = Reader(buf, 0)
+    return r.string(), r.string()
+
+
+def _cite_path(path: str) -> str:
+    """A path a reader can place. Inside the repo it is repo-relative; outside it is
+    home-relative, because the databases live in a Wine prefix and `os.path.relpath`
+    renders that as a `../../` chain that reads like a repo path and is not one."""
+    full = os.path.abspath(os.path.expanduser(path))
+    repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    if full.startswith(repo + os.sep):
+        return os.path.relpath(full, repo)
+    home = os.path.expanduser("~")
+    return os.path.join("~", os.path.relpath(full, home)) if full.startswith(home + os.sep) else full
+
+
+def provenance(path: str, buf: bytes, power_count: int) -> dict:
+    """What a committed artefact must say about the database it was derived from.
+
+    PROV-3: two artefacts here were built from a Mids `I12.mhd` and recorded it two
+    ways. The name bridge stated version + sha256; `oracle_divergence_rules.json`
+    stated a PATH into a gitignored tree and nothing else. Only one of those can be
+    checked, and when they were finally compared they turned out to be different
+    databases — 10,986 powers against 11,002 — which nothing in either file said.
+
+    So both go through this one function now. Two formats is the defect; a shared
+    primitive is why it cannot come back. `database` alone names no fork (the header
+    reads "Mids Reborn Powers Database" in all of them) and `version` alone names none
+    either — see MBDEXPORT-2 — so the sha256 is the identifying field and the rest is
+    what a human reads.
+    """
+    name, version = read_header(buf)
+    return {
+        "path": _cite_path(path),
+        "database": name,
+        "version": version,
+        "sha256": hashlib.sha256(buf).hexdigest(),
+        "powerCount": power_count,
+    }
 
 
 def read_powers(buf: bytes):
