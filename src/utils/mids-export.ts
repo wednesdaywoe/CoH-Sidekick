@@ -13,7 +13,14 @@ import { getEpicPool } from '@/data/epic-pools';
 import { getIncarnatePower } from '@/data/incarnates';
 import { getAccolade } from '@/data/accolades';
 import { getIOSet } from '@/data/io-sets';
-import { getMidsGenericIOUid, getMidsIOSetPieceUid, getMidsOriginUid, getMidsSpecialUid } from '@/data/mids-uids';
+import {
+  getMidsGenericIOLevels,
+  getMidsGenericIOUid,
+  getMidsIOSetLevels,
+  getMidsIOSetPieceUid,
+  getMidsOriginUid,
+  getMidsSpecialUid,
+} from '@/data/mids-uids';
 import {
   midsNameForExport,
   midsPowersetPathForExport,
@@ -506,6 +513,46 @@ function describeEnhancement(enh: Enhancement): string {
   }
 }
 
+/**
+ * The level Mids will hold this piece at, when that is not the level we are writing.
+ *
+ * Mids' own database states a crafted range per set and per generic IO, and a level
+ * outside it is clamped rather than refused — silently, in a file that still names the
+ * right enhancement. Our export is the source of truth about the range (Rule 0) and Mids'
+ * database is the stale half, so the level we write stays ours; what this buys is that the
+ * user is told the hop will change it. MBDEXPORT-22.
+ *
+ * Two exemptions, both because the piece states no craft level at all:
+ *
+ *   - an ATTUNED set piece, which we write as `IoLevel: 0`. Mids clamps that 0 up into the
+ *     set's range too, and MBDEXPORT-17 measured across all four of its cases that the
+ *     field is not READ for such a piece — the clamp costs nothing and warning about it
+ *     would be noise.
+ *   - origins and specials, which also go out at 0 for the same reason.
+ *
+ * The level it measures is the level the writer WRITES (`enh.level ?? 50`), not the one the
+ * enhancement states, so a piece with no level cannot be warned about at one number and
+ * written at another.
+ */
+function midsLevelClamp(enh: Enhancement): { asked: number; kept: number } | null {
+  let range: readonly [number, number] | null;
+  switch (enh.type) {
+    case 'io-set':
+      if (enh.attuned) return null;
+      range = getMidsIOSetLevels(enh.setId);
+      break;
+    case 'io-generic':
+      range = getMidsGenericIOLevels();
+      break;
+    default:
+      return null;
+  }
+  if (!range) return null;
+  const asked = enh.level ?? 50;
+  const kept = Math.max(range[0], Math.min(range[1], asked));
+  return kept === asked ? null : { asked, kept };
+}
+
 function buildIOSetEnhancement(enh: IOSetEnhancement): MbdEnhancement | null {
   const uid = getMidsIOSetPieceUid(enh.setId, enh.pieceNum);
   if (!uid) return null;
@@ -684,6 +731,17 @@ function buildSlotEntries(
         power: power.name,
         slot: index + 1,
         detail: `${describeEnhancement(slot)} — Mids has no enhancement by that name`,
+      });
+    }
+    // Only for a slot Mids will actually bind. A piece it cannot name is already reported,
+    // and its level is not the thing the user needs to hear about.
+    const clamp = slot && enhancement ? midsLevelClamp(slot) : null;
+    if (slot && clamp) {
+      warnings.push({
+        power: power.name,
+        slot: index + 1,
+        detail: `${describeEnhancement(slot)} — crafted at level ${clamp.asked}, which Mids' database`
+          + ` does not carry for it; Mids will hold it at level ${clamp.kept} instead`,
       });
     }
     const carried = levels?.[index] ?? power.level;
