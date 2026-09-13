@@ -426,7 +426,7 @@ def _cite_path(path: str) -> str:
     return os.path.join("~", os.path.relpath(full, home)) if full.startswith(home + os.sep) else full
 
 
-def provenance(path: str, buf: bytes, power_count: int) -> dict:
+def provenance(path: str, buf: bytes, power_count: int, count_key: str = "powerCount") -> dict:
     """What a committed artefact must say about the database it was derived from.
 
     PROV-3: two artefacts here were built from a Mids `I12.mhd` and recorded it two
@@ -447,7 +447,10 @@ def provenance(path: str, buf: bytes, power_count: int) -> dict:
         "database": name,
         "version": version,
         "sha256": hashlib.sha256(buf).hexdigest(),
-        "powerCount": power_count,
+        # DSH9 cites an EnhDB.mhd through this same function, and that file holds
+        # enhancements rather than powers. The count is what a human reads, so it
+        # says which it counted; the sha256 is still the identifying field.
+        count_key: power_count,
     }
 
 

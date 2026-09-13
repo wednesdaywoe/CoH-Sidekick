@@ -878,19 +878,21 @@ measurement went, and where a closure for the residual belongs too.
   12,001 → 5,679: 6,503 resolved, 181 the collapsed key had hidden — one a taunt set's
   `Enhancement|Placate` reading as a relabel. Took `_fold_complete` folding both complete sets,
   and by name: set order had been moving INV5 ±1 between runs of one tree
-- [ ] **PROV-5** — the DSH9 enhancement oracle reads a database nothing else here reads.
-  `diff_enh_oracle.py` died on PROV-3's absent `I12.mhd`, so both DSH legs were down and the row
-  knew of one; re-pointed, it runs. `read_enhdb.py` defaulted into the same vendored tree, which
-  DOES hold an `EnhDB.mhd` — an older one, so it never failed loudly: Homecoming `bf5b978e…` there
-  against `b5b4379d…` in the Wine prefix, while the Rebirth pair is byte-identical. Both defaults
-  now derive from `read_i12.DEFAULT_MHD`. Against the current DB `--strict` reports 129 new
-  residual lines: value_extra +63, value_missing +57, value_mismatch +7, extra_proc +2. Not
-  re-baselined — re-emitting is how 129 unexamined lines become the new normal.
+- [ ] **PROV-5** — the DSH9 enhancement oracle read a database nothing else here reads.
+  `diff_enh_oracle.py` died on PROV-3's absent `I12.mhd`; `read_enhdb.py` defaulted into the same
+  vendored tree, which DOES hold an older `EnhDB.mhd` (`bf5b978e…` against the prefix's
+  `b5b4379d…`), so it never failed loudly. Both defaults now derive from `read_i12.DEFAULT_MHD`.
+  129 new residual lines followed, and 122 of them were this comparator rather than either
+  database: five stat-vocabulary defects and a proc file read unforked. Set-bonus missing/extra
+  is now 0 and 0 — the whole residual, not just the 129's share. Both DB vintages produce the
+  same 129, so none of it was vintage. Two guards added, failing `--strict` behind a baseline.
+  7 held: the export reads `0.0101`×`SetBonusPetShare` = 2.525 where Mids stores 0.025, and
+  damage tiers 1/3/5/7 land round and agree exactly.
   **Goal** — the DSH9 residual is measured against the database the rest of the tooling reads, and
   its baseline says which one that was.
-  **Done when** — the 129 lines are adjudicated (the 57 `defense_(area)` look like a
-  normalization gap, the 7 `2.5000`→`2.5250` like vintage), `enh_oracle_residual_baseline.json`
-  carries `read_i12.provenance`, and it is re-emitted on the current DB.
+  **Done when** — the 129 are adjudicated (both guesses in the original row were wrong), the 7 are
+  settled against the live server, `enh_oracle_residual_baseline.json` carries
+  `read_i12.provenance`, and it is re-emitted on the current DB.
   **Check** — `python3 -c "import json;print(sorted(k for k,v in json.load(open('tools/mids-oracle/enh_oracle_residual_baseline.json')).items() if not isinstance(v,(list,dict))))"`
   prints `[]`. Any provenance key appearing there BREAKS the claim that the baseline is
   unattributed.

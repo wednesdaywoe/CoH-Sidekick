@@ -14,6 +14,7 @@ and provide an actionable worklist. It is not yet the full value-level DSH9 gate
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 import os
 import re
@@ -177,6 +178,11 @@ def _extract_repo_proc_map() -> dict[tuple[str, str], dict]:
         }
 
 
+# Mids spells slow/recharge-debuff resistance as one ResEffect record per
+# debuffed attrib; the repo carries a single slot for the whole triple.
+SLOW_RESIST_ATTRIBS = {"SpeedRunning", "SpeedFlying", "RechargeTime"}
+
+
 def _damage_name(dmg: str) -> str:
     m = {
         "Smashing": "smashing",
@@ -189,7 +195,7 @@ def _damage_name(dmg: str) -> str:
         "Psionic": "psionic",
         "Melee": "melee",
         "Ranged": "ranged",
-        "AoE": "area",
+        "AoE": "aoe",
     }
     return m.get(dmg, "")
 
@@ -253,7 +259,6 @@ def _pair_dedup(stats: dict[str, float]) -> dict[str, float]:
         ("defense_(cold)", "defense_(fire)"),
         ("defense_(lethal)", "defense_(smashing)"),
         ("defense_(energy)", "defense_(negative)"),
-        ("+res(recharge_debuff)", "+res(slow)"),
     ]
     out = dict(stats)
     for keep, drop in pairs:
@@ -288,6 +293,10 @@ def _oracle_effect_to_stat(effect: dict) -> str | None:
     if et == "DamageBuff":
         return "damage"
     if et == "MezResist":
+        if mez == "Repel":
+            # Not one of the six the family fold collapses; the repo carries it
+            # as its own stat, so it must not enter the family machinery.
+            return "repel_resistance"
         # Full-family collapse to all is done in post-processing.
         return f"_mez_resist_raw_{mez}"
     if et == "Enhancement":
@@ -321,12 +330,18 @@ def _oracle_effect_to_stat(effect: dict) -> str | None:
         return "increased_movement"
     if et == "SpeedRunning" and asp in {"Cur", "Str"}:
         return "increased_movement"
+    if et == "SpeedJumping" and asp in {"Cur", "Str"}:
+        return "increased_movement"
     if et == "JumpHeight" and asp in {"Cur", "Str"}:
         return "increased_movement"
     if et == "Heal" and asp == "Abs":
         return "healing_strength"
+    if et == "Mez" and asp == "Cur" and mez in {"Knockback", "Knockup"}:
+        return "knockback_protection"
+    if et == "ResEffect" and asp == "Res" and mod in SLOW_RESIST_ATTRIBS:
+        return "+res(recharge_debuff)"
     if et in {"MovementFriction", "Slow"}:
-        return "+res(slow)" if asp == "Res" else None
+        return "+res(recharge_debuff)" if asp == "Res" else None
     return None
 
 
@@ -376,7 +391,9 @@ def _oracle_proc_categories(enh: dict) -> set[str]:
     return cats
 
 
-def _build_oracle_set_bonus_map(sets: list[dict], powers: list[dict]) -> dict[str, dict[int, dict[str, float]]]:
+def _build_oracle_set_bonus_map(
+    sets: list[dict], powers: list[dict]
+) -> tuple[dict[str, dict[int, dict[str, float]]], collections.Counter]:
     # Resolve set-bonus links by power *name*, NOT by the stored `index`. The
     # EnhDB caches a power index that is offset by a constant (-22 on the local HC
     # DB — verified across all 1,138 links) relative to the I12 power array this
@@ -395,6 +412,7 @@ def _build_oracle_set_bonus_map(sets: list[dict], powers: list[dict]) -> dict[st
         return powers[i] if i is not None else None
 
     out: dict[str, dict[int, dict[str, float]]] = {}
+    unmapped: collections.Counter = collections.Counter()
     for s in sets:
         set_name = _canon_name(s.get("display_name", ""))
         tiers: dict[int, dict[str, float]] = {}
@@ -411,6 +429,16 @@ def _build_oracle_set_bonus_map(sets: list[dict], powers: list[dict]) -> dict[st
                 for eff in power.get("effects", []):
                     stat = _oracle_effect_to_stat(eff)
                     if not stat:
+                        # An effect row this comparator has no name for is a
+                        # gap in the mapper, not an absence in the data.
+                        unmapped[
+                            (
+                                eff.get("effect_type", ""),
+                                eff.get("aspect", ""),
+                                eff.get("et_modifies", ""),
+                                eff.get("mez_type", ""),
+                            )
+                        ] += 1
                         continue
                     if stat.startswith("_mez_resist_raw_"):
                         mez_seen.add(stat)
@@ -452,7 +480,28 @@ def _build_oracle_set_bonus_map(sets: list[dict], powers: list[dict]) -> dict[st
             tiers[p] = _pair_dedup(acc)
 
         out[set_name] = tiers
-    return out
+    return out, unmapped
+
+
+def _stat_vocabularies(
+    oracle_map: dict[str, dict[int, dict[str, float]]],
+    repo_map: dict[str, dict[int, dict[str, float]]],
+) -> tuple[list[str], list[str]]:
+    """Stat names one side can emit and the other has no slot for.
+
+    Both sides name the same 33 stats, and nothing compared the two lists. A
+    repo-side rename (MEZRES-1 spelled `defense_(area)` -> `defense_(aoe)`) or
+    an unmapped oracle effect type therefore did not fail -- it split one
+    matching stat into a `missing` line and an `extra` line and sat in the
+    baseline looking like a finding. A name with no counterpart is a defect in
+    this comparator, not a divergence between the two databases.
+    """
+
+    def stats(m: dict[str, dict[int, dict[str, float]]]) -> set[str]:
+        return {k for tiers in m.values() for row in tiers.values() for k in row}
+
+    o, r = stats(oracle_map), stats(repo_map)
+    return sorted(o - r), sorted(r - o)
 
 
 def _head(items: Iterable[str], n: int) -> list[str]:
@@ -694,6 +743,12 @@ def main(argv: list[str] | None = None) -> int:
         }
 
     repo_proc_map = _extract_repo_proc_map()
+    # proc-data.ts is one file for all three forks, but the oracle DB is one
+    # fork's. A proc whose SET is absent from this dataset's io-sets belongs to
+    # another fork and can only ever read as `extra` here.
+    off_fork_procs = sorted({k for k in repo_proc_map if k[0] not in repo_set_names})
+    for k in off_fork_procs:
+        repo_proc_map.pop(k, None)
     raw_oracle_proc_map = dict(oracle_proc_map)
     raw_oracle_proc_pairs = set(raw_oracle_proc_map.keys())
     oracle_proc_map, proc_aliases = _auto_normalize_proc_pairs(oracle_proc_map, repo_proc_map)
@@ -720,8 +775,13 @@ def main(argv: list[str] | None = None) -> int:
         if not os.path.isfile(i12):
             print(f"error: no such I12.mhd: {i12}", file=sys.stderr)
             return 2
-        powers, _ = read_i12.read_powers(open(i12, "rb").read())
-        oracle_bonus_map = _build_oracle_set_bonus_map(sets, powers)
+        i12_buf = open(i12, "rb").read()
+        powers, _ = read_i12.read_powers(i12_buf)
+        i12_provenance = read_i12.provenance(i12, i12_buf, len(powers))
+        oracle_bonus_map, unmapped_effects = _build_oracle_set_bonus_map(sets, powers)
+        vocab_oracle_only, vocab_repo_only = _stat_vocabularies(
+            oracle_bonus_map, repo_bonus_map
+        )
 
         for set_name in sorted(oracle_set_names & repo_set_names):
             o_tiers = oracle_bonus_map.get(set_name, {})
@@ -786,12 +846,22 @@ def main(argv: list[str] | None = None) -> int:
         f"missing set names={len(missing_sets)} extra set names={len(extra_sets)}\n"
         f"oracle proc pairs={len(oracle_proc_pairs)} repo proc pairs={len(repo_proc_pairs)}\n"
         f"missing proc pairs={len(missing_proc)} extra proc pairs={len(extra_proc)}\n"
-        f"proc aliases auto-normalized={len(proc_aliases)} explicit={len(explicit_proc_aliases)}"
+        f"proc aliases auto-normalized={len(proc_aliases)} explicit={len(explicit_proc_aliases)}\n"
+        f"off-fork procs excluded={len(off_fork_procs)} (set absent from this dataset's io-sets)"
     )
 
     if args.value_diff:
         print(
-            f"\nvalue-aware set-bonus residuals: missing_stats={value_missing_stats}, "
+            f"\nstat vocabulary: oracle-only={vocab_oracle_only or '[]'} "
+            f"repo-only={vocab_repo_only or '[]'}\n"
+            f"unmapped oracle effect rows={sum(unmapped_effects.values())} "
+            f"in {len(unmapped_effects)} shapes"
+        )
+        for shape, n in unmapped_effects.most_common():
+            print(f"  UNMAPPED {n:5d}  et={shape[0]} aspect={shape[1]} "
+                  f"modifies={shape[2]} mez={shape[3]}")
+        print(
+            f"value-aware set-bonus residuals: missing_stats={value_missing_stats}, "
             f"extra_stats={value_extra_stats}, value_mismatches={value_mismatch_count}"
         )
         print(f"proc category mismatches (where repo has structured categories): {proc_category_mismatch}")
@@ -893,8 +963,22 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.baseline_out:
         out_path = os.path.abspath(args.baseline_out)
+        # PROV-5: this file graded two Mids databases and named neither. It is the
+        # third artefact of the shape PROV-3 found, and it goes through the same
+        # primitive the other two now do.
+        payload: dict = {
+            "schema": "dsh9-enh-oracle-residual-baseline/1",
+            "dataset": args.dataset,
+            "oracle": {
+                "enhdb": read_i12.provenance(
+                    mhd, open(mhd, "rb").read(), len(enhancements), "enhancementCount"
+                ),
+                "i12": i12_provenance if args.value_diff else None,
+            },
+        }
+        payload.update(residual_signatures)
         with open(out_path, "w", encoding="utf-8") as fh:
-            json.dump(residual_signatures, fh, indent=2, sort_keys=True)
+            json.dump(payload, fh, indent=2, sort_keys=True)
             fh.write("\n")
         print(f"\nwrote residual-signature baseline: {out_path}")
 
@@ -949,11 +1033,28 @@ def main(argv: list[str] | None = None) -> int:
 
     should_fail = False
     if args.strict:
+        # A stat name with no counterpart is a defect in this comparator, not a
+        # residual, so a baseline must not forgive it -- that is how the
+        # `defense_(area)` rename sat for five weeks looking like 115 findings.
+        if args.value_diff and (vocab_oracle_only or vocab_repo_only):
+            print(
+                "STAT-VOCABULARY: the two sides name different stats "
+                f"(oracle-only={vocab_oracle_only}, repo-only={vocab_repo_only})",
+                file=sys.stderr,
+            )
+            should_fail = True
+        if args.value_diff and unmapped_effects:
+            print(
+                f"UNMAPPED-EFFECTS: {sum(unmapped_effects.values())} oracle effect rows "
+                f"in {len(unmapped_effects)} shapes have no stat name",
+                file=sys.stderr,
+            )
+            should_fail = True
         if args.baseline:
             assert new_residuals is not None
-            should_fail = any(new_residuals.values())
+            should_fail = should_fail or any(new_residuals.values())
         else:
-            should_fail = bool(
+            should_fail = should_fail or bool(
                 missing_sets
                 or missing_proc
                 or (args.value_diff and (value_missing_stats or value_extra_stats or value_mismatch_count or proc_category_mismatch))
