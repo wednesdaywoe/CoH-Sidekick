@@ -61,7 +61,7 @@ because it reads data trees the beta does not carry.
 vocabulary; MBDEXPORT-24 is a writer row. Both are new on 2026-09-13, and both came from sweeps.
 
 **A control's domain is data.** BOOST-6 closed the day after it opened: the level band both
-planners offered was two literals, and the boost index had named the ten crafted levels all
+planners offered was two literals, and the boost index had named the nine crafted levels all
 along. The fix was reading them — which also retired the Rust picker's separate craft ceiling,
 because with the band read from the export the ceiling IS the top of the roster.
 
