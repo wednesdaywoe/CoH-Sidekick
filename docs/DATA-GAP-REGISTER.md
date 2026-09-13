@@ -57,14 +57,14 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**3 open, of 306 entries.** **None is the reader.** Three `.mbd` rows closed 2026-09-12 — the
+**2 open, of 306 entries.** **None is the reader.** Three `.mbd` rows closed 2026-09-12 — the
 slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24, and -21 by deciding the claim — so
 `mbd_writer_roundtrip` now forgives no register row at all, and ACCOLADE-3 closed the same day.
 
-**All three open rows are the Mids oracle harness, and two of them are new.** PROV-3 closed
-2026-09-13 and PROV-4 and PROV-5 are what rerunning it found: the DSH5 comparator drops the
-field naming which attribute an `Enhancement` record enhances, and the DSH9 leg reads an older
-enhancement database than everything else here. Both are measured; neither is adjudicated.
+**One of the two open rows is the Mids oracle harness.** PROV-3 and PROV-4 closed 2026-09-13,
+leaving PROV-5, what re-pointing the DSH9 leg found: it reads an older enhancement database than
+everything else here, and its 129 residual lines are measured but not adjudicated — do not
+re-baseline it first. The other open row is the set-bonus oracle, and it predates all three.
 
 **A tool nothing runs is a tool nothing checks.** DSH5 had been dead since COND-8 landed on
 2026-08-13, and stale for three weeks before that — its export side gained a namespace and a
@@ -796,7 +796,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 92 of 95 closed
+[Full detail](gaps/pipeline-provenance.md) — 93 of 95 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -872,22 +872,12 @@ measurement went, and where a closure for the residual belongs too.
   `read_i12.provenance` and the sweep is regenerated on the database the bridge names, which took
   porting the emitter to COND-8 token arrays and excluding the brainstorm fork it had been
   grading 101 Homecoming powers against
-- [ ] **PROV-4** — the DSH5 comparator drops Mids' enhanced-attribute discriminator. Mids spells a
-  strength buff `EffectType.Enhancement` with `et_modifies` naming WHICH attribute; `read_i12`
-  emits that field and `rec_key` keys on `(effectType, subType, resistible)` without it, so Power
-  Boost's `et_modifies` SpeedRunning, SpeedFlying and Defense are one key. 9,359 of the oracle's
-  73,431 effect rows are `Enhancement`, 9,358 at aspect Str. The export uses both conventions and
-  the comparator models neither: `boosts.*` carries the attrib as the effectType (ToHit, aspect
-  Str), Power Boost carries `Enhancement` + `sourceAttrib`. Table, aspect, attribType, scale,
-  resistible and pvMode all agree on those pairs.
-  **Goal** — an Enhancement record is compared on the attribute it enhances, or is a named
-  non-UNCLASSIFIED class that says why not.
-  **Done when** — the two encodings are one canonicalization, where `_fold_complete` and the pv
-  fold already live, with the sweep re-run and the UNCLASSIFIED count re-measured; or the class is
-  tiered with the divergence written down.
-  **Check** — `python3 -c "import json,sys;r=json.load(open('tools/mids-oracle/oracle_divergence_rules.json'));print(sum('|Enhancement|' in s for s in r['unclassified_signatures']))"`
-  reads 4374 of 12001. Zero, or those rows carrying a tier other than UNCLASSIFIED, BREAKS the
-  claim that the class is unmodelled and gating.
+- [x] **PROV-4** — the comparator dropped Mids' `et_modifies`, so Power Boost's SpeedRunning,
+  SpeedFlying and Defense were one key; `oracle_records` re-spells an `Enhancement` row in the
+  export's vocabulary and the rules file states where every `et_modifies` routed. UNCLASSIFIED
+  12,001 → 5,679: 6,503 resolved, 181 the collapsed key had hidden — one a taunt set's
+  `Enhancement|Placate` reading as a relabel. Took `_fold_complete` folding both complete sets,
+  and by name: set order had been moving INV5 ±1 between runs of one tree
 - [ ] **PROV-5** — the DSH9 enhancement oracle reads a database nothing else here reads.
   `diff_enh_oracle.py` died on PROV-3's absent `I12.mhd`, so both DSH legs were down and the row
   knew of one; re-pointed, it runs. `read_enhdb.py` defaulted into the same vendored tree, which
