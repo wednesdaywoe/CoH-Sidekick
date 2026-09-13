@@ -34,6 +34,7 @@ import { reconcilePlannerColumns, isPreAtomicSplitCategory } from '@/utils/plann
 import { type ColorThemeId, DEFAULT_COLOR_THEME, applyColorTheme, type ColorMode, DEFAULT_COLOR_MODE, applyColorMode } from '@/data/core/themes';
 import type { SlotLevelRef } from '@/utils/slot-levels';
 import type { PowerMetric } from '@/utils/calculations/attack-chain';
+import { getCommonIOLevels } from '@/data/boost-index';
 
 /** Persisted geometry of a floating window (see `FloatingWindow`). */
 export interface FloatingWindowRect {
@@ -1136,10 +1137,18 @@ export const useUIStore = create<UIStore>()(
         })),
 
       // Settings
-      setGlobalIOLevel: (level) =>
+      // Clamped to the crafted-record roster the export names, not to a typed
+      // band: 51-53 were never recipes, and a persisted one from before this
+      // read the export comes back as the ceiling (BOOST-6).
+      setGlobalIOLevel: (level) => {
+        const craftLevels = getCommonIOLevels();
         set({
-          globalIOLevel: Math.max(10, Math.min(53, level)),
-        }),
+          globalIOLevel: Math.max(
+            craftLevels[0],
+            Math.min(craftLevels[craftLevels.length - 1], level),
+          ),
+        });
+      },
 
       toggleAttunement: () =>
         set((state) => ({

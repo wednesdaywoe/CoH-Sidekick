@@ -31,7 +31,10 @@
     {
       "path": "scripts/keys/fork4-test-surface-direction.py",
       "reason": "Turns DATA-GAP-REGISTER FORK-4's \"keep sync:shared off the shared test surface\". Reads BOTH repos' whole git history for each shared test path, so it can only run where the private canonical tree is the cwd and the beta is the sibling — the beta cannot see canonical at all, and a copy there would grade one repo against itself and always find the surface one-way. That is the failure mode the key exists to prevent, so a mirrored copy would be worse than none. Same docs/-reference reasoning as the sibling keys.",
-      "gap": "FORK-4"
+      "gap": "FORK-4",
+      "mentions": [
+        "scripts/shared-test-surface.json"
+      ]
     },
     {
       "path": "scripts/keys/mbdexport8-separator-census.cjs",
@@ -218,7 +221,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "2cd08e3b11f4e858dda5d714c294f732c4e2cdbaade3f24f40330131ac2b6fd8"
+      "sha256": "53b60fb6f5d14b22cd2653eb44b7ee51adad0956830382b3d6a6629597279900"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -376,6 +379,11 @@
       "sha256": "32a23945fcb66cffabcec368aba5fcfd6b0df21f73b67519812d68407a2a8dd3"
     },
     {
+      "path": "scripts/convert-boost-index.cjs",
+      "status": "identical",
+      "sha256": "fabcee0f9c84106e74bd014fafb889279e6cba93a9aa78245f4ec01225c3c511"
+    },
+    {
       "path": "scripts/convert-enhancement-curves.cjs",
       "status": "identical",
       "sha256": "f72fd2e1ccc418402ce753d88c65dd7a08b28023e86699f083dc093a62564f07"
@@ -510,7 +518,7 @@
       "status": "per-repo",
       "sha256": {
         "canonical": "5d0b254e47331e78677e34a4bf1b9cb26ad68848f4670c6f22e2ca15069419e7",
-        "beta": "d46098283b99ef618925b0cbc727aa93b80d0932405f3b5db0325387a36af8f8"
+        "beta": "e2ca064e6006ca00dd6ad02321d834244994188f0f04a72cdc5d300874f46286"
       },
       "reason": "The stage roster and the gate roster ARE the repo's identity — which converters exist and which gates it can currently pass — so two repos with different pipelines have different stage lists by definition. Re-measured 2026-08-29; the 2026-08-21 figures had gone stale on both halves (beta gained convert-accolades.cjs on 2026-08-22, and canonical's bag strip aaab1c4077 deleted seven post-loop blocks). Strip the comments, the STEPS body and the post-loop blocks and what is left is a 21-line driver, byte-identical, so all the divergence is in the two parts a shared table would have to hold. Canonical runs 22 stages to beta's 15 and neither is a subset: 14 shared, 8 canonical-only (convert-boost-index, convert-special-enhancements, convert-inherents, convert-incarnate-slot-indices, detect-chance-mod-selectors, detect-caster-meters, validate-converter-output, dsh8-incarnate-collapse-detector), 1 beta-only (convert-archetype-inherents.cjs, which canonical has no copy of). Post-loop — counting each top-level if/block/for after the dataset loop that runs a command, which is the measure the 2026-08-21 note left unstated — canonical runs 16 blocks to beta's 8, and the strip made that divergence sharper rather than smaller: canonical's are 13 audit gates plus 3 emitter/fixture blocks, while beta's are dsh6 plus the seven planb-shadow gates canonical deleted along with the bag they read. Those blocks are not a stage list: they carry dataset predicates, existsSync optionality, a python3 runner, a ts-esm-register runner and two --dataset arg conventions, so a declarative table for them is a predicate/runner/optionality DSL written to describe a list of shell commands. And a shared table is a file canonical edits and beta EXECUTES at the head of the pipeline that produces beta's committed data, where a stage carrying the wrong repo-membership flag is silent on beta's side.",
       "exit": null,
@@ -520,6 +528,11 @@
       "path": "scripts/register-env-loader.mjs",
       "status": "identical",
       "sha256": "c082c26197f4a12978d5b904ee56ad9427d4417554a2907adbe4e87414f9ac91"
+    },
+    {
+      "path": "scripts/shared-test-surface.json",
+      "status": "identical",
+      "sha256": "f37049c0a12f1fdd16d3f42cae77b80ab6d34ef90002dbadde0b4c1dca35845b"
     },
     {
       "path": "scripts/validate-converter-output.cjs",
@@ -609,7 +622,7 @@
     {
       "path": "src/data/dataset.ts",
       "status": "identical",
-      "sha256": "4cf0fd00aa50886533f90f7e5cc5310ff40a74b1586a4b436801e4b3326ba518"
+      "sha256": "9be915faf4e24528f0d319acd1e4218ad54be097b8b9d1d9c66e99bfa8d6af0f"
     },
     {
       "path": "src/data/datasets/brainstorm/generated/mids-name-map.ts",
@@ -843,7 +856,7 @@
     {
       "path": "src/utils/calculations/enhancement-values.ts",
       "status": "identical",
-      "sha256": "5e2e823ae8c20995f1e887ff65dd75ff7a6a818be4af7c0aacebe4cc20110c5c"
+      "sha256": "5f3fd03fef25bee179565c94e505ee1f4780fcbeaab5879f115ee2b8635b32d2"
     },
     {
       "path": "src/utils/calculations/repel-protection.ts",

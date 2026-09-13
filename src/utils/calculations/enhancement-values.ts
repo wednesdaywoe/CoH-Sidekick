@@ -8,10 +8,13 @@
  * multi-aspect scale, boost combine curve) comes from the active dataset's
  * generated enhancement-curves module via `@/data/enhancement-curves` —
  * emitted from the binary export and staleness-guarded against it.
+ * The levels those curves may be read at come from the same export's crafted
+ * boost roster via `@/data/boost-index`.
  */
 
 import type { Enhancement, EnhancementStatType } from '@/types';
 import { getEnhancementCurves } from '@/data/enhancement-curves';
+import { getCommonIOLevels } from '@/data/boost-index';
 import type { EnhancementSchedule, OriginTier } from '@/data/enhancement-curves';
 import { isCalcDebugEnabled, debugGroup, debugGroupEnd, debugFormula } from '@/utils/calc-debug';
 
@@ -259,24 +262,29 @@ export function getOriginTierValue(tier: OriginTier, normalizedAspect: string): 
 // IO EFFECTIVENESS BY LEVEL
 // ============================================
 
-/** Enhancements exist at levels 10..53 (level-50 cap + 3 combine levels);
- * lookups clamp here. A dataset whose strength curve ends earlier (the fork
- * exports carry 50 levels) caps at its last defined level. */
-const IO_MIN_LEVEL = 10;
-const IO_MAX_LEVEL = 53;
-
 /**
  * Enhancement strength of one boost at `level` for a schedule — a direct
  * read of the dataset's per-level strength curve (the `Melee_Boosts_*`
  * named class-modifier tables). Levels are integers in-game; a fractional
  * level is a caller bug and fails loud.
+ *
+ * The band is the crafted-record roster (10..50 on all four datasets), not the
+ * curve: Homecoming's runs 105 entries deep because its class tables do, and
+ * reading 51-53 off it paid out a level the game ships no recipe for — and paid
+ * nothing on the forks, whose tables stop at 50. A level past the roster is a
+ * stored value from before that band was read from the export (BOOST-6) or a
+ * set level clamped elsewhere, so it clamps rather than throwing.
  */
 export function getIOValueAtLevel(level: number, schedule: EnhancementSchedule = 'A'): number {
   if (!Number.isInteger(level)) {
     throw new Error(`Enhancement level must be an integer, got ${level}`);
   }
   const curve = getEnhancementCurves().schedules[schedule].strengthByBoostLevel;
-  const clampedLevel = Math.max(IO_MIN_LEVEL, Math.min(IO_MAX_LEVEL, curve.length, level));
+  const craftLevels = getCommonIOLevels();
+  const clampedLevel = Math.max(
+    craftLevels[0],
+    Math.min(craftLevels[craftLevels.length - 1], curve.length, level),
+  );
   return curve[clampedLevel - 1];
 }
 

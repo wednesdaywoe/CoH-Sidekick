@@ -24,6 +24,7 @@ import { Tooltip, Toggle, LevelSpinner } from '@/components/ui';
 import { IOSetIcon, GenericIOIcon, OriginEnhancementIcon, SpecialEnhancementIcon } from './EnhancementIcon';
 import { SetBonusList } from './SetBonusList';
 import type { IOSet, IOSetPiece, EnhancementStatType, SpecialEnhancementDef, IOSetCategory, SpecialEnhancement, Enhancement } from '@/types';
+import { getCommonIOLevels, craftedCommonIOLevel } from '@/data/boost-index';
 import { getSetTrackedBonuses, type TrackedBonusMatch } from '@/data/set-bonus-index';
 import { statKeyToChipLabel, formatTrackedBonusAmount } from '@/data/set-bonus-groups';
 import { formatBonusDesc } from '@/utils/set-bonus-format';
@@ -86,6 +87,28 @@ export function EnhancementPicker() {
     () => enhancementLevelRange(levelOffsetType),
     [levelOffsetType],
   );
+
+  // The crafting levels the export names a record at. Set pieces are craftable
+  // at every integer inside their own range, common IOs only at the roster's
+  // nine — so the spinner takes its ends from the roster everywhere, and walks
+  // it entry by entry on the tab where that is all there is. Its band used to
+  // be `min={10} max={53}` typed in, which offered a level-37 Accuracy IO and
+  // three levels past the top of the game's roster; 51-53 is the pre-booster
+  // spelling of a level-50 IO with three combines, which this picker already
+  // carries on its own axis as the Boost dial (BOOST-6).
+  const ioCraftLevels = getCommonIOLevels();
+  const onGenericTab = typeFilter === 'generic';
+  // What a generic IO picked right now is crafted at: a level carried in from
+  // the set tab (27 is legal there) floors onto the roster.
+  const genericIOLevel = craftedCommonIOLevel(globalIOLevel, ioCraftLevels);
+
+  // A level persisted from before the band was read off the export comes back
+  // out of range; the setter clamps, so handing it its own value folds it in.
+  useEffect(() => {
+    if (globalIOLevel < ioCraftLevels[0] || globalIOLevel > ioCraftLevels[ioCraftLevels.length - 1]) {
+      setGlobalIOLevel(globalIOLevel);
+    }
+  }, [globalIOLevel, ioCraftLevels, setGlobalIOLevel]);
 
   // The level offset above is a PLACEMENT default — it is stamped into an
   // enhancement when the picker mints it and nothing revisits a slot after.
@@ -746,12 +769,12 @@ export function EnhancementPicker() {
     if (isStackingClick(e)) {
       incStacked(
         `generic:${stat}`,
-        () => createGenericIOEnhancement(stat, globalIOLevel, globalBoostLevel),
+        () => createGenericIOEnhancement(stat, genericIOLevel, globalBoostLevel),
         `${stat} IO`,
       );
       return;
     }
-    placeEnhancement(picker.currentPowerName, picker.currentSlotIndex, createGenericIOEnhancement(stat, globalIOLevel, globalBoostLevel));
+    placeEnhancement(picker.currentPowerName, picker.currentSlotIndex, createGenericIOEnhancement(stat, genericIOLevel, globalBoostLevel));
     closeEnhancementPicker();
   };
 
@@ -838,19 +861,29 @@ export function EnhancementPicker() {
           <div className="px-3 sm:px-4 py-1.5 sm:py-0 border-t sm:border-t-0 border-gray-700 flex items-center gap-4">
             <div
               className={`flex items-center gap-1.5 ${attunementEnabled ? 'opacity-40 pointer-events-none' : ''}`}
-              title="Crafting level for IO enhancements (10–53). Higher level = stronger effect, but exemplaring below the level disables it."
+              title={
+                onGenericTab
+                  ? `Crafting level for generic IOs — the ${ioCraftLevels.length} levels the game crafts them at (${ioCraftLevels.join(', ')}). Higher level = stronger effect, but exemplaring below the level disables it.`
+                  : `Crafting level for IO enhancements (${ioCraftLevels[0]}–${ioCraftLevels[ioCraftLevels.length - 1]}). Higher level = stronger effect, but exemplaring below the level disables it.`
+              }
             >
               <span className="text-xs text-gray-400">Lv</span>
               <LevelSpinner
-                value={globalIOLevel}
-                min={10}
-                max={53}
+                value={onGenericTab ? genericIOLevel : globalIOLevel}
+                min={ioCraftLevels[0]}
+                max={ioCraftLevels[ioCraftLevels.length - 1]}
+                allowedValues={onGenericTab ? ioCraftLevels : undefined}
                 onChange={setGlobalIOLevel}
                 disabled={attunementEnabled}
                 decreaseTitle="Decrease IO crafting level"
                 increaseTitle="Increase IO crafting level"
-                valueTitle="Drag up/down to change, click to type (10–53)"
+                valueTitle={
+                  onGenericTab
+                    ? `Drag up/down to change, click to type (${ioCraftLevels.join(', ')})`
+                    : `Drag up/down to change, click to type (${ioCraftLevels[0]}–${ioCraftLevels[ioCraftLevels.length - 1]})`
+                }
                 valueColorClass={attunementEnabled ? 'text-gray-500' : 'text-blue-400'}
+                widthClass="w-6"
               />
             </div>
             <Toggle
@@ -1202,7 +1235,7 @@ export function EnhancementPicker() {
             {typeFilter === 'generic' && (
               <GenericIOContent
                 availableIOs={availableGenericIOs}
-                globalIOLevel={globalIOLevel}
+                craftLevel={genericIOLevel}
                 onSelect={handleSelectGenericIO}
                 stackedCountFor={(stat) => stackedCountFor(`generic:${stat}`)}
                 onDecrement={(stat) => decStacked(`generic:${stat}`)}
@@ -1993,13 +2026,15 @@ function StackedCountBadge({ count, onDecrement }: { count: number; onDecrement:
 
 interface GenericIOContentProps {
   availableIOs: EnhancementStatType[];
-  globalIOLevel: number;
+  /** The roster level these chips mint at — not the raw picker level, which the
+   *  set tab may have left between the roster's steps. */
+  craftLevel: number;
   onSelect: (stat: EnhancementStatType, e?: React.MouseEvent) => void;
   stackedCountFor: (stat: EnhancementStatType) => number;
   onDecrement: (stat: EnhancementStatType) => void;
 }
 
-function GenericIOContent({ availableIOs, globalIOLevel, onSelect, stackedCountFor, onDecrement }: GenericIOContentProps) {
+function GenericIOContent({ availableIOs, craftLevel, onSelect, stackedCountFor, onDecrement }: GenericIOContentProps) {
   if (availableIOs.length === 0) {
     return <div className="text-center text-gray-500 py-8">No generic IOs available for this power</div>;
   }
@@ -2012,12 +2047,12 @@ function GenericIOContent({ availableIOs, globalIOLevel, onSelect, stackedCountF
             schedules, so one number here would be right for the Schedule A ones
             and wrong for ToHit / Defense / Resistance / Range / Interrupt /
             Knockback. It lives on each chip's tooltip instead. */}
-        <span className="text-xs text-gray-500">Lv {globalIOLevel}</span>
+        <span className="text-xs text-gray-500">Lv {craftLevel}</span>
       </div>
       <div className="flex flex-wrap gap-1">
         {availableIOs.map((stat) => {
           const count = stackedCountFor(stat);
-          const value = genericIOValueAtLevel(stat, globalIOLevel);
+          const value = genericIOValueAtLevel(stat, craftLevel);
           return (
             <Tooltip key={stat} content={value === null ? `${stat} IO` : `${stat} IO (+${value.toFixed(1)}%)`}>
               <div className="relative">

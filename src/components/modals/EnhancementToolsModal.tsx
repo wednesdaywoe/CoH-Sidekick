@@ -13,6 +13,7 @@ import { useBuildStore } from '@/stores';
 import { Modal, ModalBody, ModalFooter } from './Modal';
 import { Button, Slider, Toggle } from '@/components/ui';
 import { enhancementLevelRange } from '@/utils/calculations';
+import { getCommonIOLevels } from '@/data/boost-index';
 
 interface EnhancementToolsModalProps {
   isOpen: boolean;
@@ -32,8 +33,12 @@ export function EnhancementToolsModal({ isOpen, onClose }: EnhancementToolsModal
   const relativeRange = enhancementLevelRange('special');
   const [relativeLevel, setRelativeLevel] = useState(relativeRange.max);
 
+  // The band is the crafted-record roster's ends, not a typed 10-50: set pieces
+  // take every integer inside their own range, generic IOs only the roster's
+  // steps, and the store floors them onto it on the way in (BOOST-6).
+  const ioCraftLevels = getCommonIOLevels();
   const [ioLevelEnabled, setIoLevelEnabled] = useState(true);
-  const [ioLevel, setIoLevel] = useState(50);
+  const [ioLevel, setIoLevel] = useState(ioCraftLevels[ioCraftLevels.length - 1]);
 
   const [attuneAll, setAttuneAll] = useState(false);
 
@@ -83,12 +88,12 @@ export function EnhancementToolsModal({ isOpen, onClose }: EnhancementToolsModal
             checked={ioLevelEnabled}
             onCheckedChange={setIoLevelEnabled}
             label="Set non-attuned IO level"
-            description="Generic IOs and non-attuned set IOs. Set IOs are clamped to each set's level range; attuned IOs are skipped."
+            description="Generic IOs and non-attuned set IOs. Set IOs are clamped to each set's level range, generic IOs to the levels the game crafts them at; attuned IOs are skipped."
           >
             <Slider
               value={ioLevel}
-              min={10}
-              max={50}
+              min={ioCraftLevels[0]}
+              max={ioCraftLevels[ioCraftLevels.length - 1]}
               onChange={(e) => setIoLevel(Number(e.target.value))}
               disabled={!ioLevelEnabled}
               valueFormatter={(v) => `Level ${v}`}

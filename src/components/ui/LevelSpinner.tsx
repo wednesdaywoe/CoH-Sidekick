@@ -11,6 +11,11 @@
  *
  * Typing: free-edit while focused; the value commits and clamps to
  * [min, max] on Enter or blur. Esc reverts to the previous value.
+ *
+ * `allowedValues` narrows all three gestures to a roster: the buttons and the
+ * drag walk it entry by entry, and a typed value snaps to the nearest one. That
+ * is for a band whose steps are data rather than arithmetic — generic IOs are
+ * crafted at the nine levels the export names, not at every integer between them.
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -22,6 +27,9 @@ interface LevelSpinnerProps {
   onChange: (next: number) => void;
   /** Step for +/- buttons (and drag-per-`pxPerStep`-pixels). */
   step?: number;
+  /** The only values the control may land on. Its ends replace `min`/`max` and
+   *  one entry replaces `step`; a typed or dragged value snaps to the nearest. */
+  allowedValues?: number[];
   /** Pixels of vertical drag that advance the value by one step. */
   pxPerStep?: number;
   /** Render `+` in front of positive values (used for boost level). */
@@ -45,12 +53,19 @@ function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
 }
 
+/** The roster entry closest to `n`; ties go to the lower one. */
+function nearest(values: number[], n: number): number {
+  if (Number.isNaN(n)) return values[0];
+  return values.reduce((best, v) => (Math.abs(v - n) < Math.abs(best - n) ? v : best), values[0]);
+}
+
 export function LevelSpinner({
   value,
   min,
   max,
   onChange,
   step = 1,
+  allowedValues,
   pxPerStep = 6,
   showPlus = false,
   valueColorClass = 'text-link',
@@ -73,11 +88,22 @@ export function LevelSpinner({
     moved: boolean;
   } | null>(null);
 
+  // With a roster the band is its ends, and one move is one entry; without, the
+  // props say both.
+  const lo = allowedValues ? allowedValues[0] : min;
+  const hi = allowedValues ? allowedValues[allowedValues.length - 1] : max;
+  const snap = (n: number) => (allowedValues ? nearest(allowedValues, n) : clamp(n, lo, hi));
+  const moved = (from: number, steps: number) => {
+    if (!allowedValues) return clamp(from + steps * step, lo, hi);
+    const i = allowedValues.indexOf(snap(from));
+    return allowedValues[clamp(i + steps, 0, allowedValues.length - 1)];
+  };
+
   const commit = (raw: string) => {
     const n = Math.round(parseFloat(raw));
     if (Number.isFinite(n)) {
-      const clamped = clamp(n, min, max);
-      if (clamped !== value) onChange(clamped);
+      const snapped = snap(n);
+      if (snapped !== value) onChange(snapped);
     }
     setEditing(false);
   };
@@ -102,7 +128,7 @@ export function LevelSpinner({
     if (!d.moved && Math.abs(deltaY) < DRAG_MOVEMENT_THRESHOLD_PX) return;
     d.moved = true;
     const steps = Math.round(deltaY / pxPerStep);
-    const next = clamp(d.startValue + steps * step, min, max);
+    const next = moved(d.startValue, steps);
     if (next !== value) onChange(next);
   };
 
@@ -124,8 +150,8 @@ export function LevelSpinner({
     if (editing) inputRef.current?.select();
   }, [editing]);
 
-  const dec = () => onChange(clamp(value - step, min, max));
-  const inc = () => onChange(clamp(value + step, min, max));
+  const dec = () => onChange(moved(value, -1));
+  const inc = () => onChange(moved(value, 1));
 
   const displayValue = showPlus ? `+${value}` : String(value);
 
@@ -135,7 +161,7 @@ export function LevelSpinner({
         type="button"
         onClick={dec}
         title={decreaseTitle}
-        disabled={disabled || value <= min}
+        disabled={disabled || value <= lo}
         className="w-5 h-5 rounded text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
       >−</button>
       {editing ? (
@@ -143,9 +169,9 @@ export function LevelSpinner({
           ref={inputRef}
           type="number"
           inputMode="numeric"
-          min={min}
-          max={max}
-          step={step}
+          min={lo}
+          max={hi}
+          step={allowedValues ? undefined : step}
           value={draftText}
           onChange={(e) => setDraftText(e.target.value)}
           onBlur={(e) => commit(e.target.value)}
@@ -178,7 +204,7 @@ export function LevelSpinner({
         type="button"
         onClick={inc}
         title={increaseTitle}
-        disabled={disabled || value >= max}
+        disabled={disabled || value >= hi}
         className="w-5 h-5 rounded text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
       >+</button>
     </div>

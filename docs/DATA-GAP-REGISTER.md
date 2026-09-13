@@ -57,10 +57,17 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**4 open, of 311 entries.** **None is the reader.** FIXTURE-3 is the set-bonus oracle's own
-vocabulary; MBDEXPORT-24 is a writer row; ROSTER-2 is a powerset offering two picks where the
-game sells one; BOOST-6 is a level spinner offering levels the export does not name. All four
-are new on 2026-09-13, and all came from sweeps.
+**2 open, of 311 entries.** **Neither is the reader.** FIXTURE-3 is the set-bonus oracle's own
+vocabulary; MBDEXPORT-24 is a writer row. Both are new on 2026-09-13, and both came from sweeps.
+
+**A control's domain is data.** BOOST-6 closed the day after it opened: the level band both
+planners offered was two literals, and the boost index had named the ten crafted levels all
+along. The fix was reading them — which also retired the Rust picker's separate craft ceiling,
+because with the band read from the export the ceiling IS the top of the roster.
+
+**A planner that reads the export is the oracle for one that guesses.** ROSTER-2 closed the day
+it opened: Rust already filtered on `AutoIssue` where the beta inferred it from a hand list, so
+the fix was deleting the guess. The report named one set on one fork; it was two on two.
 
 **A corpus is a census of what someone chose to author.** The eight-file corpus holds 86
 enhancements and names about a hundred powers. The sweeps put 2,112 enhancements and all
@@ -368,21 +375,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Sets, boosts, incarnates, inherents
 
-[Full detail](gaps/sets-boosts-incarnates.md) — 29 of 30 closed
-
-- [ ] **BOOST-6** — the generic-IO level spinner offers every integer from 10 to 53, both bounds
-  typed into `EnhancementPicker.tsx`, where the export names ten crafted records per stat (levels
-  10 to 50 in steps of five) and nothing above 50. On Homecoming and Brainstorm the extra levels
-  compute a real and larger number off a 105-entry curve; on Rebirth and Thunderspy the curve
-  stops at 50 and they silently collapse — one spinner, two meanings, no export behind either.
-  Found from the far side, by MBDEXPORT-22's clamp measurement.
-  **Goal** — the levels a user can craft at are the levels the export names.
-  **Done when** — the spinner's bounds and step come from the boost roster rather than from two
-  literals, and it is written down whether `IO_MAX_LEVEL`'s "level-50 cap + 3 combine levels" is
-  the +1..+5 booster the planner already carries separately as `Enhancement.boost` (in which case
-  those three levels are a double-count) or something the export states elsewhere.
-  **Check** — the levels the picker offers for one stat equal the `common-io` levels
-  `boost-index.json` names for it, on all four forks.
+[Full detail](gaps/sets-boosts-incarnates.md) — 30 of 30 closed
 
 - [x] **HYBRID-2** — Homecoming and its Brainstorm beta dropped the Melee Hybrid's status-protection
   rows at Total Radial Graft and both T4 Embodiments while the tooltip still promises them, where
@@ -417,6 +410,7 @@ measurement went, and where a closure for the residual belongs too.
   `ssuperior_winters_gift.png`, 404ing from the day the set was added while the base set's own
   asset sat unreferenced; the fabricating fallback is retired for a loud stop, and a guard now
   resolves all 673 icons against the asset library
+- [x] **BOOST-6** — the generic-IO level spinner offered every integer from 10 to 53, both bounds typed in, where the export names nine crafted levels per stat (10 to 50 in steps of five) and nothing above 50; 51-53 is the pre-booster spelling of a level-50 IO with three combines, which both planners already carry on their own axis, and the band now comes from the boost index in the two UIs, both engines and the bulk re-level
 - [x] **BOOST-5** — the two repos' `io-sets-raw` registries drifted wholesale on all three forks and each side was ahead of the other; the damage tiers are export-true, shared sets carry their own fork's values, and the beta now regenerates byte-identical registries from the same extractor
 - [x] **BOOST-4** — Synapse's Agility's 6th piece read "Empty" and the 20% end-drain-resist global it grants was modeled nowhere; the piece-gated-bonus census found it the one absentee among 39
 - [x] **BOOST-3** — a resist set's pieces were labelled from the record's `Category`, which the game leaves blank on every PvP, purple, event and ATO set; Gladiator's Armor exported as damage enhancement on all three forks and its resistance never reached the totals
@@ -814,7 +808,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 96 of 99 closed
+[Full detail](gaps/pipeline-provenance.md) — 97 of 99 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -1052,18 +1046,11 @@ measurement went, and where a closure for the residual belongs too.
   reloaded onto the file's own dataset, so "what does my live build look like on Brainstorm" was
   unaskable; each now parks the file and offers both opens, and a port re-stamps the build with the
   fork it was read against rather than rebuilding FORKSTAMP-1 by hand
-- [ ] **ROSTER-2** — Rebirth's Wind Control ships `Clear_Skies` and `Clear_Skies_Text`, two
-  powers with one display name ("Clear Skies"), one description, the same unlock level, both
-  `Auto` with `maxSlots: 0`, and both describing themselves as granted automatically once
-  Vacuum and Vortex are trained. The picker offers both as picks, so the set reads as 11
-  choices where the game sells 9, and the `_Text` twin is a name no Mids database carries.
-  Found by the power sweep, which named it and watched Mids refuse it.
-  **Goal** — the roster offers what the game sells, and a power it grants is not a pick.
-  **Done when** — an auto-granted powerset member is classified from the export rather than
-  from the two curated lists the picker filters on (`GRANTED_POWER_GROUPS` and the
-  `modeVariants` targets), which between them reach neither of these.
-  **Check** — `getPowerset` for that set lists 9 pickable powers, and the power sweep names
-  no `Clear_Skies_Text`.
+- [x] **ROSTER-2** — the beta sold three powers the game hands over: Clear Skies as a tenth pick in
+  Wind Control on Rebirth and Thunderspy, Fetid Presence in Thunderspy's Pale Blade. All three carry
+  the export's `AutoIssue` mark, which the Rust planner had read all along and the beta inferred
+  instead from `GRANTED_POWER_GROUPS`, a hand list naming none of them. The mark is the filter now
+  and the hand list is retired, measured to claim nothing `AutoIssue` misses on any fork
 
 - [x] **ROSTER-1** — 23 powersets across Homecoming and its Brainstorm beta converted cleanly,
   shipped in the contract, passed every corpus gate and could be picked by nobody, because the

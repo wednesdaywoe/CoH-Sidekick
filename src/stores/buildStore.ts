@@ -60,6 +60,7 @@ import {
 import { slimBuild, hydrateBuild, normalizeAccoladeIds, type HydrationNote } from '@/utils/build-serialization';
 import { encodeImportFragment } from '@/utils/import-url';
 import { getActiveDataset, getAllDatasetMetadata, isDatasetId } from '@/data/dataset';
+import { craftedCommonIOLevel } from '@/data/boost-index';
 import { toCanonicalStatKey } from '@/data/set-bonus-groups';
 import { showDatasetSwitchOverlay } from '@/utils/dataset-switch-overlay';
 import {
@@ -2754,9 +2755,12 @@ export const useBuildStore = create<BuildStore>()(
             }
 
             // ioLevel: force non-attuned IO level. Set IOs are clamped to
-            // the set's [minLevel, maxLevel] range; generic IOs are clamped
-            // to [10, 50]. Attuned IOs (including those just-flipped by
-            // attuneAll above) don't carry a meaningful level, so we skip.
+            // the set's [minLevel, maxLevel] range; generic IOs land on the
+            // crafted-record roster the export names (nine levels in steps of
+            // five — the slider's every-integer band would otherwise mint a
+            // level-37 Accuracy IO, BOOST-6). Attuned IOs (including those
+            // just-flipped by attuneAll above) don't carry a meaningful level,
+            // so we skip.
             const isAttuned = next.type === 'io-set' && next.attuned === true;
             if (ioLevel !== undefined && !isAttuned) {
               let target = ioLevel;
@@ -2767,7 +2771,7 @@ export const useBuildStore = create<BuildStore>()(
                   target = Math.min(set.maxLevel, Math.max(set.minLevel ?? 10, ioLevel));
                 }
               } else if (next.type === 'io-generic') {
-                target = Math.min(50, Math.max(10, ioLevel));
+                target = craftedCommonIOLevel(ioLevel);
               }
               if ((next.level ?? 50) !== target) {
                 next = { ...next, level: target };
