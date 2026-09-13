@@ -73,6 +73,55 @@ DEFAULT_MHD = {
 }
 
 
+# The two `eGridType` values that place an archetype's own inherent. 2 is the class grid —
+# exactly one power per class on Homecoming, and where fourteen of fifteen sit on every
+# fork. 4 is the universal grid `SortGridPowers` indexes by position, which carries
+# Brawl/Sprint/Rest and the four Fitness powers on every fork and is also where Rebirth
+# files Assassination and the Thunderspy drop files Resolve. Both bind: the Rebirth sweep
+# resolves `Inherent.Inherent.Assassination` with no refusal. 0 is the one that does not.
+GRIDDED_INHERENT_TYPES = (2, 4)
+
+
+def archetype_inherents(powers) -> tuple[dict[str, str], list]:
+    """`Class_X` -> Mids' name for that archetype's own inherent, and the classes it refused.
+
+    The writer needs this because the `.mbd` archetype-inherent row is addressed by name and
+    Mids has more names than powers. Homecoming carries THREE rows displaying "Opportunity" —
+    `Opportunity`, `Opportunity_Icon` and `Opportunity_Meter`, all level 1, all gated to
+    `Class_Sentinel` — so neither display nor level separates them, and the name map's join
+    withdraws rather than guessing. It is right to withdraw: read backwards, that merge has no
+    answer in the names. The answer is in a different field.
+
+    `eGridType` is that field. It says which grid Mids places a power on, and 0 means none:
+    a `.mbd` naming a power Mids grids nowhere is refused with no error and the row is simply
+    gone. `Opportunity` is 0 and so is `Opportunity_Icon`; `Opportunity_Meter` is 2, the grid
+    the other fourteen archetype inherents sit on. Measured, not reasoned: patching one swept
+    build's `PowerName` to each of the three in turn, Mids binds `Opportunity_Meter` at the
+    same front index every other archetype's inherent takes and refuses the other two.
+
+    So the join is the CLASS GATE, not the name: the power gated to exactly this one class
+    that Mids grids. Over all three databases that predicate selects 15, 16 and 15 powers, all
+    of them in `Inherent.Inherent`, and never two for one class — the gate is what excludes
+    Thunderspy's `Restraint` and `Tenacity`, which are gridded at 2 and gated on fourteen
+    classes each.
+
+    A class with more than one is returned unanswered rather than resolved by a preference,
+    the same withdrawal the name rows take. A class with NONE gets no key, which is a real
+    state and not an oversight: the Thunderspy drop grids `Assassination` at 0, so a
+    Thunderspy Stalker has no name here that Mids would bind, and the writer says so.
+    """
+    by_class: dict[str, list[str]] = collections.defaultdict(list)
+    for p in powers:
+        if p["inherent_type"] not in GRIDDED_INHERENT_TYPES:
+            continue
+        if len(p["class_name"]) != 1:
+            continue
+        by_class[p["class_name"][0]].append(p["power"])
+    answered = {c: rows[0] for c, rows in sorted(by_class.items()) if len(rows) == 1}
+    contested = [(c, rows) for c, rows in sorted(by_class.items()) if len(rows) > 1]
+    return answered, contested
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Emit Mids' power name table for one dataset")
     ap.add_argument("--dataset", required=True, choices=sorted(DEFAULT_MHD))
@@ -114,6 +163,16 @@ def main(argv=None) -> int:
             return 3
         sets[key].append([p["power"], p.get("display") or "", p.get("level")])
 
+    # The archetype inherent Mids grids for each class, which the display join cannot
+    # reach. See `archetype_inherents` below.
+    inherents, contested = archetype_inherents(powers)
+    for cls, rows in contested:
+        print(
+            f"  {args.dataset}: {cls} has {len(rows)} gridded single-class inherents "
+            f"({', '.join(rows)}) — no row emitted, the writer keeps our spelling",
+            file=sys.stderr,
+        )
+
     # The provenance fields stay at top level, in this order, because the emitted file is
     # a committed artefact with readers (`scripts/convert-mids-name-map.cjs`, the census
     # keys). `provenance()` supplies them; `path` is dropped, being per-machine.
@@ -127,6 +186,11 @@ def main(argv=None) -> int:
         # MBDEXPORT-6 carries folded keys and no marker, and its case is unrecoverable
         # without the `.mhd` — which is a different answer from "Mids spells it that way".
         "powersetKeys": "literal",
+        # `Class_X` -> Mids' name for that archetype's own inherent. A separate key rather
+        # than rows in `powersets`, because it answers a different question with a different
+        # join: these are not two spellings of one name but the one power of several that
+        # Mids will actually place. DATA-GAP MBDEXPORT-24.
+        "archetypeInherents": inherents,
         "powersets": {k: sets[k] for k in sorted(sets, key=str.lower)},
     }
 
@@ -136,7 +200,8 @@ def main(argv=None) -> int:
 
     print(
         f"[emit_mids_names] {args.dataset}: {payload['powerCount']} powers in "
-        f"{len(payload['powersets'])} powersets (db {payload['version']}) -> "
+        f"{len(payload['powersets'])} powersets, {len(inherents)} archetype inherents "
+        f"(db {payload['version']}) -> "
         f"{os.path.relpath(out_path, REPO_ROOT)}",
         file=sys.stderr,
     )

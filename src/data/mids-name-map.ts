@@ -24,6 +24,7 @@ import {
   MIDS_NAME_REVERSE as HOMECOMING_MIDS_REVERSE,
   MIDS_POWERSET_PATH as HOMECOMING_MIDS_PATHS,
   MIDS_NAME_REVERSE_LOOSE as HOMECOMING_MIDS_LOOSE,
+  MIDS_ARCHETYPE_INHERENT as HOMECOMING_MIDS_AT_INHERENT,
 } from './datasets/homecoming/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as REBIRTH_MIDS_NAMES,
@@ -31,6 +32,7 @@ import {
   MIDS_NAME_REVERSE as REBIRTH_MIDS_REVERSE,
   MIDS_POWERSET_PATH as REBIRTH_MIDS_PATHS,
   MIDS_NAME_REVERSE_LOOSE as REBIRTH_MIDS_LOOSE,
+  MIDS_ARCHETYPE_INHERENT as REBIRTH_MIDS_AT_INHERENT,
 } from './datasets/rebirth/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as THUNDERSPY_MIDS_NAMES,
@@ -38,6 +40,7 @@ import {
   MIDS_NAME_REVERSE as THUNDERSPY_MIDS_REVERSE,
   MIDS_POWERSET_PATH as THUNDERSPY_MIDS_PATHS,
   MIDS_NAME_REVERSE_LOOSE as THUNDERSPY_MIDS_LOOSE,
+  MIDS_ARCHETYPE_INHERENT as THUNDERSPY_MIDS_AT_INHERENT,
 } from './datasets/thunderspy/generated/mids-name-map';
 import {
   MIDS_NAME_MAP as BRAINSTORM_MIDS_NAMES,
@@ -45,6 +48,7 @@ import {
   MIDS_NAME_REVERSE as BRAINSTORM_MIDS_REVERSE,
   MIDS_POWERSET_PATH as BRAINSTORM_MIDS_PATHS,
   MIDS_NAME_REVERSE_LOOSE as BRAINSTORM_MIDS_LOOSE,
+  MIDS_ARCHETYPE_INHERENT as BRAINSTORM_MIDS_AT_INHERENT,
 } from './datasets/brainstorm/generated/mids-name-map';
 
 type NameMap = Readonly<Record<string, Readonly<Record<string, string>>>>;
@@ -106,6 +110,22 @@ const PATH_BY_DATASET: Record<DatasetId, SetAlias> = {
   rebirth: REBIRTH_MIDS_PATHS,
   thunderspy: THUNDERSPY_MIDS_PATHS,
   brainstorm: BRAINSTORM_MIDS_PATHS,
+};
+
+/**
+ * Mids' `Class_X` → its own name for that archetype's inherent (DATA-GAP MBDEXPORT-24).
+ *
+ * Not part of the rotation tables above and not reachable from them. Those join on the
+ * display name; three of Homecoming's `Inherent.Inherent` rows display "Opportunity" at
+ * level 1 under one class gate, so that join has nothing to separate them with and withdraws.
+ * This one joins on Mids' `eGridType` — which grid it places a power on — and a power it
+ * grids nowhere is what a refused row looks like from here.
+ */
+const ARCHETYPE_INHERENT_BY_DATASET: Record<DatasetId, SetAlias> = {
+  homecoming: HOMECOMING_MIDS_AT_INHERENT,
+  rebirth: REBIRTH_MIDS_AT_INHERENT,
+  thunderspy: THUNDERSPY_MIDS_AT_INHERENT,
+  brainstorm: BRAINSTORM_MIDS_AT_INHERENT,
 };
 
 /** Mids' spelling of a powerset key → ours, for the pairs where the group segment drifted. */
@@ -251,4 +271,24 @@ export function midsNameReverseMap(): NameMap {
 /** The looser writer-side rows — for gates and audits, not for resolution. */
 export function midsNameReverseLooseMap(): NameMap {
   return LOOSE_BY_DATASET[getActiveDataset().id];
+}
+
+/**
+ * Mids' name for `midsClass`'s own archetype inherent, or undefined when Mids grids none.
+ *
+ * Undefined is NOT "write ours" here, and that is the difference from `midsNameForExport`:
+ * this table holds one row per class rather than only the names that moved, so a miss means
+ * Mids places no inherent for the class at all. Our own spelling then goes out unchanged and
+ * the row may open as nothing — which is what the Sentinel did before this table existed, and
+ * what a Thunderspy Stalker still does. The caller says so rather than letting it pass.
+ *
+ * Keyed by Mids' class token, the same string the writer stamps into the file's `Class`.
+ */
+export function midsArchetypeInherentName(midsClass: string): string | undefined {
+  return ARCHETYPE_INHERENT_BY_DATASET[getActiveDataset().id][midsClass];
+}
+
+/** The active dataset's whole archetype-inherent table — for gates and audits. */
+export function midsArchetypeInherentMap(): SetAlias {
+  return ARCHETYPE_INHERENT_BY_DATASET[getActiveDataset().id];
 }

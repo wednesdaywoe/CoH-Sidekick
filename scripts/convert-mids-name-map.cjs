@@ -629,6 +629,27 @@ for (const midsKey of Object.keys(alias)) {
   }
 }
 
+/**
+ * Mids' `Class_X` → its name for that archetype's own inherent (DATA-GAP MBDEXPORT-24).
+ *
+ * Passed through from the names dump rather than derived here, because the join is a field
+ * this file never sees: Mids' `eGridType`, which says which grid the app places a power on
+ * and whose 0 means none. `emit_mids_names.py` carries the derivation and the evidence.
+ *
+ * It has to come from somewhere other than the display join, because the display join
+ * cannot answer it. Homecoming's `Inherent.Inherent` holds THREE rows displaying
+ * "Opportunity" and TWO of ours, so the pass below reaches the ambiguous arm on our side
+ * and withdraws before it ever reaches the merge arm — correctly, in both cases. The name
+ * the writer then falls back to, our `Opportunity`, is the one of the three Mids grids
+ * nowhere, so the row is refused and the Sentinel's inherent is gone from the file.
+ *
+ * Keyed by Mids' class token because that is what the writer has in hand: it stamps the
+ * same string into the file's `Class`, so no archetype-id mapping stands between the two.
+ */
+const archetypeInherents = midsNames.archetypeInherents || {};
+const sortedArchetypeInherents = Object.fromEntries(
+  Object.keys(archetypeInherents).sort().map((k) => [k, archetypeInherents[k]]));
+
 const sorted = Object.fromEntries(Object.keys(map).sort().map((k) => [k, map[k]]));
 const sortedReverse = Object.fromEntries(Object.keys(reverse).sort().map((k) => [k, reverse[k]]));
 const sortedAlias = Object.fromEntries(Object.keys(alias).sort().map((k) => [k, alias[k]]));
@@ -668,6 +689,7 @@ const body = `/**
  * Reverse rows for the writer: ${stats.reverseRows}${stats.reverseWithdrawn.length ? `, with ${stats.reverseWithdrawn.length} withdrawn as ambiguous` : ''}, plus ${stats.loose.length} the display join could only reach with its separators stripped.
  * Powerset paths for the writer: ${Object.keys(sortedPaths).length}${KEYS_ARE_LITERAL ? '' : ` — NONE. The ${namesDataset} names dump predates MBDEXPORT-6 and carries folded powerset keys, so Mids' own spelling is not in it. Re-run emit_mids_names.py against that fork's I12.mhd to fill this in.`}
  * Mids powersets with no counterpart here: ${unmatched.length} — listed by the generator on stderr.
+ * Archetype inherents Mids grids: ${Object.keys(sortedArchetypeInherents).length}.
  *
  * Regenerate: node scripts/convert-mids-name-map.cjs --dataset ${datasetId}
  */
@@ -681,6 +703,27 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
  * this; a reader that starts from our own powers (the matcher) already holds the map's key.
  */
 export const MIDS_POWERSET_ALIAS: Readonly<Record<string, string>> = ${JSON.stringify(sortedAlias, null, 2)};
+
+/**
+ * Mids' \`Class_X\` → its own name for that archetype's inherent (DATA-GAP MBDEXPORT-24).
+ *
+ * The \`.mbd\` archetype-inherent row is addressed by NAME, and Mids has more names than
+ * powers: Homecoming carries \`Opportunity\`, \`Opportunity_Icon\` and \`Opportunity_Meter\`,
+ * all displaying "Opportunity", all level 1, all gated to \`Class_Sentinel\`. Neither the
+ * display join above nor its level tie-break separates three rows like that, and the merge
+ * withdrawal is right to refuse them — read backwards the names hold no answer.
+ *
+ * Mids' own \`eGridType\` holds it instead: it says which grid the app places a power on,
+ * and a power it grids nowhere is refused out of a build file with no error. So this is not
+ * a rotation table and must not be read as one. It carries one row per class rather than
+ * per name that MOVED, and its value is the power Mids will actually place — for fourteen
+ * of fifteen archetypes that is the same string we would have written anyway.
+ *
+ * A class MISSING from this table is a real state, not an oversight: Mids grids no inherent
+ * for it, so there is no name here that would bind and the writer says so rather than
+ * writing one that will vanish.
+ */
+export const MIDS_ARCHETYPE_INHERENT: Readonly<Record<string, string>> = ${JSON.stringify(sortedArchetypeInherents, null, 2)};
 
 /**
  * The same join backwards — THIS dataset's internal name (lower-cased) → Mids' own, for
@@ -753,7 +796,8 @@ console.error(
   `[convert-mids-name-map] ${datasetId}: ${stats.rows} remapped names across ` +
   `${Object.keys(sorted).length} powersets (of ${stats.shared} paired, ` +
   `${Object.keys(sortedAlias).length} by alias), ${stats.reverseRows} reverse, ` +
-  `${Object.keys(sortedPaths).length} powerset paths, ${stats.loose.length} loose reverse` +
+  `${Object.keys(sortedPaths).length} powerset paths, ${stats.loose.length} loose reverse, ` +
+  `${Object.keys(sortedArchetypeInherents).length} archetype inherents` +
   (dryRun ? ' [dry run]' : ` -> ${path.relative(REPO_ROOT, OUTPUT_PATH)}`),
 );
 if (!KEYS_ARE_LITERAL) {

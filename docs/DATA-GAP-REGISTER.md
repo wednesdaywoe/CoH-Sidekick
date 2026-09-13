@@ -57,8 +57,21 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**2 open, of 311 entries.** **Neither is the reader.** FIXTURE-3 is the set-bonus oracle's own
-vocabulary; MBDEXPORT-24 is a writer row. Both are new on 2026-09-13, and both came from sweeps.
+**1 open, of 312 entries.** **It is not the reader.** DRIFTBASE-1 is an ORACLE row, new on
+2026-09-13: the sweep's whole residual is two refusals its forgiveness list cannot see.
+
+**A baseline is blind on the axis it joins on.** DRIFTBASE-1 is not a stale file — regenerating
+it produces the same one. It forgives by DISPLAY name and the reconciler grades INTERNAL names,
+so Rebirth filing `Clear_Skies` and `Clear_Skies_Text` under one display name is a distinction
+one side is built on and the other cannot represent.
+
+**A merge and an ambiguity are not the same withdrawal.** MBDEXPORT-24 closed the day it opened,
+filed as the wrong one: Mids has three "Opportunity" rows and we have two, so the join withdrew
+on OUR side. The answer was never in the names — `eGridType` says which grid Mids places a power
+on, and ours was the one it places nowhere.
+
+**A cost stated in a tracker is a claim nobody re-measures.** That row named the slider as what
+was lost. The slider is `VariableEnabled false`, so Mids zeroes it bound or not. The ROW was.
 
 **A control's domain is data.** BOOST-6 closed the day after it opened: the level band both
 planners offered was two literals, and the boost index had named the nine crafted levels all
@@ -808,7 +821,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 97 of 99 closed
+[Full detail](gaps/pipeline-provenance.md) — 99 of 100 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -1002,20 +1015,24 @@ measurement went, and where a closure for the residual belongs too.
   build holding Lingering Radiation, Wrath of Hell or Tough Hide lost that power and its
   slots, silently. Reverse rows 312 -> 339 across four forks, verified in a real Mids
 
-- [ ] **MBDEXPORT-24** — the Sentinel's archetype inherent goes out as `Opportunity`, which no
-  Mids database binds: Mids carries three rows displaying "Opportunity" and files the
-  character's own as `Opportunity_Meter`. The name map withdraws the row as a merge — three
-  Mids names onto one of ours, and nothing in the data says which was meant — so the writer
-  falls back to our spelling. Mids re-creates the inherent itself, so the power survives; the
-  row's `VariableValue` slider, which is what MBDEXPORT-20 added the row for, does not. 1 of
-  15 archetypes, 15 of 217 swept Homecoming builds; every other archetype's inherent binds.
-  **Goal** — a Sentinel's inherent row is written under a name Mids resolves, or the build is
-  told it will not be.
-  **Done when** — the merge withdrawal can tell an archetype inherent's THREE display twins
-  apart (level is no tie-break here: all three are level 1), or the writer reports the
-  fallback as a warning the way it reports an unnameable enhancement.
-  **Check** — `scripts/generate-mbd-power-sweep.ts` then the oracle; the row is open while
-  any `Inherent.Inherent.Opportunity` refusal remains.
+- [ ] **DRIFTBASE-1** — `mids-drift-baseline.<fork>.json` forgives a correct Mids refusal by
+  DISPLAY name and the reconciler grades INTERNAL names, so a fork filing two internal names
+  under one display name is invisible to it: Rebirth's `Clear_Skies` / `Clear_Skies_Text` read
+  as an exact display match, the powerset is not even listed as differing, and the two
+  refusals grade UNEXPLAINED. They are the whole residual of the 440-build sweep.
+  **Goal** — a refusal Mids' own database explains is forgiven whatever the two names share.
+  **Done when** — the baseline carries an internal-name leg for those pairs AND the sweep is 0
+  unexplained, or `Clear_Skies_Text` is adjudicated out of the sweep's population as a
+  `hiddenAuto` power ROSTER-2 established no build is offered — whichever, written down.
+  **Check** — regenerating the baseline does NOT move these two; a run that forgives them
+  after a plain regenerate breaks the claim that the join, not the file, is the cause.
+
+- [x] **MBDEXPORT-24** — every Sentinel build handed Mids `Inherent.Inherent.Opportunity` and
+  Mids refused it, 15 of 217 swept Homecoming builds: three of its rows display "Opportunity"
+  at level 1 under one class gate and two of ours do too, so the display join withdraws as
+  AMBIGUOUS and our spelling goes out — the one of the three Mids grids nowhere. The tie-break
+  is Mids' own `eGridType`, not the name; the table is one row per class, and Thunderspy's
+  Stalker, which has none, is reported instead of guessed
 
 - [x] **MBDEXPORT-22** — a crafted set piece below the level Mids' database allowed came back
   stronger than it left, on 4 Homecoming sets we state at 15-50 and Mids states at 20-50: Mids
@@ -1175,21 +1192,12 @@ measurement went, and where a closure for the residual belongs too.
   7 `per-repo`; 198 → 217 watched), canonical's `src/` measured to ship nothing so the 4 rule
   forks are a stale oracle, the walk reads the composed `require` the contract emitter uses, and
   `beta-authored` was re-read by RUNNING its 21 copies — 6 hold a rule canonical's TS lacks
-- [ ] **FIXTURE-3** — the set-bonus oracle is narrower than the engine it grades:
-  canonical's `normalizeStatName` returns null for `knockback_strength` and
-  `endurance_drain_resistance`, both of which `contract/set-bonus-stat-vocab.json` maps and
-  `coh_math::set_bonuses` routes. The fixtures are emitted from that TS, so the Rust is graded by
-  an oracle blind to two stats it models. 5 corpus sets carry the first (Homecoming's Air Burst
-  states +2.0%), 1 Thunderspy row the second, and 0 fixture lines carry either — the gate is not
-  suppressing a red, the population never stages the question.
-  **Goal** — the set-bonus oracle can state which stats it covers, and cannot quietly cover fewer
-  than the engine.
-  **Done when** — canonical's TS models both keys AND a fixture build slots each (so the sides are
-  staged against one another), or the emitter stamps the uncovered keys into `manifest.json` and
-  the gate holds the fixture to that census — FIXTURE-2's shape, where a vacuous branch says so.
-  **Check** — `grep -c 'knockbackstrength\|debuffresistendurance' fixtures/set-bonuses/*.jsonl`
-  returns 0 while `coh_math::set_bonuses` names both. A non-zero count, or a manifest census of
-  uncovered keys, breaks the claim that the oracle is silently narrower.
+- [x] **FIXTURE-3** — the set-bonus oracle was narrower than the engine and nothing could say
+  so: no fixture slotted a carrier for the two stats canonical's `normalizeStatName` drops, for
+  `defPsionic`, for the one paired stat or the PvP-only one — 5 of 34 granted stats ungraded,
+  and three `global_field` outputs had left the gate's compared universe besides. The emitter
+  stages every stat the corpus grants now and censuses what it cannot; the gate holds body,
+  census and engine to one another
 - [x] **FIXTURE-1** — the manually-emitted gate fixtures (procs, movement, set-bonus) drifted on
   sampling identity and labels only, no values; all three re-emitted, gates green, and the
   emitters now run in `npm run regen` so the drift class is closed
