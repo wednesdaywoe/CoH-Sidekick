@@ -29,7 +29,9 @@ disagree numerically, the raw `.pigg` bin is the tiebreaker.
   `Length-1`, reads `count+1`) means a single misread field desyncs the whole
   stream. After reading `count+1` powers the reader MUST land exactly on the
   `BEGIN:SUMMONS` string; it raises with the byte offset otherwise. Passing this on
-  the full HC DB (10,986 powers / 73,553 effects) proves the layout is byte-correct.
+  the full HC DB (11,002 powers / 73,431 effects, Mids 2026.5.1337) proves the layout
+  is byte-correct. The database is the one in the Wine prefix `mids-wine.sh` drives —
+  `read_i12.DEFAULT_MHD`, which every tool here resolves through.
 
 - **`diff_oracle.py`** — PoC structural comparison of the oracle vs our parser export
   (`exported_powers/`), canonicalized to the bridge-free identity tuple
@@ -68,8 +70,11 @@ disagree numerically, the raw `.pigg` bin is the tiebreaker.
 
 ## Requirements
 
-Local only — `MidsReborn-master/` (the vendored Mids source + `I12.mhd`) is
-**gitignored**, so these tools do not run in CI. Wiring the harness into CI (with a
+Local only — the `.mhd` databases live in a gitignored Wine prefix, so these tools do
+not run in CI. `MidsReborn-master/` is the vendored Mids SOURCE, read by a human when
+porting a binary layout; it is not where a database is read from. It held one until
+PROV-3 (2026-09-13), which is how the DSH5 baseline came to name a database nobody
+could produce — see the provenance note below. Wiring the harness into CI (with a
 committed DB or a golden JSON export) is DSH5/DSH7. Python 3, stdlib only.
 
 ## Usage
@@ -99,9 +104,17 @@ python3 diff_harness.py --baseline oracle_divergence_rules.json  # + regression 
 python3 diff_harness.py --emit --top 30           # force-refresh canonical, show 30 classes
 ```
 
-## Gate results (2026-07-05)
+## Provenance (PROV-3, 2026-09-13)
 
-- **Gate 1 (reader byte-correct):** PASS — parses all 10,986 HC powers / 73,553
+Every artefact here that is derived from a `.mhd` states which one, through the single
+`read_i12.provenance()` — `database`, `version`, `sha256`, `powerCount`. The sha256 is
+the identifying field: the header reads "Mids Reborn Powers Database" in all four forks
+and a version string names none of them either (MBDEXPORT-2). A path is not a citation,
+and `oracle_divergence_rules.json` carried only a path until this row.
+
+## Gate results (Gate 1 re-run 2026-09-13; 2 and 3 as of 2026-07-05)
+
+- **Gate 1 (reader byte-correct):** PASS — parses all 11,002 HC powers / 73,431
   effects and lands exactly on `BEGIN:SUMMONS`.
 - **Gate 2 (structural agreement):** the oracle corresponds to our parser export on
   known-answer powers (Single Shot, Flash Arrow, Poison Gas Arrow match *exactly*

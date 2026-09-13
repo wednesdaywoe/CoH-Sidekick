@@ -27,23 +27,10 @@ import read_i12
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-DEFAULT_DB = os.path.join(
-    REPO,
-    "MidsReborn-master",
-    "MidsReborn",
-    "Databases",
-    "Homecoming",
-    "EnhDB.mhd",
-)
-
-DEFAULT_I12 = os.path.join(
-    REPO,
-    "MidsReborn-master",
-    "MidsReborn",
-    "Databases",
-    "Homecoming",
-    "I12.mhd",
-)
+# Both spelled once, in the readers that own them (PROV-3). The `I12.mhd` this named
+# has not existed on this checkout since before the row was opened, so DSH9 died on it.
+DEFAULT_DB = read_enhdb.DEFAULT_MHD
+DEFAULT_I12 = read_i12.DEFAULT_MHD
 
 # Known naming drift between oracle and extracted data. Keep canonicalized for
 # matching and report the deltas separately as "name normalization" noise.

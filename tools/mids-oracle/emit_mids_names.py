@@ -31,13 +31,13 @@ from __future__ import annotations
 
 import argparse
 import collections
-import hashlib
 import json
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from read_i12 import Reader, read_powers  # noqa: E402
+import read_i12  # noqa: E402
+from read_i12 import provenance, read_powers  # noqa: E402
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -63,20 +63,14 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 # not the other — which is how a session looking only at canonical concluded the file was
 # gone. A gitignored vendored directory is per-checkout; check both before calling one empty.
 DEFAULT_MHD = {
-    "homecoming": os.path.expanduser(
-        "~/Games/mids-reborn/drive_c/MidsReborn/Databases/Homecoming/I12.mhd"
-    ),
+    # Spelled in `read_i12` so the DSH5 harness and this bridge read the same file by
+    # construction rather than by two copies of one string agreeing (PROV-3).
+    "homecoming": read_i12.DEFAULT_MHD,
     "rebirth": os.path.expanduser(
         "~/Games/mids-reborn/drive_c/MidsReborn/Databases/Rebirth/I12.mhd"
     ),
     "thunderspy": os.path.join(REPO_ROOT, "Thunderspy", "I12.mhd"),
 }
-
-
-def read_header(buf: bytes) -> tuple[str, str]:
-    """The first two records are the database name and its version string."""
-    r = Reader(buf, 0)
-    return r.string(), r.string()
 
 
 def main(argv=None) -> int:
@@ -96,8 +90,8 @@ def main(argv=None) -> int:
         return 2
     with open(mhd_path, "rb") as fh:
         buf = fh.read()
-    name, version = read_header(buf)
     powers, total = read_powers(buf)
+    prov = provenance(mhd_path, buf, total)
 
     # Keyed by Mids' OWN spelling of `group.set`, case and all. Folding it here is what
     # MBDEXPORT-6 was: the writer composes a `PowerName` out of these two segments, Mids
@@ -120,12 +114,15 @@ def main(argv=None) -> int:
             return 3
         sets[key].append([p["power"], p.get("display") or "", p.get("level")])
 
+    # The provenance fields stay at top level, in this order, because the emitted file is
+    # a committed artefact with readers (`scripts/convert-mids-name-map.cjs`, the census
+    # keys). `provenance()` supplies them; `path` is dropped, being per-machine.
     payload = {
         "dataset": args.dataset,
-        "database": name,
-        "version": version,
-        "sha256": hashlib.sha256(buf).hexdigest(),
-        "powerCount": total,
+        "database": prov["database"],
+        "version": prov["version"],
+        "sha256": prov["sha256"],
+        "powerCount": prov["powerCount"],
         # The marker a reader checks before trusting a key's case. A dump written before
         # MBDEXPORT-6 carries folded keys and no marker, and its case is unrecoverable
         # without the `.mhd` — which is a different answer from "Mids spells it that way".

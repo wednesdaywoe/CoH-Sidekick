@@ -57,11 +57,19 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**2 open, of 304 entries.** **None is the reader, and none is a defect anyone can measure.** Three
-`.mbd` rows closed 2026-09-12 — the slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24,
-and -21 by deciding the claim — so `mbd_writer_roundtrip` now forgives no register row at all,
-and ACCOLADE-3 closed the same day and took the last measurable one with it. Every row below is
-an adjudication.
+**3 open, of 306 entries.** **None is the reader.** Three `.mbd` rows closed 2026-09-12 — the
+slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24, and -21 by deciding the claim — so
+`mbd_writer_roundtrip` now forgives no register row at all, and ACCOLADE-3 closed the same day.
+
+**All three open rows are the Mids oracle harness, and two of them are new.** PROV-3 closed
+2026-09-13 and PROV-4 and PROV-5 are what rerunning it found: the DSH5 comparator drops the
+field naming which attribute an `Enhancement` record enhances, and the DSH9 leg reads an older
+enhancement database than everything else here. Both are measured; neither is adjudicated.
+
+**A tool nothing runs is a tool nothing checks.** DSH5 had been dead since COND-8 landed on
+2026-08-13, and stale for three weeks before that — its export side gained a namespace and a
+fork while its committed baseline stayed green-looking, because a baseline is a file and files
+do not fail.
 
 **The Wine oracle is back up, and that is what moved this list.** Recorded as down from
 2026-09-10; fixed 2026-09-11 by app-local ICU next to `MidsReborn.exe`.
@@ -72,7 +80,7 @@ not a defect under it. `tools/mids-oracle/mids-wine.sh` carries the setup and th
 **2026-09-11, the first session to drive that Mids rather than read its files**, opened three
 rows at once: PROV-3, MBDIMPORT-15 and STATFMT-1. The through-line is that a working Mids grades
 surfaces our own gates cannot see — none of the three is a parse gap, and the PARSER frontier
-stays clear. MBDIMPORT-15 and STATFMT-1 both closed 2026-09-13; PROV-3 is below.
+stays clear. All three closed 2026-09-13.
 
 Mids' calc engine is a NEW oracle axis and is not what the trust boundary distrusts: on a
 Mids-authored Blaster the two agree on all 11 defence vectors and all 8 resistances. The bin stays
@@ -788,7 +796,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 91 of 93 closed
+[Full detail](gaps/pipeline-provenance.md) — 92 of 95 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -858,22 +866,44 @@ measurement went, and where a closure for the residual belongs too.
   50 under a receipt reading "everything resolved" — a different row of the archetype's hit-point
   table, unannounced; `settle_level`'s two facts now leave as one note rather than one of them
   leaving as none, graded on content per file and mutation-scored on all three arms
-- [ ] **PROV-3** — the structural baseline names its oracle by PATH, the name bridge names its own
-  by VERSION, and only one of them can be checked. `mids-power-names.homecoming.json` carries
-  `version 2026.5.1337`, `powerCount 11002` and the `.mhd`'s sha256 — byte-identical to the
-  database in the Wine prefix. `oracle_divergence_rules.json` carries
-  `MidsReborn-master/.../Homecoming/I12.mhd` and nothing else. They are not the same database: the
-  harness README reports 10,986 powers / 73,553 effects where the current one reads 11,002 /
-  73,431. Master's `I12.mhd` is gitignored and absent from the tree, so DSH5 cannot run as
-  checked out; `read_i12.py` parses the current DB unchanged, self-check passing.
-  **Goal** — the structural baseline states which database produced it, and is produced by the
-  current one.
-  **Done when** — `oracle_divergence_rules.json` carries version + sha256 the way the name bridge
-  does; the baseline is regenerated against 2026.5.1337; and the 2,542-power residual is
-  re-measured against it, since part of it may be DB vintage rather than schema divergence.
-  **Check** — `grep -o '"powerCount": [0-9]*' tools/mids-oracle/mids-power-names.homecoming.json`
-  reads 11002 against the harness README's own 10,986. Those two agreeing BREAKS the claim that
-  the two oracles are different databases, and the re-point is already done.
+- [x] **PROV-3** — the structural baseline named its Mids database by PATH into a gitignored tree
+  that no longer held one, so DSH5 could not be rerun and nothing could tell it from the name
+  bridge's 2026.5.1337 — it was not: 10,986 powers against 11,002; both artefacts now stamp one
+  `read_i12.provenance` and the sweep is regenerated on the database the bridge names, which took
+  porting the emitter to COND-8 token arrays and excluding the brainstorm fork it had been
+  grading 101 Homecoming powers against
+- [ ] **PROV-4** — the DSH5 comparator drops Mids' enhanced-attribute discriminator. Mids spells a
+  strength buff `EffectType.Enhancement` with `et_modifies` naming WHICH attribute; `read_i12`
+  emits that field and `rec_key` keys on `(effectType, subType, resistible)` without it, so Power
+  Boost's `et_modifies` SpeedRunning, SpeedFlying and Defense are one key. 9,359 of the oracle's
+  73,431 effect rows are `Enhancement`, 9,358 at aspect Str. The export uses both conventions and
+  the comparator models neither: `boosts.*` carries the attrib as the effectType (ToHit, aspect
+  Str), Power Boost carries `Enhancement` + `sourceAttrib`. Table, aspect, attribType, scale,
+  resistible and pvMode all agree on those pairs.
+  **Goal** — an Enhancement record is compared on the attribute it enhances, or is a named
+  non-UNCLASSIFIED class that says why not.
+  **Done when** — the two encodings are one canonicalization, where `_fold_complete` and the pv
+  fold already live, with the sweep re-run and the UNCLASSIFIED count re-measured; or the class is
+  tiered with the divergence written down.
+  **Check** — `python3 -c "import json,sys;r=json.load(open('tools/mids-oracle/oracle_divergence_rules.json'));print(sum('|Enhancement|' in s for s in r['unclassified_signatures']))"`
+  reads 4374 of 12001. Zero, or those rows carrying a tier other than UNCLASSIFIED, BREAKS the
+  claim that the class is unmodelled and gating.
+- [ ] **PROV-5** — the DSH9 enhancement oracle reads a database nothing else here reads.
+  `diff_enh_oracle.py` died on PROV-3's absent `I12.mhd`, so both DSH legs were down and the row
+  knew of one; re-pointed, it runs. `read_enhdb.py` defaulted into the same vendored tree, which
+  DOES hold an `EnhDB.mhd` — an older one, so it never failed loudly: Homecoming `bf5b978e…` there
+  against `b5b4379d…` in the Wine prefix, while the Rebirth pair is byte-identical. Both defaults
+  now derive from `read_i12.DEFAULT_MHD`. Against the current DB `--strict` reports 129 new
+  residual lines: value_extra +63, value_missing +57, value_mismatch +7, extra_proc +2. Not
+  re-baselined — re-emitting is how 129 unexamined lines become the new normal.
+  **Goal** — the DSH9 residual is measured against the database the rest of the tooling reads, and
+  its baseline says which one that was.
+  **Done when** — the 129 lines are adjudicated (the 57 `defense_(area)` look like a
+  normalization gap, the 7 `2.5000`→`2.5250` like vintage), `enh_oracle_residual_baseline.json`
+  carries `read_i12.provenance`, and it is re-emitted on the current DB.
+  **Check** — `python3 -c "import json;print(sorted(k for k,v in json.load(open('tools/mids-oracle/enh_oracle_residual_baseline.json')).items() if not isinstance(v,(list,dict))))"`
+  prints `[]`. Any provenance key appearing there BREAKS the claim that the baseline is
+  unattributed.
 - [x] **MBDIMPORT-13** — Mids spells one Rebirth power `Moon_Beam` where the export says
   `Moonbeam`, and the name map's display join folds separators to a space rather than deleting
   them ON PURPOSE, leaving the drift to a matcher ladder the Rust reader omits by design — so
