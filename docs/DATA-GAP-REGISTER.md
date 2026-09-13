@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**5 open, of 304 entries.** **None is the reader, and none is a defect anyone can measure.** Three
+**4 open, of 304 entries.** **None is the reader, and none is a defect anyone can measure.** Three
 `.mbd` rows closed 2026-09-12 — the slot-level one at 0 of its 44, MBDEXPORT-16 at 0 of its 24,
 and -21 by deciding the claim — so `mbd_writer_roundtrip` now forgives no register row at all,
 and ACCOLADE-3 closed the same day and took the last measurable one with it. Every row below is
@@ -70,9 +70,9 @@ The second symptom was never real — the FastDeepCloner crash is what invariant
 not a defect under it. `tools/mids-oracle/mids-wine.sh` carries the setup and the diagnosis.
 
 **2026-09-11, the first session to drive that Mids rather than read its files**, opened three
-rows at once: PROV-3, MBDIMPORT-15 and STATFMT-1, each below with its own line. The through-line
-is that a working Mids grades surfaces our own gates cannot see — none of the three is a parse
-gap, and the PARSER frontier stays clear.
+rows at once: PROV-3, MBDIMPORT-15 and STATFMT-1. The through-line is that a working Mids grades
+surfaces our own gates cannot see — none of the three is a parse gap, and the PARSER frontier
+stays clear. MBDIMPORT-15 closed 2026-09-13; the other two are below.
 
 Mids' calc engine is a NEW oracle axis and is not what the trust boundary distrusts: on a
 Mids-authored Blaster the two agree on all 11 defence vectors and all 8 resistances. The bin stays
@@ -804,7 +804,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 89 of 93 closed
+[Full detail](gaps/pipeline-provenance.md) — 90 of 93 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -881,22 +881,11 @@ measurement went, and where a closure for the residual belongs too.
   **Check** — `node scripts/keys/mbdimport14-respec-rows-census.cjs` — 4 databases, `NLevels` 0/0
   and `RLevels` 3/3 at 47 and 49 on every one. Any `NLevels` or any export granting there BREAKS
   the claim that these rows are respec-only, and puts a second schedule back in play.
-- [ ] **MBDIMPORT-15** — the importer moves a build's level and three of eight corpus files are
-  moved without a word: `settle_level` raises Mids' floor until the placed slots fit the export's
-  schedule — MBDIMPORT-8's design working — but only `over_budget_at_cap` writes a note, so a
-  raise that lands inside budget writes nothing. The Blaster and both Warshades import at 50 from
-  a floor of 49 and the dialog says only that everything resolved. `raised_from_floor` is set at
-  both return sites and read by nothing but the corpus test. Level is not cosmetic: the same
-  Blaster reads Max HP 1621 at 50 and 1617 at 49.
-  **Goal** — a build whose level the importer moved says so, in the report that already lists
-  what did not resolve.
-  **Done when** — `raised_from_floor` reaches `OpenedReport` the way `over_budget_at_cap` does;
-  the wording separates "re-levelled to fit this server's schedule" from "over budget"; and the
-  three silent corpus files are the fixture that proves it.
-  **Check** — `crates/coh_data/tests/mbd_import_build.rs`'s `expected` table: the blaster and both
-  warshade rows read `(49, 50, true, 0)` — raised, zero excess, therefore no note. Any of the
-  three reading `false`, or gaining a non-zero excess, BREAKS the claim that a silent raise is
-  reachable at all.
+- [x] **MBDIMPORT-15** — the importer raised a build's level to fit this server's schedule and
+  only said so when the placements also overran it, so 3 of 8 corpus files moved from Mids' 49 to
+  50 under a receipt reading "everything resolved" — a different row of the archetype's hit-point
+  table, unannounced; `settle_level`'s two facts now leave as one note rather than one of them
+  leaving as none, graded on content per file and mutation-scored on all three arms
 - [ ] **PROV-3** — the structural baseline names its oracle by PATH, the name bridge names its own
   by VERSION, and only one of them can be checked. `mids-power-names.homecoming.json` carries
   `version 2026.5.1337`, `powerCount 11002` and the `.mhd`'s sha256 — byte-identical to the
