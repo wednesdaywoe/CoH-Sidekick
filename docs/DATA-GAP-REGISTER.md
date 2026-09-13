@@ -57,9 +57,10 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**4 open, of 310 entries.** **None is the reader.** FIXTURE-3 is the set-bonus oracle's own
-vocabulary; MBDEXPORT-22 and MBDEXPORT-24 are writer rows; ROSTER-2 is a powerset offering two
-picks where the game sells one. All three are new on 2026-09-13, and all came from sweeps.
+**4 open, of 311 entries.** **None is the reader.** FIXTURE-3 is the set-bonus oracle's own
+vocabulary; MBDEXPORT-24 is a writer row; ROSTER-2 is a powerset offering two picks where the
+game sells one; BOOST-6 is a level spinner offering levels the export does not name. All four
+are new on 2026-09-13, and all came from sweeps.
 
 **A corpus is a census of what someone chose to author.** The eight-file corpus holds 86
 enhancements and names about a hundred powers. The sweeps put 2,112 enhancements and all
@@ -367,7 +368,21 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Sets, boosts, incarnates, inherents
 
-[Full detail](gaps/sets-boosts-incarnates.md) — 29 of 29 closed
+[Full detail](gaps/sets-boosts-incarnates.md) — 29 of 30 closed
+
+- [ ] **BOOST-6** — the generic-IO level spinner offers every integer from 10 to 53, both bounds
+  typed into `EnhancementPicker.tsx`, where the export names ten crafted records per stat (levels
+  10 to 50 in steps of five) and nothing above 50. On Homecoming and Brainstorm the extra levels
+  compute a real and larger number off a 105-entry curve; on Rebirth and Thunderspy the curve
+  stops at 50 and they silently collapse — one spinner, two meanings, no export behind either.
+  Found from the far side, by MBDEXPORT-22's clamp measurement.
+  **Goal** — the levels a user can craft at are the levels the export names.
+  **Done when** — the spinner's bounds and step come from the boost roster rather than from two
+  literals, and it is written down whether `IO_MAX_LEVEL`'s "level-50 cap + 3 combine levels" is
+  the +1..+5 booster the planner already carries separately as `Enhancement.boost` (in which case
+  those three levels are a double-count) or something the export states elsewhere.
+  **Check** — the levels the picker offers for one stat equal the `common-io` levels
+  `boost-index.json` names for it, on all four forks.
 
 - [x] **HYBRID-2** — Homecoming and its Brainstorm beta dropped the Melee Hybrid's status-protection
   rows at Total Radial Graft and both T4 Embodiments while the tooltip still promises them, where
@@ -799,7 +814,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 95 of 99 closed
+[Full detail](gaps/pipeline-provenance.md) — 96 of 99 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -1008,19 +1023,12 @@ measurement went, and where a closure for the residual belongs too.
   **Check** — `scripts/generate-mbd-power-sweep.ts` then the oracle; the row is open while
   any `Inherent.Inherent.Opportunity` refusal remains.
 
-- [ ] **MBDEXPORT-22** — a crafted set piece below the level MIDS' database allows comes back
-  stronger than it left: our export states Launch, Thrust, Hypersonic and Warp at 15-50, Mids'
-  Homecoming `EnhDB` states 20-50, and Mids clamps a level-15 piece to 20 with no message on
-  either side. 4 sets, 0 corpus files, found only because `generate-mbd-sweep.ts` levels each
-  piece inside its OWN range. The other 5 HC and 2 Rebirth range disagreements are ours-narrower
-  and cannot clamp. Distinct from MBDEXPORT-17, which closed the no-craft-level case and left
-  this one alone by name.
-  **Goal** — a level we write is a level Mids reads back, or the user is told it will not be.
-  **Done when** — `emit_mids_uids.py` carries each set's `level_min`/`level_max` and the writer
-  reports a piece outside the range it is about to be clamped into, OR the range disagreement is
-  adjudicated the way MBDEXPORT-17 was — measured in a real Mids, written down, writer unchanged.
-  **Check** — `npx tsx --import ./scripts/env-register.mjs scripts/generate-mbd-sweep.ts --out
-  /tmp/sweep` then the oracle and reconciler over it; the row is open while any RESTATED remains.
+- [x] **MBDEXPORT-22** — a crafted set piece below the level Mids' database allowed came back
+  stronger than it left, on 4 Homecoming sets we state at 15-50 and Mids states at 20-50: Mids
+  clamped the level, kept the Uid, and said nothing on either side. The emitter now carries each
+  set's range off the record Mids actually clamps with — measured on a Rebirth piece whose two
+  records disagree — and the writer reports the hop instead of writing a number it knows will not
+  survive; the sweep's 4 RESTATED are 0
 
 - [x] **MBDEXPORT-21** — three code paths wrote a level into `slotOrder` and nothing recorded
   which, so each repo's writer inferred provenance from a proxy — canonical from "is there a

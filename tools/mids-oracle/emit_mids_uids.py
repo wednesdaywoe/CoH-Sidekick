@@ -168,6 +168,7 @@ def build_table(mhd_path: str) -> dict:
 
     io_set_pieces: dict[str, list[str]] = {}
     io_set_prefix: dict[str, str] = {}
+    io_set_levels: dict[str, list[int]] = {}
     notes: list[str] = []
     for s in sets:
         key = set_key(s["uid"])
@@ -238,6 +239,21 @@ def build_table(mhd_path: str) -> dict:
         if classes:
             io_set_prefix[key] = classes.pop()
 
+        # The level range Mids will hold this set's pieces at, read off the SET record.
+        #
+        # Both records carry `level_min`/`level_max` — the set's and each enhancement's —
+        # and they disagree on 96 of Homecoming's 227 sets, so which one is read is a
+        # decision and not a detail. It was measured rather than reasoned: Rebirth's
+        # `Rolling_Barrage_A` states 34 on its own record and its set states 24, and a slot
+        # written at 24 came back from Mids' own reader untouched. The piece record is not
+        # the gate; the set record is. MBDEXPORT-22.
+        #
+        # Stored as GAME levels. The field is in `IoLevel` space, which is 0-based (a
+        # level-50 piece is 49) and which Mids clamps against raw, so +1 here puts it in
+        # the same space as the export's own `minLevel`/`maxLevel` and the two can be
+        # compared without either side having to know the other's base.
+        io_set_levels[key] = [s["level_min"] + 1, s["level_max"] + 1]
+
         holes = [n for n in range(1, size + 1) if n not in by_piece]
         if holes:
             notes.append(f"{s['uid']}: no UID for piece {holes}, emitted empty")
@@ -245,12 +261,33 @@ def build_table(mhd_path: str) -> dict:
     # Generic (crafted) IOs and the special/exotic rosters. Both are flat name
     # spaces the exporter validates against rather than a per-set list.
     generic = sorted(e["uid"] for e in enh if e["type"] == "InventO")
+
+    # The crafted generic IOs' own level range, folded across the roster the way the
+    # per-set prefix is folded across a set's pieces: measured identical on all 26 records
+    # in every fork (10-50), so one pair says what 26 would. A database that ever mixes
+    # them stops the generator rather than shipping a bound that is right for 25 of them.
+    #
+    # It is not the sets' range restated. Our picker offers 10-53 and Homecoming's own
+    # strength curve runs past 50, so a level-53 generic IO is a real piece on our side and
+    # a level-50 one on Mids' — measured, clamped silently. MBDEXPORT-22.
+    generic_ranges = sorted({(e["level_min"] + 1, e["level_max"] + 1)
+                             for e in enh if e["type"] == "InventO"})
+    if len(generic_ranges) > 1:
+        raise SystemExit(
+            f"{mhd_path}: crafted generic IOs carry more than one level range "
+            f"({generic_ranges}); one pair cannot describe them"
+        )
+
     special = sorted(e["uid"] for e in enh if e["type"] == "SpecialO")
     origin = sorted(e["uid"] for e in enh if e["type"] == "Normal")
 
     return {
         "ioSetPieces": io_set_pieces,
         "ioSetPrefix": io_set_prefix,
+        "ioSetLevels": io_set_levels,
+        # Absent, not defaulted, when the database names no crafted generic IO at all:
+        # Mids states nothing there and the writer must not invent a bound.
+        "genericIOLevels": list(generic_ranges[0]) if generic_ranges else None,
         "genericIO": generic,
         "special": special,
         "origin": origin,
@@ -296,6 +333,18 @@ def render_ts(dataset: str, source: str, table: dict) -> str:
         lines.append(f"    {json.dumps(key)}: {json.dumps(table['ioSetPrefix'][key])},")
     lines.append("  },")
     lines.append("")
+    lines.append("  /** setId → the level range Mids holds that set's pieces at, as game levels. */")
+    lines.append("  ioSetLevels: {")
+    for key in sorted(table["ioSetLevels"]):
+        low, high = table["ioSetLevels"][key]
+        lines.append(f"    {json.dumps(key)}: [{low}, {high}],")
+    lines.append("  },")
+    lines.append("")
+    if table["genericIOLevels"] is not None:
+        low, high = table["genericIOLevels"]
+        lines.append("  /** The level range Mids holds every crafted generic IO at, as game levels. */")
+        lines.append(f"  genericIOLevels: [{low}, {high}],")
+        lines.append("")
     lines.append("  /** Every crafted generic IO UID Mids knows. */")
     lines.append("  genericIO: [")
     for uid in table["genericIO"]:

@@ -60,8 +60,35 @@ export interface MidsUidTable {
    * It means Mids says nothing about attunement here.
    */
   ioSetPrefix: Record<string, MidsUidPrefix>;
+  /**
+   * setId → the level range Mids will hold that set's pieces at, as game levels.
+   *
+   * Mids does not refuse a level its database does not carry; it clamps the slot into
+   * this range, keeps the Uid, and says nothing. The slot comes back looking filled and
+   * correct on both screens while holding a different enhancement — Homecoming's Launch,
+   * Thrust, Hypersonic and Warp are 15-50 in the game export and 20-50 here, so a
+   * level-15 piece is a level-20 piece by the time Mids has read it. MBDEXPORT-22.
+   *
+   * Read off Mids' SET record, which is the one it clamps with. Each enhancement record
+   * carries a range too and the two disagree on 96 of Homecoming's 227 sets; the set
+   * record won on a measurement, not on reasoning — see `emit_mids_uids.py`.
+   *
+   * Game levels, so this is directly comparable to the export's own `minLevel`/`maxLevel`.
+   * The `.mbd` field itself (`IoLevel`) is 0-based and the writer converts.
+   */
+  ioSetLevels: Record<string, readonly [number, number]>;
   /** Every crafted generic IO UID Mids knows, e.g. `Crafted_Endurance_Discount`. */
   genericIO: readonly string[];
+  /**
+   * The level range Mids holds every crafted generic IO at, as game levels.
+   *
+   * One pair for the whole roster because all 26 records state the same one in all four
+   * databases; the emitter refuses a database that mixes them rather than picking.
+   *
+   * Optional because absent is not 10-50: a database that names no crafted generic IO
+   * states no range, and a bound invented there would warn about levels nobody can judge.
+   */
+  genericIOLevels?: readonly [number, number];
   /** Hamidon / Hydra / Titan / D-Sync and friends. */
   special: readonly string[];
   /** Origin (TO/DO/SO) enhancement UIDs. */
@@ -77,7 +104,7 @@ export interface MidsUidTable {
   sourceSha256: string;
 }
 
-const EMPTY: MidsUidTable = { ioSetPieces: {}, ioSetPrefix: {}, genericIO: [], special: [], origin: [], sourceSha256: '' };
+const EMPTY: MidsUidTable = { ioSetPieces: {}, ioSetPrefix: {}, ioSetLevels: {}, genericIO: [], special: [], origin: [], sourceSha256: '' };
 
 /** The active dataset's UID table. */
 export function getMidsUids(): MidsUidTable {
@@ -96,6 +123,24 @@ export function getMidsIOSetPieceUid(setId: string, pieceNum: number): string | 
   const pieces = getMidsUids().ioSetPieces;
   const entry = pieces[setId] ?? pieces[setId.replace(/-/g, '')];
   return entry?.[pieceNum - 1] || null;
+}
+
+/**
+ * The level range Mids will hold this set's pieces at, or `null` when its database says
+ * nothing about the set.
+ *
+ * Null is the honest answer for a set Mids does not carry — the piece is unnameable and
+ * already reported as such, and a range guessed here would add a second complaint about
+ * the same hole.
+ */
+export function getMidsIOSetLevels(setId: string): readonly [number, number] | null {
+  const levels = getMidsUids().ioSetLevels;
+  return levels[setId] ?? levels[setId.replace(/-/g, '')] ?? null;
+}
+
+/** The level range Mids holds crafted generic IOs at, or `null` if its database states none. */
+export function getMidsGenericIOLevels(): readonly [number, number] | null {
+  return getMidsUids().genericIOLevels ?? null;
 }
 
 /** Resolve a Mids UID suffix (`Endurance_Discount`) to its crafted generic IO UID. */
