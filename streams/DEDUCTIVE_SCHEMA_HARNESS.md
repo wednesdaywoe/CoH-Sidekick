@@ -143,8 +143,9 @@ archived; what remains here are the SC-N routing/accounting invariants not yet b
 ## Backlog
 
 - [x] **DSH4** (closed atomic-effect schema + attrib→type bridge) · **DSH5**
-  (oracle-backed differential harness — UNCLASSIFIED **6,107 FROZEN**, gate-on-new,
-  see the DSH7-descoped note for why the pile is not a burn-down worklist) —
+  (oracle-backed differential harness — UNCLASSIFIED **6,107 at ship**, gate-on-new, see
+  the DSH7-descoped note for why the pile is not a burn-down worklist; the live count moves
+  with the register, not with this line) —
   **SHIPPED 2026-07-05**, full narrative in
   [the archive](DEDUCTIVE_SCHEMA_HARNESS_ARCHIVE.md).
 - [~] **DSH6** — Converter repair: rework `extractEffects()` to build the DSH4
