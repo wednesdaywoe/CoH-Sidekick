@@ -43,6 +43,7 @@ import { POWER_POOLS_RAW } from './power-pools-raw';
 import type { LegacyPowerPoolRegistry } from '../../power-pools';
 import { ENHANCEMENT_CURVES } from './generated/enhancement-curves';
 import { SPECIAL_ENHANCEMENTS } from './generated/special-enhancements';
+import { BOOST_INDEX } from './generated/boost-index';
 import { LEVELING_SCHEDULE } from './generated/leveling-schedule';
 import { GENERATED_ARCHETYPE_INHERENTS, HEADLINE_ARCHETYPE_INHERENTS } from './generated/archetype-inherents';
 
@@ -105,6 +106,7 @@ const dataset: Dataset = {
 
   enhancementCurves: ENHANCEMENT_CURVES,
   specialEnhancements: SPECIAL_ENHANCEMENTS,
+  boostIndex: BOOST_INDEX,
 
   getTableValue,
   calculateEffectValue,

@@ -56,6 +56,7 @@ const datasets = (() => {
 //   generate-powerset-index-> powersets/index.ts      (needs powersets first)
 //   convert-pet-entities   -> pet-entities.ts (+ sidecars)
 //   convert-archetype-inherents -> generated/archetype-inherents.ts (needs powersets first)
+//   convert-boost-index    -> generated/boost-index.ts (needs the special registries)
 const STEPS = [
   { script: 'extract-at-tables.cjs',          args: [],          generated: false },
   // Power-pick/slot-grant schedules, pool + epic unlock levels, pool cap and
@@ -82,6 +83,12 @@ const STEPS = [
   // missing by checking that no powerset already displays that name, so a stale
   // powerset layer would make it emit powers the build can already reach.
   { script: 'convert-archetype-inherents.cjs', args: [],         generated: true },
+  // The boost index (BOOST-1): every enhancement keyed by the name the game
+  // client prints for it -> generated/boost-index.ts. It INVERTS two layers
+  // this list does not own — generated/special-enhancements.ts and
+  // io-sets-raw.ts, both refreshed out of band here — so it runs last and
+  // throws if either names a record the export does not carry.
+  { script: 'convert-boost-index.cjs',        args: [],          generated: true },
   // Guard: fail the regen if a malformed boostset poisoned a whole IO-set
   // category (the Thunderspy "KB"/SumoBoostName pollution class). Runs on the
   // freshly-generated output, so it also gates the CI regen-and-diff pass.

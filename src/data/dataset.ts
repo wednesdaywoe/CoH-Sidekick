@@ -26,9 +26,14 @@ import type { LegacyPowerPoolRegistry } from './power-pools';
 // structurally identical to the binary export.
 import type { EnhancementCurvesData } from './datasets/homecoming/generated/enhancement-curves';
 import type { SpecialEnhancementsData } from './datasets/homecoming/generated/special-enhancements';
+// Same rationale: the boost-index shape is authored by convert-boost-index.cjs
+// into every dataset's generated module, and the homecoming copy is the
+// reference declaration.
+import type { BoostIndexData } from './datasets/homecoming/generated/boost-index';
 
 export type { EnhancementCurvesData, EnhancementSchedule, OriginTier } from './datasets/homecoming/generated/enhancement-curves';
 export type { GeneratedSpecialEnhancementDef, SpecialEnhancementsData } from './datasets/homecoming/generated/special-enhancements';
+export type { BoostIndexData, BoostIndexEntry } from './datasets/homecoming/generated/boost-index';
 // Same rationale as above: the archetype-inherent shape is authored in the
 // homecoming levels module and imported type-only as the contract's reference
 // declaration. A dataset that populates `archetypeInherents` satisfies it.
@@ -418,6 +423,13 @@ export interface Dataset {
   // through `src/data/enhancement-curves.ts`.
   enhancementCurves: EnhancementCurvesData;
 
+  // Boost index — every enhancement the game can name, keyed by the spelling
+  // the game client prints for it, each entry pointing at the section that
+  // describes it (scripts/convert-boost-index.cjs). Read through
+  // `src/data/boost-index.ts`; it is what tells the picker which crafting
+  // levels a common IO exists at, a band that used to be typed in (BOOST-6).
+  boostIndex: BoostIndexData;
+
   // Special-enhancement registries (Hamidon/Titan/Hydra/D-Sync/prestige),
   // generated from the dataset's boost-piece templates (SOURCE-1 item 9).
   // The forks carry no D-Sync pieces and only the classic 11 Hamidons —
@@ -551,6 +563,12 @@ function validateDataset(ds: Dataset): void {
   if (ds.specialEnhancements.dataset !== ds.id) {
     errors.push(
       `specialEnhancements carries dataset id "${ds.specialEnhancements.dataset}" — the index ` +
+      `wired another dataset's generated module.`,
+    );
+  }
+  if (ds.boostIndex.dataset !== ds.id) {
+    errors.push(
+      `boostIndex carries dataset id "${ds.boostIndex.dataset}" — the index ` +
       `wired another dataset's generated module.`,
     );
   }
