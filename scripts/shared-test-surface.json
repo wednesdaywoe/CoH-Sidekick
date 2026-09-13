@@ -1,0 +1,716 @@
+{
+  "$comment": "The shared TEST surface, adjudicated. `identical` is the pairs a divergence must not pass silently; `departed` is a watched pair that later forked, with its reason; `clusters` is the pairs that already differed, adjudicated one fork CLASS at a time with an exit each. Every shared path is in exactly one of the three — `unassigned` is the error state, not a bucket. Hand-edit a cluster's reason and exit; never hand-edit hashes or path lists, which `--sibling <beta> --write` maintains. See scripts/verify-shared-tests.cjs and FORK-4.",
+  "measurements": {
+    "$comment": "One run per repo, and the premise every entry below rests on. `head` is the commit the suite ran at, `red` is every file that failed and the gap that owns it. The gate reds when a repo has moved past its head (the claims are unverified), when a red file has no gap, and when an entry's `evidence` disagrees with what the run recorded. Maintained by `--results <role>=<vitest json> --write`; hand-edit a red file's `gap` and nothing else. FORK-5.",
+    "$roster": "BPORT12 — the guard read the retired bag to assert a fact about a power; the fact stands, the reader is dead, and the remedy is the atoms (canonical's copy already reads them for most). BPORT13 — the bag WAS the subject: the shadow `.verify` comparisons, the legacy-oracle parity, the supply census. Nothing is left to compare against, so each states the skip or retires. PROD6B-BETA-PARITY — the beta resolver and the engine disagree, bag or no bag.",
+    "canonical": {
+      "date": "2026-09-13",
+      "head": "319d87b4b5c128ffae95538af25550d17f555c92",
+      "command": "npx vitest run",
+      "testFiles": 210,
+      "tests": 2208,
+      "failed": 0,
+      "red": []
+    },
+    "beta": {
+      "date": "2026-09-13",
+      "head": "35a2f2904d5b1170861b608388d6c1abf4c58af3",
+      "command": "npm test",
+      "testFiles": 271,
+      "tests": 2691,
+      "failed": 0,
+      "red": []
+    }
+  },
+  "census": {
+    "canonicalTests": 210,
+    "betaTests": 271,
+    "shared": 178,
+    "identical": 119,
+    "differ": 59,
+    "departed": 6,
+    "clustered": 53,
+    "unassigned": 0
+  },
+  "identical": [
+    {
+      "path": "src/components/incarnate/craft-tree.test.ts",
+      "sha256": "3353ea66b9b2763a5c975b21f9097020b9eafb6d6e8258e7ae50fd3c1b502da1"
+    },
+    {
+      "path": "src/components/info/conditionalDamageDisplacement.test.ts",
+      "sha256": "4d4b9edec1652d289840d84b8109a43bd5b819c261bccc41deea8d01ebda82a6"
+    },
+    {
+      "path": "src/components/info/powerDisplayUtils.collisions.test.ts",
+      "sha256": "c9cd4e7770a51b7476e099fdb6f04a25f92ab63f31053f33500ea109ab3da069"
+    },
+    {
+      "path": "src/data/adaptation-stance-gating.test.ts",
+      "sha256": "d3ef75a8eabf48e69c40389beed02ca0858bee342bc8248ee863c97680ce580c"
+    },
+    {
+      "path": "src/data/ally-range-buff.test.ts",
+      "sha256": "ae50ec5e317ad7bf28a8b2c2e1216450b820ea126231a0ae86d6a7208866bf06"
+    },
+    {
+      "path": "src/data/alpha-enhances-destiny.test.ts",
+      "sha256": "9799e06bcce2dbf93c185f5bb624221fd9580ed688d1165804babf425d92ac42"
+    },
+    {
+      "path": "src/data/archetype-mode-variants.test.ts",
+      "sha256": "2f6d92f198963474cb38d726fb7d3553bfc67e9393dd5d3f6ef03624109a2fcd"
+    },
+    {
+      "path": "src/data/archetype-roster-coverage.test.ts",
+      "sha256": "6a5aa9393469d7f50c0d17d9c5830b8666a82227cdb17b06086925ce398966d7"
+    },
+    {
+      "path": "src/data/assassin-strike-damage.test.ts",
+      "sha256": "24935740baf8d0f0f64ea79048d8323c3ff74e56a652dab536978877d214a1c0"
+    },
+    {
+      "path": "src/data/at-table-archetype-coverage.test.ts",
+      "sha256": "2d8d883213392e28906bcefa1a246b48b82e9dd235db0f7557e611182cfb59bd"
+    },
+    {
+      "path": "src/data/ato-passive-globals.test.ts",
+      "sha256": "c40def88095e6768c48324360d724993509288d2e43f2ddca5c5a520cf3fd771"
+    },
+    {
+      "path": "src/data/atomic-effect.test.ts",
+      "sha256": "a064103d3573556b23074116b7cb8ff5ba3644ea2da87e859c9499df8a820aa1"
+    },
+    {
+      "path": "src/data/attuned-only-reward-sets.test.ts",
+      "sha256": "fa239d9489aa5b5bde630784d1640d4418023ebab0d6efd9320f866d0ce59cc7"
+    },
+    {
+      "path": "src/data/bio-armor-naming.test.ts",
+      "sha256": "209755d11aa5802fa126b9baa1acb9a0ccdda2843a1813bf9e28395aa8131cf4"
+    },
+    {
+      "path": "src/data/chain-target-expressions.test.ts",
+      "sha256": "866543f7e8d9a2117ee33ad3795502233b1bf69894493e69c21e4240fb03d1d2"
+    },
+    {
+      "path": "src/data/converter-recovery-marker.test.ts",
+      "sha256": "6bf1cd2fc32343213ce3514bc56862c194f5bf51be9aed4f6c5721eadcfcec8f"
+    },
+    {
+      "path": "src/data/converter-table-integrity.test.ts",
+      "sha256": "f8e9d879cf94dd2053e682108739ff5b61a9215bcb7ad4e01bf86956e396cc0d"
+    },
+    {
+      "path": "src/data/core/atom-query.test.ts",
+      "sha256": "94ab5a5fb7e98da2bff3b9d8f64861513ecf539836b01ba99586873e08d99b5e"
+    },
+    {
+      "path": "src/data/core/splitSlotGrouping.test.ts",
+      "sha256": "7c83654d6ca8155a510363fff41cc27391f6ddd258388760cbe298701b14e13c"
+    },
+    {
+      "path": "src/data/core/stat-definitions.test.ts",
+      "sha256": "a6af0e31d9fde27decefb7ff2036507e6d26ae2ba2bfc989bfd846bd606c26d2"
+    },
+    {
+      "path": "src/data/datasets/homecoming/levels.test.ts",
+      "sha256": "07295100d221e7edac992686fcc5b878c432b9b2e3ce4cd7b32b5ef663525427"
+    },
+    {
+      "path": "src/data/description-notes.test.ts",
+      "sha256": "c11475381993a8ac69f8fd52452124d03a3304ccd2d8e59ebc9a2fb8379d7824"
+    },
+    {
+      "path": "src/data/destiny-decay.test.ts",
+      "sha256": "c5e6a2cf1c030a1adfc90ba69b55863c04d478fa002e17030948d1fb294a3154"
+    },
+    {
+      "path": "src/data/display-only-atoms.test.ts",
+      "sha256": "c4746531268db70dd2694acad854b1b302caf7ae1396948294eac5a52282be09"
+    },
+    {
+      "path": "src/data/docs/register-shape.test.ts",
+      "sha256": "8e1c8acaec185949689619e53ef58c7a6133f2f11f41a0d32d5ecc6ca0abd36c"
+    },
+    {
+      "path": "src/data/domination-per-effect.test.ts",
+      "sha256": "064dc50777d97465b415f7cf07e090f0bd864e43edf71bfd4105d10892c39ee0"
+    },
+    {
+      "path": "src/data/dormant-pools.test.ts",
+      "sha256": "bf01324439957c733e57543876e6d5837cda4d664b95d49a178bb6010a68f293"
+    },
+    {
+      "path": "src/data/dormant-powersets.test.ts",
+      "sha256": "5000355616bef0a1c4f994683eb035c76788d7d8a8e9ca1267e72fe841511b96"
+    },
+    {
+      "path": "src/data/enhancement-curves-staleness.test.ts",
+      "sha256": "0f2c74f0ee7220393c5b33b56ecc454f4c55bb5d7a381d9156cb365eef64c6fb"
+    },
+    {
+      "path": "src/data/epic-pools-availability.test.ts",
+      "sha256": "1b08ba72405f8a1e725dc31607a73c56387fcf4fa3ba0c3134cf6c0732e9f0ff"
+    },
+    {
+      "path": "src/data/export-provenance.test.ts",
+      "sha256": "4e27d1a1a9a33aff1ee5605cfff58364c1e77bc5652b5a57d91bdbf0ebb48275"
+    },
+    {
+      "path": "src/data/genesis-incarnate.test.ts",
+      "sha256": "90c09641cc5a62d4b5a12fef4cc6e8a0a93a6152ae4e41bb63bd8b5fc60bf891"
+    },
+    {
+      "path": "src/data/globalboost-not-selectable.test.ts",
+      "sha256": "05c3735d6afd81b5621d3bb74ee8b25bc9a7af6b947d715c06b2e838d8157997"
+    },
+    {
+      "path": "src/data/granted-damage-procs.test.ts",
+      "sha256": "e807f517cfff03072d5c763929a97ef656a60bac1d7841798eaa82648f098d18"
+    },
+    {
+      "path": "src/data/hybrid-melee-mez-fork-split.test.ts",
+      "sha256": "ffa95c76b31a71dbad2d2866aea748021f0395bb56e4645561812012dd7efcfe"
+    },
+    {
+      "path": "src/data/hybrid-per-target-cap.test.ts",
+      "sha256": "f7c3da189bf1076cc1172b7382ba6ca060c2155bf367f033a7fab2cfbc604a1b"
+    },
+    {
+      "path": "src/data/inherent-slots.test.ts",
+      "sha256": "eebe5691e3d0b481e970481a0744a86517aa5d581e4384c4e49e2f3cd6f38d42"
+    },
+    {
+      "path": "src/data/invention-salvage.test.ts",
+      "sha256": "80b9c43f41b3ab958295739c35bf31779b590437c7d837ca7bbe0d66958cf199"
+    },
+    {
+      "path": "src/data/io-sets-aspect-count-corpus.test.ts",
+      "sha256": "3467f3774f499165819da974f944a1031f6efacf13e0a1b04733eb1885846bef"
+    },
+    {
+      "path": "src/data/io-sets-heal-absorb.test.ts",
+      "sha256": "6cd2118c070b1b695b180cd7fa5caa227adffdf9c44827b10d91516883655f34"
+    },
+    {
+      "path": "src/data/io-sets-proc-resolution.test.ts",
+      "sha256": "9d99bfb2da43f40f3912bc20df145e48ad505477c3be5d941b55835f11b04c02"
+    },
+    {
+      "path": "src/data/mids-uids-placement.test.ts",
+      "sha256": "69e396cf6f80151b06e87dc8899a6df0678caf3aaf93cf5031dd414317b13ca0"
+    },
+    {
+      "path": "src/data/mids-uids-staleness.test.ts",
+      "sha256": "291d59c6d2c3323312d4471f3124ed7bed0f7b8d3b1d61bfcfc98c0a234741bd"
+    },
+    {
+      "path": "src/data/multipet-summon-count.test.ts",
+      "sha256": "9ea64b7df70e95fa2ee8ac5fc26cb862373391e30e246d1b48f99809482b6d54"
+    },
+    {
+      "path": "src/data/override-identity-fields.test.ts",
+      "sha256": "8ce16c0ec2fe6e4764f35a5a29377a622d97be5710aeb4269e9897a27e4fb401"
+    },
+    {
+      "path": "src/data/parser-effect-alignment.test.ts",
+      "sha256": "d85c23b15d03ee711dc4170728fb7836406634ed3b450fbed5400b3ab1855ca3"
+    },
+    {
+      "path": "src/data/partition-execution-stats.test.ts",
+      "sha256": "f62098d5bfb0eda9ff008d9678eb4e580bc5b91ac8fb5d357a257d4be36227c5"
+    },
+    {
+      "path": "src/data/pet-pvp-twin-drop.test.ts",
+      "sha256": "fb4549fa1a20ff261d14a87d669718563030e11d8d51bb82102a750215375700"
+    },
+    {
+      "path": "src/data/pool-collisions.test.ts",
+      "sha256": "6c0294009c976d87fb91714054aeb101b9abc88b5eb2ce490d7b81908f95d11e"
+    },
+    {
+      "path": "src/data/pool-epic-mode-gates.test.ts",
+      "sha256": "2db6d0b0d4eb2286c23c001f4d6f05ac7ab81c20f8c9082b12a190a317d95396"
+    },
+    {
+      "path": "src/data/proc-area-factor.test.ts",
+      "sha256": "3437c175962abd0b51a3cb2b1a850243d9c6a46bc0e5c13435695f59381d62af"
+    },
+    {
+      "path": "src/data/proc-damage-parity.test.ts",
+      "sha256": "df9d56fe1bcae78f82b8ba450627f85f766f5ca30a505b9dfc9c225c6f387e9c"
+    },
+    {
+      "path": "src/data/proc-data.test.ts",
+      "sha256": "996787e1ba2ca2b47dad5fa9f2a4ea7ed8ad031f70249f14985774ac2eebd412"
+    },
+    {
+      "path": "src/data/proc-effects-coverage.test.ts",
+      "sha256": "925c8b716ba22ae608557ff37a9fa6c66e2fb4157d3b955493671a3597664a59"
+    },
+    {
+      "path": "src/data/proc-globals-parity.test.ts",
+      "sha256": "96fa9b117242f784369073f5670d9509e3ce4588f4ad9e58536b26d649101b78"
+    },
+    {
+      "path": "src/data/proc-other-parity.test.ts",
+      "sha256": "9190365373a4744c35c589ed3916c4da2c9777e9bae4a70f0dad48608336ad19"
+    },
+    {
+      "path": "src/data/proc-piece-name-resolution.test.ts",
+      "sha256": "1ecf15a84350b8632ff274dfbbecfa02a08f9d6496fa0bb8af7843a4b0e59199"
+    },
+    {
+      "path": "src/data/proc-ppm-parity.test.ts",
+      "sha256": "d6a17e82d08febc6a0e90fbfef0b5ff894a4358bc79d80e263623f826da02a22"
+    },
+    {
+      "path": "src/data/proc-variable-overrides.test.ts",
+      "sha256": "df2ab4da88f5393b164bf1546f9bc6dd38ee62651ecd4947da5fd9cc0796935a"
+    },
+    {
+      "path": "src/data/pseudopet-summon-entity.test.ts",
+      "sha256": "d92248cac4d5597d94bf546386797cd3a502d6d3a8dfc70bb58a08d52ff937d3"
+    },
+    {
+      "path": "src/data/rebirth-flight-fixes.test.ts",
+      "sha256": "0b58d3a0d8a212307a4777ef13c42f63090cc4def1c38dcbc484b3fdf8a76e4b"
+    },
+    {
+      "path": "src/data/rebirth-phalanx-ally-scaling.test.ts",
+      "sha256": "607bf392b27c01945607eac9b634b7d241119ec50a8c614b13902737bb8d96fc"
+    },
+    {
+      "path": "src/data/rebirth-pool-fixes.test.ts",
+      "sha256": "02b24825563a65073c4ec74d991973aad7b9729103b260bf47bdde96fef9e9de"
+    },
+    {
+      "path": "src/data/rebirth-resurrection.test.ts",
+      "sha256": "516d3a8574ef59e7207dc115ff8a0d20873f789557358db40d0affe6d3759a5e"
+    },
+    {
+      "path": "src/data/rebirth-universal-debuff.test.ts",
+      "sha256": "0dac1ba6db6f12aa5f1d7fc414bbdffc54f510095bc98c4b5593af0c2c4cc41f"
+    },
+    {
+      "path": "src/data/redirect-info-damage.test.ts",
+      "sha256": "023b4d6241850ad5f63149b12466e5067f8555649f09989f65c4670fd95d1cac"
+    },
+    {
+      "path": "src/data/repo-sync.test.ts",
+      "sha256": "5cb43fba9c481f0dc8e089a675964a89917842c68a37047121886a18d1d901c6"
+    },
+    {
+      "path": "src/data/set-mode-resolution.test.ts",
+      "sha256": "7752951920d91a1aaf068624dbbcff2a055b07f0984e2a9576f9f343c238f4a6"
+    },
+    {
+      "path": "src/data/snipe-timing.test.ts",
+      "sha256": "098286574fdf8a64997aa2618348f15fb2684c079aad06da7d9fe36953357b9b"
+    },
+    {
+      "path": "src/data/special-enhancements-guard.test.ts",
+      "sha256": "c06586c2ad99ae638f61bb33871504877a42946ffe79393ca2a2ab4f6861805c"
+    },
+    {
+      "path": "src/data/specialized-pool-exclusion.test.ts",
+      "sha256": "e2844bb9ccb56cd2d02d14e2409f66983c480f485c7f3fce25f171a00de01d59"
+    },
+    {
+      "path": "src/data/stealth-proc-naming.test.ts",
+      "sha256": "b9fb835682e8d98736784f3b013f7c77aaf8752b1f6cba5b0c12f3fe46c31fa6"
+    },
+    {
+      "path": "src/data/summon-copyboosts.test.ts",
+      "sha256": "370aa511fd058c2eed7e4e6d334392b19609ad2883207a5c26438ab2e2051a1b"
+    },
+    {
+      "path": "src/data/synapses-shock-proc.test.ts",
+      "sha256": "25f7c1f6283db7c819288b112ff351af3c4ff1f19b7b9ac4cea3c1733d322c71"
+    },
+    {
+      "path": "src/data/tail-projection.test.ts",
+      "sha256": "63d59b28aa60b294db990c56ca154a0882d6e008fbeeb9771b97b7ef9db835b0"
+    },
+    {
+      "path": "src/data/thunderspy-ato-categories.test.ts",
+      "sha256": "1a05a72ff35168c8261f6e25f6d6c6493dd718a2d3789903696b420f80564521"
+    },
+    {
+      "path": "src/data/thunderspy-defense-data.test.ts",
+      "sha256": "40e72fb34e3b2cd6e441ac4dde360d40d41bfa10fda16840d5f1e4498480f790"
+    },
+    {
+      "path": "src/data/thunderspy-dot-tickrate.test.ts",
+      "sha256": "1165a7df9c1db1c48e9516dfe8301c47ea1f236b0cefbdd9cfb222cace563c1a"
+    },
+    {
+      "path": "src/data/thunderspy-epic-prereqs.test.ts",
+      "sha256": "11dd2441f6a2aa2fd68a19bf022914f2348acea92860564e1dce992152cf943b"
+    },
+    {
+      "path": "src/data/thunderspy-io-set-roster.test.ts",
+      "sha256": "baec812ea1f0784a9a123bf116e621b4515af33d793fa34c57876669fc12c3d3"
+    },
+    {
+      "path": "src/data/thunderspy-mez-knockback.test.ts",
+      "sha256": "24d434715f59988b399734acd2234ff0f4d185608ae5f197a0151376fbd43232"
+    },
+    {
+      "path": "src/data/thunderspy-pet-summon.test.ts",
+      "sha256": "f5bb236f82eea51d0d98c2dc96f89c0400ddf0336c365be649ee2c2f9068ce31"
+    },
+    {
+      "path": "src/data/thunderspy-resist-tohit-vocab.test.ts",
+      "sha256": "6c6542f4f3a59ab221cffc34a9b6d01a0ed2c404e9a8215c3ba1c37d08cf0837"
+    },
+    {
+      "path": "src/data/thunderspy-support-hybrid.test.ts",
+      "sha256": "7f88cd265aa44050d78fbb452b71583073ee7c9ba96b5d3f36be1542cf3f8223"
+    },
+    {
+      "path": "src/data/trick-arrow-fixes.test.ts",
+      "sha256": "fd73d7af897d67f6e6e55e272466cbb829f6d16ea0a2a0f254c631eb93c4f02c"
+    },
+    {
+      "path": "src/data/unresolved-message-keys.test.ts",
+      "sha256": "e53a08ef32e71477385781105a3aeba9689f6b0b9ac4d1b30ec7bbd6b64e5ae9"
+    },
+    {
+      "path": "src/types/archetype-stats-fidelity.test.ts",
+      "sha256": "02dcc7108eb6321e3a4318f7b25aa3450685660a03a661164d14a931f5a0f7df"
+    },
+    {
+      "path": "src/types/power-emitted-fields.test.ts",
+      "sha256": "2ef9216a7f4e35e785a7e647a3201a909e9aeb1afa8927225d7e12fa3eaff834"
+    },
+    {
+      "path": "src/utils/accolade-legacy-ids.test.ts",
+      "sha256": "2aaf43d285c918f877a0cd7ef898780bf194af5e8f3d6f440d55d5ac530432a8"
+    },
+    {
+      "path": "src/utils/build-powers.test.ts",
+      "sha256": "7eb87deb214488fde5533ec11950ddbad114b843ef4e23e9adf8205db2cd9da2"
+    },
+    {
+      "path": "src/utils/build-serverid-roster.test.ts",
+      "sha256": "633460b425fb71baffd2749c706eed319a77dcbb8e2e8198ac2f93b19533cc38"
+    },
+    {
+      "path": "src/utils/calculations/dot-cancel-on-miss.test.ts",
+      "sha256": "53cb19381966f32af69ecd2170a71027a6c102014186e94096c7d192879e5cca"
+    },
+    {
+      "path": "src/utils/calculations/dot-tick-count.test.ts",
+      "sha256": "ed8e811156f3aa45439cde4a8144c2a8a3aadd58743c7dfa670679eb4d71f67f"
+    },
+    {
+      "path": "src/utils/calculations/dsh8-incarnate-collapse.test.ts",
+      "sha256": "6f08d000c7745a2db2cbf49f89c63e5f4519e926128414c28b7d5ed2deb2fe45"
+    },
+    {
+      "path": "src/utils/calculations/dual-pistols-ammo.test.ts",
+      "sha256": "96fde5292c3e952671c358558a066cfe574d1ce324e08bd7457af1c4ab4f6652"
+    },
+    {
+      "path": "src/utils/calculations/enhancement-export-sourced.test.ts",
+      "sha256": "3e31e22c9591e878b02387f6ed76b7101f1cb4a9bc7abd5e31e68025dff5a47c"
+    },
+    {
+      "path": "src/utils/calculations/enhancement-schedule-vocabulary.test.ts",
+      "sha256": "6df03b79f9675f0c8b240f05ee59e71987d541335177e0bf4edc8846f434de75"
+    },
+    {
+      "path": "src/utils/calculations/enhancement-values.heal-absorb.test.ts",
+      "sha256": "00f916013502275f3529a44b0b7d1b3b196423437284605e29359a8958b06943"
+    },
+    {
+      "path": "src/utils/calculations/mez-duration-bonus.test.ts",
+      "sha256": "61deb94e1458d8e40e4eb4a17c1575cba12ff678803fb27dfed95e9f0639ef31"
+    },
+    {
+      "path": "src/utils/calculations/mez-duration-combat-mod.test.ts",
+      "sha256": "d79b48a5d1f4b41a4a583210e203864fd0bd66ebb73a4946536eb22fe98097d8"
+    },
+    {
+      "path": "src/utils/calculations/power-at-mechanics.test.ts",
+      "sha256": "dee472b115b9374a3af029eaa472e9198f04f179cac433858f1edac81f76f90e"
+    },
+    {
+      "path": "src/utils/calculations/proc-area-geometry.test.ts",
+      "sha256": "75b7a99eb13d2364f590293bdcd38420f447ff57542d092f00db1828580afd19"
+    },
+    {
+      "path": "src/utils/calculations/proc-damage-level.test.ts",
+      "sha256": "d2a3b0d16c2b8a806d346ba52c49d1b8730de49d733c360ec51515d8fe3ecc1b"
+    },
+    {
+      "path": "src/utils/calculations/pseudopet-effects.test.ts",
+      "sha256": "41c1424d73e664894546a2fa48240be2dd5eaf1906c25cacf1fa980253cdfa3f"
+    },
+    {
+      "path": "src/utils/calculations/pseudopet-redirect.test.ts",
+      "sha256": "d8a4e17846348458d518542fe7e9f6d38d2fa1950b3122ea989043dec5828aca"
+    },
+    {
+      "path": "src/utils/calculations/sc345-converter-self-check.test.ts",
+      "sha256": "1fd1bf1535c62c3ae5f4d718a039d70111247572321e359a0d28ddf9523f6210"
+    },
+    {
+      "path": "src/utils/calculations/self-penalty-towho.test.ts",
+      "sha256": "5cf027be256c5e69e12c5ba3407352833ecd68f7bde3e4b555c72a7d4ef9f5e8"
+    },
+    {
+      "path": "src/utils/import-uid-parity.test.ts",
+      "sha256": "e1d7473d40d726c10840a8ab2d2f31dd14444e4d39219cf37535cfbf85596a4d"
+    },
+    {
+      "path": "src/utils/kheldian-import.test.ts",
+      "sha256": "b02c5a88b1fcdbcfebca56f65e6f72cb9b49ee9267c00f9aeb7f44147987966b"
+    },
+    {
+      "path": "src/utils/mids-export-slot-claim.test.ts",
+      "sha256": "7dcd21ce849fce99f9b0cec009798e1a687d0c37d85ae90c91fcf43405a3d80a"
+    },
+    {
+      "path": "src/utils/mids-import/accolades.test.ts",
+      "sha256": "d521254056d2bc7d0f8a2e67f924fa9f7315c03fc9d211c4068d9070dbdd456f"
+    },
+    {
+      "path": "src/utils/mids-import/importer.test.ts",
+      "sha256": "7ed839b937661905bf6d80b727370700a5030ee025568da1595ed9f7f27117b0"
+    },
+    {
+      "path": "src/utils/mids-import/name-map.test.ts",
+      "sha256": "acc4ea33e40626ce14e6773f51dd943d41a18464babd2b7a864713a37a422df9"
+    },
+    {
+      "path": "src/utils/mids-import/relative-level.test.ts",
+      "sha256": "49ba1e48b48ceb5095c13269af53a3c5aa848c73118b72dc2ad06942a6690427"
+    },
+    {
+      "path": "src/utils/mids-import/summary-counts.test.ts",
+      "sha256": "6557dd661696b8d60b2bf4d240afbea3df7584f3497d04e9debc2c0d6c6e691a"
+    },
+    {
+      "path": "src/utils/mode-suppression.test.ts",
+      "sha256": "d79b8199a7538c3008cd74c4d73c0ef1d9f6c605e82dc1a8aae5d695d28de48e"
+    },
+    {
+      "path": "src/utils/planner-layout.test.ts",
+      "sha256": "f88f1830b9d50164822699d0cdcc9b1b44da1c8067146a7d37bd20b79731668c"
+    },
+    {
+      "path": "src/utils/quick-snipe.test.ts",
+      "sha256": "73175e921c7d0493e0d5b71f7761a1fa530766b206d845d661fa62d942f9ba3b"
+    },
+    {
+      "path": "src/utils/slot-levels.test.ts",
+      "sha256": "70b1ed5a410cbe4b3c57b4d50a9cef7c39a60458d876b65292a8c595531e3f73"
+    }
+  ],
+  "departed": [
+    {
+      "path": "src/data/core/pool-atoms.verify.test.ts",
+      "reason": "STRIP-1 restated the epic-pool redirect reads onto top-level `power.damage` (the epic-pools partition no longer ships the legacy `effects` bag; the converter emits the redirect resolution as `damage` at the same address the bag slot used to project). The pool-powers bag survives, so the Health/Stamina/Aid Other/Teleport reads are unchanged. BPORT13 made the same restatement in the beta on 2026-09-08 and reached it independently: `effects.damage` → `power.damage` at the same address, and `effects.teleport` onto the `Mez`/`Teleport` atom that minted the key. Both copies are green and both now read the same fields, so the fork is down to Cross Punch, where the beta keeps a `perTarget ?? 0` floor against the bogus per-foe stamp the pool detector once minted. Converges whenever that floor is carried across.",
+      "gap": "STRIP-1",
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    },
+    {
+      "path": "src/data/redirect-summon-entity.test.ts",
+      "reason": "STRIP-1/ENT-22 restatement: the parser now skips a `summon` whose enclosing object is an `effects` bag, because ENT-22 hoisted `power.summon` to top level while the pool converter still ships the whole legacy bag — Corrosive Vial emitted its redirect summon twice and the text parse double-counted it (14->15 HC, 18->19 BS). Counts return to the pinned 14/18.",
+      "gap": "STRIP-1",
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    },
+    {
+      "path": "src/services/sharedBuilds.test.ts",
+      "reason": "SBV11 (beta commit 07e1dde73c): the live app's share payload moved from a boolean `is_public` to a 3-state `visibility` string ('private'/'unlisted'/'public'), so the beta's copy asserts on `visibility` and adds two `quickShareBuild` cases (10 tests to canonical's 8). Canonical's `src/services/sharedBuilds.ts` still sends `is_public` and has no visibility model to assert against; the shared-build work is scoped to `CoH-Sidekick/src/` by its own stream doc (docs/streams/shared-build-unlisted.md, corrected 2026-09-03), which is the repo that deploys. Converges only if canonical's frozen TS oracle ever takes the visibility model, or is archived with the beta handover.",
+      "gap": "SBV11",
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    },
+    {
+      "path": "src/utils/calculations/stacking-flaw-fix.verify.test.ts",
+      "reason": "STRIP-1 restated every claim onto atom-native readers (`stackCapOf`, `debuffResistanceValue`, `rechargeBuffValue`, `regenBuffValue`, `recoveryBuffValue`, `absorbMaxHPFractionValue`) because the strip retired the `effects` bag (maxStacks/stacksLinear/stackCaps) and the MaxHP-fraction absorb bag slot; canonical proves stacking per-key from the atoms' own stack caps and per-target stamps. BPORT13 restated the beta's copy onto the same readers on 2026-09-08, arriving at canonical's shape from the other side. Both are green. Two claims still differ: the beta keeps Consume Psyche's N² leg (the increment atoms are `RefreshToCount`, which `selfStacks` declines, so `stackCapOf` cannot hand the multiplier a cap) and drops its `perTarget` pair as a duplicate of `resources-atom-native`, where canonical asserts both in one file. Converges when the two agree which file owns the per-foe claim.",
+      "gap": "STRIP-1",
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    },
+    {
+      "path": "src/utils/mids-export.test.ts",
+      "reason": "SLOT-3 (beta commit d59d7d3d5c): beta's `exportToMids` / `exportToMidsWithReport` took a second `levelUpMode` parameter so off-mode slot placement stops enforcing a pick-level schedule floor, and the beta's copy passes `true` at nine call sites. Canonical's `src/utils/mids-export.ts` still has the one-arg form, so the beta's copy does not type-check there. Same commit and same fork as `src/utils/mids-import/importer.ts`, already declared `forked` with an exit in `sync-manifest.json`; this is its test-surface twin and converges with it.",
+      "gap": "SLOT-3",
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    },
+    {
+      "path": "src/utils/slot-levels-move.test.ts",
+      "reason": "SLOT-3 (beta commit d59d7d3d5c): `canMoveSlotLevel`, `applySlotLevelMove` and `computeAllSlotLevels` gained a trailing `levelUpMode` argument in the beta's `src/utils/slot-levels.ts` (879 lines to canonical's 690) and the beta's copy passes it at nine call sites. Canonical's module has no parameter to receive it. Converges with the `src/utils/mids-import/importer.ts` row in `sync-manifest.json`, which declares the same fork with an exit.",
+      "gap": "SLOT-3",
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    }
+  ],
+  "clusters": [
+    {
+      "id": "canonical-migration-lag",
+      "side": "canonical",
+      "reason": "Canonical's copy is the only one that has moved since the pair last held the same blob, and every one of these moves is the same move: the atom migrations (STRIP-1, ENT-22, MOVEMAP-1, TARGETS-3, STRTEST-1, BRAIN-13, ENT-16/DISPLAYONLY-1) re-pointed the assertion off the retired `effects` bag onto the atoms that used to feed it. The argument was that the beta still ships the bag, so its copy is not stale prose — it grades the engine that repo has, and both copies pass where they live (measured 2026-09-03: all 54 then-differing files run in both repos, canonical 701 green, beta 640 green). That premise lapsed for three days: BPORT7 emptied the beta's bag on 2026-09-06 and 5 of the then-13 copies went red there, rostered under BPORT12. BPORT12 closed 2026-09-08 and carried them, so all 9 copies pass in both repos again and the premise holds on a live run rather than a stamp. Four of the 13 reconciled outright in that carry (canonical's copy was taken verbatim) and left for the watched set, which is what shrank this cluster to 9. The cluster itself is unchanged in kind: canonical's copy is still the only one that has moved, and the beta's still grades the engine that repo has.",
+      "exit": "The beta takes the atom migration with the engine it tests, or the beta is archived (REBUILD-PROGRESS, 'Archive the beta'). One of those two ends this cluster; no per-file work does, which is why it is one row and not 13.",
+      "gap": "FORK-4",
+      "paths": [
+        "src/data/archetype-stats.test.ts",
+        "src/data/domination-perma-classification.test.ts",
+        "src/data/export-staleness.test.ts",
+        "src/data/io-set-slotting-reach.test.ts",
+        "src/stores/cross-dataset-import.test.ts",
+        "src/stores/per-server-persist.test.ts",
+        "src/stores/pool-dedup-self-heal.test.ts",
+        "src/utils/calculations/foe-slow.test.ts",
+        "src/utils/per-server-builds.test.ts"
+      ],
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    },
+    {
+      "id": "beta-authored",
+      "side": "beta",
+      "reason": "The beta's copy is the only one that moved: a feature it shipped and canonical has not (chain persistence, over-cap mute canonicalization, the per-instance-options cache regression), a fixture field its own engine needs, coverage canonical never took, the localStorage-polyfill import its vitest config made redundant, or the comment reflow the 80e28b2b6a transplant left behind. Canonical's copy is the older form of the same test and passes. RE-CUT 2026-09-11 by running each member rather than re-reading the group: all 21 beta copies were dropped into canonical (with `src/test/build-fixtures.ts`, which five of them import and canonical lacks) and run against canonical's engine. Twelve pass, and for those the sentence above is measured. Three fail on a missing export, which is the feature claim coming out true. Six failed on a rule canonical's TypeScript does not carry and left for `beta-fix-canonical-lacks`. The sentence this reason used to end with — that the one file where the beta held a real fix canonical lacked had been checked and reconciled rather than clustered — is deleted, not corrected: MBDEXPORT-14 broke it, and a group claim that has been broken once cannot be repaired by naming a second exception.",
+      "exit": "Canonical takes the content when it takes the surface under it, or the beta is archived. A file leaves this cluster the moment canonical carries the copy — that is a reconcile, and it re-enters the watched set on the next --write. What the re-cut adds: a member leaves for `beta-fix-canonical-lacks` if it fails when run against canonical's engine, so the check that ends this cluster is that run, not a reading of the list.",
+      "gap": "FORK-4",
+      "paths": [
+        "src/data/assault-damage-buff-flat.test.ts",
+        "src/data/set-bonus-groups.test.ts",
+        "src/data/strengths-disallowed.test.ts",
+        "src/hooks/shared-calc-cache.test.ts",
+        "src/utils/build-enhancement-validation.test.ts",
+        "src/utils/calculations/adaptation-modes.test.ts",
+        "src/utils/calculations/attack-chain-judgement.test.ts",
+        "src/utils/calculations/attack-chain-persistence.test.ts",
+        "src/utils/calculations/defense-atom-native.verify.test.ts",
+        "src/utils/calculations/incandescence-heal-received.test.ts",
+        "src/utils/calculations/maxhp-atom-native.verify.test.ts",
+        "src/utils/calculations/proc-global-recharge.test.ts",
+        "src/utils/calculations/proc-runtime-allowlist.test.ts",
+        "src/utils/calculations/resistance-atom-native.verify.test.ts",
+        "src/utils/calculations/stealth-procs.test.ts"
+      ],
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    },
+    {
+      "id": "two-way",
+      "side": "both",
+      "reason": "Both repos hold content the other's history never had for that path — the FORK-1 shape, and four of these never shared a blob at all (the same test authored twice, once per repo). Neither copy is behind, so neither can be ended by a copy: closing one is a merge decision about two engines' assertions, not a carry. This is the cluster that keeps `npm run sync:shared` off the shared test surface, because a one-way mirror over it would report success while deleting the other side's only copy. Seven of the 18 beta copies went red when BPORT7 emptied that repo's bag; BPORT12 carried four and BPORT13 restated three, and all 18 are green on both sides as of 2026-09-08. The two-way argument never depended on that — neither copy is behind, and a merge is still a merge — but the surface is now two-way in evidence as well as in origin, which is the state the cluster was always claiming and could not show while seven halves were not running.",
+      "exit": "Per file, and only when one repo actually needs the other's content — otherwise the archive. `scripts/keys/fork4-test-surface-direction.py` is the standing key: it exits 1 when the beta-original count reaches 0, at which point the surface has gone one-way, this cluster is empty in substance, and the mirror question must be re-decided rather than re-trusted.",
+      "gap": "FORK-4",
+      "paths": [
+        "src/data/accolades.test.ts",
+        "src/data/converter-invariants.test.ts",
+        "src/data/core/caster-excluded-defense.verify.test.ts",
+        "src/data/core/resources-atom-native.verify.test.ts",
+        "src/data/proc-main-target-only.test.ts",
+        "src/data/thunderspy-ones-recharge-buff.test.ts",
+        "src/stores/unreachable-active-flag.test.ts",
+        "src/utils/calculations/absorb-stat.test.ts",
+        "src/utils/calculations/bo-ryaku-kb-doubling.test.ts",
+        "src/utils/calculations/buff-pet-auras.test.ts",
+        "src/utils/calculations/focused-accuracy.test.ts",
+        "src/utils/calculations/incarnate-effects-completeness.test.ts",
+        "src/utils/calculations/jump-height.test.ts",
+        "src/utils/calculations/movement-atom-native.verify.test.ts",
+        "src/utils/calculations/strength-buffs.test.ts",
+        "src/utils/calculations/tohit-atom-native.verify.test.ts",
+        "src/utils/calculations/travel-speed-fixes.test.ts",
+        "src/utils/slot-move.test.ts"
+      ],
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    },
+    {
+      "id": "strip-lag-oracle",
+      "side": "both",
+      "reason": "The same guard written twice, because the two repos do not have the same oracle available. Each of these grades an atom reader against the `effects` bag it replaces, and canonical stripped that bag before it migrated: its copies compare against a frozen pre-strip git object, restate the result as hand-picked cases CI can still reach, and cover readers whose bag went silent (`selfMovementCapDebuffValue` — Granite Armor, Reaction Time, Rest). The beta migrated BEFORE its strip (BPORT6), so its copies ran the retired bag predicate beside the new one over the whole live corpus every run — 14,249 powers for the toggle roster, 28 carriers for the cap bump, 213,735 power×class views for mez protection — which was a standing gate rather than a measurement taken once. BPORT7 ended that: the bag those legs read is gone. BPORT13 closed the consequence on 2026-09-08 — all 3 beta copies are green — but it did NOT restore the standing comparison, and the distinction is the cluster's whole subject. Each beta leg is now a one-armed census pinned to the carrier count its own live comparison minted while the bag still answered, plus a scope test asserting the retired arm is empty. So the beta's advantage has been spent rather than kept: it bought numbers no frozen git object could have produced, and those numbers are now pins like canonical's. Neither copy is behind. Carrying either across would replace one repo's evidence with the other's, which is a merge decision and not a carry.",
+      "exit": "BPORT13, not BPORT7. The exit written here was BPORT7 — \"when the beta's converters land and its bag empties, each beta copy's shadow leg self-scopes, both state the skip rather than passing quietly\". BPORT7 landed on 2026-09-06 and the prediction failed: the legs did not self-scope, they went red, because a comparison whose oracle is gone is not a skip until something writes the skip. So the condition became BPORT13 — and BPORT13's remedy was not the one written here either. \"State the vacuous skip\" turned out to be right for exactly one of the three: `toggle-roster` had a stated skip already, and what it needed was a corrected SCOPE test (it asked whether any bag was non-empty, still true on the overrides layer, rather than whether the bag supplied a key its predicate reads) plus a floor asserting the atom side still answers, so the skip cannot become cover for a dead file. The other two did not skip: their arms became one-armed censuses pinned per fork to the carrier counts the live comparison minted before the bag went. Closed 2026-09-08, all three green. The two copies are now asking the same question with the same evidence available. BPORT9 re-adjudicates the manifest at that point; converging these is a merge of the case lists, not a carry, and the beta owes canonical's `selfMovementCapDebuffValue` cases when it takes them.",
+      "gap": "STRIP-1",
+      "paths": [
+        "src/components/powers/toggle-roster-atom-native.verify.test.ts",
+        "src/utils/calculations/mez-protection-atom-native.verify.test.ts",
+        "src/utils/calculations/movement-cap-atom-native.verify.test.ts"
+      ],
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    },
+    {
+      "id": "beta-fix-canonical-lacks",
+      "side": "beta",
+      "reason": "Six files where the beta asserts a RULE canonical's TypeScript does not carry — not coverage, and not a feature. Found 2026-09-11 by running the `beta-authored` cluster's 21 copies against canonical's engine: these six fail there, 37 cases. The rules are the archetype's own recharge floor and cap instead of a constant (`attack-chain`), the `knockback_strength` and `endurance_drain_resistance` bonus keys (`io-sets-bonus-keys`), below-45 incarnate exemplar suppression (`incarnate-exemplar`), the proc host's type read from the dataset rather than the build object (`proc-variable-calc`), two generic-IO stat keys (`game-importer/importer`), and a travel-inherent's added slot surviving an export → import round trip (`kheldian-travel-inherents`). Three were checked against canonical's RUST and it carries the rule in all three — recharge bounds in `coh_math::projection::ReductionClamps::for_build`, both bonus keys in `coh_math::set_bonuses`, exemplar suppression in `coh_math::incarnates`. So what this cluster covers is canonical's frozen TS oracle lagging two shipping engines, which is FORK-7's finding arriving on the test surface.",
+      "exit": "Each file leaves when canonical's copy carries the rule, or with the frozen TS half. The binding half is not the TypeScript: for any of these rules that is not yet in `coh_math`, the Rust port is taken from the BETA's form, the same condition SLOT-3 records on `mids-export.ts`. The check that empties this cluster is the run that filled it — drop the beta copies into canonical and run them; a file that passes belongs back in `beta-authored`.",
+      "gap": "FORK-4",
+      "paths": [
+        "src/data/datasets/homecoming/kheldian-travel-inherents.test.ts",
+        "src/data/io-sets-bonus-keys.test.ts",
+        "src/utils/calculations/attack-chain.test.ts",
+        "src/utils/calculations/incarnate-exemplar.test.ts",
+        "src/utils/calculations/proc-variable-calc.test.ts",
+        "src/utils/game-importer/importer.test.ts"
+      ],
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      }
+    },
+    {
+      "id": "contract-route",
+      "side": "both",
+      "gap": "FORK-7",
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      },
+      "reason": "The same drift gate written twice, because the two repos reach the contract by routes that do not exist in the other. Canonical reads `contract/effect-registry.json` directly — it is the repo that BUILDS the contract. The beta has no `contract/` directory at all: it receives the same file as `src/data/generated/effect-registry.generated.ts`, emitted by its own `build-engine.mjs`. So the fork is the import line and the header prose that explains it; both copies grade the same 69 keys against the same authored JSON on the same resolution fields, and both are green. A shared file could only exist by one repo growing the other's route, which is a decision about the two repos and not about this test.",
+      "exit": "The beta gains `contract/`, or canonical vendors a generated emit, or the beta is archived (REBUILD-PROGRESS, 'Archive the beta'). No per-file work ends this one. Until then the claim worth holding is checked rather than assumed: each copy grades all 69 keys in its own repo, so a contract change that reaches one side and not the other reds on the side it missed — which is the failure this pair exists to catch, and the reason the fork costs nothing while it lasts.",
+      "paths": [
+        "src/data/core/effectRegistryDrift.test.ts"
+      ]
+    },
+    {
+      "id": "slot-3-arity-and-corpus",
+      "side": "both",
+      "gap": "SLOT-3",
+      "evidence": {
+        "canonical": "pass",
+        "beta": "pass"
+      },
+      "reason": "Downstream of a fork already declared next door: `src/utils/slot-levels.ts` is `forked` under SLOT-3 in `sync-manifest.json` because `ensureSlotOrderPopulated` takes a `levelUpMode` argument on the beta and not in canonical, so the two copies cannot call the function they grade the same way. The second half is the corpus: the `.mbd` fixtures are canonical-only, so only canonical's copy can assert that MBDIMPORT's seed comes back AUTHORED. Both copies grade the wholesale-fill stamp; canonical's grades one case more, and each header states its own half rather than implying the other does not exist.",
+      "exit": "Two halves, and both must land. The arity half ends exactly where `slot-levels.ts`'s own manifest exit says it does — canonical takes SLOT-3 through all ten consumers, or that half is retired once the Rust writer lands. The corpus half ends when the `.mbd` fixtures are shared, or with the archive. Closing only the arity leaves a file that still cannot carry canonical's second case, so a single-half close is not this cluster's exit.",
+      "paths": [
+        "src/utils/slot-levels-provenance.test.ts"
+      ]
+    }
+  ],
+  "unassigned": []
+}
