@@ -62,13 +62,9 @@ either: DRIFTBASE-1 opened and closed on 2026-09-13, and the sweep's whole resid
 refusals its forgiveness list could not see.
 
 **A baseline is blind on the axis it joins on.** DRIFTBASE-1 was never a stale file —
-regenerating it produced the same one, which is what its inverted `Check` was for. It forgave by
-DISPLAY name while the reconciler grades INTERNAL names, so Rebirth filing `Clear_Skies` and
-`Clear_Skies_Text` under one display name was a distinction one side is built on and the other
-could not represent. The fix was a second leg rather than a second join, scoped to display names
-filed over more than one power — unscoped, that leg forgives 104 Homecoming names and 75 Rebirth
-ones instead of 0 and 2, which is the rotation the display join exists to survive. The 440-build
-sweep is 0 unexplained.
+regenerating produced the same one, which is what its inverted `Check` was for. The fix is a
+second leg, not a second join: scoped to a display name filed over more than one power, because
+unscoped it forgives 104 Homecoming names instead of 0. The 440-build sweep is 0 unexplained.
 
 **A merge and an ambiguity are not the same withdrawal.** MBDEXPORT-24 closed the day it opened,
 filed as the wrong one: Mids has three "Opportunity" rows and we have two, so the join withdrew
@@ -826,7 +822,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 99 of 100 closed
+[Full detail](gaps/pipeline-provenance.md) — 100 of 100 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -1020,13 +1016,10 @@ measurement went, and where a closure for the residual belongs too.
   build holding Lingering Radiation, Wrath of Hell or Tough Hide lost that power and its
   slots, silently. Reverse rows 312 -> 339 across four forks, verified in a real Mids
 
-- [x] **DRIFTBASE-1** — `mids-drift-baseline.<fork>.json` forgave a correct Mids refusal by
-  DISPLAY name while the reconciler graded INTERNAL names, so a fork filing two internal names
-  under one display name was invisible to it: Rebirth's `Clear_Skies` / `Clear_Skies_Text` read
-  as an exact display match, the powerset was not even listed as differing, and the two refusals
-  graded UNEXPLAINED — the whole residual of the 440-build sweep. The baseline gained a second
-  leg, `oursOnlyInternal`, scoped to display names our export files over more than one power;
-  unscoped it would forgive 104 Homecoming and 75 Rebirth names instead of 0 and 2
+- [x] **DRIFTBASE-1** — the drift baseline forgave by DISPLAY name while the reconciler graded
+  INTERNAL names, so Rebirth filing `Clear_Skies` and `Clear_Skies_Text` under one display name
+  read as an exact match and both correct refusals graded UNEXPLAINED — the whole residual of
+  the 440-build sweep. A second leg, `oursOnlyInternal`, scoped to the doubling
 
 - [x] **MBDEXPORT-24** — every Sentinel build handed Mids `Inherent.Inherent.Opportunity` and
   Mids refused it, 15 of 217 swept Homecoming builds: three of its rows display "Opportunity"
