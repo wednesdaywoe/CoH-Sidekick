@@ -6,18 +6,34 @@
   },
   "canonicalOnly": [
     {
+      "path": "scripts/audit-converter-twins.cjs",
+      "reason": "Wired into canonical's regen-all.cjs and package.json as audit:twins. The beta held a copy it never referenced and could not have run — the --gate leg reads scripts/audit-twins-baseline.json, which the beta does not carry.",
+      "gap": "FORK-1"
+    },
+    {
+      "path": "scripts/audit-coverage-census.cjs",
+      "reason": "Wired into canonical's regen-all.cjs and package.json as audit:census. Same shape as the twins ratchet: an unreferenced beta copy whose --gate leg reads scripts/audit-census-baseline.json, absent there.",
+      "gap": "FORK-1"
+    },
+    {
+      "path": "scripts/audit-override-staleness.cjs",
+      "reason": "Wired into canonical's regen-all.cjs and package.json as audit:override-staleness. Cross-fork by construction: it grades every dataset's override layer against that dataset's own generated twin, and the beta carries neither the four-dataset tree nor the generated layer to compare.",
+      "gap": "BRAIN-2"
+    },
+    {
+      "path": "scripts/convert-inherents.cjs",
+      "reason": "Canonical-only converter for the archetype inherents tree, wired into regen-all.cjs. The beta has never carried the file, so the manifest's present-in-both check never fired on it and its absence was undeclared rather than adjudicated — found while routing every display_help emitter through helpText. Both names of it in the beta are prose in comments (the convert-side twin, the family it omits), not a require.",
+      "gap": "HELPTEXT-1",
+      "mentions": [
+        "scripts/convert-accolades.cjs",
+        "src/data/dataset.ts",
+        "scripts/detect-chance-mod-selectors.cjs",
+        "scripts/convert-archetype-inherents.cjs"
+      ]
+    },
+    {
       "path": "scripts/keys/README.md",
       "reason": "The keys convention: a tracker row that makes a door-closing claim carries a Check that turns it. Canonical-only because the keys are, and a README for files the beta does not hold would describe nothing there.",
-      "gap": "FORK-1"
-    },
-    {
-      "path": "scripts/keys/tspy11-filter-cost.py",
-      "reason": "Turns DATA-GAP-REGISTER TSPY-11's \"a reaches_caster filter is not the fix\". Reads contract/*/powersets, which the beta does not carry in this layout, and mirrors a Rust predicate (reaches_caster) the beta's TS engine spells differently — so a beta copy would grade a different question under the same name. The register naming it is a docs/ reference, outside verify-sync's WIRING_PATHS, and the same already-stated condition as the docs/gaps/ narratives its rows cite (lint-register-shape.cjs rule 6).",
-      "gap": "FORK-1"
-    },
-    {
-      "path": "scripts/keys/shapeshift-suppression.py",
-      "reason": "Turns the Kheldian shapeshift residual's \"nothing is granted through this channel\". Walks exported_powers/, the 746 MB export tree, which is canonical-only. Same docs/-reference reasoning as the sibling key.",
       "gap": "FORK-1"
     },
     {
@@ -54,30 +70,44 @@
       ]
     },
     {
-      "path": "scripts/audit-converter-twins.cjs",
-      "reason": "Wired into canonical's regen-all.cjs and package.json as audit:twins. The beta held a copy it never referenced and could not have run — the --gate leg reads scripts/audit-twins-baseline.json, which the beta does not carry.",
+      "path": "scripts/keys/shapeshift-suppression.py",
+      "reason": "Turns the Kheldian shapeshift residual's \"nothing is granted through this channel\". Walks exported_powers/, the 746 MB export tree, which is canonical-only. Same docs/-reference reasoning as the sibling key.",
       "gap": "FORK-1"
     },
     {
-      "path": "scripts/audit-coverage-census.cjs",
-      "reason": "Wired into canonical's regen-all.cjs and package.json as audit:census. Same shape as the twins ratchet: an unreferenced beta copy whose --gate leg reads scripts/audit-census-baseline.json, absent there.",
+      "path": "scripts/keys/tspy11-filter-cost.py",
+      "reason": "Turns DATA-GAP-REGISTER TSPY-11's \"a reaches_caster filter is not the fix\". Reads contract/*/powersets, which the beta does not carry in this layout, and mirrors a Rust predicate (reaches_caster) the beta's TS engine spells differently — so a beta copy would grade a different question under the same name. The register naming it is a docs/ reference, outside verify-sync's WIRING_PATHS, and the same already-stated condition as the docs/gaps/ narratives its rows cite (lint-register-shape.cjs rule 6).",
       "gap": "FORK-1"
     },
     {
-      "path": "scripts/audit-override-staleness.cjs",
-      "reason": "Wired into canonical's regen-all.cjs and package.json as audit:override-staleness. Cross-fork by construction: it grades every dataset's override layer against that dataset's own generated twin, and the beta carries neither the four-dataset tree nor the generated layer to compare.",
-      "gap": "BRAIN-2"
+      "path": "src/data/datasets/brainstorm/generated/mids-enh-names.ts",
+      "reason": "Generated half of the canonical-only Mids short-name table; see `src/data/mids-enh-names.ts`.",
+      "gap": "FORK-1"
     },
     {
-      "path": "scripts/convert-inherents.cjs",
-      "reason": "Canonical-only converter for the archetype inherents tree, wired into regen-all.cjs. The beta has never carried the file, so the manifest's present-in-both check never fired on it and its absence was undeclared rather than adjudicated — found while routing every display_help emitter through helpText. Both names of it in the beta are prose in comments (the convert-side twin, the family it omits), not a require.",
-      "gap": "HELPTEXT-1",
-      "mentions": [
-        "scripts/convert-accolades.cjs",
-        "src/data/dataset.ts",
-        "scripts/detect-chance-mod-selectors.cjs",
-        "scripts/convert-archetype-inherents.cjs"
-      ]
+      "path": "src/data/datasets/homecoming/generated/mids-enh-names.ts",
+      "reason": "Generated half of the canonical-only Mids short-name table; see `src/data/mids-enh-names.ts`.",
+      "gap": "FORK-1"
+    },
+    {
+      "path": "src/data/datasets/rebirth/generated/mids-enh-names.ts",
+      "reason": "Generated half of the canonical-only Mids short-name table; see `src/data/mids-enh-names.ts`.",
+      "gap": "FORK-1"
+    },
+    {
+      "path": "src/data/datasets/thunderspy/generated/mids-enh-names.ts",
+      "reason": "Generated half of the canonical-only Mids short-name table; see `src/data/mids-enh-names.ts`.",
+      "gap": "FORK-1"
+    },
+    {
+      "path": "src/data/mids-enh-names.ts",
+      "reason": "Mids' enhancement SHORT-NAME table and its array order, which only the legacy `.mxd` reader needs: that format names a slotted piece by a short code in its post half and by an index in its compressed half, and neither is a name the export owns. Canonical-only because the reader is — `crates/coh_data/src/mxd.rs` has no beta counterpart and the beta's TS importer reads `.mbd` only — and because the one thing that consumes it, `scripts/emit-contract.cjs`, is canonical-only already. Mirroring it would put ~400 KB of Mids vocabulary in a tree with nothing to ask it.",
+      "gap": "FORK-1"
+    },
+    {
+      "path": "src/utils/mids-export-thunderspy.test.ts",
+      "reason": "Pins what a Thunderspy build becomes as a .mbd (MBDEXPORT-2). Reads fixtures/skif/v4/thunderpy-primalist.skif, and the beta has no fixtures/ tree — the same reason as the .mbd corpus gate beside it. It is un-carryable for a second reason worth naming, because the first one would go away if the beta ever grew fixtures: it calls the one-arg `exportToMidsWithReport(build)`, and the beta's takes a `levelUpMode` second argument (SLOT-3), so it would not type-check there. What it grades is therefore canonical's forked copy and not the one users run. The two copies differ in three hunks, all slot levels, so every assertion here holds for the beta's copy too — this gate asserts nothing about a slot's `Level`.",
+      "gap": "MBDEXPORT-2"
     },
     {
       "path": "src/utils/mids-import/mbd-corpus.test.ts",
@@ -93,9 +123,9 @@
       ]
     },
     {
-      "path": "src/utils/mids-export-thunderspy.test.ts",
-      "reason": "Pins what a Thunderspy build becomes as a .mbd (MBDEXPORT-2). Reads fixtures/skif/v4/thunderpy-primalist.skif, and the beta has no fixtures/ tree — the same reason as the .mbd corpus gate beside it. It is un-carryable for a second reason worth naming, because the first one would go away if the beta ever grew fixtures: it calls the one-arg `exportToMidsWithReport(build)`, and the beta's takes a `levelUpMode` second argument (SLOT-3), so it would not type-check there. What it grades is therefore canonical's forked copy and not the one users run. The two copies differ in three hunks, all slot levels, so every assertion here holds for the beta's copy too — this gate asserts nothing about a slot's `Level`.",
-      "gap": "MBDEXPORT-2"
+      "path": "tools/mids-oracle/emit_mids_enh_names.py",
+      "reason": "Emits the table above out of Mids' own EnhDB, beside `emit_mids_uids.py` which IS shared because the beta's importer reads its output. This one's output is canonical-only, so the emitter is.",
+      "gap": "FORK-1"
     }
   ],
   "betaOnly": [
@@ -221,7 +251,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "893c3265e002834a91289fd78d4e4953598584012d98d58131ae9e14ba570a0c"
+      "sha256": "82713ca6eaaca958fc5724d262843e9a3b705af9b837fde26568dc6daf477aa5"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
