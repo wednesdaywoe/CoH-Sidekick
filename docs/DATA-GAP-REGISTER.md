@@ -57,15 +57,15 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 316 entries.** It came out of one `.mbd` corpus sweep on 2026-09-14 — 2,178 files,
+**0 open, of 316 entries.** It came out of one `.mbd` corpus sweep on 2026-09-14 — 2,178 files,
 against the **eight** the reader was closed on. **The reader held**: zero parse failures, zero
 hydrate failures, zero non-reconciling builds, so MBDIMPORT-5's property holds at 272 times the
 corpus it was written against.
 
-**A gate reds; a population has to be read.** BOOST-7 is not a defect the reader hid; it is
-something the reader reported, in a number too large to keep calling noise — 128 stripped `+5`s
-never adjudicated. It is the one finding of the three still open, and the one needing the live
-server rather than a key.
+**A loud refusal is the most comfortable place for a wrong rule to live.** BOOST-7 reported 128
+strips over a 2,178-file corpus and nothing ever red, because Rule 1 was satisfied. The live
+server settled it in one answer: a piece takes a booster exactly when it enhances something, which
+is what the rule already read. What was missing was anyone asking the game.
 
 **A guard on one side of a join is not a guard.** The display join refused OUR ambiguity
 and never Mids', and the level tie-break that would have caught the difference cannot fire on a
@@ -408,7 +408,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Sets, boosts, incarnates, inherents
 
-[Full detail](gaps/sets-boosts-incarnates.md) — 30 of 31 closed
+[Full detail](gaps/sets-boosts-incarnates.md) — 31 of 31 closed
 
 - [x] **HYBRID-2** — Homecoming and its Brainstorm beta dropped the Melee Hybrid's status-protection
   rows at Total Radial Graft and both T4 Embodiments while the tooltip still promises them, where
@@ -443,24 +443,12 @@ measurement went, and where a closure for the residual belongs too.
   `ssuperior_winters_gift.png`, 404ing from the day the set was added while the base set's own
   asset sat unreferenced; the fabricating fallback is retired for a loud stop, and a guard now
   resolves all 673 icons against the asset library
-- [ ] **BOOST-7** — the reader strips a `+5` from every booster it finds on a piece flagged
-  `proc`, and Mids writes them: **128 pieces over 53 distinct set slots** in a 2,178-file corpus,
-  every one of them a proc or a global. The refusal is REPORTED, so rule 1 holds and nothing
-  ships silently wrong; what is unadjudicated is whether it is right. Boosters combine into an
-  unattuned non-proc IO at level 50+, and two of these cut the other way — a level-30-capped
-  Kismet could never take one, while a craftable level-50 global plausibly can. So this is not
-  one question: the rule may be too broad, Mids may be writing boosts it does not honour either,
-  or both, per piece.
-  **Goal** — the +5-on-a-proc population is adjudicated against the game, and the rule either
-  narrows to what the game refuses or the strip is confirmed correct and said out loud.
-  **Done when** — the 53 slots are partitioned by what actually blocks a booster (attunement, the
-  level-50 floor, a per-piece level cap, proc-ness itself); the live server answers for at least
-  one piece in each partition, since it is the only oracle that outranks both us and Mids; and the
-  rule reads whichever of those the export already carries rather than the `proc` flag standing in
-  for all four.
-  **Check** — `cargo run -p coh_data --release --example mbd_corpus_sweep -- <corpus>` prints the
-  `+5 booster refused, by piece` block. A piece leaving that block without the rule changing means
-  a fork moved the flag, not that the question was answered.
+- [x] **BOOST-7** — 128 stored `+5`s over 53 set pieces in a 2,178-file corpus, stripped
+  and reported, never graded against the game. Not one flag doing four jobs: 95
+  are aspect-less procs, 28 attuned Superior ATOs with no craft level to combine into, 5 ordinary
+  pieces slotted at 30. The live server named the discriminator — a level-50 Gladiator's Armor
+  Res/End/Rech boosts, the same set's aspect-less `#6` and Zephyr's static 4 points do not — so a
+  piece takes one exactly when it enhances something, which the rule already read
 - [x] **BOOST-6** — the generic-IO level spinner offered every integer from 10 to 53, both bounds typed in, where the export names nine crafted levels per stat (10 to 50 in steps of five) and nothing above 50; 51-53 is the pre-booster spelling of a level-50 IO with three combines, which both planners already carry on their own axis, and the band now comes from the boost index in the two UIs, both engines and the bulk re-level
 - [x] **BOOST-5** — the two repos' `io-sets-raw` registries drifted wholesale on all three forks and each side was ahead of the other; the damage tiers are export-true, shared sets carry their own fork's values, and the beta now regenerates byte-identical registries from the same extractor
 - [x] **BOOST-4** — Synapse's Agility's 6th piece read "Empty" and the 20% end-drain-resist global it grants was modeled nowhere; the piece-gated-bonus census found it the one absentee among 39
