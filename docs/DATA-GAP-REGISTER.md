@@ -57,10 +57,26 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 316 entries.** It came out of one `.mbd` corpus sweep on 2026-09-14 — 2,178 files,
-against the **eight** the reader was closed on. **The reader held**: zero parse failures, zero
-hydrate failures, zero non-reconciling builds, so MBDIMPORT-5's property holds at 272 times the
-corpus it was written against.
+**1 open, of 317 entries.** The open row is MXDIMPORT-1. It came out of the `.mxd` reader landing on 2026-09-15,
+over a corpus the feature row said did not exist — 1,929 posted files.
+
+**A format that states a build twice grades its own reader.** A `.mxd` is a forum post over a
+compressed Mids stream, and neither half can be read alone: the binary names nothing and the prose
+has no structure. 1,929 files, zero disagreements on row count, level, slot count and IO level. So
+the reader refuses a file whose halves differ rather than preferring one.
+
+**A declared version is not a record shape.** One file says `1.01` and carries records a byte
+shorter, under a header identical to its 955 siblings. The shape is chosen by which of ten
+candidate layouts consumes the buffer exactly; one fits every file and never two.
+
+**What is left is a name nobody can join.** 1,882 of 75,368 powers, 33 distinct display names Mids
+has changed since — MXDIMPORT-1. Reported per entry; the index cannot rescue these the way it
+rescues an enhancement, because a power's position in Mids' array does not survive a release.
+
+The previous frontier, retained because its lesson stands: it came out of one `.mbd` corpus sweep
+on 2026-09-14 — 2,178 files, against the **eight** the reader was closed on. **The reader held**:
+zero parse failures, zero hydrate failures, zero non-reconciling builds, so MBDIMPORT-5's property
+holds at 272 times the corpus it was written against.
 
 **A loud refusal is the most comfortable place for a wrong rule to live.** BOOST-7 reported 128
 strips over a 2,178-file corpus and nothing ever red, because Rule 1 was satisfied. The live
@@ -847,7 +863,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 103 of 103 closed
+[Full detail](gaps/pipeline-provenance.md) — 103 of 104 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -935,6 +951,23 @@ measurement went, and where a closure for the residual belongs too.
   the repo had no slot for, plus a proc file read unforked; missing/extra 58/86 → 0/0. Two guards
   that fail `--strict` behind a baseline, because they grade the comparator. The 7 are Mids
   storing the authored label where the scale grants 2.525
+- [ ] **MXDIMPORT-1** — a `.mxd` names a power by DISPLAY name and nothing else, so a post written
+  against an older Mids names powers this dataset spells differently: 1,882 of 75,368 entries over
+  a 1,929-file corpus, in **33 distinct names** — `Dull Pain` for Regeneration's `Second Wind` (55),
+  Electrical Blast's `Aim` (20), `Instant Regeneration` (21) and thirty more. Reported per entry,
+  never dropped silently. The index cannot rescue these the way it rescues a renamed enhancement:
+  set membership survives Mids reordering its array and a power's position does not, so the same
+  check fires never rather than wrongly.
+  **Goal** — a `.mxd` written against an older Mids resolves the powers this dataset still carries
+  under a different label, or states that the label is what moved.
+  **Done when** — the 33 are censused against this dataset's rosters and split into what a join
+  could reach and what only a table could; any join is adjudicated pair by pair the way
+  MBDIMPORT-16's residual pass was, never by a similarity threshold; the remainder is a stated
+  population rather than a drifting number.
+  **Check** — `cargo run -q -p coh_data --release --example mxd_corpus_sweep -- <corpus> | grep 'unnamed powers'`
+  prints 33 while this row is open. More means the census is stale; FEWER means something started
+  matching that nobody adjudicated, which is the direction worth looking at.
+
 - [x] **MBDIMPORT-18** — the name map's display join refuses an ambiguous display on OUR
   side and never on Mids', so where Mids gives one display to two powers it took an arm: Rebirth's
   Savage Melee pet sets bound Mids' `Rending_Flurry_Large` onto our `Rending_Flurry_Normal`, past
