@@ -57,7 +57,13 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 318 entries.** MXDIMPORT-2 opened and closed on 2026-09-15, out of MXDIMPORT-1's
+**0 open, of 319 entries.** IOUNIQUE-1 opened and closed on 2026-09-15: a converter default
+stamped `unique: false` on 12 Thunderspy ATO pieces, and a downstream rarity guess covered for it.
+
+**A soft default is right by accident until someone asks the record.** Nothing was ever red — the
+flag had a value and the value was a boolean.
+
+The previous frontier, retained because its lesson stands — MXDIMPORT-2, out of MXDIMPORT-1's
 census: three `.mxd` files declare `Epic.Scrapper_Mace_Mastery`, and Homecoming has no such set.
 
 **The game's own defs are an oracle that proves it was read right.** `bin_powers.pigg` holds one
@@ -443,8 +449,13 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Sets, boosts, incarnates, inherents
 
-[Full detail](gaps/sets-boosts-incarnates.md) — 31 of 31 closed
+[Full detail](gaps/sets-boosts-incarnates.md) — 32 of 32 closed
 
+- [x] **IOUNIQUE-1** — the Thunderspy-only reconstruction path stamped `unique: false` on every
+  piece it built rather than reading the `slot_requires` the main path reads, so the 12 Primalist
+  ATO pieces exported as freely stackable; the beta had grown a purple/ATO rarity guess that
+  overrode the export to compensate, and with the flag true on all four forks that guess is
+  redundant rather than load-bearing
 - [x] **HYBRID-2** — Homecoming and its Brainstorm beta dropped the Melee Hybrid's status-protection
   rows at Total Radial Graft and both T4 Embodiments while the tooltip still promises them, where
   Rebirth and Thunderspy keep the rows and read true; adjudicated as an upstream removal, not a
