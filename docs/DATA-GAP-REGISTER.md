@@ -57,8 +57,13 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 317 entries.** The open row is MXDIMPORT-1. It came out of the `.mxd` reader landing on 2026-09-15,
-over a corpus the feature row said did not exist — 1,929 posted files.
+**1 open, of 318 entries.** The open row is MXDIMPORT-2. It came out of closing MXDIMPORT-1 on
+2026-09-15: three `.mxd` files declare `Epic.Scrapper_Mace_Mastery` and nothing here has that set.
+
+**The export carries nine archetypes' Mace Mastery and no Scrapper one — and neither does Mids.**
+That is why the row is open rather than filed as a parser miss: this tree and Mids' current
+database agree, so what a Mids of 2022 wrote neither of them now knows. The game's own defs are
+the only oracle that settles it.
 
 **A format that states a build twice grades its own reader.** A `.mxd` is a forum post over a
 compressed Mids stream, and neither half can be read alone: the binary names nothing and the prose
@@ -69,9 +74,20 @@ the reader refuses a file whose halves differ rather than preferring one.
 shorter, under a header identical to its 955 siblings. The shape is chosen by which of ten
 candidate layouts consumes the buffer exactly; one fits every file and never two.
 
-**What is left is a name nobody can join.** 1,882 of 75,368 powers, 33 distinct display names Mids
-has changed since — MXDIMPORT-1. Reported per entry; the index cannot rescue these the way it
-rescues an enhancement, because a power's position in Mids' array does not survive a release.
+**A renamed power keeps its name where the game keeps names.** Homecoming moves a power's DISPLAY
+and leaves `internalName` alone, so a post written before the rename names a record this dataset
+still stores under exactly that name — `Dull_Pain` displays `Second Wind`, Electrical Blast's `Aim`
+displays `Charge Up`. 277 of MXDIMPORT-1's 292 reported misses arrive on that join.
+
+**Which door runs first was measured, not chosen.** 433 corpus entries answer to both the display
+join and the ident join and the two disagree on every one, because a revamp permutes a set's
+labels against its own record names — Shield Defense's three are a clean 3-cycle. Mids' own name
+table sides with the display join, so the ident join runs last and sees only what the first missed.
+
+**An internal name is not an identity across a revamp.** Homecoming reused Stalker Ninjitsu's
+`Smoke_Flash` record for `Bo Ryaku`, so a file that picked the old set's two powers has one pick
+with nowhere to go. The join refuses where its claimant is already held, and where two of the
+build's sets store the name — the rule MBDIMPORT-18 cut, at a second door.
 
 The previous frontier, retained because its lesson stands: it came out of one `.mbd` corpus sweep
 on 2026-09-14 — 2,178 files, against the **eight** the reader was closed on. **The reader held**:
@@ -863,7 +879,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 103 of 104 closed
+[Full detail](gaps/pipeline-provenance.md) — 104 of 105 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -951,22 +967,26 @@ measurement went, and where a closure for the residual belongs too.
   the repo had no slot for, plus a proc file read unforked; missing/extra 58/86 → 0/0. Two guards
   that fail `--strict` behind a baseline, because they grade the comparator. The 7 are Mids
   storing the authored label where the scale grants 2.525
-- [ ] **MXDIMPORT-1** — a `.mxd` names a power by DISPLAY name and nothing else, so a post written
-  against an older Mids names powers this dataset spells differently: 1,882 of 75,368 entries over
-  a 1,929-file corpus, in **33 distinct names** — `Dull Pain` for Regeneration's `Second Wind` (55),
-  Electrical Blast's `Aim` (20), `Instant Regeneration` (21) and thirty more. Reported per entry,
-  never dropped silently. The index cannot rescue these the way it rescues a renamed enhancement:
-  set membership survives Mids reordering its array and a power's position does not, so the same
-  check fires never rather than wrongly.
-  **Goal** — a `.mxd` written against an older Mids resolves the powers this dataset still carries
-  under a different label, or states that the label is what moved.
-  **Done when** — the 33 are censused against this dataset's rosters and split into what a join
-  could reach and what only a table could; any join is adjudicated pair by pair the way
-  MBDIMPORT-16's residual pass was, never by a similarity threshold; the remainder is a stated
-  population rather than a drifting number.
-  **Check** — `cargo run -q -p coh_data --release --example mxd_corpus_sweep -- <corpus> | grep 'unnamed powers'`
-  prints 33 while this row is open. More means the census is stale; FEWER means something started
-  matching that nobody adjudicated, which is the direction worth looking at.
+- [x] **MXDIMPORT-1** — a `.mxd` names a power by DISPLAY name alone, so a post written against an
+  older Mids named 292 entries in 33 names this dataset spells differently; 29 of those are a
+  label Homecoming moved off a record it still stores under the old name (`Dull_Pain` displays
+  `Second Wind`), so a second door joins on `internalName` — last, because 433 entries answer to
+  both doors and disagree, and refusing where the claimant is already held or two sets store it.
+  277 of 292 now arrive; the residual is 15 entries in 7 names
+- [ ] **MXDIMPORT-2** — three `.mxd` files declare `Epic.Scrapper_Mace_Mastery`, a powerset path
+  this dataset has no set for, so their `Mace Beam` and `Disruptor Blast` picks — 6 of 75,368 —
+  arrive as reported misses. The export carries nine archetypes' Mace Mastery and no Scrapper one,
+  and no Scrapper patron pool at all; **Mids' own current database has none either**, so what a
+  Mids of 2022 wrote a Mids of today does not know. Not claimed: that the export missed a set.
+  **Goal** — either this dataset carries the set a Scrapper's Mace Mastery is, or the row states
+  that Homecoming has none and the path is a spelling nothing answers.
+  **Done when** — the game's own defs are read for a Scrapper patron pool (the `.pigg` tree or the
+  live server, not this tree and not Mids, since both already agree); if one is there the export
+  is missing it and the gap moves upstream, and if not the path is named as withdrawn and the
+  three files' picks are a stated population.
+  **Check** — `cargo run -q -p coh_data --release --example mxd_name_census -- <corpus> | grep -A3 'no set for'`
+  prints `3x Epic.Scrapper_Mace_Mastery` while this row is open. A second path appearing means a
+  roster gap wider than this row; it vanishing means the set arrived and the row can close.
 
 - [x] **MBDIMPORT-18** — the name map's display join refuses an ambiguous display on OUR
   side and never on Mids', so where Mids gives one display to two powers it took an arm: Rebirth's
