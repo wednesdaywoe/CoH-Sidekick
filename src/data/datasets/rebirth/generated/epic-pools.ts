@@ -30,6 +30,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Chilblain",
+        "internalName": "Chilblain",
         "fullName": "Epic.Arctic_Mastery.Chilblain",
         "targetsAffected": [
           "Foe"
@@ -120,6 +121,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Block of Ice",
+        "internalName": "Block_of_Ice",
         "fullName": "Epic.Arctic_Mastery.Block_of_Ice",
         "targetsAffected": [
           "Foe"
@@ -205,6 +207,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Ice Blast",
+        "internalName": "Ice_Blast",
         "fullName": "Epic.Arctic_Mastery.Ice_Blast",
         "targetsAffected": [
           "Foe"
@@ -285,6 +288,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shiver",
+        "internalName": "Shiver",
         "fullName": "Epic.Arctic_Mastery.Shiver",
         "targetsAffected": [
           "Foe"
@@ -350,6 +354,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Ice Storm",
+        "internalName": "Ice_Storm",
         "fullName": "Epic.Arctic_Mastery.Ice_Storm",
         "targetsAffected": [
           "Self"
@@ -448,6 +453,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Web Envelope",
+        "internalName": "Web_Envelope",
         "fullName": "Epic.Blaster_Mace_Mastery.Web_Envelope",
         "targetsAffected": [
           "Foe"
@@ -517,6 +523,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Scorpion Shield",
+        "internalName": "Scorpion_Shield",
         "fullName": "Epic.Blaster_Mace_Mastery.Scorpion_Shield",
         "targetsAffected": [
           "Self"
@@ -592,6 +599,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Mace Beam Volley",
+        "internalName": "Mace_Beam_Volley",
         "fullName": "Epic.Blaster_Mace_Mastery.Mace_Beam_Volley",
         "targetsAffected": [
           "Foe"
@@ -674,6 +682,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Spiderlings",
+        "internalName": "Power_Boost",
         "fullName": "Epic.Blaster_Mace_Mastery.Power_Boost",
         "targetsAffected": [
           "Self"
@@ -747,6 +756,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Web Cocoon",
+        "internalName": "Web_Cocoon",
         "fullName": "Epic.Blaster_Mace_Mastery.Web_Cocoon",
         "targetsAffected": [
           "Foe"
@@ -849,6 +859,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Static Discharge",
+        "internalName": "Static_Discharge",
         "fullName": "Epic.Blaster_Mu_Mastery.Static_Discharge",
         "targetsAffected": [
           "Foe"
@@ -924,6 +935,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Charged Armor",
+        "internalName": "Charged_Armor",
         "fullName": "Epic.Blaster_Mu_Mastery.Charged_Armor",
         "targetsAffected": [
           "Self"
@@ -991,6 +1003,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Adept",
+        "internalName": "Thunder_Strike",
         "fullName": "Epic.Blaster_Mu_Mastery.Thunder_Strike",
         "targetsAffected": [
           "Self"
@@ -1061,6 +1074,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Electrifying Fences",
+        "internalName": "Electrifying_Fences",
         "fullName": "Epic.Blaster_Mu_Mastery.Electrifying_Fences",
         "targetsAffected": [
           "Foe"
@@ -1145,6 +1159,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Electric Shackles",
+        "internalName": "Electric_Shackles",
         "fullName": "Epic.Blaster_Mu_Mastery.Electric_Shackles",
         "targetsAffected": [
           "Foe"
@@ -1257,6 +1272,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Ring of Fire",
+        "internalName": "Ring_of_Fire",
         "fullName": "Epic.Blaze_Mastery.Ring_of_Fire",
         "targetsAffected": [
           "Foe"
@@ -1340,6 +1356,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Char",
+        "internalName": "Char",
         "fullName": "Epic.Blaze_Mastery.Char",
         "targetsAffected": [
           "Foe"
@@ -1421,6 +1438,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Blast",
+        "internalName": "Fire_Blast",
         "fullName": "Epic.Blaze_Mastery.Fire_Blast",
         "targetsAffected": [
           "Foe"
@@ -1499,6 +1517,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Melt Armor",
+        "internalName": "Melt_Armor",
         "fullName": "Epic.Blaze_Mastery.Melt_Armor",
         "targetsAffected": [
           "Foe"
@@ -1558,6 +1577,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Ball",
+        "internalName": "Fire_Ball",
         "fullName": "Epic.Blaze_Mastery.Fire_Ball",
         "targetsAffected": [
           "Foe"
@@ -1682,6 +1702,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Conserve Power",
+        "internalName": "Conserve_Power",
         "fullName": "Epic.Body_Mastery.Conserve_Power",
         "targetsAffected": [
           "Self"
@@ -1722,6 +1743,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Focused Accuracy",
+        "internalName": "Focused_Accuracy",
         "fullName": "Epic.Body_Mastery.Focused_Accuracy",
         "targetsAffected": [
           "Self"
@@ -1771,6 +1793,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Laser Beam Eyes",
+        "internalName": "Laser_Beam_Eyes",
         "fullName": "Epic.Body_Mastery.Laser_Beam_Eyes",
         "targetsAffected": [
           "Foe"
@@ -1836,6 +1859,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Physical Perfection",
+        "internalName": "Physical_Perfection",
         "fullName": "Epic.Body_Mastery.Physical_Perfection",
         "targetsAffected": [
           "Self"
@@ -1879,6 +1903,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Energy Torrent",
+        "internalName": "Energy_Torrent",
         "fullName": "Epic.Body_Mastery.Energy_Torrent",
         "targetsAffected": [
           "Foe"
@@ -1988,6 +2013,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Superior Conditioning",
+        "internalName": "Conserve_Power",
         "fullName": "Epic.Body_Mastery_Stalker.Conserve_Power",
         "targetsAffected": [
           "Self"
@@ -2028,6 +2054,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Focused Accuracy",
+        "internalName": "Focused_Accuracy",
         "fullName": "Epic.Body_Mastery_Stalker.Focused_Accuracy",
         "targetsAffected": [
           "Self"
@@ -2077,6 +2104,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Laser Beam Eyes",
+        "internalName": "Laser_Beam_Eyes",
         "fullName": "Epic.Body_Mastery_Stalker.Laser_Beam_Eyes",
         "targetsAffected": [
           "Foe"
@@ -2147,6 +2175,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Physical Perfection",
+        "internalName": "Physical_Perfection",
         "fullName": "Epic.Body_Mastery_Stalker.Physical_Perfection",
         "targetsAffected": [
           "Self"
@@ -2190,6 +2219,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Energy Torrent",
+        "internalName": "Energy_Torrent",
         "fullName": "Epic.Body_Mastery_Stalker.Energy_Torrent",
         "targetsAffected": [
           "Foe"
@@ -2302,6 +2332,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Spirit Shark",
+        "internalName": "Spirit_Shark",
         "fullName": "Epic.Brute_Leviathan_Mastery.Spirit_Shark",
         "targetsAffected": [
           "Foe"
@@ -2406,6 +2437,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "School of Sharks",
+        "internalName": "School_of_Sharks",
         "fullName": "Epic.Brute_Leviathan_Mastery.School_of_Sharks",
         "targetsAffected": [
           "Foe"
@@ -2513,6 +2545,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Bile Spray",
+        "internalName": "Chum_Spray",
         "fullName": "Epic.Brute_Leviathan_Mastery.Chum_Spray",
         "targetsAffected": [
           "Foe"
@@ -2611,6 +2644,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Arctic Breath",
+        "internalName": "Arctic_Breath",
         "fullName": "Epic.Brute_Leviathan_Mastery.Arctic_Breath",
         "targetsAffected": [
           "Foe"
@@ -2731,6 +2765,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Guardian",
+        "internalName": "Summon_Guardian",
         "fullName": "Epic.Brute_Leviathan_Mastery.Summon_Guardian",
         "targetsAffected": [
           "Self"
@@ -2834,6 +2869,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Mace Blast",
+        "internalName": "Mace_Blast",
         "fullName": "Epic.Brute_Mace_Mastery.Mace_Blast",
         "targetsAffected": [
           "Foe"
@@ -2927,6 +2963,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Web Envelope",
+        "internalName": "Web_Envelope",
         "fullName": "Epic.Brute_Mace_Mastery.Web_Envelope",
         "targetsAffected": [
           "Foe"
@@ -3009,6 +3046,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Focused Accuracy",
+        "internalName": "Focused_Accuracy",
         "fullName": "Epic.Brute_Mace_Mastery.Focused_Accuracy",
         "targetsAffected": [
           "Self"
@@ -3070,6 +3108,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Disruptor Blast",
+        "internalName": "Disruptor_Blast",
         "fullName": "Epic.Brute_Mace_Mastery.Disruptor_Blast",
         "targetsAffected": [
           "Foe"
@@ -3161,6 +3200,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Blaster",
+        "internalName": "Summon_Blaster",
         "fullName": "Epic.Brute_Mace_Mastery.Summon_Blaster",
         "targetsAffected": [
           "Self"
@@ -3263,6 +3303,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Mu Lightning",
+        "internalName": "Mu_Lightning",
         "fullName": "Epic.Brute_Mu_Mastery.Mu_Lightning",
         "targetsAffected": [
           "Foe"
@@ -3351,6 +3392,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Electrifying Fences",
+        "internalName": "Electrifying_Fences",
         "fullName": "Epic.Brute_Mu_Mastery.Electrifying_Fences",
         "targetsAffected": [
           "Foe"
@@ -3453,6 +3495,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Ball Lightning",
+        "internalName": "Ball_Lightning",
         "fullName": "Epic.Brute_Mu_Mastery.Ball_Lightning",
         "targetsAffected": [
           "Foe"
@@ -3555,6 +3598,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Static Discharge",
+        "internalName": "Static_Discharge",
         "fullName": "Epic.Brute_Mu_Mastery.Static_Discharge",
         "targetsAffected": [
           "Foe"
@@ -3641,6 +3685,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Striker",
+        "internalName": "Summon_Striker",
         "fullName": "Epic.Brute_Mu_Mastery.Summon_Striker",
         "targetsAffected": [
           "Self"
@@ -3743,6 +3788,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Gloom",
+        "internalName": "Gloom",
         "fullName": "Epic.Brute_Soul_Mastery.Gloom",
         "targetsAffected": [
           "Foe"
@@ -3833,6 +3879,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Soul Tentacles",
+        "internalName": "Soul_Tentacles",
         "fullName": "Epic.Brute_Soul_Mastery.Soul_Tentacles",
         "targetsAffected": [
           "Foe"
@@ -3934,6 +3981,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Darkest Night",
+        "internalName": "Darkest_Night",
         "fullName": "Epic.Brute_Soul_Mastery.Darkest_Night",
         "targetsAffected": [
           "Foe"
@@ -4012,6 +4060,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Obliteration",
+        "internalName": "Dark_Obliteration",
         "fullName": "Epic.Brute_Soul_Mastery.Dark_Obliteration",
         "targetsAffected": [
           "Foe"
@@ -4097,6 +4146,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Widow",
+        "internalName": "Summon_Widow",
         "fullName": "Epic.Brute_Soul_Mastery.Summon_Widow",
         "targetsAffected": [
           "Self"
@@ -4198,6 +4248,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Static Discharge",
+        "internalName": "Static_Discharge",
         "fullName": "Epic.Charge_Mastery.Static_Discharge",
         "targetsAffected": [
           "Foe"
@@ -4259,6 +4310,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Electric Shackles",
+        "internalName": "Electric_Shackles",
         "fullName": "Epic.Charge_Mastery.Electric_Shackles",
         "targetsAffected": [
           "Foe"
@@ -4326,6 +4378,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Thunder Strike",
+        "internalName": "Thunder_Strike",
         "fullName": "Epic.Charge_Mastery.Thunder_Strike",
         "strengthsDisallowed": [
           "Range"
@@ -4406,6 +4459,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Surge of Power",
+        "internalName": "Surge_of_Power",
         "fullName": "Epic.Charge_Mastery.Surge_of_Power",
         "targetsAffected": [
           "Self"
@@ -4465,6 +4519,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "EM Pulse",
+        "internalName": "EM_Pulse",
         "fullName": "Epic.Charge_Mastery.EM_Pulse",
         "targetsAffected": [
           "Foe"
@@ -4573,6 +4628,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Ice Blast",
+        "internalName": "Ice_Blast",
         "fullName": "Epic.Chill_Mastery.Ice_Blast",
         "targetsAffected": [
           "Foe"
@@ -4644,6 +4700,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Flash Freeze",
+        "internalName": "Flash_Freeze",
         "fullName": "Epic.Chill_Mastery.Flash_Freeze",
         "targetsAffected": [
           "Foe"
@@ -4712,6 +4769,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hoarfrost",
+        "internalName": "Hoarfrost",
         "fullName": "Epic.Chill_Mastery.Hoarfrost",
         "targetsAffected": [
           "Self"
@@ -4762,6 +4820,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Frozen Armor",
+        "internalName": "Snow_Storm",
         "fullName": "Epic.Chill_Mastery.Snow_Storm",
         "targetsAffected": [
           "Self"
@@ -4825,6 +4884,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hibernate",
+        "internalName": "Hibernate",
         "fullName": "Epic.Chill_Mastery.Hibernate",
         "targetsAffected": [
           "Self"
@@ -4928,6 +4988,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Snow Storm",
+        "internalName": "Snow_Storm",
         "fullName": "Epic.Cold_Mastery.Snow_Storm",
         "targetsAffected": [
           "Foe"
@@ -4983,6 +5044,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Flash Freeze",
+        "internalName": "Flash_Freeze",
         "fullName": "Epic.Cold_Mastery.Flash_Freeze",
         "targetsAffected": [
           "Foe"
@@ -5051,6 +5113,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hoarfrost",
+        "internalName": "Hoarfrost",
         "fullName": "Epic.Cold_Mastery.Hoarfrost",
         "targetsAffected": [
           "Self"
@@ -5105,6 +5168,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Frozen Armor",
+        "internalName": "Frozen_Armor",
         "fullName": "Epic.Cold_Mastery.Frozen_Armor",
         "targetsAffected": [
           "Self"
@@ -5168,6 +5232,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hibernate",
+        "internalName": "Hibernate",
         "fullName": "Epic.Cold_Mastery.Hibernate",
         "targetsAffected": [
           "Self"
@@ -5271,6 +5336,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Poisonous Ray",
+        "internalName": "Poisonous_Ray",
         "fullName": "Epic.Controller_Mace_Mastery.Poisonous_Ray",
         "targetsAffected": [
           "Foe"
@@ -5363,6 +5429,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Scorpion Shield",
+        "internalName": "Scorpion_Shield",
         "fullName": "Epic.Controller_Mace_Mastery.Scorpion_Shield",
         "targetsAffected": [
           "Self"
@@ -5438,6 +5505,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Disruptor Blast",
+        "internalName": "Disruptor_Blast",
         "fullName": "Epic.Controller_Mace_Mastery.Disruptor_Blast",
         "targetsAffected": [
           "Foe"
@@ -5521,6 +5589,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Focused Accuracy",
+        "internalName": "Personal_Force_Field",
         "fullName": "Epic.Controller_Mace_Mastery.Personal_Force_Field",
         "targetsAffected": [
           "Self"
@@ -5582,6 +5651,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Tarantula",
+        "internalName": "Summon_Tarantula",
         "fullName": "Epic.Controller_Mace_Mastery.Summon_Tarantula",
         "targetsAffected": [
           "Self"
@@ -5685,6 +5755,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "School of Sharks",
+        "internalName": "School_of_Sharks",
         "fullName": "Epic.Corruptor_Leviathan_Mastery.School_of_Sharks",
         "targetsAffected": [
           "Foe"
@@ -5776,6 +5847,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shark Skin",
+        "internalName": "Shark_Skin",
         "fullName": "Epic.Corruptor_Leviathan_Mastery.Shark_Skin",
         "targetsAffected": [
           "Self"
@@ -5847,6 +5919,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hibernate",
+        "internalName": "Hibernate",
         "fullName": "Epic.Corruptor_Leviathan_Mastery.Hibernate",
         "targetsAffected": [
           "Self"
@@ -5925,6 +5998,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Spirit Shark Jaws",
+        "internalName": "Spirit_Shark_Jaws",
         "fullName": "Epic.Corruptor_Leviathan_Mastery.Spirit_Shark_Jaws",
         "targetsAffected": [
           "Foe"
@@ -6010,6 +6084,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Coralax",
+        "internalName": "Summon_Coralax",
         "fullName": "Epic.Corruptor_Leviathan_Mastery.Summon_Coralax",
         "targetsAffected": [
           "Self"
@@ -6116,6 +6191,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Web Envelope",
+        "internalName": "Web_Envelope",
         "fullName": "Epic.Corruptor_Mace_Mastery.Web_Envelope",
         "targetsAffected": [
           "Foe"
@@ -6189,6 +6265,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Scorpion Shield",
+        "internalName": "Scorpion_Shield",
         "fullName": "Epic.Corruptor_Mace_Mastery.Scorpion_Shield",
         "targetsAffected": [
           "Self"
@@ -6268,6 +6345,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Focused Accuracy",
+        "internalName": "Focused_Accuracy",
         "fullName": "Epic.Corruptor_Mace_Mastery.Focused_Accuracy",
         "targetsAffected": [
           "Self"
@@ -6329,6 +6407,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Web Cocoon",
+        "internalName": "Web_Cocoon",
         "fullName": "Epic.Corruptor_Mace_Mastery.Web_Cocoon",
         "targetsAffected": [
           "Foe"
@@ -6398,6 +6477,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Disruptor",
+        "internalName": "Summon_Disruptor",
         "fullName": "Epic.Corruptor_Mace_Mastery.Summon_Disruptor",
         "targetsAffected": [
           "Self"
@@ -6500,6 +6580,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Power Sink",
+        "internalName": "Power_Sink",
         "fullName": "Epic.Corruptor_Mu_Mastery.Power_Sink",
         "targetsAffected": [
           "Foe"
@@ -6566,6 +6647,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Charged Armor",
+        "internalName": "Charged_Armor",
         "fullName": "Epic.Corruptor_Mu_Mastery.Charged_Armor",
         "targetsAffected": [
           "Self"
@@ -6637,6 +6719,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Electric Shackles",
+        "internalName": "Electric_Shackles",
         "fullName": "Epic.Corruptor_Mu_Mastery.Electric_Shackles",
         "targetsAffected": [
           "Foe"
@@ -6718,6 +6801,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Conserve Power",
+        "internalName": "Conserve_Power",
         "fullName": "Epic.Corruptor_Mu_Mastery.Conserve_Power",
         "targetsAffected": [
           "Self"
@@ -6771,6 +6855,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Adept",
+        "internalName": "Summon_Adept",
         "fullName": "Epic.Corruptor_Mu_Mastery.Summon_Adept",
         "targetsAffected": [
           "Self"
@@ -6874,6 +6959,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Soul Drain",
+        "internalName": "Soul_Drain",
         "fullName": "Epic.Corruptor_Soul_Mastery.Soul_Drain",
         "targetsAffected": [
           "Foe"
@@ -6965,6 +7051,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Embrace",
+        "internalName": "Dark_Embrace",
         "fullName": "Epic.Corruptor_Soul_Mastery.Dark_Embrace",
         "targetsAffected": [
           "Self"
@@ -7037,6 +7124,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Power Boost",
+        "internalName": "Power_Boost",
         "fullName": "Epic.Corruptor_Soul_Mastery.Power_Boost",
         "targetsAffected": [
           "Self"
@@ -7111,6 +7199,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Soul Storm",
+        "internalName": "Soul_Storm",
         "fullName": "Epic.Corruptor_Soul_Mastery.Soul_Storm",
         "targetsAffected": [
           "Foe"
@@ -7186,6 +7275,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Mistress",
+        "internalName": "Summon_Mistress",
         "fullName": "Epic.Corruptor_Soul_Mastery.Summon_Mistress",
         "targetsAffected": [
           "Self"
@@ -7290,6 +7380,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Oppressive Gloom",
+        "internalName": "Oppressive_Gloom",
         "fullName": "Epic.Dark_Mastery.Oppressive_Gloom",
         "targetsAffected": [
           "Foe"
@@ -7350,6 +7441,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Consumption",
+        "internalName": "Dark_Consumption",
         "fullName": "Epic.Dark_Mastery.Dark_Consumption",
         "targetsAffected": [
           "Foe"
@@ -7410,6 +7502,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Embrace",
+        "internalName": "Dark_Embrace",
         "fullName": "Epic.Dark_Mastery.Dark_Embrace",
         "targetsAffected": [
           "Self"
@@ -7466,6 +7559,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Soul Transfer",
+        "internalName": "Soul_Transfer",
         "fullName": "Epic.Dark_Mastery.Soul_Transfer",
         "targetsAffected": [
           "Foe"
@@ -7538,6 +7632,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Soul Drain",
+        "internalName": "Soul_Drain",
         "fullName": "Epic.Dark_Mastery.Soul_Drain",
         "targetsAffected": [
           "Foe"
@@ -7645,6 +7740,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Torrent",
+        "internalName": "Torrent",
         "fullName": "Epic.Darkness_Mastery.Torrent",
         "targetsAffected": [
           "Foe"
@@ -7725,6 +7821,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Petrifying Gaze",
+        "internalName": "Petrifying_Gaze",
         "fullName": "Epic.Darkness_Mastery.Petrifying_Gaze",
         "targetsAffected": [
           "Foe"
@@ -7781,6 +7878,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Blast",
+        "internalName": "Dark_Blast",
         "fullName": "Epic.Darkness_Mastery.Dark_Blast",
         "targetsAffected": [
           "Foe"
@@ -7850,6 +7948,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Night Fall",
+        "internalName": "Night_Fall",
         "fullName": "Epic.Darkness_Mastery.Night_Fall",
         "targetsAffected": [
           "Foe"
@@ -7924,6 +8023,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Tenebrous Tentacles",
+        "internalName": "Tenebrous_Tentacles",
         "fullName": "Epic.Darkness_Mastery.Tenebrous_Tentacles",
         "targetsAffected": [
           "Foe"
@@ -8045,6 +8145,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Water Spout",
+        "internalName": "Water_Spout",
         "fullName": "Epic.Dominator_Leviathan_Mastery.Water_Spout",
         "targetsAffected": [
           "Self"
@@ -8121,6 +8222,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Bile Spray",
+        "internalName": "Chum_Spray",
         "fullName": "Epic.Dominator_Leviathan_Mastery.Chum_Spray",
         "targetsAffected": [
           "Foe"
@@ -8207,6 +8309,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hibernate",
+        "internalName": "Hibernate",
         "fullName": "Epic.Dominator_Leviathan_Mastery.Hibernate",
         "targetsAffected": [
           "Self"
@@ -8285,6 +8388,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shark Skin",
+        "internalName": "Shark_Skin",
         "fullName": "Epic.Dominator_Leviathan_Mastery.Shark_Skin",
         "targetsAffected": [
           "Self"
@@ -8352,6 +8456,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Coralax",
+        "internalName": "Summon_Coralax",
         "fullName": "Epic.Dominator_Leviathan_Mastery.Summon_Coralax",
         "targetsAffected": [
           "Self"
@@ -8455,6 +8560,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Poisonous Ray",
+        "internalName": "Poisonous_Ray",
         "fullName": "Epic.Dominator_Mace_Mastery.Poisonous_Ray",
         "targetsAffected": [
           "Foe"
@@ -8547,6 +8653,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Scorpion Shield",
+        "internalName": "Scorpion_Shield",
         "fullName": "Epic.Dominator_Mace_Mastery.Scorpion_Shield",
         "targetsAffected": [
           "Self"
@@ -8622,6 +8729,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Disruptor Blast",
+        "internalName": "Disruptor_Blast",
         "fullName": "Epic.Dominator_Mace_Mastery.Disruptor_Blast",
         "targetsAffected": [
           "Foe"
@@ -8705,6 +8813,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Personal Force Field",
+        "internalName": "Personal_Force_Field",
         "fullName": "Epic.Dominator_Mace_Mastery.Personal_Force_Field",
         "targetsAffected": [
           "Self"
@@ -8785,6 +8894,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Tarantula",
+        "internalName": "Summon_Tarantula",
         "fullName": "Epic.Dominator_Mace_Mastery.Summon_Tarantula",
         "targetsAffected": [
           "Self"
@@ -8888,6 +8998,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Power Sink",
+        "internalName": "Power_Sink",
         "fullName": "Epic.Dominator_Mu_Mastery.Power_Sink",
         "targetsAffected": [
           "Foe"
@@ -8954,6 +9065,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Charged Armor",
+        "internalName": "Charged_Armor",
         "fullName": "Epic.Dominator_Mu_Mastery.Charged_Armor",
         "targetsAffected": [
           "Self"
@@ -9025,6 +9137,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Ball Lightning",
+        "internalName": "Ball_Lightning",
         "fullName": "Epic.Dominator_Mu_Mastery.Ball_Lightning",
         "targetsAffected": [
           "Foe"
@@ -9111,6 +9224,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Surge of Power",
+        "internalName": "Surge_of_Power",
         "fullName": "Epic.Dominator_Mu_Mastery.Surge_of_Power",
         "targetsAffected": [
           "Self"
@@ -9182,6 +9296,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Guardian",
+        "internalName": "Summon_Guardian",
         "fullName": "Epic.Dominator_Mu_Mastery.Summon_Guardian",
         "targetsAffected": [
           "Self"
@@ -9284,6 +9399,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Dark Consumption",
+        "internalName": "Dark_Consumption",
         "fullName": "Epic.Dominator_Soul_Mastery.Dark_Consumption",
         "targetsAffected": [
           "Foe"
@@ -9358,6 +9474,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Embrace",
+        "internalName": "Dark_Embrace",
         "fullName": "Epic.Dominator_Soul_Mastery.Dark_Embrace",
         "targetsAffected": [
           "Self"
@@ -9430,6 +9547,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Obliteration",
+        "internalName": "Dark_Obliteration",
         "fullName": "Epic.Dominator_Soul_Mastery.Dark_Obliteration",
         "targetsAffected": [
           "Foe"
@@ -9505,6 +9623,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Soul Drain",
+        "internalName": "Soul_Drain",
         "fullName": "Epic.Dominator_Soul_Mastery.Soul_Drain",
         "targetsAffected": [
           "Foe"
@@ -9592,6 +9711,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Seer",
+        "internalName": "Summon_Seer",
         "fullName": "Epic.Dominator_Soul_Mastery.Summon_Seer",
         "targetsAffected": [
           "Self"
@@ -9692,6 +9812,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Stone Prison",
+        "internalName": "Stone_Prison",
         "fullName": "Epic.Earth_Mastery.Stone_Prison",
         "targetsAffected": [
           "Foe"
@@ -9777,6 +9898,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Salt Crystals",
+        "internalName": "Salt_Crystals",
         "fullName": "Epic.Earth_Mastery.Salt_Crystals",
         "targetsAffected": [
           "Foe"
@@ -9835,6 +9957,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fossilize",
+        "internalName": "Fossilize",
         "fullName": "Epic.Earth_Mastery.Fossilize",
         "targetsAffected": [
           "Foe"
@@ -9906,6 +10029,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Quick Sand",
+        "internalName": "Quick_Sand",
         "fullName": "Epic.Earth_Mastery.Quick_Sand",
         "targetsAffected": [
           "Self"
@@ -9968,6 +10092,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Stalagmites",
+        "internalName": "Stalagmites",
         "fullName": "Epic.Earth_Mastery.Stalagmites",
         "targetsAffected": [
           "Foe"
@@ -10074,6 +10199,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Static Discharge",
+        "internalName": "Static_Discharge",
         "fullName": "Epic.Electrical_Mastery.Static_Discharge",
         "targetsAffected": [
           "Foe"
@@ -10135,6 +10261,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shocking Bolt",
+        "internalName": "Shocking_Bolt",
         "fullName": "Epic.Electrical_Mastery.Shocking_Bolt",
         "targetsAffected": [
           "Foe"
@@ -10200,6 +10327,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Charged Armor",
+        "internalName": "Charged_Armor",
         "fullName": "Epic.Electrical_Mastery.Charged_Armor",
         "targetsAffected": [
           "Self"
@@ -10255,6 +10383,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Surge of Power",
+        "internalName": "Surge_of_Power",
         "fullName": "Epic.Electrical_Mastery.Surge_of_Power",
         "targetsAffected": [
           "Self"
@@ -10314,6 +10443,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "EM Pulse",
+        "internalName": "EM_Pulse",
         "fullName": "Epic.Electrical_Mastery.EM_Pulse",
         "targetsAffected": [
           "Foe"
@@ -10422,6 +10552,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Electric Fence",
+        "internalName": "Electric_Fence",
         "fullName": "Epic.Electricity_Mastery.Electric_Fence",
         "targetsAffected": [
           "Foe"
@@ -10498,6 +10629,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Thunder Strike",
+        "internalName": "Thunder_Strike",
         "fullName": "Epic.Electricity_Mastery.Thunder_Strike",
         "targetsAffected": [
           "Foe"
@@ -10580,6 +10712,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Charged Armor",
+        "internalName": "Charged_Armor",
         "fullName": "Epic.Electricity_Mastery.Charged_Armor",
         "targetsAffected": [
           "Self"
@@ -10635,6 +10768,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shocking Bolt",
+        "internalName": "Shocking_Bolt",
         "fullName": "Epic.Electricity_Mastery.Shocking_Bolt",
         "targetsAffected": [
           "Foe"
@@ -10704,6 +10838,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Power Sink",
+        "internalName": "Power_Sink",
         "fullName": "Epic.Electricity_Mastery.Power_Sink",
         "targetsAffected": [
           "Foe"
@@ -10790,6 +10925,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Conserve Power",
+        "internalName": "Conserve_Power",
         "fullName": "Epic.Energy_Mastery.Conserve_Power",
         "targetsAffected": [
           "Self"
@@ -10830,6 +10966,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Focused Accuracy",
+        "internalName": "Focused_Accuracy",
         "fullName": "Epic.Energy_Mastery.Focused_Accuracy",
         "targetsAffected": [
           "Self"
@@ -10879,6 +11016,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Laser Beam Eyes",
+        "internalName": "Laser_Beam_Eyes",
         "fullName": "Epic.Energy_Mastery.Laser_Beam_Eyes",
         "targetsAffected": [
           "Foe"
@@ -10949,6 +11087,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Physical Perfection",
+        "internalName": "Physical_Perfection",
         "fullName": "Epic.Energy_Mastery.Physical_Perfection",
         "targetsAffected": [
           "Self"
@@ -10992,6 +11131,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Energy Torrent",
+        "internalName": "Energy_Torrent",
         "fullName": "Epic.Energy_Mastery.Energy_Torrent",
         "targetsAffected": [
           "Foe"
@@ -11104,6 +11244,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Superior Conditioning",
+        "internalName": "Conserve_Power",
         "fullName": "Epic.Energy_Mastery_Brute.Conserve_Power",
         "targetsAffected": [
           "Self"
@@ -11144,6 +11285,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Focused Accuracy",
+        "internalName": "Focused_Accuracy",
         "fullName": "Epic.Energy_Mastery_Brute.Focused_Accuracy",
         "targetsAffected": [
           "Self"
@@ -11193,6 +11335,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Laser Beam Eyes",
+        "internalName": "Laser_Beam_Eyes",
         "fullName": "Epic.Energy_Mastery_Brute.Laser_Beam_Eyes",
         "targetsAffected": [
           "Foe"
@@ -11263,6 +11406,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Physical Perfection",
+        "internalName": "Physical_Perfection",
         "fullName": "Epic.Energy_Mastery_Brute.Physical_Perfection",
         "targetsAffected": [
           "Self"
@@ -11306,6 +11450,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Energy Torrent",
+        "internalName": "Energy_Torrent",
         "fullName": "Epic.Energy_Mastery_Brute.Energy_Torrent",
         "targetsAffected": [
           "Foe"
@@ -11418,6 +11563,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Temp Invulnerability",
+        "internalName": "Personal_Force_Field",
         "fullName": "Epic.Field_Mastery.Personal_Force_Field",
         "targetsAffected": [
           "Self"
@@ -11472,6 +11618,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Power Blast",
+        "internalName": "Power_Blast",
         "fullName": "Epic.Field_Mastery.Power_Blast",
         "targetsAffected": [
           "Foe"
@@ -11539,6 +11686,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Energy Torrent",
+        "internalName": "Energy_Torrent",
         "fullName": "Epic.Field_Mastery.Energy_Torrent",
         "targetsAffected": [
           "Foe"
@@ -11609,6 +11757,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Explosive Blast",
+        "internalName": "Repulsion_Bomb",
         "fullName": "Epic.Field_Mastery.Repulsion_Bomb",
         "targetsAffected": [
           "Foe"
@@ -11674,6 +11823,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Force of Nature",
+        "internalName": "Foce_of_Nature",
         "fullName": "Epic.Field_Mastery.Foce_of_Nature",
         "targetsAffected": [
           "Self"
@@ -11764,6 +11914,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Fire Blast",
+        "internalName": "Fire_Blast",
         "fullName": "Epic.Fire_Mastery.Fire_Blast",
         "targetsAffected": [
           "Foe"
@@ -11832,6 +11983,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Ball",
+        "internalName": "Fire_Ball",
         "fullName": "Epic.Fire_Mastery.Fire_Ball",
         "targetsAffected": [
           "Foe"
@@ -11909,6 +12061,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Shield",
+        "internalName": "Fire_Shield",
         "fullName": "Epic.Fire_Mastery.Fire_Shield",
         "targetsAffected": [
           "Self"
@@ -11965,6 +12118,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Rise of the Phoenix",
+        "internalName": "Rise_of_the_Phoenix",
         "fullName": "Epic.Fire_Mastery.Rise_of_the_Phoenix",
         "targetsAffected": [
           "Self"
@@ -12041,6 +12195,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Consume",
+        "internalName": "Consume",
         "fullName": "Epic.Fire_Mastery.Consume",
         "targetsAffected": [
           "Foe"
@@ -12134,6 +12289,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Rain of Fire",
+        "internalName": "Fire_Blast",
         "fullName": "Epic.Fire_Mastery_Dominator.Fire_Blast",
         "targetsAffected": [
           "Self"
@@ -12187,6 +12343,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Ball",
+        "internalName": "Fire_Ball",
         "fullName": "Epic.Fire_Mastery_Dominator.Fire_Ball",
         "targetsAffected": [
           "Foe"
@@ -12264,6 +12421,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Shield",
+        "internalName": "Fire_Shield",
         "fullName": "Epic.Fire_Mastery_Dominator.Fire_Shield",
         "targetsAffected": [
           "Self"
@@ -12320,6 +12478,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Rise of the Phoenix",
+        "internalName": "Rise_of_the_Phoenix",
         "fullName": "Epic.Fire_Mastery_Dominator.Rise_of_the_Phoenix",
         "targetsAffected": [
           "Self"
@@ -12396,6 +12555,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Melt Armor",
+        "internalName": "Consume",
         "fullName": "Epic.Fire_Mastery_Dominator.Consume",
         "targetsAffected": [
           "Foe"
@@ -12488,6 +12648,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Bonfire",
+        "internalName": "Bonfire",
         "fullName": "Epic.Flame_Mastery.Bonfire",
         "targetsAffected": [
           "Self"
@@ -12542,6 +12703,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Char",
+        "internalName": "Char",
         "fullName": "Epic.Flame_Mastery.Char",
         "targetsAffected": [
           "Foe"
@@ -12605,6 +12767,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Shield",
+        "internalName": "Fire_Shield",
         "fullName": "Epic.Flame_Mastery.Fire_Shield",
         "targetsAffected": [
           "Self"
@@ -12661,6 +12824,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Melt Armor",
+        "internalName": "Melt_Armor",
         "fullName": "Epic.Flame_Mastery.Melt_Armor",
         "targetsAffected": [
           "Foe"
@@ -12728,6 +12892,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Rise of the Phoenix",
+        "internalName": "Rise_of_the_Phoenix",
         "fullName": "Epic.Flame_Mastery.Rise_of_the_Phoenix",
         "targetsAffected": [
           "Self"
@@ -12837,6 +13002,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Personal Force Field",
+        "internalName": "Personal_Force_Field",
         "fullName": "Epic.Force_Mastery.Personal_Force_Field",
         "targetsAffected": [
           "Self"
@@ -12905,6 +13071,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Repulsion Field",
+        "internalName": "Repulsion_Field",
         "fullName": "Epic.Force_Mastery.Repulsion_Field",
         "targetsAffected": [
           "Foe"
@@ -12953,6 +13120,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Temp Invulnerability",
+        "internalName": "Temp_Invulnerability",
         "fullName": "Epic.Force_Mastery.Temp_Invulnerability",
         "targetsAffected": [
           "Self"
@@ -13007,6 +13175,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Repulsion Bomb",
+        "internalName": "Repulsion_Bomb",
         "fullName": "Epic.Force_Mastery.Repulsion_Bomb",
         "targetsAffected": [
           "Foe"
@@ -13081,6 +13250,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Force of Nature",
+        "internalName": "Foce_of_Nature",
         "fullName": "Epic.Force_Mastery.Foce_of_Nature",
         "targetsAffected": [
           "Self"
@@ -13171,6 +13341,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Block of Ice",
+        "internalName": "Block_of_Ice",
         "fullName": "Epic.Frost_Mastery.Block_of_Ice",
         "targetsAffected": [
           "Foe"
@@ -13246,6 +13417,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Frostbite",
+        "internalName": "Frostbite",
         "fullName": "Epic.Frost_Mastery.Frostbite",
         "targetsAffected": [
           "Foe"
@@ -13326,6 +13498,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hoarfrost",
+        "internalName": "Hoarfrost",
         "fullName": "Epic.Frost_Mastery.Hoarfrost",
         "targetsAffected": [
           "Self"
@@ -13380,6 +13553,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Frozen Armor",
+        "internalName": "Frozen_Armor",
         "fullName": "Epic.Frost_Mastery.Frozen_Armor",
         "targetsAffected": [
           "Self"
@@ -13443,6 +13617,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hibernate",
+        "internalName": "Hibernate",
         "fullName": "Epic.Frost_Mastery.Hibernate",
         "targetsAffected": [
           "Self"
@@ -13542,6 +13717,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Ring of Fire",
+        "internalName": "Ring_of_Fire",
         "fullName": "Epic.Guardian_Fire_Mastery.Ring_of_Fire",
         "targetsAffected": [
           "Foe"
@@ -13608,6 +13784,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Ball",
+        "internalName": "Fire_Ball",
         "fullName": "Epic.Guardian_Fire_Mastery.Fire_Ball",
         "targetsAffected": [
           "Foe"
@@ -13684,6 +13861,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Char",
+        "internalName": "Char",
         "fullName": "Epic.Guardian_Fire_Mastery.Char",
         "targetsAffected": [
           "Foe"
@@ -13748,6 +13926,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Rain of Fire",
+        "internalName": "Rain_of_Fire",
         "fullName": "Epic.Guardian_Fire_Mastery.Rain_of_Fire",
         "targetsAffected": [
           "Self"
@@ -13802,6 +13981,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Greater Fire Sword",
+        "internalName": "Greater_Fire_Sword",
         "fullName": "Epic.Guardian_Fire_Mastery.Greater_Fire_Sword",
         "strengthsDisallowed": [
           "Range"
@@ -13911,6 +14091,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Chilblain",
+        "internalName": "Chilblain",
         "fullName": "Epic.Guardian_Ice_Mastery.Chilblain",
         "targetsAffected": [
           "Foe"
@@ -13985,6 +14166,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Frozen Aura",
+        "internalName": "Frozen_Aura",
         "fullName": "Epic.Guardian_Ice_Mastery.Frozen_Aura",
         "strengthsDisallowed": [
           "Range"
@@ -14048,6 +14230,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Freezing Touch",
+        "internalName": "Freezing_Touch",
         "fullName": "Epic.Guardian_Ice_Mastery.Freezing_Touch",
         "strengthsDisallowed": [
           "Range"
@@ -14117,6 +14300,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Ice Storm",
+        "internalName": "Ice_Storm",
         "fullName": "Epic.Guardian_Ice_Mastery.Ice_Storm",
         "targetsAffected": [
           "Self"
@@ -14174,6 +14358,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shiver",
+        "internalName": "Shiver",
         "fullName": "Epic.Guardian_Ice_Mastery.Shiver",
         "targetsAffected": [
           "Foe"
@@ -14263,6 +14448,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Spirit Shark Jaws",
+        "internalName": "Spirit_Shark_Jaws",
         "fullName": "Epic.Guardian_Leviathan_Mastery.Spirit_Shark_Jaws",
         "targetsAffected": [
           "Foe"
@@ -14347,6 +14533,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Arctic Breath",
+        "internalName": "Arctic_Breath",
         "fullName": "Epic.Guardian_Leviathan_Mastery.Arctic_Breath",
         "targetsAffected": [
           "Foe"
@@ -14450,6 +14637,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Bile Spray",
+        "internalName": "Bile_Spray",
         "fullName": "Epic.Guardian_Leviathan_Mastery.Bile_Spray",
         "targetsAffected": [
           "Foe"
@@ -14531,6 +14719,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Water Spout",
+        "internalName": "Water_Spout",
         "fullName": "Epic.Guardian_Leviathan_Mastery.Water_Spout",
         "targetsAffected": [
           "Self"
@@ -14604,6 +14793,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Coralax",
+        "internalName": "Summon_Coralax",
         "fullName": "Epic.Guardian_Leviathan_Mastery.Summon_Coralax",
         "targetsAffected": [
           "Self"
@@ -14708,6 +14898,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Shatter Armor",
+        "internalName": "Shatter_Armor",
         "fullName": "Epic.Guardian_Mace_Mastery.Shatter_Armor",
         "targetsAffected": [
           "Foe"
@@ -14782,6 +14973,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Web Cocoon",
+        "internalName": "Web_Cocoon",
         "fullName": "Epic.Guardian_Mace_Mastery.Web_Cocoon",
         "targetsAffected": [
           "Foe"
@@ -14851,6 +15043,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Disruptor Blast",
+        "internalName": "Disruptor_Blast",
         "fullName": "Epic.Guardian_Mace_Mastery.Disruptor_Blast",
         "targetsAffected": [
           "Foe"
@@ -14933,6 +15126,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Focused Accuracy",
+        "internalName": "Focused_Accuracy",
         "fullName": "Epic.Guardian_Mace_Mastery.Focused_Accuracy",
         "targetsAffected": [
           "Self"
@@ -14994,6 +15188,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Tarantula",
+        "internalName": "Summon_Tarantula",
         "fullName": "Epic.Guardian_Mace_Mastery.Summon_Tarantula",
         "targetsAffected": [
           "Self"
@@ -15098,6 +15293,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Electric Shackles",
+        "internalName": "Electric_Shackles",
         "fullName": "Epic.Guardian_Mu_Mastery.Electric_Shackles",
         "targetsAffected": [
           "Foe"
@@ -15178,6 +15374,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Ball Lightning",
+        "internalName": "Ball_Lightning",
         "fullName": "Epic.Guardian_Mu_Mastery.Ball_Lightning",
         "targetsAffected": [
           "Foe"
@@ -15263,6 +15460,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Thunder Strike",
+        "internalName": "Thunder_Strike",
         "fullName": "Epic.Guardian_Mu_Mastery.Thunder_Strike",
         "strengthsDisallowed": [
           "Range"
@@ -15357,6 +15555,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Conserve Power",
+        "internalName": "Conserve_Power",
         "fullName": "Epic.Guardian_Mu_Mastery.Conserve_Power",
         "targetsAffected": [
           "Self"
@@ -15410,6 +15609,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Guardian",
+        "internalName": "Summon_Guardian",
         "fullName": "Epic.Guardian_Mu_Mastery.Summon_Guardian",
         "targetsAffected": [
           "Self"
@@ -15513,6 +15713,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Taser Jolt",
+        "internalName": "Taser_Jolt",
         "fullName": "Epic.Guardian_Munitions_Mastery.Taser_Jolt",
         "targetsAffected": [
           "Foe"
@@ -15571,6 +15772,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Attack Munitions",
+        "internalName": "Attack_Munitions",
         "fullName": "Epic.Guardian_Munitions_Mastery.Attack_Munitions",
         "targetsAffected": [
           "Foe"
@@ -15721,6 +15923,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Superior Conditioning",
+        "internalName": "Superior_Conditioning",
         "fullName": "Epic.Guardian_Munitions_Mastery.Superior_Conditioning",
         "targetsAffected": [
           "Self"
@@ -15761,6 +15964,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Targeting Drone",
+        "internalName": "Targeting_Drone",
         "fullName": "Epic.Guardian_Munitions_Mastery.Targeting_Drone",
         "targetsAffected": [
           "Self"
@@ -15810,6 +16014,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Surveillance",
+        "internalName": "Surveillance",
         "fullName": "Epic.Guardian_Munitions_Mastery.Surveillance",
         "targetsAffected": [
           "Foe"
@@ -15900,6 +16105,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Energy Transfer",
+        "internalName": "Energy_Transfer",
         "fullName": "Epic.Guardian_Primal_Forces_Mastery.Energy_Transfer",
         "strengthsDisallowed": [
           "Range"
@@ -15977,6 +16183,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Explosive Blast",
+        "internalName": "Explosive_Blast",
         "fullName": "Epic.Guardian_Primal_Forces_Mastery.Explosive_Blast",
         "targetsAffected": [
           "Foe"
@@ -16046,6 +16253,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Energy Torrent",
+        "internalName": "Energy_Torrent",
         "fullName": "Epic.Guardian_Primal_Forces_Mastery.Energy_Torrent",
         "targetsAffected": [
           "Foe"
@@ -16117,6 +16325,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Focused Accuracy",
+        "internalName": "Focused_Accuracy",
         "fullName": "Epic.Guardian_Primal_Forces_Mastery.Focused_Accuracy",
         "targetsAffected": [
           "Self"
@@ -16166,6 +16375,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Physical Perfection",
+        "internalName": "Physical_Perfection",
         "fullName": "Epic.Guardian_Primal_Forces_Mastery.Physical_Perfection",
         "targetsAffected": [
           "Self"
@@ -16242,6 +16452,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Boggle",
+        "internalName": "Boggle",
         "fullName": "Epic.Guardian_Psionic_Mastery.Boggle",
         "targetsAffected": [
           "Foe"
@@ -16291,6 +16502,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Greater Psi Blade",
+        "internalName": "Greater_Psi_Blade",
         "fullName": "Epic.Guardian_Psionic_Mastery.Greater_Psi_Blade",
         "strengthsDisallowed": [
           "Range"
@@ -16363,6 +16575,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Psionic Tornado",
+        "internalName": "Psionic_Tornado",
         "fullName": "Epic.Guardian_Psionic_Mastery.Psionic_Tornado",
         "targetsAffected": [
           "Foe"
@@ -16426,6 +16639,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Mass Levitate",
+        "internalName": "Mass_Levitate",
         "fullName": "Epic.Guardian_Psionic_Mastery.Mass_Levitate",
         "strengthsDisallowed": [
           "Range"
@@ -16488,6 +16702,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Mass Hypnosis",
+        "internalName": "Mass_Hypnosis",
         "fullName": "Epic.Guardian_Psionic_Mastery.Mass_Hypnosis",
         "targetsAffected": [
           "Foe"
@@ -16572,6 +16787,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Soul Storm",
+        "internalName": "Soul_Storm",
         "fullName": "Epic.Guardian_Soul_Mastery.Soul_Storm",
         "targetsAffected": [
           "Foe"
@@ -16646,6 +16862,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Obliteration",
+        "internalName": "Dark_Obliteration",
         "fullName": "Epic.Guardian_Soul_Mastery.Dark_Obliteration",
         "targetsAffected": [
           "Foe"
@@ -16720,6 +16937,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Soul Drain",
+        "internalName": "Soul_Drain",
         "fullName": "Epic.Guardian_Soul_Mastery.Soul_Drain",
         "targetsAffected": [
           "Foe"
@@ -16806,6 +17024,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Consumption",
+        "internalName": "Dark_Consumption",
         "fullName": "Epic.Guardian_Soul_Mastery.Dark_Consumption",
         "targetsAffected": [
           "Foe"
@@ -16874,6 +17093,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Widow",
+        "internalName": "Summon_Widow",
         "fullName": "Epic.Guardian_Soul_Mastery.Summon_Widow",
         "targetsAffected": [
           "Self"
@@ -16976,6 +17196,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Bonfire",
+        "internalName": "Bonfire",
         "fullName": "Epic.Heat_Mastery_Stalker.Bonfire",
         "targetsAffected": [
           "Self"
@@ -17030,6 +17251,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Blast",
+        "internalName": "Fire_Blast",
         "fullName": "Epic.Heat_Mastery_Stalker.Fire_Blast",
         "targetsAffected": [
           "Foe"
@@ -17096,6 +17318,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Ball",
+        "internalName": "Fire_Ball",
         "fullName": "Epic.Heat_Mastery_Stalker.Fire_Ball",
         "targetsAffected": [
           "Foe"
@@ -17171,6 +17394,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Char",
+        "internalName": "Melt_Armor",
         "fullName": "Epic.Heat_Mastery_Stalker.Melt_Armor",
         "targetsAffected": [
           "Foe"
@@ -17247,6 +17471,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Rise of the Phoenix",
+        "internalName": "Rise_of_the_Phoenix",
         "fullName": "Epic.Heat_Mastery_Stalker.Rise_of_the_Phoenix",
         "targetsAffected": [
           "Self"
@@ -17348,6 +17573,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Ice Blast",
+        "internalName": "Ice_Blast",
         "fullName": "Epic.Ice_Mastery.Ice_Blast",
         "targetsAffected": [
           "Foe"
@@ -17421,6 +17647,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hibernate",
+        "internalName": "Hibernate",
         "fullName": "Epic.Ice_Mastery.Hibernate",
         "targetsAffected": [
           "Self"
@@ -17487,6 +17714,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Frozen Armor",
+        "internalName": "Frozen_Armor",
         "fullName": "Epic.Ice_Mastery.Frozen_Armor",
         "targetsAffected": [
           "Self"
@@ -17550,6 +17778,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Frost Breath",
+        "internalName": "Frost_Breath",
         "fullName": "Epic.Ice_Mastery.Frost_Breath",
         "targetsAffected": [
           "Foe"
@@ -17619,6 +17848,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Ice Storm",
+        "internalName": "Ice_Storm",
         "fullName": "Epic.Ice_Mastery.Ice_Storm",
         "targetsAffected": [
           "Self"
@@ -17711,6 +17941,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Sleet",
+        "internalName": "Ice_Blast",
         "fullName": "Epic.Ice_Mastery_Dominator.Ice_Blast",
         "targetsAffected": [
           "Self"
@@ -17770,6 +18001,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hibernate",
+        "internalName": "Hibernate",
         "fullName": "Epic.Ice_Mastery_Dominator.Hibernate",
         "targetsAffected": [
           "Self"
@@ -17836,6 +18068,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Frozen Armor",
+        "internalName": "Frozen_Armor",
         "fullName": "Epic.Ice_Mastery_Dominator.Frozen_Armor",
         "targetsAffected": [
           "Self"
@@ -17899,6 +18132,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hoarfrost",
+        "internalName": "Frost_Breath",
         "fullName": "Epic.Ice_Mastery_Dominator.Frost_Breath",
         "targetsAffected": [
           "Self"
@@ -17953,6 +18187,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Ice Storm",
+        "internalName": "Ice_Storm",
         "fullName": "Epic.Ice_Mastery_Dominator.Ice_Storm",
         "targetsAffected": [
           "Self"
@@ -18045,6 +18280,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Char",
+        "internalName": "Char",
         "fullName": "Epic.Inferno_Mastery.Char",
         "targetsAffected": [
           "Foe"
@@ -18112,6 +18348,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Consume",
+        "internalName": "Consume",
         "fullName": "Epic.Inferno_Mastery.Consume",
         "targetsAffected": [
           "Foe"
@@ -18174,6 +18411,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Shield",
+        "internalName": "Fire_Shield",
         "fullName": "Epic.Inferno_Mastery.Fire_Shield",
         "targetsAffected": [
           "Self"
@@ -18230,6 +18468,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Bonfire",
+        "internalName": "Bonfire",
         "fullName": "Epic.Inferno_Mastery.Bonfire",
         "targetsAffected": [
           "Self"
@@ -18284,6 +18523,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Rise of the Phoenix",
+        "internalName": "Rise_of_the_Phoenix",
         "fullName": "Epic.Inferno_Mastery.Rise_of_the_Phoenix",
         "targetsAffected": [
           "Self"
@@ -18393,6 +18633,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Warrior's Mark",
+        "internalName": "Warriors_Mark",
         "fullName": "Epic.Martial_Mastery.Warriors_Mark",
         "targetsAffected": [
           "Foe"
@@ -18450,6 +18691,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Entangling Bolt",
+        "internalName": "Entangling_Arrow",
         "fullName": "Epic.Martial_Mastery.Entangling_Arrow",
         "targetsAffected": [
           "Foe"
@@ -18510,6 +18752,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Keen Quarrel",
+        "internalName": "Aimed_Shot",
         "fullName": "Epic.Martial_Mastery.Aimed_Shot",
         "targetsAffected": [
           "Foe"
@@ -18567,6 +18810,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shukuchi",
+        "internalName": "Shukuchi",
         "fullName": "Epic.Martial_Mastery.Shukuchi",
         "targetsAffected": [
           "Self"
@@ -18620,6 +18864,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Gather Chi",
+        "internalName": "Gather_Chi",
         "fullName": "Epic.Martial_Mastery.Gather_Chi",
         "targetsAffected": [
           "Self"
@@ -18704,6 +18949,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Throwing Dagger",
+        "internalName": "Throwing_Dagger",
         "fullName": "Epic.Martial_Mastery_Brute.Throwing_Dagger",
         "targetsAffected": [
           "Foe"
@@ -18777,6 +19023,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Battle Hardened",
+        "internalName": "Battle_Hardened",
         "fullName": "Epic.Martial_Mastery_Brute.Battle_Hardened",
         "targetsAffected": [
           "Self"
@@ -18820,6 +19067,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Bodkin Bolt",
+        "internalName": "Bodkin_Bolt",
         "fullName": "Epic.Martial_Mastery_Brute.Bodkin_Bolt",
         "targetsAffected": [
           "Foe"
@@ -18894,6 +19142,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Reckless Abandon",
+        "internalName": "Reckless_Abandon",
         "fullName": "Epic.Martial_Mastery_Brute.Reckless_Abandon",
         "targetsAffected": [
           "Self"
@@ -18940,6 +19189,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Valiance",
+        "internalName": "Valiance",
         "fullName": "Epic.Martial_Mastery_Brute.Valiance",
         "targetsAffected": [
           "Teammate",
@@ -19028,6 +19278,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Warrior's Mark",
+        "internalName": "Warriors_Mark",
         "fullName": "Epic.Martial_Mastery_Stalker.Warriors_Mark",
         "targetsAffected": [
           "Foe"
@@ -19085,6 +19336,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Entangling Bolt",
+        "internalName": "Entangling_Arrow",
         "fullName": "Epic.Martial_Mastery_Stalker.Entangling_Arrow",
         "targetsAffected": [
           "Foe"
@@ -19145,6 +19397,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Assassin's Bolt",
+        "internalName": "Aimed_Shot",
         "fullName": "Epic.Martial_Mastery_Stalker.Aimed_Shot",
         "targetsAffected": [
           "Foe"
@@ -19212,6 +19465,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "War Cry",
+        "internalName": "War_Cry",
         "fullName": "Epic.Martial_Mastery_Stalker.War_Cry",
         "targetsAffected": [
           "Foe"
@@ -19269,6 +19523,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Gather Chi",
+        "internalName": "Gather_Chi",
         "fullName": "Epic.Martial_Mastery_Stalker.Gather_Chi",
         "targetsAffected": [
           "Self"
@@ -19353,6 +19608,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Throwing Dagger",
+        "internalName": "Throwing_Dagger",
         "fullName": "Epic.Martial_Mastery_Tanker.Throwing_Dagger",
         "targetsAffected": [
           "Foe"
@@ -19426,6 +19682,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Battle Hardened",
+        "internalName": "Battle_Hardened",
         "fullName": "Epic.Martial_Mastery_Tanker.Battle_Hardened",
         "targetsAffected": [
           "Self"
@@ -19469,6 +19726,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Bodkin Bolt",
+        "internalName": "Bodkin_Bolt",
         "fullName": "Epic.Martial_Mastery_Tanker.Bodkin_Bolt",
         "targetsAffected": [
           "Foe"
@@ -19543,6 +19801,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Art of War",
+        "internalName": "Art_of_War",
         "fullName": "Epic.Martial_Mastery_Tanker.Art_of_War",
         "targetsAffected": [
           "Self"
@@ -19585,6 +19844,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Valiance",
+        "internalName": "Valiance",
         "fullName": "Epic.Martial_Mastery_Tanker.Valiance",
         "targetsAffected": [
           "Teammate",
@@ -19673,6 +19933,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "School of Sharks",
+        "internalName": "School_of_Sharks",
         "fullName": "Epic.Mastermind_Leviathan_Mastery.School_of_Sharks",
         "targetsAffected": [
           "Foe"
@@ -19762,6 +20023,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Bile Spray",
+        "internalName": "Chum_Spray",
         "fullName": "Epic.Mastermind_Leviathan_Mastery.Chum_Spray",
         "targetsAffected": [
           "Foe"
@@ -19846,6 +20108,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Knockout Blow",
+        "internalName": "Knockout_Blow",
         "fullName": "Epic.Mastermind_Leviathan_Mastery.Knockout_Blow",
         "targetsAffected": [
           "Foe"
@@ -19920,6 +20183,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shark Skin",
+        "internalName": "Shark_Skin",
         "fullName": "Epic.Mastermind_Leviathan_Mastery.Shark_Skin",
         "targetsAffected": [
           "Self"
@@ -19987,6 +20251,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Spirit Shark Jaws",
+        "internalName": "Spirit_Shark_Jaws",
         "fullName": "Epic.Mastermind_Leviathan_Mastery.Spirit_Shark_Jaws",
         "targetsAffected": [
           "Foe"
@@ -20103,6 +20368,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Web Envelope",
+        "internalName": "Web_Envelope",
         "fullName": "Epic.Mastermind_Mace_Mastery.Web_Envelope",
         "targetsAffected": [
           "Foe"
@@ -20172,6 +20438,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Scorpion Shield",
+        "internalName": "Scorpion_Shield",
         "fullName": "Epic.Mastermind_Mace_Mastery.Scorpion_Shield",
         "targetsAffected": [
           "Self"
@@ -20247,6 +20514,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Mace Beam Volley",
+        "internalName": "Mace_Beam_Volley",
         "fullName": "Epic.Mastermind_Mace_Mastery.Mace_Beam_Volley",
         "targetsAffected": [
           "Foe"
@@ -20329,6 +20597,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Power Boost",
+        "internalName": "Power_Boost",
         "fullName": "Epic.Mastermind_Mace_Mastery.Power_Boost",
         "targetsAffected": [
           "Self"
@@ -20403,6 +20672,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Web Cocoon",
+        "internalName": "Web_Cocoon",
         "fullName": "Epic.Mastermind_Mace_Mastery.Web_Cocoon",
         "targetsAffected": [
           "Foe"
@@ -20505,6 +20775,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Static Discharge",
+        "internalName": "Static_Discharge",
         "fullName": "Epic.Mastermind_Mu_Mastery.Static_Discharge",
         "targetsAffected": [
           "Foe"
@@ -20580,6 +20851,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Charged Armor",
+        "internalName": "Charged_Armor",
         "fullName": "Epic.Mastermind_Mu_Mastery.Charged_Armor",
         "targetsAffected": [
           "Self"
@@ -20647,6 +20919,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Thunder Strike",
+        "internalName": "Thunder_Strike",
         "fullName": "Epic.Mastermind_Mu_Mastery.Thunder_Strike",
         "strengthsDisallowed": [
           "Range"
@@ -20739,6 +21012,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Electrifying Fences",
+        "internalName": "Electrifying_Fences",
         "fullName": "Epic.Mastermind_Mu_Mastery.Electrifying_Fences",
         "targetsAffected": [
           "Foe"
@@ -20823,6 +21097,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Electric Shackles",
+        "internalName": "Electric_Shackles",
         "fullName": "Epic.Mastermind_Mu_Mastery.Electric_Shackles",
         "targetsAffected": [
           "Foe"
@@ -20935,6 +21210,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Night Fall",
+        "internalName": "Night_Fall",
         "fullName": "Epic.Mastermind_Soul_Mastery.Night_Fall",
         "targetsAffected": [
           "Foe"
@@ -21015,6 +21291,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Embrace",
+        "internalName": "Dark_Embrace",
         "fullName": "Epic.Mastermind_Soul_Mastery.Dark_Embrace",
         "targetsAffected": [
           "Self"
@@ -21087,6 +21364,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Oppressive Gloom",
+        "internalName": "Oppressive_Gloom",
         "fullName": "Epic.Mastermind_Soul_Mastery.Oppressive_Gloom",
         "targetsAffected": [
           "Foe"
@@ -21156,6 +21434,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Soul Tentacles",
+        "internalName": "Soul_Tentacles",
         "fullName": "Epic.Mastermind_Soul_Mastery.Soul_Tentacles",
         "targetsAffected": [
           "Foe"
@@ -21241,6 +21520,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Soul Storm",
+        "internalName": "Soul_Storm",
         "fullName": "Epic.Mastermind_Soul_Mastery.Soul_Storm",
         "targetsAffected": [
           "Foe"
@@ -21347,6 +21627,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Body Armor",
+        "internalName": "Body_Armor",
         "fullName": "Epic.Munitions_Mastery.Body_Armor",
         "targetsAffected": [
           "Self"
@@ -21396,6 +21677,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Cryo Freeze Ray",
+        "internalName": "Cryo_Freeze_Ray",
         "fullName": "Epic.Munitions_Mastery.Cryo_Freeze_Ray",
         "targetsAffected": [
           "Foe"
@@ -21458,6 +21740,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Sleep Grenade",
+        "internalName": "Sleep_Grenade",
         "fullName": "Epic.Munitions_Mastery.Sleep_Grenade",
         "targetsAffected": [
           "Foe"
@@ -21518,6 +21801,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Surveillance",
+        "internalName": "Surveillance",
         "fullName": "Epic.Munitions_Mastery.Surveillance",
         "targetsAffected": [
           "Foe"
@@ -21575,6 +21859,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "LRM Rocket",
+        "internalName": "LRM_Rocket",
         "fullName": "Epic.Munitions_Mastery.LRM_Rocket",
         "targetsAffected": [
           "Foe"
@@ -21683,6 +21968,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Conserve Power",
+        "internalName": "Conserve_Power",
         "fullName": "Epic.Power_Mastery.Conserve_Power",
         "targetsAffected": [
           "Self"
@@ -21727,6 +22013,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Power Build Up",
+        "internalName": "Power_Build_Up",
         "fullName": "Epic.Power_Mastery.Power_Build_Up",
         "targetsAffected": [
           "Self"
@@ -21805,6 +22092,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Temp Invulnerability",
+        "internalName": "Temp_Invulnerability",
         "fullName": "Epic.Power_Mastery.Temp_Invulnerability",
         "targetsAffected": [
           "Self"
@@ -21859,6 +22147,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Force of Nature",
+        "internalName": "Force_of_Nature",
         "fullName": "Epic.Power_Mastery.Force_of_Nature",
         "targetsAffected": [
           "Self"
@@ -21916,6 +22205,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Total Focus",
+        "internalName": "Total_Focus",
         "fullName": "Epic.Power_Mastery.Total_Focus",
         "targetsAffected": [
           "Foe"
@@ -22018,6 +22308,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Power Blast",
+        "internalName": "Power_Blast",
         "fullName": "Epic.Primal_Forces_Mastery.Power_Blast",
         "targetsAffected": [
           "Foe"
@@ -22087,6 +22378,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Conserve Power",
+        "internalName": "Conserve_Power",
         "fullName": "Epic.Primal_Forces_Mastery.Conserve_Power",
         "targetsAffected": [
           "Self"
@@ -22127,6 +22419,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Temp Invulnerability",
+        "internalName": "Temp_Invulnerability",
         "fullName": "Epic.Primal_Forces_Mastery.Temp_Invulnerability",
         "targetsAffected": [
           "Self"
@@ -22181,6 +22474,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Energy Torrent",
+        "internalName": "Energy_Torrent",
         "fullName": "Epic.Primal_Forces_Mastery.Energy_Torrent",
         "targetsAffected": [
           "Foe"
@@ -22253,6 +22547,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Power Boost",
+        "internalName": "Power_Boost",
         "fullName": "Epic.Primal_Forces_Mastery.Power_Boost",
         "targetsAffected": [
           "Self"
@@ -22352,6 +22647,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Energy Transfer",
+        "internalName": "Energy_Transfer",
         "fullName": "Epic.Primal_Forces_Mastery_Dominator.Energy_Transfer",
         "strengthsDisallowed": [
           "Range"
@@ -22429,6 +22725,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Conserve Power",
+        "internalName": "Conserve_Power",
         "fullName": "Epic.Primal_Forces_Mastery_Dominator.Conserve_Power",
         "targetsAffected": [
           "Self"
@@ -22469,6 +22766,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Temp Invulnerability",
+        "internalName": "Temp_Invulnerability",
         "fullName": "Epic.Primal_Forces_Mastery_Dominator.Temp_Invulnerability",
         "targetsAffected": [
           "Self"
@@ -22523,6 +22821,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Energy Torrent",
+        "internalName": "Energy_Torrent",
         "fullName": "Epic.Primal_Forces_Mastery_Dominator.Energy_Torrent",
         "targetsAffected": [
           "Foe"
@@ -22595,6 +22894,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Explosive Blast",
+        "internalName": "Explosive_Blast",
         "fullName": "Epic.Primal_Forces_Mastery_Dominator.Explosive_Blast",
         "targetsAffected": [
           "Foe"
@@ -22696,6 +22996,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Mental Blast",
+        "internalName": "Mental_Blast",
         "fullName": "Epic.Psionic_Mastery.Mental_Blast",
         "targetsAffected": [
           "Foe"
@@ -22753,6 +23054,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Indomitable Will",
+        "internalName": "Indomitable_Will",
         "fullName": "Epic.Psionic_Mastery.Indomitable_Will",
         "targetsAffected": [
           "Self"
@@ -22807,6 +23109,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Mind Over Body",
+        "internalName": "Mind_Over_Body",
         "fullName": "Epic.Psionic_Mastery.Mind_Over_Body",
         "targetsAffected": [
           "Self"
@@ -22862,6 +23165,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "World of Confusion",
+        "internalName": "World_of_Confusion",
         "fullName": "Epic.Psionic_Mastery.World_of_Confusion",
         "targetsAffected": [
           "Foe"
@@ -22918,6 +23222,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Psionic Tornado",
+        "internalName": "Psionic_Tornado",
         "fullName": "Epic.Psionic_Mastery.Psionic_Tornado",
         "targetsAffected": [
           "Foe"
@@ -23015,6 +23320,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Link Minds",
+        "internalName": "Link_Minds",
         "fullName": "Epic.Psionic_Mastery_Domingator.Link_Minds",
         "targetsAffected": [
           "Teammate",
@@ -23069,6 +23375,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Indomitable Will",
+        "internalName": "Indomitable_Will",
         "fullName": "Epic.Psionic_Mastery_Domingator.Indomitable_Will",
         "targetsAffected": [
           "Self"
@@ -23120,6 +23427,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Mind Over Body",
+        "internalName": "Mind_Over_Body",
         "fullName": "Epic.Psionic_Mastery_Domingator.Mind_Over_Body",
         "targetsAffected": [
           "Self"
@@ -23172,6 +23480,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "World of Confusion",
+        "internalName": "World_of_Confusion",
         "fullName": "Epic.Psionic_Mastery_Domingator.World_of_Confusion",
         "targetsAffected": [
           "Foe"
@@ -23222,6 +23531,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Psionic Tornado",
+        "internalName": "Psionic_Tornado",
         "fullName": "Epic.Psionic_Mastery_Domingator.Psionic_Tornado",
         "targetsAffected": [
           "Foe"
@@ -23314,6 +23624,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Dominate",
+        "internalName": "Dominate",
         "fullName": "Epic.Psychic_Mastery.Dominate",
         "targetsAffected": [
           "Foe"
@@ -23379,6 +23690,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Mass Hypnosis",
+        "internalName": "Mass_Hypnosis",
         "fullName": "Epic.Psychic_Mastery.Mass_Hypnosis",
         "targetsAffected": [
           "Foe"
@@ -23434,6 +23746,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Mind Over Body",
+        "internalName": "Mind_Over_Body",
         "fullName": "Epic.Psychic_Mastery.Mind_Over_Body",
         "targetsAffected": [
           "Self"
@@ -23489,6 +23802,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "World of Confusion",
+        "internalName": "World_of_Confusion",
         "fullName": "Epic.Psychic_Mastery.World_of_Confusion",
         "targetsAffected": [
           "Foe"
@@ -23548,6 +23862,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Telekinesis",
+        "internalName": "Telekinesis",
         "fullName": "Epic.Psychic_Mastery.Telekinesis",
         "targetsAffected": [
           "Foe"
@@ -23646,6 +23961,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Ring of Fire",
+        "internalName": "Ring_of_Fire",
         "fullName": "Epic.Pyre_Mastery.Ring_of_Fire",
         "targetsAffected": [
           "Foe"
@@ -23728,6 +24044,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Char",
+        "internalName": "Char",
         "fullName": "Epic.Pyre_Mastery.Char",
         "targetsAffected": [
           "Foe"
@@ -23808,6 +24125,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Blast",
+        "internalName": "Fire_Blast",
         "fullName": "Epic.Pyre_Mastery.Fire_Blast",
         "targetsAffected": [
           "Foe"
@@ -23891,6 +24209,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Melt Armor",
+        "internalName": "Melt_Armor",
         "fullName": "Epic.Pyre_Mastery.Melt_Armor",
         "targetsAffected": [
           "Foe"
@@ -23958,6 +24277,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fire Ball",
+        "internalName": "Fire_Ball",
         "fullName": "Epic.Pyre_Mastery.Fire_Ball",
         "targetsAffected": [
           "Foe"
@@ -24087,6 +24407,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Spirit Shark",
+        "internalName": "Spirit_Shark",
         "fullName": "Epic.Stalker_Leviathan_Mastery.Spirit_Shark",
         "targetsAffected": [
           "Foe"
@@ -24178,6 +24499,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Water Spout",
+        "internalName": "Water_Spout",
         "fullName": "Epic.Stalker_Leviathan_Mastery.Water_Spout",
         "targetsAffected": [
           "Self"
@@ -24254,6 +24576,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Hibernate",
+        "internalName": "Hibernate",
         "fullName": "Epic.Stalker_Leviathan_Mastery.Hibernate",
         "targetsAffected": [
           "Self"
@@ -24332,6 +24655,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Spirit Shark Jaws",
+        "internalName": "Spirit_Shark_Jaws",
         "fullName": "Epic.Stalker_Leviathan_Mastery.Spirit_Shark_Jaws",
         "targetsAffected": [
           "Foe"
@@ -24415,6 +24739,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Guardian",
+        "internalName": "Summon_Guardian",
         "fullName": "Epic.Stalker_Leviathan_Mastery.Summon_Guardian",
         "targetsAffected": [
           "Self"
@@ -24518,6 +24843,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Mace Blast",
+        "internalName": "Mace_Blast",
         "fullName": "Epic.Stalker_Mace_Mastery.Mace_Blast",
         "targetsAffected": [
           "Foe"
@@ -24608,6 +24934,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Mace Beam",
+        "internalName": "Mace_Beam",
         "fullName": "Epic.Stalker_Mace_Mastery.Mace_Beam",
         "targetsAffected": [
           "Foe"
@@ -24733,6 +25060,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Disruptor Blast",
+        "internalName": "Disruptor_Blast",
         "fullName": "Epic.Stalker_Mace_Mastery.Disruptor_Blast",
         "targetsAffected": [
           "Foe"
@@ -24821,6 +25149,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Web Cocoon",
+        "internalName": "Web_Cocoon",
         "fullName": "Epic.Stalker_Mace_Mastery.Web_Cocoon",
         "targetsAffected": [
           "Foe"
@@ -24890,6 +25219,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Spiderlings",
+        "internalName": "Summon_Spiderlings",
         "fullName": "Epic.Stalker_Mace_Mastery.Summon_Spiderlings",
         "targetsAffected": [
           "Self"
@@ -24996,6 +25326,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Mu Bolts",
+        "internalName": "Mu_Bolts",
         "fullName": "Epic.Stalker_Mu_Mastery.Mu_Bolts",
         "targetsAffected": [
           "Foe"
@@ -25079,6 +25410,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Zapp",
+        "internalName": "Zapp",
         "fullName": "Epic.Stalker_Mu_Mastery.Zapp",
         "targetsAffected": [
           "Foe"
@@ -25192,6 +25524,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Ball Lightning",
+        "internalName": "Ball_Lightning",
         "fullName": "Epic.Stalker_Mu_Mastery.Ball_Lightning",
         "targetsAffected": [
           "Foe"
@@ -25283,6 +25616,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Electric Shackles",
+        "internalName": "Electric_Shackles",
         "fullName": "Epic.Stalker_Mu_Mastery.Electric_Shackles",
         "targetsAffected": [
           "Foe"
@@ -25362,6 +25696,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Adept",
+        "internalName": "Summon_Adept",
         "fullName": "Epic.Stalker_Mu_Mastery.Summon_Adept",
         "targetsAffected": [
           "Self"
@@ -25465,6 +25800,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Dark Blast",
+        "internalName": "Dark_Blast",
         "fullName": "Epic.Stalker_Soul_Mastery.Dark_Blast",
         "targetsAffected": [
           "Foe"
@@ -25547,6 +25883,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Moonbeam",
+        "internalName": "Moonbeam",
         "fullName": "Epic.Stalker_Soul_Mastery.Moonbeam",
         "targetsAffected": [
           "Foe"
@@ -25658,6 +25995,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shadow Meld",
+        "internalName": "Shadow_Meld",
         "fullName": "Epic.Stalker_Soul_Mastery.Shadow_Meld",
         "targetsAffected": [
           "Self"
@@ -25724,6 +26062,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Soul Storm",
+        "internalName": "Soul_Storm",
         "fullName": "Epic.Stalker_Soul_Mastery.Soul_Storm",
         "targetsAffected": [
           "Foe"
@@ -25797,6 +26136,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Widow",
+        "internalName": "Summon_Widow",
         "fullName": "Epic.Stalker_Soul_Mastery.Summon_Widow",
         "targetsAffected": [
           "Self"
@@ -25900,6 +26240,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Hurl Boulder",
+        "internalName": "Hurl_Boulder",
         "fullName": "Epic.Stone_Mastery.Hurl_Boulder",
         "targetsAffected": [
           "Foe"
@@ -25960,6 +26301,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Fissure",
+        "internalName": "Fissure",
         "fullName": "Epic.Stone_Mastery.Fissure",
         "targetsAffected": [
           "Foe"
@@ -26028,6 +26370,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Rock Armor",
+        "internalName": "Stone_Armor",
         "fullName": "Epic.Stone_Mastery.Stone_Armor",
         "targetsAffected": [
           "Self"
@@ -26089,6 +26432,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Seismic Smash",
+        "internalName": "Seismic_Smash",
         "fullName": "Epic.Stone_Mastery.Seismic_Smash",
         "strengthsDisallowed": [
           "Range"
@@ -26153,6 +26497,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Earth's Embrace",
+        "internalName": "Earths_Embrace",
         "fullName": "Epic.Stone_Mastery.Earths_Embrace",
         "targetsAffected": [
           "Self"
@@ -26244,6 +26589,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Spirit Shark",
+        "internalName": "Spirit_Shark",
         "fullName": "Epic.VEAT_Leviathan_Mastery.Spirit_Shark",
         "targetsAffected": [
           "Foe"
@@ -26328,6 +26674,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "School of Sharks",
+        "internalName": "School_of_Sharks",
         "fullName": "Epic.VEAT_Leviathan_Mastery.School_of_Sharks",
         "targetsAffected": [
           "Foe"
@@ -26417,6 +26764,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Bile Spray",
+        "internalName": "Chum_Spray",
         "fullName": "Epic.VEAT_Leviathan_Mastery.Chum_Spray",
         "targetsAffected": [
           "Foe"
@@ -26497,6 +26845,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Arctic Breath",
+        "internalName": "Arctic_Breath",
         "fullName": "Epic.VEAT_Leviathan_Mastery.Arctic_Breath",
         "targetsAffected": [
           "Foe"
@@ -26599,6 +26948,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Guardian",
+        "internalName": "Summon_Guardian",
         "fullName": "Epic.VEAT_Leviathan_Mastery.Summon_Guardian",
         "targetsAffected": [
           "Self"
@@ -26702,6 +27052,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Mace Blast",
+        "internalName": "Mace_Blast",
         "fullName": "Epic.VEAT_Mace_Mastery.Mace_Blast",
         "targetsAffected": [
           "Foe"
@@ -26785,6 +27136,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Web Envelope",
+        "internalName": "Web_Envelope",
         "fullName": "Epic.VEAT_Mace_Mastery.Web_Envelope",
         "targetsAffected": [
           "Foe"
@@ -26860,6 +27212,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Disruptor Blast",
+        "internalName": "Disruptor_Blast",
         "fullName": "Epic.VEAT_Mace_Mastery.Disruptor_Blast",
         "targetsAffected": [
           "Foe"
@@ -26941,6 +27294,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shatter Armor",
+        "internalName": "Focused_Accuracy",
         "fullName": "Epic.VEAT_Mace_Mastery.Focused_Accuracy",
         "targetsAffected": [
           "Foe"
@@ -27014,6 +27368,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Blaster",
+        "internalName": "Summon_Blaster",
         "fullName": "Epic.VEAT_Mace_Mastery.Summon_Blaster",
         "targetsAffected": [
           "Self"
@@ -27116,6 +27471,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Mu Lightning",
+        "internalName": "Mu_Lightning",
         "fullName": "Epic.VEAT_Mu_Mastery.Mu_Lightning",
         "targetsAffected": [
           "Foe"
@@ -27192,6 +27548,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Electrifying Fences",
+        "internalName": "Electrifying_Fences",
         "fullName": "Epic.VEAT_Mu_Mastery.Electrifying_Fences",
         "targetsAffected": [
           "Foe"
@@ -27280,6 +27637,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Ball Lightning",
+        "internalName": "Ball_Lightning",
         "fullName": "Epic.VEAT_Mu_Mastery.Ball_Lightning",
         "targetsAffected": [
           "Foe"
@@ -27364,6 +27722,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Static Discharge",
+        "internalName": "Static_Discharge",
         "fullName": "Epic.VEAT_Mu_Mastery.Static_Discharge",
         "targetsAffected": [
           "Foe"
@@ -27439,6 +27798,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Striker",
+        "internalName": "Summon_Striker",
         "fullName": "Epic.VEAT_Mu_Mastery.Summon_Striker",
         "targetsAffected": [
           "Self"
@@ -27541,6 +27901,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Gloom",
+        "internalName": "Gloom",
         "fullName": "Epic.VEAT_Soul_Mastery.Gloom",
         "targetsAffected": [
           "Foe"
@@ -27618,6 +27979,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Soul Tentacles",
+        "internalName": "Soul_Tentacles",
         "fullName": "Epic.VEAT_Soul_Mastery.Soul_Tentacles",
         "targetsAffected": [
           "Foe"
@@ -27707,6 +28069,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Dark Obliteration",
+        "internalName": "Dark_Obliteration",
         "fullName": "Epic.VEAT_Soul_Mastery.Dark_Obliteration",
         "targetsAffected": [
           "Foe"
@@ -27780,6 +28143,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Darkest Night",
+        "internalName": "Darkest_Night",
         "fullName": "Epic.VEAT_Soul_Mastery.Darkest_Night",
         "targetsAffected": [
           "Foe"
@@ -27858,6 +28222,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Summon Widow",
+        "internalName": "Summon_Widow",
         "fullName": "Epic.VEAT_Soul_Mastery.Summon_Widow",
         "targetsAffected": [
           "Self"
@@ -27957,6 +28322,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Web Grenade",
+        "internalName": "Web_Grenade",
         "fullName": "Epic.Weapon_Mastery.Web_Grenade",
         "targetsAffected": [
           "Foe"
@@ -28021,6 +28387,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Caltrops",
+        "internalName": "Caltrops",
         "fullName": "Epic.Weapon_Mastery.Caltrops",
         "targetsAffected": [
           "Self"
@@ -28076,6 +28443,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shuriken",
+        "internalName": "Shuriken",
         "fullName": "Epic.Weapon_Mastery.Shuriken",
         "targetsAffected": [
           "Foe"
@@ -28136,6 +28504,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Targeting Drone",
+        "internalName": "Targeting_Drone",
         "fullName": "Epic.Weapon_Mastery.Targeting_Drone",
         "targetsAffected": [
           "Self"
@@ -28185,6 +28554,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Exploding Shuriken",
+        "internalName": "Exploding_Shuriken",
         "fullName": "Epic.Weapon_Mastery.Exploding_Shuriken",
         "targetsAffected": [
           "Foe"
@@ -28284,6 +28654,7 @@ export const EPIC_POOLS_RAW = {
     "powers": [
       {
         "name": "Web Grenade",
+        "internalName": "Web_Grenade",
         "fullName": "Epic.Weapon_Mastery_Stalker.Web_Grenade",
         "targetsAffected": [
           "Foe"
@@ -28345,6 +28716,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Physical Perfection",
+        "internalName": "Caltrops",
         "fullName": "Epic.Weapon_Mastery_Stalker.Caltrops",
         "targetsAffected": [
           "Self"
@@ -28388,6 +28760,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Shuriken",
+        "internalName": "Shuriken",
         "fullName": "Epic.Weapon_Mastery_Stalker.Shuriken",
         "targetsAffected": [
           "Foe"
@@ -28446,6 +28819,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Targeting Drone",
+        "internalName": "Targeting_Drone",
         "fullName": "Epic.Weapon_Mastery_Stalker.Targeting_Drone",
         "targetsAffected": [
           "Self"
@@ -28495,6 +28869,7 @@ export const EPIC_POOLS_RAW = {
       },
       {
         "name": "Exploding Shuriken",
+        "internalName": "Exploding_Shuriken",
         "fullName": "Epic.Weapon_Mastery_Stalker.Exploding_Shuriken",
         "targetsAffected": [
           "Foe"

@@ -12,9 +12,11 @@
  *
  * Source: mids-power-names.rebirth.json, version 2023.7.445 (sha256 d4c0b142ba76…) — Mids Reborn's own
  * Rebirth database.
- * Powersets paired with the export: 3470 of 3547. Remapped names: 38.
- * Reverse rows for the writer: 38, plus 1 the display join could only reach with its separators stripped.
+ * Powersets paired with the export: 3470 of 3547. Remapped names: 36.
+ * Reverse rows for the writer: 36, plus 1 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 3470
+ * Of the remapped names, 0 come from the residual pass (MBDIMPORT-16): a set where exactly one power was left over on each side, at the same level, their display names within 2 edits. 0 such pairings were refused for want of level agreement or distance, and 3 sets had leftovers on both sides but more than one, so nothing was joined.
+ * Display joins refused because MIDS gives one display to several powers in the set (MBDIMPORT-18): 24.
  * Mids powersets with no counterpart here: 77 — listed by the generator on stderr.
  * Archetype inherents Mids grids: 16.
  *
@@ -89,12 +91,6 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
   },
   "mastermind_pets.protector_3": {
     "seeker drones": "Seeker_Drones"
-  },
-  "pets.brute_savage_melee": {
-    "rending_flurry_large": "Rending_Flurry_Normal"
-  },
-  "pets.scrapper_savage_melee": {
-    "rending_flurry_large": "Rending_Flurry_Normal"
   },
   "pool.gadgetry": {
     "energy gauntlet": "Wrist_Blaster",
@@ -256,12 +252,6 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
   },
   "mastermind_pets.protector_3": {
     "seeker_drones": "Seeker Drones"
-  },
-  "pets.brute_savage_melee": {
-    "rending_flurry_normal": "Rending_Flurry_Large"
-  },
-  "pets.scrapper_savage_melee": {
-    "rending_flurry_normal": "Rending_Flurry_Large"
   },
   "pool.gadgetry": {
     "blaster_barrage": "Gauntlet Barrage",

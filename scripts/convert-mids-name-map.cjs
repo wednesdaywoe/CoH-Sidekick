@@ -242,6 +242,36 @@ function stripSeparators(s) {
 }
 
 /**
+ * Levenshtein distance, capped — used only to keep the residual pass below honest.
+ *
+ * Not a join. Nothing binds because two names are close; the residual pass binds because
+ * exactly one power is left on each side, and this only refuses a pair whose names are too
+ * far apart for a misspelling to explain.
+ */
+function editDistance(a, b) {
+  if (a === b) return 0;
+  if (Math.abs(a.length - b.length) > RESIDUAL_MAX_DISTANCE) return Infinity;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i += 1) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j += 1) {
+      cur.push(Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)));
+    }
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+/**
+ * How far two display names may differ and still be one misspelling (DATA-GAP MBDIMPORT-16).
+ *
+ * Mids' "Brillant Barrage" is one deletion from our "Brilliant Barrage". Two is the widest
+ * that still reads as a typo rather than a different name; the census key cuts at the same
+ * number, so the population this pass can ever see is the population that key reports.
+ */
+const RESIDUAL_MAX_DISTANCE = 2;
+
+/**
  * A powerset's own segment, separators and case folded away.
  *
  * Wider than `normalizeDisplay` on purpose: this compares INTERNAL names, where Mids'
@@ -453,7 +483,8 @@ const alias = {};
 const stats = {
   shared: paired.length, rows: 0, reverseRows: 0,
   ambiguous: [], merges: [], levelRejected: [], reverseWithdrawn: [],
-  loose: [], looseAmbiguous: [],
+  loose: [], looseAmbiguous: [], midsAmbiguous: [],
+  residual: [], residualRejected: [], residualAmbiguous: [],
 };
 
 for (const { midsKey, ourKey } of paired) {
@@ -469,6 +500,31 @@ for (const { midsKey, ourKey } of paired) {
     if (!k) continue;
     if (!byDisplay.has(k)) byDisplay.set(k, []);
     byDisplay.get(k).push(power);
+  }
+
+  // How many powers each Mids display names in this set — the MIRROR of `candidates.length`
+  // below, and missing until MBDIMPORT-18.
+  //
+  // The join already refuses when OUR display names two powers, on the sentence three lines
+  // above: picking an arm would be a coin flip dressed as a decode. That sentence is just as
+  // true read the other way, and was not being enforced. Rebirth's Savage Melee pet sets give
+  // BOTH `Rending_Flurry_Normal` and `Rending_Flurry_Large` the display "Rending Flurry";
+  // ours separates them as "Rending Flurry" and "Frenzied Rending Flurry"; and the join bound
+  // Mids' `Large` onto our `Normal` — past an exact internal-name identity, in both directions.
+  //
+  // What let it through is the withdrawal below, which is a TIE-BREAK and not a gate. It fires
+  // only when the incumbent's level agrees, and Mids writes 0 for a pet power's level where the
+  // export's 0-based index reads 1, so it cannot fire on any power Mids levels at 0. A guard a
+  // whole class of rows is structurally unable to reach is not covering that class, and the
+  // header says as much about the level in general — it is there to break a tie, not to prove
+  // a pairing.
+  const midsDisplayCount = new Map();
+  const midsStrippedCount = new Map();
+  for (const [, midsDisplay] of midsPowers) {
+    const tight = normalizeDisplay(midsDisplay);
+    const loose = stripSeparators(midsDisplay);
+    if (tight) midsDisplayCount.set(tight, (midsDisplayCount.get(tight) || 0) + 1);
+    if (loose) midsStrippedCount.set(loose, (midsStrippedCount.get(loose) || 0) + 1);
   }
 
   const midsByName = new Map(midsPowers.map((row) => [String(row[0]).toLowerCase(), row]));
@@ -505,6 +561,19 @@ for (const { midsKey, ourKey } of paired) {
     // (`Shukuchi `) were never folded and have had rows all along, which is what hid it:
     // the table plainly carried spelling-only rows while dropping a whole class of them.
     if (ourInternal === String(midsInternal)) continue;
+
+    // Mids' own display is ambiguous here (MBDIMPORT-18), so this row has no evidence behind
+    // it that the sibling sharing the display does not have equally. Refused AFTER the identity
+    // check above, on purpose: a pair Mids already spells our way is read as the identity it
+    // is, not reported as a collision it does not suffer from.
+    const midsShare = midsDisplayCount.get(normalizeDisplay(midsDisplay)) || 0;
+    if (midsShare > 1) {
+      stats.midsAmbiguous.push(
+        `${ourKey}: Mids gives "${midsDisplay}" to ${midsShare} powers, so ${midsInternal} `
+        + `reaching ${ourInternal} is a coin flip`,
+      );
+      continue;
+    }
 
     // Withdraw the row if our target is already spoken for by an identity: Mids carries a
     // power of that exact name, unlocking at the same level. See the header.
@@ -566,6 +635,17 @@ for (const { midsKey, ourKey } of paired) {
     const ourInternal = candidates[0].internalName;
     // Exactly equal, for the reason the tight pass above states at length.
     if (ourInternal === String(midsInternal)) continue;
+    // And the same Mids-side ambiguity refusal, measured on this pass's own key: stripping
+    // separators can only ever COLLAPSE two Mids displays together, never separate them, so a
+    // pass that looks past punctuation needs the guard at least as much as the tight one.
+    const midsShareLoose = midsStrippedCount.get(stripSeparators(midsDisplay)) || 0;
+    if (midsShareLoose > 1) {
+      stats.midsAmbiguous.push(
+        `${ourKey}: Mids gives "${midsDisplay}" to ${midsShareLoose} powers once separators `
+        + `are stripped, so ${midsInternal} reaching ${ourInternal} is a coin flip`,
+      );
+      continue;
+    }
     // Ours is already answered by the tight pass, or claimed by it: leave it alone.
     if (reverseRows[ourInternal.toLowerCase()] || claimed.has(ourInternal)) continue;
     // The same withdrawal the tight pass takes, and for the same reason — a display
@@ -583,6 +663,66 @@ for (const { midsKey, ourKey } of paired) {
     looseReverseRows[ourInternal.toLowerCase()] = String(midsInternal);
     stats.loose.push(`${ourKey}: ${ourInternal} → ${midsInternal} ("${candidates[0].displayName}" / "${midsDisplay}")`);
   }
+  // The residual pass (DATA-GAP MBDIMPORT-16). Mids MISSPELLS a display name — Pyrotechnic
+  // Control's "Brillant Barrage" against our "Brilliant Barrage", one missing letter, at the
+  // same level 12 — and a misspelling is not a separator, so neither pass above can reach it.
+  // MBDIMPORT-13 folded separators on purpose and left the rest to the matcher's ladder; the
+  // ladder deletes non-alphanumerics and so cannot reach a missing letter either.
+  //
+  // What reaches it is not a wider string comparison. It is the argument the POWERSET pairing
+  // at the top of this file already runs one level up: after every exact join has taken what
+  // it can, if exactly one Mids power and exactly one of ours are left over inside this set,
+  // the pairing is FORCED rather than chosen. Distance is a sanity bound on that, not the
+  // evidence for it — a pass that bound on distance alone would be the guessing machine
+  // MBDIMPORT-2 exists to prevent.
+  //
+  // The level has to AGREE here, where the passes above treat it as a tie-breaker only. Those
+  // two join on a display name that matched, which is evidence in itself; this one has no
+  // matching string at all, so the level is the whole of the corroboration, and absence of it
+  // is disqualifying rather than merely unhelpful.
+  const ourInternals = new Set(ours.map((p) => p.internalName.toLowerCase()));
+  const midsDisplaysTight = new Set(midsPowers.map((r) => normalizeDisplay(r[1])).filter(Boolean));
+  const midsDisplaysLoose = new Set(midsPowers.map((r) => stripSeparators(r[1])).filter(Boolean));
+
+  const midsLeft = midsPowers.filter((row) =>
+    (byDisplay.get(normalizeDisplay(row[1])) || []).length === 0
+    && (byStripped.get(stripSeparators(row[1])) || []).length === 0
+    && !ourInternals.has(String(row[0]).toLowerCase()));
+  const oursLeft = ours.filter((power) =>
+    !claimed.has(power.internalName)
+    && !reverseRows[power.internalName.toLowerCase()]
+    && !looseReverseRows[power.internalName.toLowerCase()]
+    && !midsByName.has(power.internalName.toLowerCase())
+    && !midsDisplaysTight.has(normalizeDisplay(power.displayName))
+    && !midsDisplaysLoose.has(stripSeparators(power.displayName)));
+
+  if (midsLeft.length === 1 && oursLeft.length === 1) {
+    const [midsInternal, midsDisplay, midsLevel] = midsLeft[0];
+    const ourPower = oursLeft[0];
+    const distance = editDistance(normalizeDisplay(midsDisplay), normalizeDisplay(ourPower.displayName));
+    const where = `${ourKey}: ${ourPower.internalName} ("${ourPower.displayName}" @L${ourPower.level}) `
+      + `vs ${midsInternal} ("${midsDisplay}" @L${midsLevel})`;
+    if (ourPower.internalName === String(midsInternal)) {
+      // Nothing to rotate; they already agree, and the passes above skipped them for that.
+    } else if (midsLevel === null || midsLevel !== ourPower.level) {
+      stats.residualRejected.push(`${where} — levels disagree, so nothing corroborates the pairing`);
+    } else if (distance > RESIDUAL_MAX_DISTANCE) {
+      stats.residualRejected.push(`${where} — distance ${distance}, too far to read as a misspelling`);
+    } else {
+      rows[String(midsInternal).trim().toLowerCase()] = ourPower.internalName;
+      reverseRows[ourPower.internalName.toLowerCase()] = String(midsInternal);
+      claimed.set(ourPower.internalName, midsInternal);
+      stats.residual.push(`${where} — distance ${distance}, sole leftover on both sides`);
+    }
+  } else if (midsLeft.length > 0 && oursLeft.length > 0) {
+    // Recorded, not joined. More than one leftover on a side means the pairing would have to
+    // CHOOSE, and a pairing that chooses is not a decode — the same refusal the powerset
+    // pairing takes when two of our sets want one of Mids'.
+    stats.residualAmbiguous.push(
+      `${ourKey}: ${midsLeft.length} Mids leftovers [${midsLeft.map((r) => r[0]).join(', ')}] `
+      + `against ${oursLeft.length} of ours [${oursLeft.map((p) => p.internalName).join(', ')}]`);
+  }
+
   if (Object.keys(looseReverseRows).length > 0) {
     looseReverse[ourKey] = Object.fromEntries(
       Object.entries(looseReverseRows).sort(([a], [b]) => a.localeCompare(b)));
@@ -688,6 +828,8 @@ const body = `/**
  * Powersets paired with the export: ${stats.shared} of ${midsSets.size}. Remapped names: ${stats.rows}.
  * Reverse rows for the writer: ${stats.reverseRows}${stats.reverseWithdrawn.length ? `, with ${stats.reverseWithdrawn.length} withdrawn as ambiguous` : ''}, plus ${stats.loose.length} the display join could only reach with its separators stripped.
  * Powerset paths for the writer: ${Object.keys(sortedPaths).length}${KEYS_ARE_LITERAL ? '' : ` — NONE. The ${namesDataset} names dump predates MBDEXPORT-6 and carries folded powerset keys, so Mids' own spelling is not in it. Re-run emit_mids_names.py against that fork's I12.mhd to fill this in.`}
+ * Of the remapped names, ${stats.residual.length} come from the residual pass (MBDIMPORT-16): a set where exactly one power was left over on each side, at the same level, their display names within ${RESIDUAL_MAX_DISTANCE} edits. ${stats.residualRejected.length} such pairings were refused for want of level agreement or distance, and ${stats.residualAmbiguous.length} sets had leftovers on both sides but more than one, so nothing was joined.
+ * Display joins refused because MIDS gives one display to several powers in the set (MBDIMPORT-18): ${stats.midsAmbiguous.length}.
  * Mids powersets with no counterpart here: ${unmatched.length} — listed by the generator on stderr.
  * Archetype inherents Mids grids: ${Object.keys(sortedArchetypeInherents).length}.
  *
@@ -809,6 +951,13 @@ if (!KEYS_ARE_LITERAL) {
 }
 for (const line of stats.loose) console.error(`  loose reverse: ${line}`);
 for (const line of stats.looseAmbiguous) console.error(`  loose-ambiguous: ${line}`);
+for (const line of stats.midsAmbiguous) console.error(`  mids-ambiguous: ${line}`);
+// Every residual pairing, taken and refused alike. This pass joins on no matching string
+// at all, so the whole of its evidence is the arithmetic of what was left over — which
+// makes a silent one indistinguishable from a guess.
+for (const line of stats.residual) console.error(`  residual: ${line}`);
+for (const line of stats.residualRejected) console.error(`  residual-rejected: ${line}`);
+for (const line of stats.residualAmbiguous) console.error(`  residual-ambiguous: ${line}`);
 for (const line of stats.merges) console.error(`  merge: ${line}`);
 for (const line of stats.reverseWithdrawn) console.error(`  reverse-withdrawn: ${line}`);
 for (const line of stats.levelRejected) console.error(`  level-rejected: ${line}`);
