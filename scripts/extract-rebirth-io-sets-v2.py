@@ -1949,7 +1949,8 @@ def _tspy_piece_from_boost(boost_full_name: str, num: int, power_index) -> dict 
     display name (e.g. 'Subaluwa: Accuracy/Damage/Endurance' → aspects
     [Accuracy, Damage, Endurance]). Proc / special-global pieces ('Chance for
     Knockback', 'Recharge/Primal Energy Bonus') are flagged proc=true."""
-    disp = _power_display_name(power_index.get(boost_full_name))
+    piece_power = power_index.get(boost_full_name)
+    disp = _power_display_name(piece_power)
     part = _piece_name_from_display(disp)
     if not part:
         _PIECE_NAME_UNAVAILABLE.append(f'{boost_full_name} (tspy-only set #{num}): {disp!r}')
@@ -1961,12 +1962,18 @@ def _tspy_piece_from_boost(boost_full_name: str, num: int, power_index) -> dict 
         key = _TSPY_ASPECT_TOKENS.get(tok.strip().lower())
         if key:
             aspects.append(key)
+    # The unique flag off the SAME `slot_requires` the main path reads (see
+    # `_extract_sets`), not a default. Hardcoding False here said "freely
+    # slottable" about the only sets that take this path — the Primalist ATOs,
+    # whose pieces each carry two `BoostsSlotted>` tests — and the beta then grew
+    # a rarity guess to override the export it had been handed (IOUNIQUE-1).
+    slot_req = _requires_text(piece_power.slot_requires).lower() if piece_power else ''
     return {
         'num': num,
         'name': part,
         'aspects': _sort_aspects_canonical(aspects) if aspects else [],
         'proc': is_proc,
-        'unique': False,
+        'unique': 'boostsslotted>' in slot_req,
     }
 
 
