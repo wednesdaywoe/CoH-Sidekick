@@ -57,13 +57,16 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 318 entries.** The open row is MXDIMPORT-2. It came out of closing MXDIMPORT-1 on
-2026-09-15: three `.mxd` files declare `Epic.Scrapper_Mace_Mastery` and nothing here has that set.
+**0 open, of 318 entries.** MXDIMPORT-2 opened and closed on 2026-09-15, out of MXDIMPORT-1's
+census: three `.mxd` files declare `Epic.Scrapper_Mace_Mastery`, and Homecoming has no such set.
 
-**The export carries nine archetypes' Mace Mastery and no Scrapper one — and neither does Mids.**
-That is why the row is open rather than filed as a parser miss: this tree and Mids' current
-database agree, so what a Mids of 2022 wrote neither of them now knows. The game's own defs are
-the only oracle that settles it.
+**The game's own defs are an oracle that proves it was read right.** `bin_powers.pigg` holds one
+entry whose stored md5 is of the INFLATED bytes, and it matches — so this is the defs, not a
+fourth reading to weigh against the export's and Mids'.
+
+Nine archetypes own `Epic.*_Mace_Mastery` there, Scrapper owns none of the four patron pools, and
+the export's roster diffs empty against it. A withdrawn spelling, not a parser miss; the gap does
+not move upstream.
 
 **A format that states a build twice grades its own reader.** A `.mxd` is a forum post over a
 compressed Mids stream, and neither half can be read alone: the binary names nothing and the prose
@@ -879,7 +882,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 104 of 105 closed
+[Full detail](gaps/pipeline-provenance.md) — 105 of 105 closed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
@@ -973,20 +976,13 @@ measurement went, and where a closure for the residual belongs too.
   `Second Wind`), so a second door joins on `internalName` — last, because 433 entries answer to
   both doors and disagree, and refusing where the claimant is already held or two sets store it.
   277 of 292 now arrive; the residual is 15 entries in 7 names
-- [ ] **MXDIMPORT-2** — three `.mxd` files declare `Epic.Scrapper_Mace_Mastery`, a powerset path
-  this dataset has no set for, so their `Mace Beam` and `Disruptor Blast` picks — 6 of 75,368 —
-  arrive as reported misses. The export carries nine archetypes' Mace Mastery and no Scrapper one,
-  and no Scrapper patron pool at all; **Mids' own current database has none either**, so what a
-  Mids of 2022 wrote a Mids of today does not know. Not claimed: that the export missed a set.
-  **Goal** — either this dataset carries the set a Scrapper's Mace Mastery is, or the row states
-  that Homecoming has none and the path is a spelling nothing answers.
-  **Done when** — the game's own defs are read for a Scrapper patron pool (the `.pigg` tree or the
-  live server, not this tree and not Mids, since both already agree); if one is there the export
-  is missing it and the gap moves upstream, and if not the path is named as withdrawn and the
-  three files' picks are a stated population.
-  **Check** — `cargo run -q -p coh_data --release --example mxd_name_census -- <corpus> | grep -A3 'no set for'`
-  prints `3x Epic.Scrapper_Mace_Mastery` while this row is open. A second path appearing means a
-  roster gap wider than this row; it vanishing means the set arrived and the row can close.
+- [x] **MXDIMPORT-2** — `Epic.Scrapper_Mace_Mastery` is a spelling nothing answers. The game's
+  defs settle it: `bin_powers.pigg` inflates under its own md5, and there nine archetypes own
+  `Epic.*_Mace_Mastery`, Scrapper owns no patron pool, and the export diffs empty. Not a parser
+  miss; the 6 picks of 75,368 are a stated population.
+  **Check** — `mxd_name_census`'s `no set for` list prints it `3x` and
+  `1x Pool.Leadership_beta`, both absent from the defs, so neither shrinks. A third path, or
+  a count moving, is a gap nobody read.
 
 - [x] **MBDIMPORT-18** — the name map's display join refuses an ambiguous display on OUR
   side and never on Mids', so where Mids gives one display to two powers it took an arm: Rebirth's
