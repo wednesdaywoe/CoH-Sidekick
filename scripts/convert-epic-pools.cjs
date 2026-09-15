@@ -129,8 +129,14 @@ function convertEpicPower(rawJson, rank, availableLevel) {
   // convert-pool-powers.cjs and [[three-power-converters]]).
   resolveThunderspyMovementTargets(rawJson);
 
-  // Basic metadata
+  // Basic metadata. `internalName` is the export's own identity for the power, carried the
+  // same way the archetype converter carries it (`internalName: powerJson.name`). Before
+  // MBDIMPORT-17 these two emitters wrote only `fullName`, and the Rust loader DERIVED the
+  // identity from its last segment — a derivation that agreed on all 1,846 pool and epic
+  // powers across four forks, which is why nothing ever broke. Agreement is not the same as
+  // reading it: the export owns this field, so it is read rather than reconstructed.
   power.name = displayText(rawJson.display_name) || rawJson.name;
+  power.internalName = rawJson.name;
   power.fullName = rawJson.full_name;
 
   // StrengthsDisallowed from the bin export; GlobalStrengthsDisallowed from the

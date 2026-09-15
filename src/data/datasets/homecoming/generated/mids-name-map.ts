@@ -12,9 +12,11 @@
  *
  * Source: mids-power-names.homecoming.json, version 2026.5.1337 (sha256 7568ff37f3a6…) — Mids Reborn's
  * own Homecoming database.
- * Powersets paired with the export: 3596 of 3653. Remapped names: 104.
- * Reverse rows for the writer: 104, plus 0 the display join could only reach with its separators stripped.
+ * Powersets paired with the export: 3596 of 3653. Remapped names: 106.
+ * Reverse rows for the writer: 106, plus 0 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 3596
+ * Of the remapped names, 2 come from the residual pass (MBDIMPORT-16): a set where exactly one power was left over on each side, at the same level, their display names within 2 edits. 3 such pairings were refused for want of level agreement or distance, and 26 sets had leftovers on both sides but more than one, so nothing was joined.
+ * Display joins refused because MIDS gives one display to several powers in the set (MBDIMPORT-18): 32.
  * Mids powersets with no counterpart here: 57 — listed by the generator on stderr.
  * Archetype inherents Mids grids: 15.
  *
@@ -62,6 +64,7 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
     "tri_cannon": "Gun_Drone"
   },
   "controller_control.pyrotechnic_control": {
+    "multipurpose_missiles": "Glitz",
     "sparkling_chain": "Sparkling_Field"
   },
   "corruptor_buff.marine_affinity": {
@@ -106,6 +109,7 @@ export const MIDS_NAME_MAP: Readonly<Record<string, Readonly<Record<string, stri
     "superior_invisibility": "Invisibility"
   },
   "dominator_control.pyrotechnic_control": {
+    "multipurpose_missiles": "Glitz",
     "sparkling_chain": "Sparkling_Field"
   },
   "epic.controller_dark_mastery": {
@@ -389,6 +393,7 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
     "gun_drone": "Tri_Cannon"
   },
   "controller_control.pyrotechnic_control": {
+    "glitz": "Multipurpose_Missiles",
     "sparkling_field": "Sparkling_Chain"
   },
   "corruptor_buff.marine_affinity": {
@@ -433,6 +438,7 @@ export const MIDS_NAME_REVERSE: Readonly<Record<string, Readonly<Record<string, 
     "spectral_terror": "Spectral_Terrror"
   },
   "dominator_control.pyrotechnic_control": {
+    "glitz": "Multipurpose_Missiles",
     "sparkling_field": "Sparkling_Chain"
   },
   "epic.controller_dark_mastery": {

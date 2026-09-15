@@ -53,6 +53,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Experimental Injection",
+        "internalName": "Experimental_Injection",
         "fullName": "Pool.Experimentation.Experimental_Injection",
         "targetsAffected": [
           "Friend"
@@ -113,6 +114,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Toxic Dart",
+        "internalName": "Toxic_Dart",
         "fullName": "Pool.Experimentation.Toxic_Dart",
         "targetsAffected": [
           "Foe"
@@ -186,6 +188,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Speed of Sound",
+        "internalName": "Speed_of_Sound",
         "fullName": "Pool.Experimentation.Speed_of_Sound",
         "targetsAffected": [
           "Self"
@@ -240,6 +243,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Corrosive Vial",
+        "internalName": "Corrosive_Vial",
         "fullName": "Pool.Experimentation.Corrosive_Vial",
         "targetsAffected": [
           "Foe"
@@ -309,6 +313,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Adrenal Booster",
+        "internalName": "Adrenal_Booster",
         "fullName": "Pool.Experimentation.Adrenal_Booster",
         "targetsAffected": [
           "Self"
@@ -384,6 +389,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Jaunt",
+        "internalName": "Jaunt",
         "fullName": "Pool.Experimentation.Jaunt",
         "strengthsDisallowed": [
           "RechargeTime"
@@ -451,6 +457,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Boxing",
+        "internalName": "Boxing",
         "fullName": "Pool.Fighting.Boxing",
         "strengthsDisallowed": [
           "Range"
@@ -552,6 +559,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Kick",
+        "internalName": "Kick",
         "fullName": "Pool.Fighting.Kick",
         "strengthsDisallowed": [
           "Range"
@@ -653,6 +661,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Tough",
+        "internalName": "Tough",
         "fullName": "Pool.Fighting.Tough",
         "targetsAffected": [
           "Self"
@@ -709,6 +718,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Weave",
+        "internalName": "Weave",
         "fullName": "Pool.Fighting.Weave",
         "targetsAffected": [
           "Self"
@@ -786,6 +796,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Cross Punch",
+        "internalName": "Cross_Punch",
         "fullName": "Pool.Fighting.Cross_Punch",
         "strengthsDisallowed": [
           "Range"
@@ -961,6 +972,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Swift",
+        "internalName": "Quick",
         "fullName": "Pool.Fitness.Quick",
         "targetsAffected": [
           "Self"
@@ -1002,6 +1014,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Hurdle",
+        "internalName": "Hurdle",
         "fullName": "Pool.Fitness.Hurdle",
         "targetsAffected": [
           "Self"
@@ -1042,6 +1055,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Health",
+        "internalName": "Health",
         "fullName": "Pool.Fitness.Health",
         "targetsAffected": [
           "Self"
@@ -1089,6 +1103,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Stamina",
+        "internalName": "Stamina",
         "fullName": "Pool.Fitness.Stamina",
         "targetsAffected": [
           "Self"
@@ -1158,6 +1173,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Hover",
+        "internalName": "Combat_Flight",
         "fullName": "Pool.Flight.Combat_Flight",
         "targetsAffected": [
           "Self"
@@ -1235,6 +1251,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Air Superiority",
+        "internalName": "Air_Superiority",
         "fullName": "Pool.Flight.Air_Superiority",
         "strengthsDisallowed": [
           "Range"
@@ -1303,6 +1320,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Fly",
+        "internalName": "Fly",
         "fullName": "Pool.Flight.Fly",
         "targetsAffected": [
           "Self"
@@ -1363,6 +1381,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Group Fly",
+        "internalName": "Group_Fly",
         "fullName": "Pool.Flight.Group_Fly",
         "targetsAffected": [
           "Teammate",
@@ -1437,6 +1456,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Evasive Maneuvers",
+        "internalName": "Afterburner",
         "fullName": "Pool.Flight.Afterburner",
         "targetsAffected": [
           "Self"
@@ -1571,6 +1591,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Afterburner",
+        "internalName": "Fly_Boost",
         "fullName": "Pool.Flight.Fly_Boost",
         "strengthsDisallowed": [
           "RechargeTime"
@@ -1658,6 +1679,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Weaken Resolve",
+        "internalName": "Weaken_Resolve",
         "fullName": "Pool.Force_of_Will.Weaken_Resolve",
         "targetsAffected": [
           "Foe"
@@ -1717,6 +1739,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Project Will",
+        "internalName": "Project_Will",
         "fullName": "Pool.Force_of_Will.Project_Will",
         "targetsAffected": [
           "Foe"
@@ -1784,6 +1807,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Mighty Leap",
+        "internalName": "Mighty_Leap",
         "fullName": "Pool.Force_of_Will.Mighty_Leap",
         "targetsAffected": [
           "Self"
@@ -1844,6 +1868,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Wall of Force",
+        "internalName": "Wall_of_Force",
         "fullName": "Pool.Force_of_Will.Wall_of_Force",
         "targetsAffected": [
           "Foe"
@@ -1935,6 +1960,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Unleash Potential",
+        "internalName": "Unleash_Potential",
         "fullName": "Pool.Force_of_Will.Unleash_Potential",
         "targetsAffected": [
           "Self"
@@ -2006,6 +2032,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Takeoff",
+        "internalName": "Stomp",
         "fullName": "Pool.Force_of_Will.Stomp",
         "targetsAffected": [
           "Foe"
@@ -2094,6 +2121,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Nano Net",
+        "internalName": "Nano_Net",
         "fullName": "Pool.Gadgetry.Nano_Net",
         "targetsAffected": [
           "Foe"
@@ -2155,6 +2183,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Blaster Drone",
+        "internalName": "Wrist_Blaster",
         "fullName": "Pool.Gadgetry.Wrist_Blaster",
         "targetsAffected": [
           "Foe"
@@ -2229,6 +2258,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Jetpack",
+        "internalName": "Jetpack",
         "fullName": "Pool.Gadgetry.Jetpack",
         "targetsAffected": [
           "Self"
@@ -2303,6 +2333,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Drone Barrage",
+        "internalName": "Blaster_Barrage",
         "fullName": "Pool.Gadgetry.Blaster_Barrage",
         "targetsAffected": [
           "Foe"
@@ -2401,6 +2432,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Force Barrier",
+        "internalName": "Force_Barrier",
         "fullName": "Pool.Gadgetry.Force_Barrier",
         "targetsAffected": [
           "Self"
@@ -2454,6 +2486,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Turbo Boost",
+        "internalName": "Turbo_Boost",
         "fullName": "Pool.Gadgetry.Turbo_Boost",
         "strengthsDisallowed": [
           "EnduranceDiscount"
@@ -2515,6 +2548,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Stealth",
+        "internalName": "Stealth",
         "fullName": "Pool.Invisibility.Stealth",
         "targetsAffected": [
           "Self"
@@ -2609,6 +2643,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Grant Invisibility",
+        "internalName": "Grant_Invisibility",
         "fullName": "Pool.Invisibility.Grant_Invisibility",
         "targetsAffected": [
           "Leaguemate"
@@ -2680,6 +2715,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Infiltration",
+        "internalName": "Invisibility",
         "fullName": "Pool.Invisibility.Invisibility",
         "targetsAffected": [
           "Self"
@@ -2774,6 +2810,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Phase Shift",
+        "internalName": "Phase_Shift",
         "fullName": "Pool.Invisibility.Phase_Shift",
         "targetsAffected": [
           "Self"
@@ -2843,6 +2880,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Misdirection",
+        "internalName": "Misdirection",
         "fullName": "Pool.Invisibility.Misdirection",
         "targetsAffected": [
           "Foe"
@@ -2937,6 +2975,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Maneuvers",
+        "internalName": "Defense",
         "fullName": "Pool.Leadership.Defense",
         "targetsAffected": [
           "Teammate",
@@ -3003,6 +3042,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Assault",
+        "internalName": "Assault",
         "fullName": "Pool.Leadership.Assault",
         "targetsAffected": [
           "Teammate",
@@ -3054,6 +3094,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Tactics",
+        "internalName": "Tactics",
         "fullName": "Pool.Leadership.Tactics",
         "targetsAffected": [
           "Teammate",
@@ -3110,6 +3151,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Vengeance",
+        "internalName": "Vengeance",
         "fullName": "Pool.Leadership.Vengeance",
         "targetsAffected": [
           "Teammate",
@@ -3212,6 +3254,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Victory Rush",
+        "internalName": "Victory_Rush",
         "fullName": "Pool.Leadership.Victory_Rush",
         "strengthsDisallowed": [
           "RechargeTime"
@@ -3303,6 +3346,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Jump Kick",
+        "internalName": "Jump_Kick",
         "fullName": "Pool.Leaping.Jump_Kick",
         "strengthsDisallowed": [
           "Range"
@@ -3365,6 +3409,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Combat Jumping",
+        "internalName": "Combat_Jumping",
         "fullName": "Pool.Leaping.Combat_Jumping",
         "targetsAffected": [
           "Self"
@@ -3438,6 +3483,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Super Jump",
+        "internalName": "Long_Jump",
         "fullName": "Pool.Leaping.Long_Jump",
         "targetsAffected": [
           "Self"
@@ -3498,6 +3544,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Acrobatics",
+        "internalName": "Leap",
         "fullName": "Pool.Leaping.Leap",
         "targetsAffected": [
           "Self"
@@ -3560,6 +3607,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Spring Attack",
+        "internalName": "Spring_Attack",
         "fullName": "Pool.Leaping.Spring_Attack",
         "procsAllowed": false,
         "procRollSites": [
@@ -3650,6 +3698,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Double Jump",
+        "internalName": "Double_Jump",
         "fullName": "Pool.Leaping.Double_Jump",
         "targetsAffected": [
           "Self"
@@ -3712,6 +3761,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Pacify",
+        "internalName": "Challenge",
         "fullName": "Pool.Manipulation.Challenge",
         "targetsAffected": [
           "Foe"
@@ -3759,6 +3809,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Provoke",
+        "internalName": "Provoke",
         "fullName": "Pool.Manipulation.Provoke",
         "targetsAffected": [
           "Foe"
@@ -3806,6 +3857,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Intimidate",
+        "internalName": "Intimidate",
         "fullName": "Pool.Manipulation.Intimidate",
         "targetsAffected": [
           "Foe"
@@ -3879,6 +3931,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Invoke Panic",
+        "internalName": "Invoke_Panic",
         "fullName": "Pool.Manipulation.Invoke_Panic",
         "targetsAffected": [
           "Foe"
@@ -3959,6 +4012,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Unrelenting",
+        "internalName": "Unrelenting",
         "fullName": "Pool.Manipulation.Unrelenting",
         "targetsAffected": [
           "Self"
@@ -4074,6 +4128,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Aid Other",
+        "internalName": "Aid_Other",
         "fullName": "Pool.Medicine.Aid_Other",
         "targetsAffected": [
           "Friend"
@@ -4145,6 +4200,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Injection",
+        "internalName": "Stimulant",
         "fullName": "Pool.Medicine.Stimulant",
         "targetsAffected": [
           "Friend",
@@ -4225,6 +4281,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Aid Self",
+        "internalName": "Aid_Self",
         "fullName": "Pool.Medicine.Aid_Self",
         "targetsAffected": [
           "Self"
@@ -4304,6 +4361,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Resuscitate",
+        "internalName": "Resuscitate",
         "fullName": "Pool.Medicine.Resuscitate",
         "targetsAffected": [
           "DeadPlayerFriend"
@@ -4370,6 +4428,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Field Medic",
+        "internalName": "Field_Medic",
         "fullName": "Pool.Medicine.Field_Medic",
         "targetsAffected": [
           "Self"
@@ -4474,6 +4533,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Spirit Ward",
+        "internalName": "Spirit_Ward",
         "fullName": "Pool.Sorcery.Spirit_Ward",
         "procsOnlyOnMainTarget": true,
         "targetsAffected": [
@@ -4528,6 +4588,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Arcane Bolt",
+        "internalName": "Arcane_Bolt",
         "fullName": "Pool.Sorcery.Arcane_Bolt",
         "targetsAffected": [
           "Foe"
@@ -4614,6 +4675,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Mystic Flight",
+        "internalName": "Mystic_Flight",
         "fullName": "Pool.Sorcery.Mystic_Flight",
         "targetsAffected": [
           "Self"
@@ -4674,6 +4736,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Enflame",
+        "internalName": "Enflame",
         "fullName": "Pool.Sorcery.Enflame",
         "targetsAffected": [
           "Any"
@@ -4740,6 +4803,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Rune of Protection",
+        "internalName": "Rune_of_Protection",
         "fullName": "Pool.Sorcery.Rune_of_Protection",
         "strengthsDisallowed": [
           "RechargeTime"
@@ -4812,6 +4876,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Arcane Power",
+        "internalName": "Arcane_Proc",
         "fullName": "Pool.Sorcery.Arcane_Proc",
         "targetsAffected": [
           "Self"
@@ -4852,6 +4917,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Translocation",
+        "internalName": "Translocation",
         "fullName": "Pool.Sorcery.Translocation",
         "targetsAffected": [
           "Self"
@@ -4911,6 +4977,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Flurry",
+        "internalName": "Flurry",
         "fullName": "Pool.Speed.Flurry",
         "strengthsDisallowed": [
           "Range"
@@ -5003,6 +5070,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Hasten",
+        "internalName": "Hasten",
         "fullName": "Pool.Speed.Hasten",
         "targetsAffected": [
           "Self"
@@ -5041,6 +5109,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Super Speed",
+        "internalName": "Super_Speed",
         "fullName": "Pool.Speed.Super_Speed",
         "targetsAffected": [
           "Self"
@@ -5124,6 +5193,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Whirlwind",
+        "internalName": "Whirlwind",
         "fullName": "Pool.Speed.Whirlwind",
         "targetsAffected": [
           "Foe"
@@ -5186,6 +5256,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Burnout",
+        "internalName": "Burnout",
         "fullName": "Pool.Speed.Burnout",
         "targetsAffected": [
           "Self"
@@ -5238,6 +5309,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Speed Phase",
+        "internalName": "SpeedPhase",
         "fullName": "Pool.Speed.SpeedPhase",
         "targetsAffected": [
           "Self"
@@ -5298,6 +5370,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Teleport Target",
+        "internalName": "Recall_Friend",
         "fullName": "Pool.Teleportation.Recall_Friend",
         "targetsAffected": [
           "DeadOrAliveLeaguemate",
@@ -5385,6 +5458,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Combat Teleport",
+        "internalName": "Teleport_Foe",
         "fullName": "Pool.Teleportation.Teleport_Foe",
         "globalStrengthsDisallowed": [
           "Range"
@@ -5443,6 +5517,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Teleport",
+        "internalName": "Teleport",
         "fullName": "Pool.Teleportation.Teleport",
         "targetsAffected": [
           "Self"
@@ -5550,6 +5625,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Team Teleport",
+        "internalName": "Team_Teleport",
         "fullName": "Pool.Teleportation.Team_Teleport",
         "targetsAffected": [
           "DeadOrAliveTeammate",
@@ -5620,6 +5696,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Fold Space",
+        "internalName": "Long_Range_Teleport",
         "fullName": "Pool.Teleportation.Long_Range_Teleport",
         "targetsAffected": [
           "Foe"
@@ -5718,6 +5795,7 @@ export const POWER_POOLS_RAW = {
     "powers": [
       {
         "name": "Bolas",
+        "internalName": "Bolas",
         "fullName": "Pool.Utility_Belt.Bolas",
         "targetsAffected": [
           "Foe"
@@ -5773,6 +5851,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Poisoned Dagger",
+        "internalName": "Poisoned_Dagger",
         "fullName": "Pool.Utility_Belt.Poisoned_Dagger",
         "targetsAffected": [
           "Foe"
@@ -5870,6 +5949,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Freerunning",
+        "internalName": "Freerunning",
         "fullName": "Pool.Utility_Belt.Freerunning",
         "targetsAffected": [
           "Self"
@@ -5944,6 +6024,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Envenomed Barrage",
+        "internalName": "Flying_Kick",
         "fullName": "Pool.Utility_Belt.Flying_Kick",
         "targetsAffected": [
           "Foe"
@@ -6056,6 +6137,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Life Support System",
+        "internalName": "Life_Support_System",
         "fullName": "Pool.Utility_Belt.Life_Support_System",
         "targetsAffected": [
           "Self"
@@ -6131,6 +6213,7 @@ export const POWER_POOLS_RAW = {
       },
       {
         "name": "Athletics",
+        "internalName": "Athletics",
         "fullName": "Pool.Utility_Belt.Athletics",
         "targetsAffected": [
           "Self"

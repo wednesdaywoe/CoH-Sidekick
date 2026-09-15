@@ -401,14 +401,17 @@ describe('Mids .mbd export — the reverse name table', () => {
         `${fork}: a forward row with no reverse — the generator withdrew one as ambiguous`)
         .toBe(Object.values(map).reduce((n, rows) => n + Object.keys(rows).length, 0));
     }
-    // 104 + 38 + 94 + 103 as generated. A table that stopped being emitted would leave every
+    // 106 + 36 + 94 + 105 as generated. A table that stopped being emitted would leave every
     // loop above unentered and every assertion in it unexecuted. The four grew by 56 at
     // MBDEXPORT-9, when the roster pass reached the powersets whose two spellings share
     // nothing — a powerset with no pair carries no rows, so its rotations were invisible
     // rather than absent. They grew by 27 more at MBDEXPORT-23, when the join stopped
     // folding case: a pair that differs ONLY in case is a pair the writer has to be told
-    // about, and it had been skipped as agreement.
-    expect(graded).toBe(339);
+    // about, and it had been skipped as agreement. By 4 more at MBDIMPORT-16, Homecoming's
+    // and Brainstorm's share of the residual pass — and DOWN by 2 at MBDIMPORT-18, where
+    // Rebirth's two Savage Melee pet rows turned out to rest on a display Mids gives to both
+    // of the powers it names, so neither arm was evidence for the other.
+    expect(graded).toBe(341);
   });
 
   /**

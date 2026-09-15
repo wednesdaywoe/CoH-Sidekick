@@ -19,6 +19,8 @@
  * Powersets paired with the export: 3453 of 3535. Remapped names: 94.
  * Reverse rows for the writer: 94, plus 0 the display join could only reach with its separators stripped.
  * Powerset paths for the writer: 3453
+ * Of the remapped names, 0 come from the residual pass (MBDIMPORT-16): a set where exactly one power was left over on each side, at the same level, their display names within 2 edits. 3 such pairings were refused for want of level agreement or distance, and 6 sets had leftovers on both sides but more than one, so nothing was joined.
+ * Display joins refused because MIDS gives one display to several powers in the set (MBDIMPORT-18): 8.
  * Mids powersets with no counterpart here: 82 — listed by the generator on stderr.
  * Archetype inherents Mids grids: 15.
  *
