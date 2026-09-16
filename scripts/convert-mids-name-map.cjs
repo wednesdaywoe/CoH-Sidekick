@@ -145,6 +145,12 @@ const namesDataset = NAMES_DATASET[datasetId] || datasetId;
  * Rebirth (checked on master, dev, dev-GfxRework, 4.0 and all thirteen forks), and its update
  * channel serves the app and Homecoming, so it came from somewhere else. Recorded as measured
  * and unattributed rather than guessed.
+ *
+ * dataset-absent: brainstorm — this table is keyed by `namesDataset`, not by the dataset being
+ * converted, and `NAMES_DATASET` above maps `brainstorm` to `homecoming` before the lookup. So
+ * a `brainstorm` key is a value nothing can ask for, and writing one would assert a fourth
+ * names dump that does not exist. The dataset is not skipped: it converts against Homecoming's
+ * dump, and the generated header's `source` line appends the sentence saying so.
  */
 const NAMES_PROVENANCE = {
   homecoming: "Mids Reborn's own Homecoming database.",

@@ -188,6 +188,10 @@ export const SURFACES = [
     reexport: () =>
       `py -3 -m bin_crawler.export_salvage --assets-dir <homecoming pigg dir>`,
     manifests: {
+      // dataset-absent: rebirth, thunderspy — their piggs carry no `salvage.bin`, so
+      // `export_salvage` early-returns and stamps no manifest. The note on this entry has the
+      // whole of it; the marker sits on the rows because a reason twelve lines up is a reason
+      // the next editor of the rows does not read (BRAIN-12).
       homecoming: join(EXPORTED, 'salvage_export_manifest.json'),
       brainstorm: join(EXPORTED, 'brainstorm', 'salvage_export_manifest.json'),
     },

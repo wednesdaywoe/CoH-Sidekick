@@ -28,7 +28,9 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { ingestExportPower } from '../../src/data/core/atomic-effect';
 
-const { isAlwaysCondition } = createRequire(import.meta.url)('../../scripts/_gate-tokens.cjs');
+const require_ = createRequire(import.meta.url);
+const { isAlwaysCondition } = require_('../../scripts/_gate-tokens.cjs');
+const { ALL_DATASETS } = require_('../../scripts/_dataset-paths.cjs') as { ALL_DATASETS: string[] };
 
 const REPO = fileURLToPath(new URL('../..', import.meta.url));
 const EXPORT_ROOT = path.join(REPO, 'exported_powers');
@@ -38,7 +40,12 @@ const EXPORT_ROOT = path.join(REPO, 'exported_powers');
 // back filesystem order, whichever tree walked later won the name: 3,232 records came from
 // brainstorm, 101 of them differing from their Homecoming twin AND joined to the Mids
 // Homecoming oracle. Those 101 were graded against the wrong fork's data.
-const SKIP_TOP = new Set(['rebirth', 'thunderspy', 'brainstorm', 'tables']);
+//
+// Derived from the roster rather than listed, because a hand-written list here fails in the
+// direction that cost those 101 records: the fifth dataset's tree would not be skipped, it
+// would be WALKED, and its powers would enter Homecoming's corpus under Homecoming's names.
+// A name missing from an exclusion set does not go quiet — it joins.
+const SKIP_TOP = new Set<string>([...ALL_DATASETS.filter((d) => d !== 'homecoming'), 'tables']);
 
 interface RawPower {
   full_name?: string;
