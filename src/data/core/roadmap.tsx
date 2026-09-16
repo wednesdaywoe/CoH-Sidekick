@@ -175,7 +175,7 @@ export const ROADMAP_GROUPS: RoadmapGroup[] = [
       { label: 'Procs & incarnates', state: 'done' },
       { label: 'Travel powers', state: 'done' },
       { label: 'Server wiring, Auth', state: 'planned' },
-      { label: 'Native desktop app', state: 'in-progress' },
+      { label: 'Native desktop app', state: 'done' },
       { label: 'Stats dashboard', state: 'done' },
       { label: 'Reimplementation of all helper modals', state: 'in-progress' },
     ],
