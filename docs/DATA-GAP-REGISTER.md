@@ -57,9 +57,20 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 323 entries.** TWIN-5 opened 2026-09-16 out of the twin-divergence adjudication that
-unblocked ICON-2: one epic power carrying a family its powerset twin lacks, likely content, and
-settled only by analogy until the live server answers. ROSTER-3 closed the same day.
+**0 open, of 324 entries.** TWIN-5 opened and closed 2026-09-16, out of the twin-divergence
+adjudication that unblocked ICON-2: one epic power carrying a family its powerset twin lacks,
+settled as authored content against the `.powers` defs rather than the live server the row had
+named. ROSTER-3 closed the same day.
+
+**A gate nobody has seen green on a clean tree has not been passing; it has been unread.** The
+shared-test digest was UNVERIFIED from the moment each stamp was written (FORK-8), because the
+stamp commit must carry the manifest that pins it and the manifest sat inside the graded spec. The
+staleness message was true and its diagnosis — "the tree moved" — was wrong.
+
+**A binary that stores an index is not the end of the line.** TWIN-5 sat open behind "the live
+server is the oracle that would settle it" because `powers.bin` keys attribs by table index and
+the string search that closed MXDIMPORT-2 found nothing. The authored source one level upstream of
+that binary is in this repo, is gated on every regen, and answered in a grep.
 
 **A key rots in the direction nobody looks.** ICON-2's row named the twins gate as its blocker;
 the twins gate was one of two, and the second had been red since before the row was written while
@@ -914,7 +925,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 108 of 109 closed
+[Full detail](gaps/pipeline-provenance.md) — 110 of 110 closed
 
 - [x] **ICON-2** — `normalizeIconPath` read the client's own art extensions as filenames in both
   directions — `.dds` passed its "already has one" test untouched and `.texture` failed it and
@@ -927,19 +938,10 @@ measurement went, and where a closure for the residual belongs too.
   fork, and because the reference intersects a slot's copies one collision could also shrink
   `mustHave` and hide a real family difference
 
-- [ ] **TWIN-5** — epic `Primal_Forces_Mastery.Power_Boost` carries an `Enhancement|Toxic` family the
-  Blaster Energy Manipulation copy lacks, surfaced when TWIN-4's partition stopped a Summon
-  Spiderlings copy sharing the record name from shrinking the reference. The two records' wide
-  Strength templates are otherwise identical in order and scale (0.66) and differ by that one
-  `Toxic` token; the same parser reads it on two sibling records, and the already-adjudicated
-  `soul_drain` row is the same shape, so content is likely and a drop unproven
-  **Goal** — the difference is settled against an oracle outside the export rather than by analogy.
-  **Done when** — the live server answers whether Primal Forces Power Boost enhances Toxic where the
-  Blaster copy does not, and the verdict is written here; if it is a parse defect the row moves
-  upstream to the parser and the twins baseline entry comes out.
-  **Check** — `node scripts/audit-converter-twins.cjs --json /tmp/t.json && node -e "const r=require('/tmp/t.json');for(const d of ['homecoming','brainstorm'])for(const f of r[d].findings)if(f.key==='power_boost')console.log(d,JSON.stringify(f.extra))"`
-  — anything but `["Enhancement|Toxic"]` on both means the population moved and this row's premise
-  changed; an empty result means the difference is gone and the row closes as content, not defect
+- [x] **TWIN-5** — epic `Primal_Forces_Mastery.Power_Boost` carries an `Enhancement|Toxic` family the
+  Blaster Energy Manipulation copy lacks, surfaced by TWIN-4's partition and adjudicated by analogy
+  until the authored `.powers` defs settled it as content: `kToxic_Attack` is in the epic def and
+  absent from the Blaster def, read exactly in order and count
 
 - [x] **ROSTER-3** — `audit-dataset-roster --gate` was red on a pristine tree, upstream of
   `emit-contract` in `regen-all`, so ICON-2 reached the contract only by calling the emitter
@@ -1422,6 +1424,13 @@ measurement went, and where a closure for the residual belongs too.
   for the power, so the claim now grades an empty population. Restated as the measured
   absence (guard: `redirect-info-damage.test.ts` asserts no `"knockback"`); narrative in
   `docs/gaps/stat-routing.md`.
+
+- [x] **FORK-8** — every stamp of the shared-test digest read UNVERIFIED from the moment it was
+  written, not by rot: `gradedHead` excluded the stamp so a stamp commit could not expire its own
+  stamp, but `sync-manifest.json` pins that file's sha and the same `--write` rewrites it, so the
+  pair commits together and the unexcluded manifest made the stamp commit its own graded head —
+  `eec21e98eb` recorded parent `50dab95dec` and graded as itself. Both paths excluded now, on both
+  legs; the beta mirrors them and had no exclusion at all
 
 - [x] **STALE-1** — the staleness gate never hashed the three `contract/*.json` its crates
   `include_str!` into the wasm, so a commit touching only one shipped a changed engine that
