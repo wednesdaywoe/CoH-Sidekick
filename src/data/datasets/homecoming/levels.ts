@@ -753,18 +753,31 @@ export function createArchetypeInherentPower(
   archetypeName: string,
   inherent: { name: string; description: string; icon?: string; powerType?: import('@/types').PowerType; effects?: import('@/types').PowerEffects }
 ): InherentPowerDef {
-  // Use explicit icon if provided, otherwise generate from archetype and power name
-  // e.g., "Blaster" + "Defiance" -> "inherent_blaster_defiance.png"
-  const archetypeSlug = archetypeName.toLowerCase().replace(/[\s-]+/g, '');
-  const powerSlug = inherent.name.toLowerCase().replace(/[\s-]+/g, '');
-  const iconName = inherent.icon || `inherent_${archetypeSlug}_${powerSlug}.png`;
+  // The icon is the export's, or there is none. Nothing is derived from the archetype and
+  // power name here any more.
+  //
+  // What used to sit here was `inherent.icon || \`inherent_${slug}_${slug}.png\``, and every
+  // name it invented that WORKED was an alias: `inherent_blaster_defiance.png`,
+  // `inherent_scrapper_criticalhit.png` and seven more are byte-identical to the one file the
+  // export names for all of them (`inherent_blasterdesperation.png`, md5 972466…), because the
+  // game really does draw one icon for that family. So the rule was a no-op thirteen times, and
+  // wrong the three times it mattered: it invented `inherent_guardian_resolve.png` for Rebirth's
+  // Guardian, whose art the export names `inherent_guardianresolve.png`; it invented one for
+  // Thunderspy's Primalist, which has no icon in any fork's data; and it pointed Sentinel at
+  // `inherent_sentinel_opportunity.png` where the export says `inherent_targetlock.png` — a
+  // DIFFERENT image, so the two planners drew different art for one power.
+  //
+  // A fabricated filename that is usually an alias is the same failure ICON-1 retired one layer
+  // over, and it hid for the same reason: it resolves. An inherent with no icon now resolves to
+  // `Unknown.png` through `getPowerIconPath`, which is a placeholder the reader can see rather
+  // than a guess that happens to land.
 
   return {
     name: inherent.name,
     internalName: inherent.name.replace(/\s+/g, '_'),
     fullName: `Inherent.${archetypeName}.${inherent.name.replace(/\s+/g, '')}`,
     description: inherent.description,
-    icon: iconName,
+    ...(inherent.icon ? { icon: inherent.icon } : {}),
     // Most archetype inherents are passive (Fury, Containment, Gauntlet, …);
     // honour an explicit type for the click-activated exceptions (Domination)
     // so they stay perma-trackable instead of being flattened to Auto.
