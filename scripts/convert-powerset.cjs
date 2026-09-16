@@ -8369,8 +8369,17 @@ const ICON_OVERRIDES = {
 // Ensure icon path has a file extension. Bin export emits bare names like
 // "atomicmanipulation_weakpunch"; the planner's icon resolver expects ".png"
 // (or .ico for set icons). Append .png if no extension is present.
+//
+// The export also sometimes writes the name the art carries INSIDE the client —
+// `MartialMastery_WarCry.texture`, `knights_upgradeequipment.texture`. Those are the
+// client's source formats, never files in our tree: everything under powers/ is a PNG
+// decoded out of the client. Strip them BEFORE the extension test, because they defeat
+// it in opposite directions — `.dds` is short enough to pass as an extension already
+// present and survives untouched, `.texture` is too long to read as one and collects a
+// second. Either way the name cannot be filed under anything (ICON-2).
 function normalizeIconPath(icon) {
   if (!icon) return icon;
+  icon = icon.replace(/\.(texture|dds|tga)$/i, '');
   // Already has an extension
   if (/\.[a-z0-9]{2,4}$/i.test(icon)) return icon;
   return icon + '.png';

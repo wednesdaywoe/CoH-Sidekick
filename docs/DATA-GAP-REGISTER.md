@@ -57,19 +57,27 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 320 entries.** ICON-2 opened 2026-09-16 out of a power-icon coverage sweep: the
-converter spells two powers' art with the extension it has inside the game client, so the file
-they ask for cannot exist.
+**2 open, of 323 entries.** TWIN-5 and ROSTER-3 opened 2026-09-16 out of the twin-divergence
+adjudication that unblocked ICON-2. TWIN-5 is one epic power carrying a family its powerset twin
+lacks, likely content; ROSTER-3 is a gate red on a pristine tree, standing upstream of the contract.
+
+**A key rots in the direction nobody looks.** ICON-2's row named the twins gate as its blocker;
+the twins gate was one of two, and the second had been red since before the row was written while
+REBUILD-PROGRESS still keyed it "GATE PASS since 2026-09-03".
+
+**An identity borrowed from a name is an identity that a revamp can retire.** TWIN-4 closed the
+same day: the twin oracle keyed on the record name, so 27 pairs across four forks compared
+unrelated powers — `Pool.Flight.Combat_Flight` is Hover now — and every one of the 16 divergences
+that had held ICON-2 shut was one of those, not converter drift.
+
+**A false join does not only add noise; it subtracts sight.** The reference is the intersection of
+a slot's copies, so one unrelated power in the group shrinks what counts as must-have and a real
+missing family stops being reported. Partitioning on the display name recovered the shape of four
+findings that were being measured against a polluted reference.
 
 **A correct fallback is a place a defect can live indefinitely.** `Unknown.png` is the right thing
 to render for a file that is not there, and it is why two powers showed a placeholder on two forks
 for as long as those forks have shipped, with every gate green — no gate reads an icon name.
-
-**Previously 0 open.** IOUNIQUE-1 opened and closed on 2026-09-15: a converter default
-stamped `unique: false` on 12 Thunderspy ATO pieces, and a downstream rarity guess covered for it.
-
-**A soft default is right by accident until someone asks the record.** Nothing was ever red — the
-flag had a value and the value was a boolean.
 
 The previous frontier, retained because its lesson stands — MXDIMPORT-2, out of MXDIMPORT-1's
 census: three `.mxd` files declare `Epic.Scrapper_Mace_Mastery`, and Homecoming has no such set.
@@ -901,25 +909,45 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 105 of 106 closed
+[Full detail](gaps/pipeline-provenance.md) — 107 of 109 closed
 
-- [ ] **ICON-2** — `normalizeIconPath` reads the client's own art extensions as filenames, in both
-  directions: `.dds` passes its "already has one" test untouched and `.texture` fails it and
-  collects a second, so two shipped powers carry a name nothing can be filed under — Rebirth's War
-  Cry as `martialmastery_warcry.dds`, Thunderspy's Upgrade Equipment as
-  `knights_upgradeequipment.texture.png`. Both have rendered `Unknown.png` since their fork was
-  added, on both UIs, and no gate consumes an icon filename. Population measured at two across all
-  four bundles; a resolver-side rule now spells the vendored name on both surfaces, so the export
-  field is the only thing still wrong
-  **Goal** — the converter emits the name the tree holds, and the resolver rule is redundant rather
-  than load-bearing.
-  **Done when** — `normalizeIconPath` strips `.texture`/`.dds`/`.tga` ahead of its `.png` rule;
-  Rebirth and Thunderspy regenerate; no bundle's power `icon` ends in anything but `.png`. Blocked
-  on `regen-all --dataset thunderspy`, which stops at `audit-converter-twins --gate` with 4
-  unadjudicated divergences unrelated to icons.
-  **Check** — `zcat crates/app/assets/contract/*/bundle.json.gz | grep -o '"icon":"[^"]*\.\(texture\|dds\)[^"]*"' | sort -u`
-  — more than the two named breaks the measured population; zero means the converter fix landed and
-  `cargo test -p app --bins every_shipped_power_icon_is_vendored` is what keeps it landed
+- [x] **ICON-2** — `normalizeIconPath` read the client's own art extensions as filenames in both
+  directions — `.dds` passed its "already has one" test untouched and `.texture` failed it and
+  collected a second — so Rebirth's War Cry and Thunderspy's Upgrade Equipment shipped names nothing
+  could be filed under, and rendered `Unknown.png` on both UIs for as long as their forks had
+
+- [x] **TWIN-4** — `audit-converter-twins` keyed a twin on `internalName` alone, so a record whose
+  name a revamp retired joined the unrelated power still carrying it (`Pool.Flight.Combat_Flight` is
+  Hover, matched against Peacebringer Combat Flight): 27 false pairs, ~27% of all twin keys on every
+  fork, and because the reference intersects a slot's copies one collision could also shrink
+  `mustHave` and hide a real family difference
+
+- [ ] **TWIN-5** — epic `Primal_Forces_Mastery.Power_Boost` carries an `Enhancement|Toxic` family the
+  Blaster Energy Manipulation copy lacks, surfaced when TWIN-4's partition stopped a Summon
+  Spiderlings copy sharing the record name from shrinking the reference. The two records' wide
+  Strength templates are otherwise identical in order and scale (0.66) and differ by that one
+  `Toxic` token; the same parser reads it on two sibling records, and the already-adjudicated
+  `soul_drain` row is the same shape, so content is likely and a drop unproven
+  **Goal** — the difference is settled against an oracle outside the export rather than by analogy.
+  **Done when** — the live server answers whether Primal Forces Power Boost enhances Toxic where the
+  Blaster copy does not, and the verdict is written here; if it is a parse defect the row moves
+  upstream to the parser and the twins baseline entry comes out.
+  **Check** — `node scripts/audit-converter-twins.cjs --json /tmp/t.json && node -e "const r=require('/tmp/t.json');for(const d of ['homecoming','brainstorm'])for(const f of r[d].findings)if(f.key==='power_boost')console.log(d,JSON.stringify(f.extra))"`
+  — anything but `["Enhancement|Toxic"]` on both means the population moved and this row's premise
+  changed; an empty result means the difference is gone and the row closes as content, not defect
+
+- [ ] **ROSTER-3** — `audit-dataset-roster --gate` is red on a pristine tree (3 literal rosters
+  naming a subset, 8 keyed tables missing a dataset undeclared) and sits upstream of `emit-contract`
+  in `regen-all`, so no converter fix reaches the contract through the orchestrator until it clears
+  — ICON-2 was emitted by calling `emit-contract.cjs` directly, with the six gates between the two
+  run individually and green. REBUILD-PROGRESS's Brainstorm row still keys this as "GATE PASS since
+  2026-09-03", a door-closing claim that rotted with nothing surfacing it
+  **Goal** — `regen-all` completes on a pristine tree, so the contract cannot be reached by stepping
+  around a gate.
+  **Done when** — each of the 11 rows is measured or marked `dataset-absent: <id> — <reason>`;
+  `node scripts/regen-all.cjs` exits 0; the REBUILD-PROGRESS key is restated to what is then true.
+  **Check** — `node scripts/audit-dataset-roster.cjs --gate; echo $?` — non-zero while this is open,
+  and a zero that arrives without the 11 rows being adjudicated means the gate stopped reading them
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
