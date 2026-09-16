@@ -38,6 +38,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Defiance',
       description: 'Attacking grants stacking damage bonus. First two Primary and first Secondary power usable while mezzed.',
+      icon: 'inherent_blasterdesperation.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['blaster'],
@@ -94,6 +95,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Containment',
       description: 'Double damage vs Held, Immobilized, Slept, or Disoriented targets. Applied after enhancements.',
+      icon: 'inherent_blasterdesperation.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['controller'],
@@ -150,6 +152,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Vigilance',
       description: 'Solo/small teams: +6-30% damage (scales with level). Endurance discount when teammates are injured. 3+ teammates = no damage bonus.',
+      icon: 'inherentpeacebringer_interspaciallink.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['defender'],
@@ -208,6 +211,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Critical Hit',
       description: '5% crit chance vs minions (double damage), 10% vs lieutenants/bosses. Average +5-10% damage bonus.',
+      icon: 'inherent_blasterdesperation.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['scrapper'],
@@ -271,6 +275,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Gauntlet',
       description: 'PunchVoke: ST attacks taunt target + 4 nearby, AoE taunts all. +50% AoE radius/range, +50% cone arc. PBAoE hits bonus targets at 33% damage.',
+      icon: 'inherent_blasterdesperation.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['tanker'],
@@ -338,6 +343,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Opportunity',
       description: 'Build meter by attacking in combat. Grants scaling critical hit chance on primary attacks (5% at empty, 40% at full meter). Crits deal 40% bonus damage. Vulnerability applies -15% Res, -11.25% Def, -150ft Stealth to targets.',
+      icon: 'inherent_targetlock.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['sentinel'],
@@ -397,6 +403,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Fury',
       description: 'Build fury (0-100) by attacking and being attacked. Each fury point grants +2% damage, up to +200% at max fury.',
+      icon: 'inherent_blasterdesperation.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['brute'],
@@ -460,6 +467,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Scourge',
       description: 'Chance for double damage when enemies are below 50% HP. 2.5% per 1% below 50%, guaranteed at 10% HP. ~30% avg damage bonus.',
+      icon: 'inherent_blasterdesperation.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['corruptor'],
@@ -530,6 +538,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
         // the archetype-inherent category filter, so it never pollutes Recovery.
         enduranceGain: 100,
       },
+      icon: 'inherent_buffeffects.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['dominator'],
@@ -582,6 +591,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Supremacy',
       description: 'Henchmen within 60ft gain +25% Damage and +10% ToHit. Bodyguard Mode (Defensive/Follow) splits damage: 66% to you, 33% to pets.',
+      icon: 'inherentpeacebringer_interspaciallink.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['mastermind'],
@@ -632,6 +642,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Assassination',
       description: 'From Hide: 100% critical (double damage). Outside: 10% base + 3% per teammate. Assassin\'s Focus grants up to +100% crit for Assassin\'s Strike.',
+      icon: 'inherent_blasterdesperation.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['stalker'],
@@ -698,6 +709,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
       name: 'Cosmic Balance',
       description:
         'Peacebringers bring balance to their team. Damage increases per nearby Tanker/Mastermind/Corruptor/Defender. Damage Resistance increases per nearby Scrapper/Sentinel/Brute/Stalker/Blaster. Control protection per nearby Controller/Dominator. Slow resistance per nearby Kheldian/Arachnos teammate.',
+      icon: 'inherentpeacebringer_interspaciallink.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['peacebringer'],
@@ -724,7 +736,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
       name: 'Dark Sustenance',
       description:
         'Warshades draw on the power of their teammates. Damage Resistance increases per nearby Tanker/Mastermind/Corruptor/Defender. Damage increases per nearby Scrapper/Sentinel/Stalker/Brute/Blaster. Control protection per nearby Controller/Dominator. Slow resistance per nearby Kheldian/Arachnos teammate.',
-      icon: 'inherent_peacebringer_interspaciallink.png',
+      icon: 'inherentpeacebringer_interspaciallink.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['warshade'],
@@ -754,6 +766,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Conditioning',
       description: 'Increased maximum HP and inherent resistance to status effects.',
+      icon: 'inherent_blasterdesperation.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['arachnos-soldier'],
@@ -791,6 +804,7 @@ export const ARCHETYPES: ArchetypeRegistry = {
     inherent: {
       name: 'Conditioning',
       description: 'Increased maximum HP and inherent resistance to status effects.',
+      icon: 'inherent_blasterdesperation.png',
     },
     stats: {
       ...ARCHETYPE_BINARY_STATS['arachnos-widow'],
