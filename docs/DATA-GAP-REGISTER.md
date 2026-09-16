@@ -57,13 +57,18 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**2 open, of 323 entries.** TWIN-5 and ROSTER-3 opened 2026-09-16 out of the twin-divergence
-adjudication that unblocked ICON-2. TWIN-5 is one epic power carrying a family its powerset twin
-lacks, likely content; ROSTER-3 is a gate red on a pristine tree, standing upstream of the contract.
+**1 open, of 323 entries.** TWIN-5 opened 2026-09-16 out of the twin-divergence adjudication that
+unblocked ICON-2: one epic power carrying a family its powerset twin lacks, likely content, and
+settled only by analogy until the live server answers. ROSTER-3 closed the same day.
 
 **A key rots in the direction nobody looks.** ICON-2's row named the twins gate as its blocker;
 the twins gate was one of two, and the second had been red since before the row was written while
 REBUILD-PROGRESS still keyed it "GATE PASS since 2026-09-03".
+
+**A reason that cannot be read where the rows are is a reason nobody re-checks.** ROSTER-3's eight
+undeclared tables mostly had reasons — in a README, in a comment twelve lines above the rows, in
+another gap's narrative. The gate only counts one written onto the table itself, which is the same
+lesson BRAIN-12 cost and the audit's own allowlist paragraphs record twice.
 
 **An identity borrowed from a name is an identity that a revamp can retire.** TWIN-4 closed the
 same day: the twin oracle keyed on the record name, so 27 pairs across four forks compared
@@ -909,7 +914,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 107 of 109 closed
+[Full detail](gaps/pipeline-provenance.md) — 108 of 109 closed
 
 - [x] **ICON-2** — `normalizeIconPath` read the client's own art extensions as filenames in both
   directions — `.dds` passed its "already has one" test untouched and `.texture` failed it and
@@ -936,18 +941,11 @@ measurement went, and where a closure for the residual belongs too.
   — anything but `["Enhancement|Toxic"]` on both means the population moved and this row's premise
   changed; an empty result means the difference is gone and the row closes as content, not defect
 
-- [ ] **ROSTER-3** — `audit-dataset-roster --gate` is red on a pristine tree (3 literal rosters
-  naming a subset, 8 keyed tables missing a dataset undeclared) and sits upstream of `emit-contract`
-  in `regen-all`, so no converter fix reaches the contract through the orchestrator until it clears
-  — ICON-2 was emitted by calling `emit-contract.cjs` directly, with the six gates between the two
-  run individually and green. REBUILD-PROGRESS's Brainstorm row still keys this as "GATE PASS since
-  2026-09-03", a door-closing claim that rotted with nothing surfacing it
-  **Goal** — `regen-all` completes on a pristine tree, so the contract cannot be reached by stepping
-  around a gate.
-  **Done when** — each of the 11 rows is measured or marked `dataset-absent: <id> — <reason>`;
-  `node scripts/regen-all.cjs` exits 0; the REBUILD-PROGRESS key is restated to what is then true.
-  **Check** — `node scripts/audit-dataset-roster.cjs --gate; echo $?` — non-zero while this is open,
-  and a zero that arrives without the 11 rows being adjudicated means the gate stopped reading them
+- [x] **ROSTER-3** — `audit-dataset-roster --gate` was red on a pristine tree, upstream of
+  `emit-contract` in `regen-all`, so ICON-2 reached the contract only by calling the emitter
+  directly; 6 rows are now `dataset-absent` markers on the tables (no Mids-written `.mbd` can name
+  a third fork, MBDEXPORT-2), 2 were measured off tables all four datasets do have, and all 3
+  rosters were widened not allowlisted — one finding Brainstorm an oracle nobody had asked for
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
