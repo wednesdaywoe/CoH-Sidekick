@@ -57,7 +57,15 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 319 entries.** IOUNIQUE-1 opened and closed on 2026-09-15: a converter default
+**1 open, of 320 entries.** ICON-2 opened 2026-09-16 out of a power-icon coverage sweep: the
+converter spells two powers' art with the extension it has inside the game client, so the file
+they ask for cannot exist.
+
+**A correct fallback is a place a defect can live indefinitely.** `Unknown.png` is the right thing
+to render for a file that is not there, and it is why two powers showed a placeholder on two forks
+for as long as those forks have shipped, with every gate green — no gate reads an icon name.
+
+**Previously 0 open.** IOUNIQUE-1 opened and closed on 2026-09-15: a converter default
 stamped `unique: false` on 12 Thunderspy ATO pieces, and a downstream rarity guess covered for it.
 
 **A soft default is right by accident until someone asks the record.** Nothing was ever red — the
@@ -893,7 +901,25 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 105 of 105 closed
+[Full detail](gaps/pipeline-provenance.md) — 105 of 106 closed
+
+- [ ] **ICON-2** — `normalizeIconPath` reads the client's own art extensions as filenames, in both
+  directions: `.dds` passes its "already has one" test untouched and `.texture` fails it and
+  collects a second, so two shipped powers carry a name nothing can be filed under — Rebirth's War
+  Cry as `martialmastery_warcry.dds`, Thunderspy's Upgrade Equipment as
+  `knights_upgradeequipment.texture.png`. Both have rendered `Unknown.png` since their fork was
+  added, on both UIs, and no gate consumes an icon filename. Population measured at two across all
+  four bundles; a resolver-side rule now spells the vendored name on both surfaces, so the export
+  field is the only thing still wrong
+  **Goal** — the converter emits the name the tree holds, and the resolver rule is redundant rather
+  than load-bearing.
+  **Done when** — `normalizeIconPath` strips `.texture`/`.dds`/`.tga` ahead of its `.png` rule;
+  Rebirth and Thunderspy regenerate; no bundle's power `icon` ends in anything but `.png`. Blocked
+  on `regen-all --dataset thunderspy`, which stops at `audit-converter-twins --gate` with 4
+  unadjudicated divergences unrelated to icons.
+  **Check** — `zcat crates/app/assets/contract/*/bundle.json.gz | grep -o '"icon":"[^"]*\.\(texture\|dds\)[^"]*"' | sort -u`
+  — more than the two named breaks the measured population; zero means the converter fix landed and
+  `cargo test -p app --bins every_shipped_power_icon_is_vendored` is what keeps it landed
 
 - [x] **MBDIMPORT-1** — Mids files accolades under `Temporary_Powers.Accolades.*` and the importer's
   blanket temp-power skip dropped every one of them upstream of the warning counters, so a user's
