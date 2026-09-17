@@ -16,9 +16,11 @@ jobs:
     # tsc and vitest both walk the whole generated/ tree, which outgrew Node's default
     # ~4GB heap: every run since 2026-08-26 died with "Ineffective mark-compacts near heap
     # limit" (exit 134) in the type-check step, before any assertion could be reached. That
-    # is a red that says nothing about the code. deploy.yml already carries this same bump
-    # and completes, so the ceiling is the setting, not the runner (GitHub-hosted linux
-    # runners have 16GB).
+    # is a red that says nothing about the code. Measured 2026-09-17: `tsc --noEmit` alone
+    # peaks at 4.45GB RSS, i.e. it clears the default ceiling by nothing at all, which is
+    # why it was the step that died. This job keeps its own NODE_OPTIONS because it never
+    # runs `npm run build` — the build carries its own flag in package.json, and lint,
+    # vitest and the audit scripts here would get the default without this.
     env:
       NODE_OPTIONS: --max-old-space-size=14336
     steps:

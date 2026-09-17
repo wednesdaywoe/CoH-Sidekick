@@ -34,16 +34,19 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # `vite build` needs far more than Node's default ~2GB heap, and going
-          # over doesn't fail the deploy loudly: the build OOMs and the Pages
-          # step silently skips.
+          # The heap size that used to live here (NODE_OPTIONS: 14336) is now inside the
+          # `build` script in package.json, invoked as `node --max-old-space-size=…` on
+          # both tsc and vite. It had to move: a CLI flag overrides NODE_OPTIONS, and
+          # setting it only here meant a developer's `npm run build` got Node's 4.3GB
+          # default and died where CI passed. That is a build whose memory budget is
+          # configured everywhere except where the build is.
           #
-          # 10240 was sized for three datasets. Brainstorm made it four and the
-          # build measured 9.72GB peak RSS against that 10GB ceiling, so it was
-          # passing on roughly 3% headroom. 14336 restores room for a fifth
-          # dataset and still leaves ~1.5GB for the OS on a 16GB runner.
-          # Re-measure before adding another dataset rather than raising blind.
-          NODE_OPTIONS: --max-old-space-size=14336
+          # Going over doesn't fail the deploy loudly: the build OOMs and the Pages step
+          # silently skips. 10240 was sized for three datasets; brainstorm made it four
+          # and it measured 9.72GB peak RSS against that ceiling, ~3% headroom. On
+          # 2026-09-17 the same build measures 11.3GB with maps (10.1GB without, which is
+          # what a token-less run now costs — see vite.config.ts), so 14336 is down to
+          # ~2.7GB of room on a 16GB runner. Re-measure before adding a dataset.
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}

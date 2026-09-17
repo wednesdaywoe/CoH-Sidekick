@@ -54,14 +54,25 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # Mirrors deploy.yml — the 3-dataset bundle OOMs Node's default heap.
-          NODE_OPTIONS: --max-old-space-size=10240
+          # The heap size lives in package.json's `build` script now (see deploy.yml for
+          # why). This step used to pin 10240 of its own, which had gone stale twice over:
+          # deploy.yml raised itself to 14336 for the fourth dataset and this did not
+          # follow, and this build now peaks at 10.7GB without maps (11.3GB with them) —
+          # so the moment tsc stopped failing ahead of it, this job would have started
+          # OOMing on a ceiling deploy had already abandoned. It never surfaced because
+          # `tsc` has failed first on every run since 2026-09-10, so `vite build` has not
+          # executed in CI since 09-08.
+          #
           # Baked into the bundle, so the artifact is actually runnable in step 2.
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
-          # SENTRY_AUTH_TOKEN deliberately omitted: it only gates source-map UPLOAD, and
-          # a test build should not create Sentry releases. The emitted bundle is the same.
+          # SENTRY_AUTH_TOKEN deliberately omitted: a test build should not create Sentry
+          # releases. It now gates source-map GENERATION as well as upload (vite.config.ts),
+          # so this artifact carries no .map files — deliberately. They would be maps no
+          # tool here can read: `sourcemap: 'hidden'` emits no sourceMappingURL, so nothing
+          # in the JS points at them and only an upload would have consumed them. The
+          # shipped JS is unaffected, which is what step 2 checks.
 
       # A successful `vite build` does NOT imply a working engine — re-ignoring the
       # artifacts, or a stale/absent contract bundle, still produces a clean build that
