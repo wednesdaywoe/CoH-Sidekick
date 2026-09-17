@@ -16,7 +16,7 @@ export const UpgradeEquipment: Power = {
   "free": false,
   "description": "Permanently Upgrades weapons and training to all of your Knight Henchman. The Upgraded Knight will gain new powers, weapons and abilities. The powers gained are unique and dependent upon the type of Knight Henchman that is Upgraded. This power only works on your Knights Henchmen and you can only Upgrade the Equipment of your Knights Henchmen once with this power. (Slotting this power with damage enhancements does nothing, this power only accepts damage enhancements so you can slot the unique Invention Enhancements that buff pets here.)",
   "shortHelp": "Auto PBAoE: Upgrade Knight Henchman",
-  "icon": "knights_upgradeequipment.texture.png",
+  "icon": "knights_upgradeequipment.png",
   "powerType": "Auto",
   "targetType": "Self",
   "effectArea": "AoE",

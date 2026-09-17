@@ -19476,7 +19476,7 @@ export const EPIC_POOLS_RAW = {
         "free": false,
         "description": "Gladiators, Samurai, Vikingur. These are but a few groups you have studied to hone your techniques. You've adopted their ability to demoralize the opposition with a War Cry! You reduce the Damage and To Hit of enemies around you. This power also has a chance to Terrorize minions. You must be level 44 and have selected either Warrior's Mark or Entangling Bolt to select this power. Recharge: Long",
         "shortHelp": "PBAoE -To Hit, -DMG, Chance of Terrorize",
-        "icon": "martialmastery_warcry.dds",
+        "icon": "martialmastery_warcry.png",
         "powerType": "Click",
         "targetType": "Self",
         "modesDisallowed": [
