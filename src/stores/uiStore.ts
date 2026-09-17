@@ -35,6 +35,7 @@ import { type ColorThemeId, DEFAULT_COLOR_THEME, applyColorTheme, type ColorMode
 import type { SlotLevelRef } from '@/utils/slot-levels';
 import type { PowerMetric } from '@/utils/calculations/attack-chain';
 import { getCommonIOLevels } from '@/data/boost-index';
+import { enhancementLevelRange } from '@/utils/calculations';
 
 /** Persisted geometry of a floating window (see `FloatingWindow`). */
 export interface FloatingWindowRect {
@@ -195,8 +196,18 @@ interface UIState {
   /** Attunement toggle */
   attunementEnabled: boolean;
 
-  /** Global enhancement boost level (0-5) */
+  /**
+   * The picker's level-offset default, split by axis because the two are
+   * different mechanics off different curves and no enhancement has both (see
+   * `enhancementLevelAxis`). One shared number meant the narrower axis clamped
+   * the wider one down and nothing ever widened it back — slot a special, and
+   * the next IO quietly took +3 instead of the +5 you left it on.
+   */
+  /** Enhancement Booster combines for IOs. Unsigned; domain from the curves. */
   globalBoostLevel: number;
+
+  /** Relative level for origin/special enhancements. Signed — below even is a penalty. */
+  globalRelativeLevel: number;
 
   /** IO set sort preference in enhancement picker */
   ioSetSortBy: 'name' | 'level';
@@ -525,6 +536,7 @@ interface UIActions {
   setGlobalIOLevel: (level: number) => void;
   toggleAttunement: () => void;
   setGlobalBoostLevel: (level: number) => void;
+  setGlobalRelativeLevel: (level: number) => void;
   setIOSetSortBy: (sort: 'name' | 'level') => void;
   setLastPickerFilter: (powerName: string, typeFilter: string, sidebarFilter: string) => void;
   toggleExemplarMode: () => void;
@@ -977,6 +989,7 @@ export const useUIStore = create<UIStore>()(
       globalIOLevel: 50,
       attunementEnabled: false,
       globalBoostLevel: 0,
+      globalRelativeLevel: 0,
       ioSetSortBy: 'name' as const,
       lastPickerFilterByPower: {},
       exemplarMode: false,
@@ -1155,10 +1168,21 @@ export const useUIStore = create<UIStore>()(
           attunementEnabled: !state.attunementEnabled,
         })),
 
-      setGlobalBoostLevel: (level) =>
-        set({
-          globalBoostLevel: Math.max(0, Math.min(5, level)),
-        }),
+      // `Math.max(0, Math.min(5, level))` until 2026-09-17. Both ends were wrong:
+      // 5 is a number the export owns (`boosters.length - 1`, and the datasets
+      // disagree), and the 0 floored the whole signed half of the OTHER axis that
+      // was sharing this setter — every below-even relative level the spinner
+      // offered was stored as even, so an under-level SO could not be placed from
+      // the picker while the dial claimed it had been.
+      setGlobalBoostLevel: (level) => {
+        const { min, max } = enhancementLevelRange('io-set');
+        set({ globalBoostLevel: Math.max(min, Math.min(max, level)) });
+      },
+
+      setGlobalRelativeLevel: (level) => {
+        const { min, max } = enhancementLevelRange('origin');
+        set({ globalRelativeLevel: Math.max(min, Math.min(max, level)) });
+      },
 
       setIOSetSortBy: (sort) =>
         set({ ioSetSortBy: sort }),
@@ -2017,6 +2041,7 @@ export const useUIStore = create<UIStore>()(
         globalIOLevel: state.globalIOLevel,
         attunementEnabled: state.attunementEnabled,
         globalBoostLevel: state.globalBoostLevel,
+        globalRelativeLevel: state.globalRelativeLevel,
         ioSetSortBy: state.ioSetSortBy,
         lastPickerFilterByPower: state.lastPickerFilterByPower,
         // exemplarMode / exemplarLevel intentionally NOT persisted. Leaving

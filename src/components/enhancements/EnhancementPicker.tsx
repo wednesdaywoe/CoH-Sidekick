@@ -20,7 +20,7 @@ import {
 } from '@/data';
 import { normalizeAspectName, readAspectDisplayValue, getEffectiveAspectCount, calculateSingleEnhancementValues, enhancementLevelAxis, enhancementLevelRange, genericIOValueAtLevel, getOriginTierValue } from '@/utils/calculations';
 import { Modal, ModalBody } from '@/components/modals';
-import { Tooltip, Toggle, LevelSpinner } from '@/components/ui';
+import { Tooltip, Toggle, LevelSpinner, formatSignedOffset } from '@/components/ui';
 import { IOSetIcon, GenericIOIcon, OriginEnhancementIcon, SpecialEnhancementIcon } from './EnhancementIcon';
 import { SetBonusList } from './SetBonusList';
 import type { IOSet, IOSetPiece, EnhancementStatType, SpecialEnhancementDef, IOSetCategory, SpecialEnhancement, Enhancement } from '@/types';
@@ -29,7 +29,7 @@ import { getSetTrackedBonuses, type TrackedBonusMatch } from '@/data/set-bonus-i
 import { statKeyToChipLabel, formatTrackedBonusAmount } from '@/data/set-bonus-groups';
 import { formatBonusDesc } from '@/utils/set-bonus-format';
 import { isBonusCapped, getTotalBonusCount } from '@/utils/calculations/set-bonuses';
-import { useBonusTracking } from '@/hooks';
+import { useBonusTracking, useIsTouchDevice } from '@/hooks';
 import { getEnhancementOutline } from '@/utils/enhancement-outline';
 import { pieceSlottableNow } from '@/utils/enhancement-eligibility';
 
@@ -57,6 +57,8 @@ export function EnhancementPicker() {
   const setGlobalIOLevel = useUIStore((s) => s.setGlobalIOLevel);
   const globalBoostLevel = useUIStore((s) => s.globalBoostLevel);
   const setGlobalBoostLevel = useUIStore((s) => s.setGlobalBoostLevel);
+  const globalRelativeLevel = useUIStore((s) => s.globalRelativeLevel);
+  const setGlobalRelativeLevel = useUIStore((s) => s.setGlobalRelativeLevel);
   const ioSortBy = useUIStore((s) => s.ioSetSortBy);
   const setIOSortBy = useUIStore((s) => s.setIOSetSortBy);
   const lastPickerFilterByPower = useUIStore((s) => s.lastPickerFilterByPower);
@@ -87,6 +89,10 @@ export function EnhancementPicker() {
     () => enhancementLevelRange(levelOffsetType),
     [levelOffsetType],
   );
+  // What the spinner shows and edits: the active tab's axis.
+  const levelOffset = levelOffsetAxis === 'relative' ? globalRelativeLevel : globalBoostLevel;
+  const setLevelOffset =
+    levelOffsetAxis === 'relative' ? setGlobalRelativeLevel : setGlobalBoostLevel;
 
   // The crafting levels the export names a record at. Set pieces are craftable
   // at every integer inside their own range, common IOs only at the roster's
@@ -122,13 +128,13 @@ export function EnhancementPicker() {
   // can legitimately move nothing, and a silent no-op reads as a dead button.
   const maximizeEnhancementLevels = useBuildStore((s) => s.maximizeEnhancementLevels);
   const [bulkApplied, setBulkApplied] = useState<number | null>(null);
-  useEffect(() => setBulkApplied(null), [globalBoostLevel, levelOffsetAxis]);
+  useEffect(() => setBulkApplied(null), [levelOffset, levelOffsetAxis]);
   const applyOffsetToSlotted = () => {
     setBulkApplied(
       maximizeEnhancementLevels(
         levelOffsetAxis === 'relative'
-          ? { relativeLevel: globalBoostLevel }
-          : { boostLevel: globalBoostLevel },
+          ? { relativeLevel: levelOffset }
+          : { boostLevel: levelOffset },
       ),
     );
   };
@@ -136,9 +142,9 @@ export function EnhancementPicker() {
   // Switching to a booster-axis tab must not leave a negative behind — it would
   // silently read as +0 there while still showing as a penalty in the spinner.
   useEffect(() => {
-    if (globalBoostLevel < levelOffsetRange.min) setGlobalBoostLevel(levelOffsetRange.min);
-    else if (globalBoostLevel > levelOffsetRange.max) setGlobalBoostLevel(levelOffsetRange.max);
-  }, [levelOffsetRange, globalBoostLevel, setGlobalBoostLevel]);
+    if (levelOffset < levelOffsetRange.min) setLevelOffset(levelOffsetRange.min);
+    else if (levelOffset > levelOffsetRange.max) setLevelOffset(levelOffsetRange.max);
+  }, [levelOffsetRange, levelOffset, setLevelOffset]);
 
   // Drag selection state (mouse/desktop only)
   const [isDragging, setIsDragging] = useState(false);
@@ -184,6 +190,14 @@ export function EnhancementPicker() {
   // Explicit select-mode toggle (visible on both desktop and mobile) — makes every
   // click/tap toggle selection instead of slotting immediately.
   const [selectMode, setSelectMode] = useState(false);
+
+  // Shift+click has done the same job since 2026-04-23 and is listed in the
+  // Controls reference, which is the one place a user has no reason to look
+  // while they are mid-slot. Reported 2026-09-17 by someone who had been using
+  // the toggle for months without knowing the modifier existed. The button
+  // stays — it is the only multi-select a touch device has, there being no
+  // shift key — so the fix is to say so next to it, where the choice is made.
+  const isTouch = useIsTouchDevice();
 
   // When opening the picker to change an already-slotted IO set piece, this
   // holds that set's id so its row scrolls into view + briefly highlights.
@@ -784,12 +798,12 @@ export function EnhancementPicker() {
     if (isStackingClick(e)) {
       incStacked(
         `origin:${tier}:${stat}`,
-        () => createOriginEnhancement(stat, tier, buildOrigin, globalBoostLevel),
+        () => createOriginEnhancement(stat, tier, buildOrigin, globalRelativeLevel),
         `${stat} ${tier}`,
       );
       return;
     }
-    placeEnhancement(picker.currentPowerName, picker.currentSlotIndex, createOriginEnhancement(stat, tier, buildOrigin, globalBoostLevel));
+    placeEnhancement(picker.currentPowerName, picker.currentSlotIndex, createOriginEnhancement(stat, tier, buildOrigin, globalRelativeLevel));
     closeEnhancementPicker();
   };
 
@@ -799,12 +813,12 @@ export function EnhancementPicker() {
     if (isStackingClick(e)) {
       incStacked(
         `special:${category}:${id}`,
-        () => createSpecialEnhancement(id, def, category, globalBoostLevel),
+        () => createSpecialEnhancement(id, def, category, globalRelativeLevel),
         def.name,
       );
       return;
     }
-    placeEnhancement(picker.currentPowerName, picker.currentSlotIndex, createSpecialEnhancement(id, def, category, globalBoostLevel));
+    placeEnhancement(picker.currentPowerName, picker.currentSlotIndex, createSpecialEnhancement(id, def, category, globalRelativeLevel));
     closeEnhancementPicker();
   };
 
@@ -906,18 +920,18 @@ export function EnhancementPicker() {
                 {levelOffsetAxis === 'relative' ? 'Rel. Level' : 'Boost'}
               </span>
               <LevelSpinner
-                value={globalBoostLevel}
+                value={levelOffset}
                 min={levelOffsetRange.min}
                 max={levelOffsetRange.max}
-                onChange={setGlobalBoostLevel}
+                onChange={setLevelOffset}
                 showPlus
                 decreaseTitle="Decrease level offset"
                 increaseTitle="Increase level offset"
                 valueTitle={`Drag up/down to change, click to type (${levelOffsetRange.min}–${levelOffsetRange.max})`}
                 valueColorClass={
-                  globalBoostLevel > 0
+                  levelOffset > 0
                     ? 'text-green-400'
-                    : globalBoostLevel < 0
+                    : levelOffset < 0
                       ? 'text-red-400'
                       : 'text-gray-500'
                 }
@@ -927,8 +941,8 @@ export function EnhancementPicker() {
               onClick={applyOffsetToSlotted}
               title={
                 levelOffsetAxis === 'relative'
-                  ? `Set every slotted origin and special enhancement to ${globalBoostLevel === 0 ? 'even' : globalBoostLevel > 0 ? `+${globalBoostLevel}` : globalBoostLevel} relative level. The spinner alone only affects enhancements you slot from here on.`
-                  : `Apply +${globalBoostLevel} to every enhancement already slotted in this build. The spinner alone only affects enhancements you slot from here on; attuned and sub-50 IOs cannot carry boosters.`
+                  ? `Set every slotted origin and special enhancement to ${levelOffset === 0 ? 'even' : levelOffset > 0 ? `+${levelOffset}` : levelOffset} relative level. The spinner alone only affects enhancements you slot from here on.`
+                  : `Apply +${levelOffset} to every enhancement already slotted in this build. The spinner alone only affects enhancements you slot from here on; attuned and sub-50 IOs cannot carry boosters.`
               }
               className="px-2 py-0.5 text-xs rounded border border-gray-600 text-gray-300 hover:text-gray-100 hover:border-gray-400 hover:bg-gray-800/60 transition-colors whitespace-nowrap"
             >
@@ -1169,9 +1183,22 @@ export function EnhancementPicker() {
             onContextMenu={(e) => { if (e.shiftKey) e.preventDefault(); }}
           >
             <div className="flex items-center justify-end gap-1 mb-2">
+              {!isTouch && !selectMode && (
+                <span className="text-xs text-gray-500 mr-1 whitespace-nowrap">
+                  or hold{' '}
+                  <kbd className="px-1 py-px rounded border border-gray-600 bg-gray-800 text-gray-300 font-sans text-[10px]">
+                    Shift
+                  </kbd>{' '}
+                  and click
+                </span>
+              )}
               <button
                 onClick={() => setSelectMode((m) => !m)}
-                title="When on, taps/clicks queue selections instead of slotting immediately. For common IOs / HOs / Origins, each tap adds another copy. Use the action bar at the bottom to slot all queued enhancements at once."
+                title={
+                  isTouch
+                    ? 'When on, taps queue selections instead of slotting immediately. For common IOs / HOs / Origins, each tap adds another copy. Use the action bar at the bottom to slot all queued enhancements at once.'
+                    : 'When on, clicks queue selections instead of slotting immediately — the same thing holding Shift does, without having to hold it. For common IOs / HOs / Origins, each click adds another copy. Use the action bar at the bottom to slot all queued enhancements at once.'
+                }
                 className={`text-xs px-2 py-0.5 rounded mr-1 transition-colors ${
                   selectMode
                     ? 'bg-green-600 text-on-success hover:bg-green-500'
@@ -1723,6 +1750,14 @@ function IOSetRow({
 
   const attunementEnabled = useUIStore((s) => s.attunementEnabled);
   const globalIOLevel = useUIStore((s) => s.globalIOLevel);
+  const globalBoostLevel = useUIStore((s) => s.globalBoostLevel);
+  /** What each piece would actually carry — the factory decides, not this row. */
+  const pieceOffset = (piece: IOSetPiece, pieceIndex: number) =>
+    createIOSetEnhancement(set, piece, pieceIndex, {
+      attuned: attunementEnabled,
+      level: globalIOLevel,
+      boost: globalBoostLevel,
+    }).boost ?? 0;
   const isUniqueEnhancementSlotted = useBuildStore((s) => s.isUniqueEnhancementSlotted);
   const isCompareMode = useUIStore((s) => s.enhancementPicker.virtualSlots) !== null;
   const trackedStats = useUIStore((s) => s.trackedStats);
@@ -1884,6 +1919,7 @@ function IOSetRow({
                     }}
                   />
                 )}
+                <PendingOffsetBadge offset={pieceOffset(piece, pieceIndex)} />
               </button>
             </Tooltip>
           );
@@ -1944,6 +1980,7 @@ function IOSetRow({
                     }}
                   />
                 )}
+                <PendingOffsetBadge offset={pieceOffset(piece, pieceIndex)} />
               </div>
 
               {/* Info on right */}
@@ -2020,6 +2057,43 @@ function StackedCountBadge({ count, onDecrement }: { count: number; onDecrement:
   );
 }
 
+/**
+ * The level offset this tile would be slotted at, drawn ON the tile.
+ *
+ * The header spinner was the only place this number appeared, at the top of a
+ * grid you scroll away from. Reported 2026-09-17: work on the special tab,
+ * whose axis stops at +3, then slot IOs — they went in at +3 rather than the +5
+ * the user had chosen, and the first sign of it was an already-slotted piece.
+ * (The clamp that leaked between the two axes is fixed in uiStore; this is the
+ * other half — a number you can see without re-reading the header.)
+ *
+ * `offset` is asked of the same factory the click path calls, never recomputed:
+ * eligibility is the factory's rule — an attuned piece and a pure proc both drop
+ * the boost — and a badge restating it would be a second copy free to drift from
+ * what actually gets slotted. Which is the exact failure this badge exists for.
+ *
+ * A span, not a button: the set-piece tile IS a button, and a nested one makes
+ * the parser close the outer element.
+ *
+ * Top-LEFT is the only free corner. Top-right carries the piece-outline dot on a
+ * set tile and `StackedCountBadge` on a stackable one, and bottom sits on the stat
+ * label that the generic/origin tiles print under their icon — which bottom-left
+ * covered when this was first written.
+ */
+function PendingOffsetBadge({ offset, className = '-top-1.5 -left-1.5' }: { offset: number; className?: string }) {
+  if (!offset) return null;
+  return (
+    <span
+      aria-hidden
+      className={`absolute ${className} min-w-[16px] h-[14px] px-0.5 rounded-sm text-[9px] font-bold leading-[14px] text-center pointer-events-none shadow ring-1 ring-gray-900 ${
+        offset > 0 ? 'bg-green-600 text-on-success' : 'bg-red-700 text-white'
+      }`}
+    >
+      {formatSignedOffset(offset)}
+    </span>
+  );
+}
+
 // ============================================
 // GENERIC IO CONTENT
 // ============================================
@@ -2035,6 +2109,7 @@ interface GenericIOContentProps {
 }
 
 function GenericIOContent({ availableIOs, craftLevel, onSelect, stackedCountFor, onDecrement }: GenericIOContentProps) {
+  const globalBoostLevel = useUIStore((s) => s.globalBoostLevel);
   if (availableIOs.length === 0) {
     return <div className="text-center text-gray-500 py-8">No generic IOs available for this power</div>;
   }
@@ -2064,6 +2139,9 @@ function GenericIOContent({ availableIOs, craftLevel, onSelect, stackedCountFor,
                   <span className="text-[8px] text-gray-400 leading-tight truncate w-full text-center">{stat}</span>
                 </button>
                 {count > 0 && <StackedCountBadge count={count} onDecrement={() => onDecrement(stat)} />}
+                <PendingOffsetBadge
+                  offset={createGenericIOEnhancement(stat, craftLevel, globalBoostLevel).boost ?? 0}
+                />
               </div>
             </Tooltip>
           );
@@ -2115,6 +2193,7 @@ const SPECIAL_SECTIONS: Array<{
 
 function SpecialContent(props: SpecialContentProps) {
   const { onSelect, stackedCountFor, onDecrement } = props;
+  const globalRelativeLevel = useUIStore((s) => s.globalRelativeLevel);
   const totalAvailable = props.availableHamidons.length + props.availableTitans.length + props.availableHydras.length + props.availableDSyncs.length + props.availablePrestige.length;
 
   if (totalAvailable === 0) {
@@ -2148,6 +2227,9 @@ function SpecialContent(props: SpecialContentProps) {
                         <SpecialEnhancementIcon icon={iconName} size={30} alt={def.name} />
                       </button>
                       {count > 0 && <StackedCountBadge count={count} onDecrement={() => onDecrement(section.category, id)} />}
+                      <PendingOffsetBadge
+                        offset={createSpecialEnhancement(id, def, section.category, globalRelativeLevel).boost ?? 0}
+                      />
                     </div>
                   </Tooltip>
                 );
@@ -2173,6 +2255,7 @@ interface OriginContentProps {
 
 function OriginContent({ availableTypes, onSelect, stackedCountFor, onDecrement }: OriginContentProps) {
   const buildOrigin = useBuildStore((s) => s.build.settings.origin);
+  const globalRelativeLevel = useUIStore((s) => s.globalRelativeLevel);
 
   if (availableTypes.length === 0) {
     return <div className="text-center text-gray-500 py-8">No origin enhancements available for this power</div>;
@@ -2209,6 +2292,9 @@ function OriginContent({ availableTypes, onSelect, stackedCountFor, onDecrement 
                       <span className="text-[8px] text-gray-400 leading-tight truncate w-full text-center">{stat}</span>
                     </button>
                     {count > 0 && <StackedCountBadge count={count} onDecrement={() => onDecrement(stat, tierShort)} />}
+                    <PendingOffsetBadge
+                      offset={createOriginEnhancement(stat, tierShort, buildOrigin, globalRelativeLevel).boost ?? 0}
+                    />
                   </div>
                 </Tooltip>
               );
