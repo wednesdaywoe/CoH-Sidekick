@@ -318,7 +318,16 @@ export default defineConfig({
     // 'hidden' generates source maps for Sentry upload without exposing a
     // sourceMappingURL comment in the deployed JS (so browsers won't fetch
     // the maps from the public site).
-    sourcemap: 'hidden',
+    //
+    // Which is also why they are conditional on the same token the upload plugin is:
+    // with no sourceMappingURL nothing but Sentry can ever ask for them, so a build
+    // without the token writes ~75 MB of maps that are read by nobody and deleted. They
+    // cost 1.2 GB of peak heap and 12s of the ~42s build, measured on this tree. The
+    // shipped JS neither references them nor changes shape — 'hidden' puts no
+    // sourceMappingURL in it either way — so this changes what a local or build-check run
+    // spends, and changes production not at all: deploy.yml sets SENTRY_AUTH_TOKEN, so the
+    // maps it uploads are still generated.
+    sourcemap: process.env.SENTRY_AUTH_TOKEN ? 'hidden' : false,
     rollupOptions: {
       output: {
         // Give the per-dataset dynamic-import chunks a stable, greppable name
