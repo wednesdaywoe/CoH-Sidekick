@@ -13,6 +13,11 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    /* The engine-staleness suite imports scripts/engine-fingerprint.mjs, and a hand-written
+       .d.ts beside that script would be a second copy of its signatures, free to drift from
+       the real ones without anything going red. This lets tsc infer them from the source
+       instead. `checkJs` stays off, so JS is read for its types and not graded. */
+    "allowJs": true,
 
     /* Linting */
     "strict": true,

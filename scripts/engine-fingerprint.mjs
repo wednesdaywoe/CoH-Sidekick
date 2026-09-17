@@ -232,6 +232,7 @@ export function fingerprintRebuild(rebuildDir) {
   // Contract bundles, hashed individually so a mismatch names the dataset that drifted.
   const contractDir = join(rebuildDir, 'contract');
   if (!existsSync(contractDir)) throw new Error(`engine-fingerprint: no contract/ under ${rebuildDir}`);
+  /** @type {Record<string, string>} dataset name -> sha256 of its bundle */
   const bundles = {};
   for (const dataset of readdirSync(contractDir).sort()) {
     const bundle = join(contractDir, dataset, 'bundle.json.gz');
