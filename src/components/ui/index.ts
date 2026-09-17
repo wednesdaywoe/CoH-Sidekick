@@ -22,6 +22,6 @@ export { Input } from './Input';
 
 export { CollapsibleSection } from './CollapsibleSection';
 
-export { LevelSpinner } from './LevelSpinner';
+export { LevelSpinner, formatSignedOffset } from './LevelSpinner';
 
 export { FloatingWindow } from './FloatingWindow';

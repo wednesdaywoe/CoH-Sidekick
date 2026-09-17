@@ -32,7 +32,7 @@ interface LevelSpinnerProps {
   allowedValues?: number[];
   /** Pixels of vertical drag that advance the value by one step. */
   pxPerStep?: number;
-  /** Render `+` in front of positive values (used for boost level). */
+  /** Spell the value as a signed offset — see `formatSignedOffset`. */
   showPlus?: boolean;
   /** Tailwind class for the value text colour. */
   valueColorClass?: string;
@@ -47,6 +47,24 @@ interface LevelSpinnerProps {
 }
 
 const DRAG_MOVEMENT_THRESHOLD_PX = 3;
+
+/**
+ * How a signed level offset is spelled: `+3`, `+0`, `-2`.
+ *
+ * `+` is a marker for "not below even", not a prefix to paste on unconditionally
+ * — pasting it produced `+-2`. That was unreachable until 2026-09-17, because the
+ * picker's only `showPlus` spinner had its negative half floored to 0 in the store,
+ * so the sign bug and the clamp bug hid each other; fixing the clamp exposed this.
+ *
+ * `+0` is kept rather than rendered bare: it is how Mids spells an even offset and
+ * users read it as "no adjustment".
+ *
+ * Exported because the picker's per-tile offset badge spells the same number, and
+ * two copies of a sign rule is how you get a tile and a header disagreeing.
+ */
+export function formatSignedOffset(value: number): string {
+  return value >= 0 ? `+${value}` : String(value);
+}
 
 function clamp(n: number, min: number, max: number): number {
   if (Number.isNaN(n)) return min;
@@ -153,7 +171,11 @@ export function LevelSpinner({
   const dec = () => onChange(moved(value, -1));
   const inc = () => onChange(moved(value, 1));
 
-  const displayValue = showPlus ? `+${value}` : String(value);
+  // `+` marks a positive, so it is not a prefix to paste on unconditionally: a
+  // negative rendered "+-2". That was unreachable until 2026-09-17 — the picker's
+  // only `showPlus` spinner had its negative half floored to 0 by the store, so
+  // the sign bug and the clamp bug hid each other. Fixing the clamp exposed this.
+  const displayValue = showPlus ? formatSignedOffset(value) : String(value);
 
   return (
     <div className="flex items-center gap-1.5" aria-disabled={disabled}>

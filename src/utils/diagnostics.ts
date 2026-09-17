@@ -62,6 +62,7 @@ export function getDiagnosticsSnapshot(): DiagnosticsSnapshot {
     attunementEnabled: ui.attunementEnabled,
     globalIOLevel: ui.globalIOLevel,
     globalBoostLevel: ui.globalBoostLevel,
+    globalRelativeLevel: ui.globalRelativeLevel,
     targetLevelOffset: ui.targetLevelOffset,
     procSettings: ui.procSettings,
     includeProcDamageInDPS: ui.includeProcDamageInDPS,
