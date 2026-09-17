@@ -51,6 +51,9 @@ CREATE INDEX idx_shared_builds_user_id ON shared_builds(user_id);
 CREATE INDEX idx_shared_builds_visibility ON shared_builds(visibility) WHERE visibility = 'public';
 CREATE INDEX idx_shared_builds_search ON shared_builds
   USING GIN (to_tsvector('english', name || ' ' || coalesce(description, '') || ' ' || coalesce(author_name, '')));
+-- The tag filter asks `tags=cs.{"Perma Hasten"}` — array containment, which only an inverted
+-- index can answer without reading every row.
+CREATE INDEX idx_shared_builds_tags ON shared_builds USING GIN (tags);
 
 -- Row Level Security
 ALTER TABLE shared_builds ENABLE ROW LEVEL SECURITY;
@@ -518,3 +521,17 @@ LEFT JOIN profiles p ON p.user_id = b.user_id;
 --    WHERE id = 'BUILD-ID-HERE';
 --
 -- 3. Use that token in the app's "Reclaim" button on the build detail page.
+
+-- ============================================
+-- Migration: Tag filtering (run on existing databases)
+-- ============================================
+-- The build browser's tag filter sends PostgREST array containment
+-- (`tags=cs.{"Perma Hasten","Budget"}`). Without an inverted index that is a
+-- sequential scan of shared_builds on every filtered browse.
+--
+-- CREATE INDEX IF NOT EXISTS idx_shared_builds_tags ON shared_builds USING GIN (tags);
+--
+-- No column change: `tags TEXT[]` already exists and the curated vocabulary is
+-- client-side (crates/app/src/cloud/tag_vocab.rs). The server deliberately does
+-- NOT validate tags against it — a row tagged before the vocabulary existed, or
+-- by an older client, stays readable rather than becoming invalid.
