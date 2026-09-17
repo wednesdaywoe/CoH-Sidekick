@@ -3226,7 +3226,7 @@ export const useBuildStore = create<BuildStore>()(
             //   v3 adds internalName to SlimPower; v2 uses display name fallback
             //   v4 adds `serverId` for multi-dataset support; v2/v3 default to 'homecoming'
             build = hydrateBuild(data.build, notes);
-          } else {
+          } else if (data.version === 1 || data.version === undefined) {
             // v1 (legacy) — full Build object, just convert Set serialization
             const setsEntries = Object.entries(data.build.sets || {}) as [
               string,
@@ -3247,6 +3247,21 @@ export const useBuildStore = create<BuildStore>()(
                 ])
               ),
             };
+          } else {
+            // A version this reader does not know is refused, not guessed at.
+            //
+            // The v1 arm used to be the fall-through, which made it the arm every
+            // FUTURE version landed in too — and v1 is a whole `Build` object where
+            // every version since is the slim shape. So a newer export was spread
+            // into a Build, `data.build.sets` came back undefined, and the result
+            // rendered as a mangled build instead of an error: the reader guessed,
+            // and the guess was wrong in the direction nobody checks. The canonical
+            // rebuild writes v5, which is exactly that case arriving for real.
+            //
+            // Caught below, where it logs and returns false like any other refusal.
+            throw new Error(
+              `Unsupported build version ${JSON.stringify(data.version)} — this app reads v1 through v4`
+            );
           }
 
           // Default slotOrder for builds that don't have it (older saves)
