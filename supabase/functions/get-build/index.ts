@@ -29,22 +29,31 @@ const corsHeaders = {
  * shared_builds_with_author's projection, which is the build document plus the
  * card fields plus the joined author profile.
  *
- * **This was `'*'`, and it is the one place the F73 fix cannot be delegated to
- * a grant.** The column grants in schema.sql narrow what `anon` and
- * `authenticated` may read from shared_builds. This function holds the SERVICE
- * ROLE key, which is a different role and was deliberately not revoked: it
- * keeps its table-level SELECT (so every column, including the hash) and it
- * has BYPASSRLS, which is the only reason an unlisted row is readable here at
- * all. Precisely: it does not *bypass* the column grants, it *holds* one — the
- * distinction matters, because it means revoking service_role would work and
- * is simply not wanted, since these functions authorise updates and deletes by
- * comparing owner_token_hash.
+ * **This was `'*'`, and what it answered with is measured: 25 keys on
+ * 2026-09-18, `owner_token_hash` among them and non-null, to an anonymous
+ * caller holding nothing but a build id — for unlisted rows as much as public
+ * ones.** The sha256 of the credential that owns the build, handed to whoever
+ * asks for the build.
  *
- * So the narrowing has to happen in the query. `select('*')` here would keep
- * answering with owner_token_hash — the sha256 of the credential that owns the
- * build — to any anonymous caller who has the id, for unlisted rows as much as
- * public ones. Measured on 2026-09-18: an anon answer was 25 keys with the
- * hash among them and non-null.
+ * **Be accurate about what closes that, because the first draft of this
+ * comment was not.** This reads the VIEW, so narrowing the view's projection
+ * already stops `'*'` returning the hash — the list below is a second lock,
+ * not the only one. It was written as though it were the only one, which
+ * overstated it in the direction this audit exists to catch.
+ *
+ * The second lock still earns its place, and this very file says why: the
+ * schema contains two historical migration blocks that DROP this view and
+ * recreate it as `SELECT b.*`. Widening it again is not hypothetical, it is
+ * the documented past. Under a widened view this list is what holds.
+ *
+ * **What is true about the grants**, separately: the column grants in
+ * schema.sql narrow `anon` and `authenticated`, and they do not constrain this
+ * function at all. The service role is a different role, deliberately not
+ * revoked — it keeps its table-level SELECT and has BYPASSRLS, which is the
+ * only reason an unlisted row is readable here. It does not *bypass* the
+ * column grants so much as *hold* one; revoking service_role would work, it is
+ * simply not wanted, since share-build, claim-builds and delete-build
+ * authorise by comparing owner_token_hash.
  *
  * Kept in step with the view by `supabase/schema-projection.test.ts`, which
  * parses this list out of this file and compares it against the view's
