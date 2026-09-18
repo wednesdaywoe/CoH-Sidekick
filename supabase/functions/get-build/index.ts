@@ -31,9 +31,16 @@ const corsHeaders = {
  *
  * **This was `'*'`, and it is the one place the F73 fix cannot be delegated to
  * a grant.** The column grants in schema.sql narrow what `anon` and
- * `authenticated` may read from shared_builds; this function holds the SERVICE
- * ROLE key, which bypasses both RLS and those grants by design, because it is
- * how an unlisted build is read at all. So `select('*')` here would keep
+ * `authenticated` may read from shared_builds. This function holds the SERVICE
+ * ROLE key, which is a different role and was deliberately not revoked: it
+ * keeps its table-level SELECT (so every column, including the hash) and it
+ * has BYPASSRLS, which is the only reason an unlisted row is readable here at
+ * all. Precisely: it does not *bypass* the column grants, it *holds* one — the
+ * distinction matters, because it means revoking service_role would work and
+ * is simply not wanted, since these functions authorise updates and deletes by
+ * comparing owner_token_hash.
+ *
+ * So the narrowing has to happen in the query. `select('*')` here would keep
  * answering with owner_token_hash — the sha256 of the credential that owns the
  * build — to any anonymous caller who has the id, for unlisted rows as much as
  * public ones. Measured on 2026-09-18: an anon answer was 25 keys with the
