@@ -62,18 +62,36 @@ export interface VerifiedAuthor {
 
 export type AuthorIdentity = AnonymousAuthor | UnverifiedAuthor | VerifiedAuthor;
 
+/** The handle sigil. Mirrors `SIGIL` in `_shared/author-name.ts`. */
+const SIGIL = '@';
+
 /**
- * The leading run a display name may not open with: the handle sigil, and the
- * whitespace that can hold two of them apart.
+ * What a display name may open with: anything that draws ink, and nothing that
+ * draws none. Mirrors `OPENER` in `_shared/author-name.ts`, and the comment
+ * there carries the full argument for the shape.
  *
- * `[@\s]+` rather than `@+`, and that width is a defect the server shipped
- * with. `sanitizeAuthorName`'s first version was `/^@+/` applied once after a
- * trim: it takes a run of sigils, so `@@savant` came out clean, but it stops
- * at a space and nothing re-reads what the strip exposed — so `@ @savant`
- * normalised to `@savant` and was stored still opening with the sigil. Both
- * sides take the run now.
+ * **This is the third spelling of this rule, and the first two were bypassed
+ * in the same way.** `/^@+/` stopped at a space, so `@ @savant` kept its
+ * sigil. `/^[@\s]+/` fixed that and stopped at a blank-rendering *letter*, so
+ * `\u3164@admin` — U+3164 HANGUL FILLER, category `Lo` — kept its sigil and
+ * this card drew it. A leading-run regex has to list what may be skipped, and
+ * the list was never going to be finished; stating what may END the run
+ * instead is what makes the next blank a dropped character rather than a live
+ * claim.
  */
-const LEADING_SIGIL = /^[@\s]+/;
+const OPENER = /(?!\p{Default_Ignorable_Code_Point}|\u2800)[\p{L}\p{N}\p{M}\p{S}\p{P}]/u;
+
+/**
+ * Drop the leading run that is not the name: the sigil, and anything that may
+ * not open one. One pass over the code points, because the two interleave —
+ * `@\u3164@admin` defeats any fixed order of two replaces.
+ */
+function stripClaimedPrefix(value: string): string {
+  const points = Array.from(value);
+  let i = 0;
+  while (i < points.length && (points[i] === SIGIL || !OPENER.test(points[i]))) i += 1;
+  return points.slice(i).join('');
+}
 
 /**
  * Decide what an author line says, from the two columns that carry it.
@@ -89,13 +107,22 @@ const LEADING_SIGIL = /^[@\s]+/;
  * stored row carries one (zero across all 5,007 rows, 2026-09-18). A second
  * copy of that table kept in sync for a population of zero is the trade being
  * refused. The sigil is copied because the sigil has a population of 64.
+ *
+ * **That bound was drawn from a measurement that could not see the thing that
+ * broke it.** The zero was counted over bidi, zero-width and `\p{Zs}` — three
+ * named classes — and U+3164 is in none of them: it is a one-column
+ * blank-*rendering* letter, so the query that justified "a population of zero"
+ * never asked about its class. The population of leading blank-renderers in
+ * stored rows is still unmeasured; [`stripClaimedPrefix`] does not need the
+ * number, because it refuses to draw the claim either way. Measuring it is
+ * F69's remaining question, not a precondition for this rule.
  */
 export function authorIdentity(
   authorName: string | null | undefined,
   authorHandle: string | null | undefined,
 ): AuthorIdentity {
-  const display = (authorName ?? '').replace(LEADING_SIGIL, '').trim();
-  const handle = (authorHandle ?? '').replace(LEADING_SIGIL, '').trim().toLowerCase();
+  const display = stripClaimedPrefix(authorName ?? '').trim();
+  const handle = stripClaimedPrefix(authorHandle ?? '').trim().toLowerCase();
   if (handle) return { kind: 'verified', display, handle };
   return display ? { kind: 'unverified', display } : { kind: 'anonymous' };
 }

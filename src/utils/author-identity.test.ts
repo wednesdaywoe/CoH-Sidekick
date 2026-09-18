@@ -71,6 +71,37 @@ describe('authorIdentity', () => {
     }
   });
 
+  it('does not let a blank-rendering opener shield the sigil', () => {
+    // F69's reopening. U+3164 HANGUL FILLER is category Lo — a LETTER that
+    // draws nothing — so `/^[@\s]+/`, the rule this replaced, matched none of
+    // it and this card drew `\u3164@admin` as an author line reading @admin.
+    // The server normaliser does not reach the rows already stored, so the
+    // client rule is the only thing standing in front of them.
+    for (const shield of ['\u3164', '\u115f', '\u1160', '\uffa0', '\u2800']) {
+      expect(
+        authorIdentity(`${shield}@admin`, null),
+        `shield U+${shield.codePointAt(0)!.toString(16).toUpperCase()}`,
+      ).toEqual({ kind: 'unverified', display: 'admin' });
+    }
+    // Interleaved with the sigil and with space, in any order.
+    expect(authorIdentity('@\u3164@ \u2800@admin', null)).toEqual({
+      kind: 'unverified',
+      display: 'admin',
+    });
+    // And a line made of nothing but shields and sigils is anonymous, not a
+    // display name made of blanks.
+    expect(authorIdentity('\u3164\u2800@@', null)).toEqual({ kind: 'anonymous' });
+  });
+
+  it('keeps a name that opens with ink, whatever alphabet it draws', () => {
+    // The rule has to admit real names or it is just a different way to be
+    // wrong. Real Hangul lives next door to the fillers and is nothing like
+    // them; an emoji opener is an ordinary display name.
+    for (const name of ['가나', '\u{1F9B8}Statesman', '小次郎', '-Savant-', '3rd Sentinel']) {
+      expect(authorIdentity(name, null)).toEqual({ kind: 'unverified', display: name });
+    }
+  });
+
   it('leaves an @ that is not the sigil alone', () => {
     // A name is not a claim because it contains an @; it is one because it
     // opens with one.
