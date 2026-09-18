@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { isFavorite, toggleFavorite, isOwnedBuild, deleteBuild } from '@/services/sharedBuilds';
 import type { SharedBuild, BuildVisibility } from '@/types/shared';
+import { authorIdentity } from '@/utils/author-identity';
 
 /** Click cycles forward through all three states. */
 const NEXT_VISIBILITY: Record<BuildVisibility, BuildVisibility> = {
@@ -62,16 +63,25 @@ export function BuildCard({ build, showDelete, onDeleted, onAuthorClick, onVisib
     }
   };
 
+  // The author line, decided once. `author_name` is free text a sharer typed;
+  // the handle is the profile join and the only part of this a client can
+  // prove, so the `@` is written from the handle and never from the name —
+  // SECURITY_AUDIT.md F69, and `utils/author-identity.ts` carries the why.
+  const author = authorIdentity(build.author_name, build.author_handle);
+
   const handleAuthorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     // Verified author with a handle → public author page
-    if (build.author_handle) {
-      navigate({ to: '/author/$handle', params: { handle: build.author_handle } });
+    if (author.kind === 'verified') {
+      navigate({ to: '/author/$handle', params: { handle: author.handle } });
       return;
     }
-    // Otherwise fall back to filtering the build list by author
-    if (onAuthorClick && build.author_name) {
-      onAuthorClick(build.user_id ?? null, build.author_name);
+    // Otherwise fall back to filtering the build list by author. The stripped
+    // display name is what goes to the filter, not the raw column: a filter
+    // that searched for `@savant` would search for a string this card is
+    // deliberately not showing.
+    if (onAuthorClick && author.kind === 'unverified') {
+      onAuthorClick(build.user_id ?? null, author.display);
     }
   };
 
@@ -235,20 +245,28 @@ export function BuildCard({ build, showDelete, onDeleted, onAuthorClick, onVisib
         {/* Footer */}
         <div className="flex items-center justify-between text-[10px] text-gray-500">
           <span>
-            {build.author_name ? (
+            {author.kind === 'anonymous' ? (
+              'Anonymous'
+            ) : (
               <span
                 role="button"
                 onClick={handleAuthorClick}
                 className={
-                  build.author_handle || onAuthorClick
+                  author.kind === 'verified' || onAuthorClick
                     ? 'hover:text-blue-400 transition-colors'
                     : ''
                 }
               >
-                {build.author_name}
+                {author.display}
+                {author.kind === 'verified' && (
+                  <span
+                    className={author.display ? 'ml-1 text-gray-300 font-semibold' : 'text-gray-300 font-semibold'}
+                    title="A handle this account holds"
+                  >
+                    @{author.handle}
+                  </span>
+                )}
               </span>
-            ) : (
-              'Anonymous'
             )}
             {build.server ? ` · ${build.server}` : ''}
           </span>

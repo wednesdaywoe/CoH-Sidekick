@@ -12,6 +12,7 @@ import { getActiveDataset } from '@/data/dataset';
 import { buildDocumentTitle, useDocumentTitle, DEFAULT_DOCUMENT_TITLE } from '@/utils/document-title';
 import { CURRENT_PREVIEW_TEMPLATE_VERSION } from '@/components/export-image/BuildPreviewCard';
 import type { SharedBuild, BuildVisibility } from '@/types/shared';
+import { authorIdentity } from '@/utils/author-identity';
 
 /** Hard cap on how long a hidden preview-capture iframe can run before this
  *  page gives up on it — matches SharePreviewCapture's own timeout, plus
@@ -262,6 +263,9 @@ export function BuildDetailPage() {
   const buildData = build.build_json.build;
   const pools = buildData.pools ?? [];
   const epicPool = buildData.epicPool;
+  // See `utils/author-identity.ts`: the `@` comes from the proved handle and
+  // never from the free-text name (SECURITY_AUDIT.md F69).
+  const author = authorIdentity(build.author_name, build.author_handle);
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -351,19 +355,23 @@ export function BuildDetailPage() {
 
         {/* Meta */}
         <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-          {build.author_name && (
+          {author.kind !== 'anonymous' && (
             <span>
               By{' '}
-              {build.author_handle ? (
+              {author.kind === 'verified' ? (
                 <Link
                   to="/author/$handle"
-                  params={{ handle: build.author_handle }}
+                  params={{ handle: author.handle }}
                   className="text-gray-300 hover:text-blue-400 transition-colors"
                 >
-                  {build.author_name}
+                  {author.display}
+                  {author.display ? ' ' : ''}
+                  <span className="font-semibold" title="A handle this account holds">
+                    @{author.handle}
+                  </span>
                 </Link>
               ) : (
-                <span className="text-gray-400">{build.author_name}</span>
+                <span className="text-gray-400">{author.display}</span>
               )}
             </span>
           )}
