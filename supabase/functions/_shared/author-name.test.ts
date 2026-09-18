@@ -110,6 +110,59 @@ describe('sanitizeAuthorName', () => {
     expect(sanitizeAuthorName('Savant @ Everlasting')).toBe('Savant @ Everlasting');
   });
 
+  // ---- blank-rendering openers (F69's live bypass) ----
+
+  it('strips a blank-rendering opener, so nothing can shield the sigil', () => {
+    // U+3164 HANGUL FILLER is category Lo — a LETTER that renders as nothing.
+    // Every class in this file was a subtraction over Cc/Cf/Zs/Zl/Zp, so none
+    // of them saw it, and `\u3164@admin` reached both clients with its sigil
+    // intact, reading as the handle @admin on a desktop card that draws the
+    // author string and nothing beside it.
+    expect(sanitizeAuthorName('\u3164@admin')).toBe('admin');
+    // The rest of the family. U+FFA0 is here because the property caught it,
+    // not because anyone listed it — which is the argument for the property.
+    expect(sanitizeAuthorName('\u115f@admin')).toBe('admin');
+    expect(sanitizeAuthorName('\u1160@admin')).toBe('admin');
+    expect(sanitizeAuthorName('\uffa0@admin')).toBe('admin');
+    // U+2800 BRAILLE PATTERN BLANK is the one Default_Ignorable does NOT
+    // cover: an empty braille cell, category So, renders as a gap. It is
+    // refused by the opener class instead, which is why that class is not
+    // simply the ignorable property again.
+    expect(sanitizeAuthorName('\u2800@admin')).toBe('admin');
+    // Collapses ONTO the name it imitates rather than beside it — the same
+    // property that makes stripping the right answer for the zero-widths.
+    expect(sanitizeAuthorName('\u3164@admin')).toBe(sanitizeAuthorName('admin'));
+  });
+
+  it('takes an interleaved prefix to a fixed point, not one layer', () => {
+    // Any fixed order of two passes leaves a claim standing: take the sigils
+    // and a filler is next, take the fillers and a sigil is next.
+    expect(sanitizeAuthorName('@\u3164@admin')).toBe('admin');
+    expect(sanitizeAuthorName('\u3164@\u2800@\u3164admin')).toBe('admin');
+    expect(sanitizeAuthorName('\u3164\u2800@@@')).toBe('');
+  });
+
+  it('strips a blank-rendering character inside a name, not only in front', () => {
+    // The same defect as the zero-width family, one category over: this
+    // renders as "savant" and stores as a different string, so it reads as the
+    // real name while passing any comparison there might ever be.
+    expect(sanitizeAuthorName('sav\u3164ant')).toBe('savant');
+    expect(sanitizeAuthorName('savant\u3164')).toBe('savant');
+    expect(sanitizeAuthorName('sav\u3164ant')).toBe(sanitizeAuthorName('savant'));
+  });
+
+  it('keeps a name that opens with ink, whatever alphabet it draws', () => {
+    // A positive class that refuses real names is just a different way to be
+    // wrong, so these are the half of the rule that costs something to get
+    // right. An emoji opener is an ordinary display name.
+    expect(sanitizeAuthorName('\u{1F9B8}Statesman')).toBe('\u{1F9B8}Statesman');
+    // Real Hangul, next door to the fillers and nothing like them.
+    expect(sanitizeAuthorName('가나')).toBe('가나');
+    expect(sanitizeAuthorName('-Savant-')).toBe('-Savant-');
+    expect(sanitizeAuthorName('3rd Sentinel')).toBe('3rd Sentinel');
+    expect(sanitizeAuthorName('小次郎')).toBe('小次郎');
+  });
+
   // ---- truncation ----
 
   it('truncates by code point, so an astral character is never cut in half', () => {

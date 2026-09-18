@@ -54,6 +54,12 @@ const SEPARATORS = /[\t\n\v\f\r\p{Zl}\p{Zp}]/gu;
  *     right-to-left over its neighbours, the zero-width space/joiner family
  *     (U+200B-U+200D) that makes two distinct strings render identically,
  *     U+00AD soft hyphen, and U+FEFF.
+ *   * `\p{Default_Ignorable_Code_Point}` — the property Unicode maintains for
+ *     precisely this question: code points a conforming renderer draws as
+ *     nothing. It is what catches the HANGUL FILLER family — U+3164, U+115F,
+ *     U+1160, U+FFA0 — which are category `Lo`, *letters* that render blank,
+ *     and so walked past all three of the classes above. SECURITY_AUDIT.md
+ *     F69: `\u3164@admin` reached both clients with its sigil intact.
  *
  * **Known cost, accepted:** `\p{Cf}` includes U+200D, so an emoji ZWJ sequence
  * in a name (a family glyph, a profession glyph) degrades to its component
@@ -61,8 +67,14 @@ const SEPARATORS = /[\t\n\v\f\r\p{Zl}\p{Zp}]/gu;
  * weighed against a class whose entire remaining use here is hiding one name
  * inside another. Keeping ZWJ would mean enumerating the rest of `Cf`, and an
  * enumeration is the thing that goes stale.
+ *
+ * **Second known cost, same trade:** the default-ignorables include the
+ * variation selectors U+FE00-U+FE0F, so an emoji's presentation selector comes
+ * off with them and a glyph may render text-style where the sharer meant
+ * emoji-style. Accepted for the reason above, and cheaper than the ZWJ loss
+ * this file already took: the character survives, only its styling does not.
  */
-const INVISIBLE = /[\p{Cc}\p{Cf}]/gu;
+const INVISIBLE = /[\p{Cc}\p{Cf}\p{Default_Ignorable_Code_Point}]/gu;
 
 /**
  * Any run of whitespace, INCLUDING the `\p{Zs}` impostors — U+00A0 no-break
@@ -80,20 +92,75 @@ const WHITESPACE = /[\p{Zs}\s]+/gu;
  * holds one. A display name opening with it is claiming that namespace without
  * holding anything in it, so the sigil comes off and the name behind it stays.
  *
- * **The class is `[@\s]`, not `@`, and the difference is a defect this file
- * shipped with.** The first version was `/^@+/`, which strips a *run* of
- * sigils — `@@savant` — but not one held apart by a space. Applied once, after
- * the trim, to `@ @savant`, it removes the first sigil and returns
- * `@savant`: a stored value that still opens with the sigil and still names a
- * handle, which is the entire thing this constant exists to prevent. The
- * single pass is what makes it possible, because nothing re-reads what the
- * strip exposed. Found on 2026-09-18 by the canonical client's own sweep over
- * the same rule (`cloud/profile.rs::author_identity`), not by rereading this.
+ * **This constant was twice a regex and twice wrong, which is why it is now
+ * one character and the rule lives in [`stripClaimedPrefix`].** The first
+ * version was `/^@+/`: it strips a *run* of sigils — `@@savant` — but not one
+ * held apart by a space, so `@ @savant` lost its first sigil and returned
+ * `@savant`, a stored value still opening with the sigil and still naming a
+ * handle. The second was `/^[@\s]+/`, which fixed that by widening the class,
+ * and was bypassed in turn by `ㅤ@admin` — a blank-rendering *letter* is
+ * neither `@` nor `\s`. Both failures are one failure: a leading-run regex has
+ * to enumerate what may be skipped, and the list is never finished.
+ *
+ * So the skipping is stated the other way round now. [`OPENER`] says what may
+ * *end* the prefix, and everything before the first of those goes, sigil or
+ * blank or both in any order. The two historical cases fall out rather than
+ * being handled: `@ @savant` and `ㅤ@admin` both reduce because a space
+ * and a filler are equally "not something a name opens with".
  *
  * Interior sigils are still left alone — `Savant @ Everlasting` is a name, not
  * a claim. What makes a claim is opening with one.
  */
-const LEADING_SIGIL = /^[@\s]+/;
+const SIGIL = '@';
+
+/**
+ * What a display name may OPEN with — stated as a positive class on purpose,
+ * because the subtractive version of this rule is the one that shipped
+ * bypassed (F69). A name may open with anything that draws ink: a letter, a
+ * number, a combining mark, a symbol (an emoji name is a real name), or
+ * punctuation. What it may not open with is anything that draws nothing,
+ * because the only thing an invisible opener does is hide the character behind
+ * it — and the character worth hiding is the [`SIGIL`] above.
+ *
+ * The two exclusions are the blanks those ink categories would otherwise
+ * admit. The default-ignorables are already gone by the time this runs
+ * ([`INVISIBLE`] takes them); they are named here anyway so the class is true
+ * read on its own. U+2800 BRAILLE PATTERN BLANK is the one that needs naming
+ * for real — an empty braille cell, category `So`, *not* default-ignorable,
+ * and it renders as a gap.
+ *
+ * **This goes stale too, and that is the point of the shape.** A blank glyph
+ * Unicode adds tomorrow that is neither default-ignorable nor U+2800 will be
+ * admitted as an opener. What changed is which way the staleness falls: an
+ * unfamiliar *non-ink* character is now refused by default, so the failure
+ * mode is a name that loses a leading character rather than a sigil that
+ * survives to both clients. Subtraction failed open; this fails closed.
+ *
+ * Written as a lookahead rather than the `v`-flag set difference that says
+ * this more directly (`[[…]--[…]]`). That flag is ES2024, this file runs under
+ * whatever Deno the edge runtime happens to ship, and an unsupported flag is a
+ * SyntaxError at module load — which would take `share-build` down whole
+ * rather than degrade it. The two forms were swept against each other over
+ * 71,200 code points and disagreed on none, so the older spelling costs
+ * nothing but the indirection.
+ */
+const OPENER = /(?!\p{Default_Ignorable_Code_Point}|\u2800)[\p{L}\p{N}\p{M}\p{S}\p{P}]/u;
+
+/**
+ * Drop everything in front of the name: any character that may not open one,
+ * and the sigil itself, up to the first character that may.
+ *
+ * One pass over the code points rather than two regex replaces, because the
+ * two cases interleave — `@\u3164@admin` needs the sigil taken, then the
+ * filler, then the sigil again, and any fixed number of passes is the same
+ * enumeration bug wearing a different hat.
+ */
+function stripClaimedPrefix(name: string): string {
+  const points = Array.from(name);
+  let i = 0;
+  while (i < points.length && (points[i] === SIGIL || !OPENER.test(points[i]))) i += 1;
+  return points.slice(i).join('');
+}
 
 /**
  * Normalise a caller-supplied author name into what may be stored.
@@ -111,7 +178,9 @@ const LEADING_SIGIL = /^[@\s]+/;
  *      gap behind it, a zero-width space sitting between two real spaces must
  *      not survive as the thing that keeps them from collapsing, and the
  *      collapse has to run after both to see the spaces they produced.
- *   3. **Sigil after trimming**, so ` @savant` is caught as well as `@savant`.
+ *   3. **Prefix strip after trimming**, so ` @savant` is caught as well as
+ *      `@savant`, and so the whitespace impostors are already spaces rather
+ *      than characters the opener class would have to rule on.
  *   4. **Truncate LAST, and by code point.** `String.prototype.slice` counts
  *      UTF-16 units, so the old `.slice(0, 50)` could cut an astral character
  *      in half and store a lone surrogate — a real defect the length rule was
@@ -120,14 +189,14 @@ const LEADING_SIGIL = /^[@\s]+/;
 export function sanitizeAuthorName(raw: unknown): string {
   if (typeof raw !== 'string') return '';
 
-  const cleaned = raw
-    .normalize('NFC')
-    .replace(SEPARATORS, ' ')
-    .replace(INVISIBLE, '')
-    .replace(WHITESPACE, ' ')
-    .trim()
-    .replace(LEADING_SIGIL, '')
-    .trim();
+  const cleaned = stripClaimedPrefix(
+    raw
+      .normalize('NFC')
+      .replace(SEPARATORS, ' ')
+      .replace(INVISIBLE, '')
+      .replace(WHITESPACE, ' ')
+      .trim(),
+  ).trim();
 
   const points = Array.from(cleaned);
   return points.length <= MAX_AUTHOR_NAME
