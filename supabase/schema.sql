@@ -90,8 +90,45 @@ CREATE INDEX idx_rate_limits_lookup ON rate_limits(ip, action, created_at);
 -- RLS enabled with no policies = only service role can access
 ALTER TABLE rate_limits ENABLE ROW LEVEL SECURITY;
 
--- Auto-cleanup: delete rate limit entries older than 2 hours
--- (Run as a cron job via pg_cron or Supabase scheduled function)
+-- Auto-cleanup: delete rate limit entries older than 2 hours.
+--
+-- This was two lines of comment promising a cron job that did not exist —
+-- SECURITY_AUDIT.md F70. Nothing read rate_limits except the sliding-window
+-- COUNT in share-build, which filters on `created_at >= windowStart`, so an
+-- aged-out row was never wrong, only permanent: the table grew by one row per
+-- share or vault save, for the life of the project, and fastest under exactly
+-- the flood the rate limit exists to absorb.
+--
+-- Idempotent, so this block is also the migration for an existing database —
+-- run it as-is. pg_cron >= 1.4 makes cron.schedule an upsert on the job name,
+-- and Supabase ships 1.6, so re-running replaces the job rather than stacking
+-- a second copy of it.
+--
+-- If CREATE EXTENSION is refused in the SQL editor, enable pg_cron from the
+-- dashboard instead (Database -> Extensions) and run the SELECT alone.
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Hourly at :17 rather than on the hour, to sit off the top-of-hour pile.
+--
+-- Two hours, against a RATE_WINDOW_HOURS of 1 in share-build: one full window
+-- of headroom, so a row is only ever deleted well after the last query that
+-- could have counted it. Deleting at exactly the window would race the count.
+--
+-- The job runs as the role that scheduled it (postgres, the table's owner),
+-- and an owner is not subject to its own RLS unless the table is set FORCE ROW
+-- LEVEL SECURITY, which this one is not — so "RLS enabled, no policies" does
+-- not block the purge.
+--
+-- No index for this predicate on purpose. idx_rate_limits_lookup leads with
+-- (ip, action) and cannot serve a created_at-only scan, but once this job is
+-- running the table holds at most two hours of traffic, and under the flood
+-- that makes it big the DELETE is removing most of what it reads — which is a
+-- sequential scan's best case, not an index's.
+SELECT cron.schedule(
+  'purge-rate-limits',
+  '17 * * * *',
+  $$DELETE FROM public.rate_limits WHERE created_at < now() - INTERVAL '2 hours'$$
+);
 
 -- ============================================
 -- View counter RPC function
@@ -347,9 +384,35 @@ ON CONFLICT (user_id) DO NOTHING;
 -- security_invoker = on is REQUIRED so the view respects the caller's RLS
 -- context instead of running with the view-creator's privileges. Without it,
 -- anon role would see private builds through this view.
+--
+-- The projection NAMES its columns. It was `b.*` until F73 (see the migration
+-- at the end of this file): `b.*` carried owner_token_hash, the sha256 of the
+-- credential that owns an anonymous build, to every anonymous caller. A named
+-- list cannot pick up a column nobody decided to publish — including the next
+-- one somebody adds to the table.
 CREATE VIEW shared_builds_with_author
 WITH (security_invoker = on) AS
-SELECT b.*,
+SELECT b.id,
+       b.name,
+       b.description,
+       b.archetype,
+       b.archetype_name,
+       b.primary_set,
+       b.primary_name,
+       b.secondary_set,
+       b.secondary_name,
+       b.level,
+       b.author_name,
+       b.server,
+       b.tags,
+       b.build_json,
+       b.created_at,
+       b.updated_at,
+       b.views,
+       b.user_id,
+       b.visibility,
+       b.preview_image_path,
+       b.preview_template_version,
        p.handle       AS author_handle,
        p.display_name AS author_display_name,
        p.avatar_url   AS author_avatar_url
@@ -475,6 +538,11 @@ ON CONFLICT (id) DO NOTHING;
 --    (grep confirms none exist anywhere in this file) — access comes from
 --    Supabase's project-wide default privileges, which apply to newly
 --    created objects the same as existing ones.
+--
+-- **DO NOT COPY THIS PROJECTION.** `b.*` is what F73 was — it published
+-- owner_token_hash to every anonymous caller. This block is left as the SQL
+-- that actually ran, and the F73 migration at the end of this file supersedes
+-- it; the shape to copy when adding a column is the one there.
 DROP VIEW IF EXISTS shared_builds_with_author;
 CREATE VIEW shared_builds_with_author
 WITH (security_invoker = on) AS
@@ -499,6 +567,9 @@ ALTER TABLE shared_builds ADD COLUMN IF NOT EXISTS preview_template_version INTE
 -- shared_builds_with_author freezes its `b.*` expansion at creation, same as
 -- the EMBED1 migration above — rebuild it the same way (DROP+CREATE, no
 -- GRANTs on the view to preserve).
+--
+-- **DO NOT COPY THIS PROJECTION** — see the note on the EMBED1 block above.
+-- Superseded by the F73 migration at the end of this file.
 DROP VIEW IF EXISTS shared_builds_with_author;
 CREATE VIEW shared_builds_with_author
 WITH (security_invoker = on) AS
@@ -535,3 +606,215 @@ LEFT JOIN profiles p ON p.user_id = b.user_id;
 -- client-side (crates/app/src/cloud/tag_vocab.rs). The server deliberately does
 -- NOT validate tags against it — a row tagged before the vocabulary existed, or
 -- by an older client, stays readable rather than becoming invalid.
+
+-- ============================================
+-- Migration: Stop publishing the ownership credential's hash (F73)
+-- ============================================
+-- SECURITY_AUDIT.md F73. owner_token_hash is the sha256 of the owner_token
+-- that share-build hands an anonymous sharer, and that claim-builds,
+-- delete-build and share-build compare against to authorise an update or a
+-- delete. It was readable by anyone holding the public anon key.
+--
+-- **Measured against the deployed project, 2026-09-18, with the anon key:**
+--
+--   GET /rest/v1/shared_builds?select=id,owner_token_hash        -> hashes
+--   GET /rest/v1/shared_builds?select=id&owner_token_hash=not.is.null
+--                                                    -> 1575 of 2665 public rows
+--   GET /rest/v1/shared_builds?select=id&owner_token_hash=like.0*        -> 97
+--
+-- The third line is the one that decides the shape of this fix. The column was
+-- not merely readable, it was FILTERABLE — a prefix probe answers a question
+-- about the credential rather than returning it.
+--
+-- **The fix the finding described was incomplete, and the middle query above
+-- is why.** F73 called for "a projection on the view (or dropping the column
+-- from it) plus a named select in get-build". Both of those are here, and both
+-- together close nothing: every query above names `shared_builds`, the BASE
+-- TABLE, not `shared_builds_with_author`. The view was only ever one of two
+-- doors. PostgREST exposes the table directly, the "Public read" policy grants
+-- anon every public row, and a table-level SELECT grant covers every column in
+-- it — so narrowing the view would have left the census, the filter and the
+-- hashes exactly where they were.
+--
+-- **Why Low, still.** The token is a `crypto.randomUUID`, so an unsalted
+-- sha256 of it is not invertible and the hash buys no takeover. What it buys
+-- is a free census of which builds are token-owned versus account-owned, and a
+-- credential-derived value on a public wire that a future weaker token would
+-- make fatal.
+--
+-- **Weighed and not taken: moving the column to its own table.** A
+-- `build_owner_tokens(build_id, token_hash)` with RLS and no policies would
+-- put the credential structurally out of reach instead of relying on a grant
+-- staying correct, and would leave `select=*` working. It was rejected for
+-- this pass on cost, not on merit: it is a data migration over 1,575 live rows
+-- plus edits to three edge functions and the import script, against a finding
+-- whose severity is entropy rather than design. If a weaker token is ever
+-- issued, that migration is the fix and this one is not enough.
+
+-- 1. The view. `b.*` freezes its expansion at creation, so this is a
+--    DROP+CREATE for the same reason the two preview migrations above are —
+--    and the projection is named this time, which also means the NEXT column
+--    added to shared_builds is published only if someone decides to publish
+--    it. See step 3 for what adding a column now costs.
+DROP VIEW IF EXISTS shared_builds_with_author;
+CREATE VIEW shared_builds_with_author
+WITH (security_invoker = on) AS
+SELECT b.id,
+       b.name,
+       b.description,
+       b.archetype,
+       b.archetype_name,
+       b.primary_set,
+       b.primary_name,
+       b.secondary_set,
+       b.secondary_name,
+       b.level,
+       b.author_name,
+       b.server,
+       b.tags,
+       b.build_json,
+       b.created_at,
+       b.updated_at,
+       b.views,
+       b.user_id,
+       b.visibility,
+       b.preview_image_path,
+       b.preview_template_version,
+       p.handle       AS author_handle,
+       p.display_name AS author_display_name,
+       p.avatar_url   AS author_avatar_url
+FROM shared_builds b
+LEFT JOIN profiles p ON p.user_id = b.user_id;
+
+-- 2. The base table, which is the door that actually mattered.
+--
+--    Postgres has no way to hide one column from a role that holds table-level
+--    SELECT — a table grant covers every column, present and future. Getting
+--    column granularity means revoking the table grant and re-granting the
+--    columns by name. That is the whole of the mechanism, and the order
+--    matters: REVOKE first, because a column-level GRANT is simply ignored
+--    while the table-level one is still held.
+--
+--    This must stay in step with the view's projection above. The view is
+--    `security_invoker = on`, so reading it checks the INVOKER's privileges on
+--    these base columns — grant fewer than the view projects and every
+--    anonymous browse starts failing, loudly and immediately.
+REVOKE SELECT ON public.shared_builds FROM anon, authenticated;
+GRANT SELECT (
+  id,
+  name,
+  description,
+  archetype,
+  archetype_name,
+  primary_set,
+  primary_name,
+  secondary_set,
+  secondary_name,
+  level,
+  author_name,
+  server,
+  tags,
+  build_json,
+  created_at,
+  updated_at,
+  views,
+  user_id,
+  visibility,
+  preview_image_path,
+  preview_template_version
+) ON public.shared_builds TO anon, authenticated;
+
+--    service_role is deliberately NOT revoked. The edge functions authorise an
+--    update or a delete by comparing owner_token_hash (share-build,
+--    claim-builds, delete-build), and they run under the service role key,
+--    which keeps its table grant and bypasses RLS. Same for the postgres owner
+--    and the two admin scripts in scripts/, which use the service role key.
+--
+--    increment_views is SECURITY DEFINER and so unaffected. search_authors is
+--    invoker-rights SQL and joins shared_builds, but reads only id, user_id
+--    and visibility — all three granted above.
+
+-- 3. **What this costs, and it is a real cost: adding a column to
+--    shared_builds is now a three-step change, not one.**
+--
+--      a. ALTER TABLE shared_builds ADD COLUMN ...
+--      b. add it to the view's projection (DROP+CREATE, as always)
+--      c. add it to the GRANT SELECT list above
+--
+--    Skip (c) and the column is invisible to anon through the view — but not
+--    silently: a security_invoker view whose projection names a column the
+--    caller cannot read fails the whole read with "permission denied for
+--    column", which is a loud failure and the right kind. Skip (b) and the
+--    column simply never reaches a client, which is the quiet one to watch
+--    for.
+--
+--    A column that SHOULD stay private now needs nothing done to it, which is
+--    the point: the default flipped from published to withheld.
+
+-- 4. **Behaviour change worth knowing before it surprises someone.** An
+--    anonymous or logged-in `select=*` against the BASE table now fails —
+--    PostgREST expands `*` to every column, owner_token_hash included, and
+--    that column is no longer granted:
+--
+--      GET /rest/v1/shared_builds                 -> 403, permission denied
+--      GET /rest/v1/shared_builds?select=id,name  -> fine
+--
+--    Nothing in either repo does this: the web client reads the view in all
+--    four of its build queries (src/services/sharedBuilds.ts), the Rust client
+--    reads the view through BUILDS_VIEW and names its columns
+--    (crates/app/src/cloud/shared_builds.rs), and the two scripts that touch
+--    the table directly hold the service role key. The failure is loud if
+--    anything is missed, which is the outcome to want.
+
+-- 5. Confirming it took. The SQL editor answers the first two; the third needs
+--    the public anon key, because the thing being checked is what a stranger
+--    can do and the editor is not a stranger.
+--
+--    a. No table-level SELECT left, and exactly 21 column grants, for each of
+--       the two public roles — 42 rows, none of them owner_token_hash:
+--
+--         SELECT grantee, column_name
+--         FROM information_schema.column_privileges
+--         WHERE table_name = 'shared_builds' AND privilege_type = 'SELECT'
+--           AND grantee IN ('anon', 'authenticated')
+--         ORDER BY grantee, column_name;
+--
+--         SELECT grantee, privilege_type
+--         FROM information_schema.table_privileges
+--         WHERE table_name = 'shared_builds' AND grantee IN ('anon', 'authenticated');
+--         -- SELECT must not appear for either role.
+--
+--    b. The view publishes 24 columns and none of them is the hash:
+--
+--         SELECT column_name FROM information_schema.columns
+--         WHERE table_name = 'shared_builds_with_author' ORDER BY ordinal_position;
+--
+--    c. From a shell, with the anon key — the three probes that measured the
+--       finding on 2026-09-18. All three must now fail rather than answer:
+--
+--         curl -sS -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--           "$URL/rest/v1/shared_builds?select=id,owner_token_hash&limit=1"
+--         curl -sS -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--           "$URL/rest/v1/shared_builds?select=id&owner_token_hash=like.0*&limit=1"
+--         curl -sS -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--           "$URL/rest/v1/shared_builds_with_author?select=id,owner_token_hash&limit=1"
+--         # each: 42501 / "permission denied for ..." or "column does not exist",
+--         # where before they returned hashes, a filtered id list, and hashes.
+--
+--       And the two that must KEEP working, because a fix that breaks the
+--       browse is not a fix:
+--
+--         curl -sS -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--           "$URL/rest/v1/shared_builds_with_author?select=id,name,author_handle&visibility=eq.public&limit=3"
+--         curl -sS -X POST -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--           -H "Content-Type: application/json" -d '{"id":"<any public build id>"}' \
+--           "$URL/functions/v1/get-build"
+--         # the second must answer 24 keys, WITHOUT owner_token_hash — it was
+--         # 25 with it. That one is the redeploy's check, not the SQL's.
+--
+--    The view is DROPped and recreated here with no GRANT restored after it,
+--    which is safe for the reason the EMBED1 block above states and the two
+--    prior migrations demonstrated by running: this project has no explicit
+--    GRANTs on the view, and access comes from Supabase's project-wide default
+--    privileges, which apply to newly created objects. If the browse 401s
+--    after this migration, that assumption is what to check first.

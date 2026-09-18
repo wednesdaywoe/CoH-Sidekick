@@ -12,6 +12,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { nanoid } from 'https://esm.sh/nanoid@5';
+import { handleCandidate, sanitizeAuthorName } from '../_shared/author-name.ts';
 
 const SHARE_RATE_LIMIT = 10;  // max public shares per hour
 const VAULT_RATE_LIMIT = 50;  // max vault saves per hour (private library — more generous)
@@ -24,6 +25,73 @@ const corsHeaders = {
 
 const VALID_VISIBILITIES = ['private', 'unlisted', 'public'] as const;
 type Visibility = typeof VALID_VISIBILITIES[number];
+
+/**
+ * The half of the author_name rule that needs the database — SECURITY_AUDIT.md
+ * F69. `sanitizeAuthorName` has already taken the characters that let one name
+ * render as another; what is left is a name that reads, in plain text, as an
+ * identity somebody else holds.
+ *
+ * Returns a refusal message, or null to allow.
+ *
+ * **Two checks, and deliberately not a third.**
+ *
+ *   1. **`reserved_handles` where `reason = 'system'`** — admin, api, auth,
+ *      support, help, system. The service's own names, and a build card
+ *      reading "support" is the impersonation with the most leverage. The list
+ *      is read from the table rather than spelled here, so adding a name is an
+ *      INSERT and not a deploy. The `reason` filter is what keeps it usable:
+ *      the same table's `route` rows (me, new, edit, builds) and `sentinel`
+ *      rows (null, undefined, **anonymous**) are ordinary things to type in an
+ *      author box, and refusing "Anonymous" on an anonymous share would be the
+ *      fix doing more damage than the finding.
+ *   2. **`profiles.handle`, when it is not the caller's own** — a claimed,
+ *      unique slug that already resolves at `/author/@handle`. An anonymous
+ *      sharer typing an exact registered handle is the vector; the same string
+ *      from the account that owns it is that user writing their own name.
+ *
+ * **Not checked: `profiles.display_name`.** Display names are not unique and
+ * never were — two people genuinely called "Savant" both get to be Savant, and
+ * a rule against that would refuse far more real shares than fake ones. The
+ * collision that remains is answered where it belongs, by the client drawing
+ * the verified badge beside a name that has one. That is the half of F69 the
+ * desktop card still owes.
+ *
+ * Both lookups are skipped entirely unless the name could be a handle at all
+ * (`handleCandidate`), so an ordinary "Wednesday Woe" costs no round trip.
+ */
+async function impersonatedIdentity(
+  supabase: ReturnType<typeof createClient>,
+  authorName: string,
+  authUserId: string | null,
+): Promise<string | null> {
+  const candidate = handleCandidate(authorName);
+  if (candidate === null) return null;
+
+  // Both columns are CITEXT, so `eq` is already case-insensitive at the
+  // database — "SAVANT" and "savant" are the same key.
+  const [reserved, claimed] = await Promise.all([
+    supabase
+      .from('reserved_handles')
+      .select('handle')
+      .eq('handle', candidate)
+      .eq('reason', 'system')
+      .maybeSingle(),
+    supabase
+      .from('profiles')
+      .select('user_id')
+      .eq('handle', candidate)
+      .maybeSingle(),
+  ]);
+
+  if (reserved.data) {
+    return `"${authorName}" is a reserved name. Please use a different author name.`;
+  }
+  if (claimed.data && claimed.data.user_id !== authUserId) {
+    return `"${authorName}" is the handle of a registered account. Please use a different author name.`;
+  }
+  return null;
+}
 
 /** SHA-256 hash a string, returning hex digest */
 async function sha256(input: string): Promise<string> {
@@ -161,6 +229,24 @@ Deno.serve(async (req: Request) => {
     // ---- Supabase client (service role for inserts) ----
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // ---- author_name (F69) ----
+    // Normalised before anything else looks at it, and checked against the two
+    // identity namespaces BEFORE the rate-limit slot is spent — a refusal here
+    // is a validation error like the three above it, and burning a share on a
+    // typo'd name would be a worse rule than the one being enforced.
+    //
+    // This does NOT enumerate anything that was not already public: whether a
+    // handle is claimed is answerable by anyone through `resolve_author` and by
+    // loading /author/@handle, so there is nothing here to meter.
+    const authorName = sanitizeAuthorName(body.author_name);
+    const impersonation = await impersonatedIdentity(supabase, authorName, authUserId);
+    if (impersonation) {
+      return new Response(
+        JSON.stringify({ error: impersonation, code: 'author_name_conflict' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // ---- Rate limiting ----
     const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
       ?? req.headers.get('cf-connecting-ip')
@@ -247,7 +333,10 @@ Deno.serve(async (req: Request) => {
       secondary_set,
       secondary_name: (secondary_name || '').slice(0, 100),
       level: buildLevel,
-      author_name: (body.author_name || '').slice(0, 50),
+      // Normalised and checked above (F69). The `.slice(0, 50)` this replaces
+      // counted UTF-16 units, so a name of 50 astral characters was cut
+      // between a surrogate pair and stored broken.
+      author_name: authorName,
       server: (body.server || '').slice(0, 50),
       tags,
       build_json,
