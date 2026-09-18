@@ -1,10 +1,14 @@
 /**
  * Normalisation for `shared_builds.author_name` — the free-text author label a
- * sharer types, and the ONLY author identity a desktop build card draws
- * (crates/app/src/cloud/browser.rs in the canonical repo shows this string and
- * nothing beside it, where the web card shows the verified `@handle` next to
- * it). That asymmetry is what makes an unchecked string here an impersonation
- * vector rather than a cosmetic one: SECURITY_AUDIT.md F69.
+ * sharer types, and for a long time the only author identity ANY build card
+ * drew. SECURITY_AUDIT.md F69 recorded that as an asymmetry between the two
+ * clients; it was not one. Neither card drew the handle: the web card
+ * (`components/shared/BuildCard.tsx`) renders `author_name` alone and marks a
+ * verified author only by making the name a link, and the desktop card
+ * rendered it alone with no mark at all. So an unchecked string here was an
+ * impersonation vector on both. The desktop client draws the proved `@handle`
+ * beside the name as of 2026-09-18 (`cloud/profile.rs::author_identity`); the
+ * web card does not yet, and F69's row says so.
  *
  * Split out of `share-build/index.ts` rather than written inline because the
  * function itself cannot be imported by the test runner — it opens with
@@ -19,7 +23,7 @@
  * than a display name*: an invisible character that hides the difference
  * between two names, and the `@` sigil that makes a display name read as the
  * claimed-and-unique handle. The collision cases that remain are handled where
- * they belong, by the client drawing the verified badge.
+ * they belong, by the client drawing the proved `@handle` beside the name.
  */
 
 /** Longest stored author_name. Matches the column's historical `.slice(0, 50)`. */
@@ -71,13 +75,25 @@ const WHITESPACE = /[\p{Zs}\s]+/gu;
 
 /**
  * The handle sigil. `@name` is how this app spells a *claimed, unique*
- * identity — it is the `/author/@handle` route and the badge the web card
- * draws. A display name opening with it is claiming that namespace without
+ * identity — it is the `/author/@handle` route, the author pin in the browser,
+ * and what the desktop card now draws beside a name whose account actually
+ * holds one. A display name opening with it is claiming that namespace without
  * holding anything in it, so the sigil comes off and the name behind it stays.
- * Repeats are stripped too: `@@savant` reads as `@savant` once one layer is
- * removed, which would leave the claim standing.
+ *
+ * **The class is `[@\s]`, not `@`, and the difference is a defect this file
+ * shipped with.** The first version was `/^@+/`, which strips a *run* of
+ * sigils — `@@savant` — but not one held apart by a space. Applied once, after
+ * the trim, to `@ @savant`, it removes the first sigil and returns
+ * `@savant`: a stored value that still opens with the sigil and still names a
+ * handle, which is the entire thing this constant exists to prevent. The
+ * single pass is what makes it possible, because nothing re-reads what the
+ * strip exposed. Found on 2026-09-18 by the canonical client's own sweep over
+ * the same rule (`cloud/profile.rs::author_identity`), not by rereading this.
+ *
+ * Interior sigils are still left alone — `Savant @ Everlasting` is a name, not
+ * a claim. What makes a claim is opening with one.
  */
-const LEADING_SIGIL = /^@+/;
+const LEADING_SIGIL = /^[@\s]+/;
 
 /**
  * Normalise a caller-supplied author name into what may be stored.

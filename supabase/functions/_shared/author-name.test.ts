@@ -34,8 +34,10 @@ describe('sanitizeAuthorName', () => {
 
   it('strips bidi overrides, so a name cannot render over its neighbour', () => {
     // U+202E RIGHT-TO-LEFT OVERRIDE is the classic: everything after it
-    // renders reversed, which is how one name is made to read as another in a
-    // card that draws one string and nothing beside it.
+    // renders reversed, which is how one name is made to read as another. The
+    // cards draw the proved @handle beside the name now, but that only marks
+    // what IS verified — it does nothing about one free-text name rendering as
+    // a different free-text one, which is why this still has to happen here.
     expect(sanitizeAuthorName('Savant\u202egnittimda')).toBe('Savantgnittimda');
     expect(sanitizeAuthorName('\u202bsavant\u202c')).toBe('savant');
     expect(sanitizeAuthorName('\u2066savant\u2069')).toBe('savant');
@@ -71,14 +73,35 @@ describe('sanitizeAuthorName', () => {
   // ---- the handle sigil ----
 
   it('strips the @ sigil, which is how this app spells a claimed identity', () => {
-    // /author/@handle is a route, and the web card draws @handle as the
-    // verified badge. A free-text display name may not open with it.
+    // /author/@handle is a route, and the desktop card draws @handle beside a
+    // name whose account holds one. A free-text name may not open with it.
     expect(sanitizeAuthorName('@savant')).toBe('savant');
     expect(sanitizeAuthorName('  @savant')).toBe('savant');
     // Repeats: stripping one layer would leave the claim standing.
     expect(sanitizeAuthorName('@@@savant')).toBe('savant');
     // An invisible in front of the sigil must not shield it.
     expect(sanitizeAuthorName('\u200b@savant')).toBe('savant');
+  });
+
+  it('strips a sigil that a space holds apart from the one before it', () => {
+    // The defect the first version of this file shipped with. `/^@+/` takes a
+    // run of sigils and stops at the space, and the strip runs once, so
+    // `@ @savant` came out as `@savant` — still opening with the sigil, still
+    // naming a handle. Every assertion here passed `@@savant` and failed
+    // `@ @savant` before the class became `[@\\s]`.
+    expect(sanitizeAuthorName('@ @savant')).toBe('savant');
+    expect(sanitizeAuthorName('@ @ savant')).toBe('savant');
+    expect(sanitizeAuthorName('  @  @  savant')).toBe('savant');
+    // The impostor spaces are collapsed before this runs, so they cannot hold
+    // a sigil apart either.
+    expect(sanitizeAuthorName('@\u00a0@savant')).toBe('savant');
+    expect(sanitizeAuthorName('@\u3000@savant')).toBe('savant');
+  });
+
+  it('leaves a name that is nothing but sigils and spaces empty', () => {
+    // The anonymous outcome, not a name made of spaces: `@ @ @` claims a
+    // namespace and holds nothing, so nothing is what is left of it.
+    expect(sanitizeAuthorName('@ @ @')).toBe('');
   });
 
   it('keeps an @ that is not the sigil', () => {

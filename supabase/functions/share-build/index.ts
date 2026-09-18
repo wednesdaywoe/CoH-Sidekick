@@ -54,8 +54,10 @@ type Visibility = typeof VALID_VISIBILITIES[number];
  * never were — two people genuinely called "Savant" both get to be Savant, and
  * a rule against that would refuse far more real shares than fake ones. The
  * collision that remains is answered where it belongs, by the client drawing
- * the verified badge beside a name that has one. That is the half of F69 the
- * desktop card still owes.
+ * the proved `@handle` beside a name whose account holds one. Both clients do
+ * that as of 2026-09-18 — the desktop card and detail view via
+ * `cloud/profile.rs::author_identity`, this one via
+ * `utils/author-identity.ts`.
  *
  * Both lookups are skipped entirely unless the name could be a handle at all
  * (`handleCandidate`), so an ordinary "Wednesday Woe" costs no round trip.
