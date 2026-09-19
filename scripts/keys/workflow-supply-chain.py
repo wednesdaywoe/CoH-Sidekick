@@ -144,8 +144,25 @@ def unchecksummed_uploads(text: str) -> list[int]:
     return unguarded
 
 
+def declares_permissions(text: str) -> bool:
+    """Whether the workflow states a top-level `permissions:` block — SECURITY_AUDIT.md F59.
+
+    Column 0 is the whole test, because column 0 is what makes it top-level. A `permissions:`
+    nested under one job binds that job and leaves every other job on the repository default,
+    which is the thing this rule exists to stop being invisible: that default is a setting in the
+    web UI, it can be widened to read/write for every workflow at once, and nothing in the
+    repository changes when it is.
+
+    Deliberately not a check that the block is NARROW. What each workflow legitimately needs
+    differs — the beta's `deploy.yml` needs `pages: write` and `id-token: write` — and a rule
+    that guessed at the right set would be wrong for the first job that needed more. Stating the
+    set is what is enforced; choosing it is a review.
+    """
+    return any(line.startswith("permissions:") for line in text.splitlines())
+
+
 def self_test() -> int:
-    """Grade both rules against text that breaks them. A check nobody has seen fail is a wish."""
+    """Grade every rule against text that breaks it. A check nobody has seen fail is a wish."""
     failures = []
 
     tagged = "      - uses: Swatinem/rust-cache@v2\n"
@@ -195,11 +212,21 @@ def self_test() -> int:
     if len(unchecksummed_uploads(three)) != 1:
         failures.append("one checksum step was read as covering a later, separate upload")
 
+    if declares_permissions("name: CI\non:\n  push:\n\njobs:\n  build:\n"):
+        failures.append("a workflow with no permissions block was reported as having one")
+    if not declares_permissions("name: CI\non:\n  push:\n\npermissions:\n  contents: read\n"):
+        failures.append("a top-level permissions block was not recognised")
+    if declares_permissions("jobs:\n  build:\n    permissions:\n      contents: read\n"):
+        failures.append(
+            "a job-level permissions block was accepted as top-level; it binds one job and "
+            "leaves the rest on the repository default"
+        )
+
     for failure in failures:
         print(f"SELF-TEST FAILED: {failure}", file=sys.stderr)
     if failures:
         return 1
-    print("self-test: all four rules refuse what they are meant to refuse")
+    print("self-test: all five rules refuse what they are meant to refuse")
     return 0
 
 
@@ -231,6 +258,12 @@ def main() -> int:
                     f"{path.relative_to(ROOT)}:{number}: an RC artifact is uploaded with no "
                     f"{CHECKSUMS} step before it, so nobody can tell this bundle from another"
                 )
+        if not declares_permissions(text):
+            problems.append(
+                f"{path.relative_to(ROOT)}: no top-level `permissions:` block, so every job in "
+                f"it takes the repository default — a setting in the web UI that can be widened "
+                f"to read/write for every workflow at once, with nothing here changing"
+            )
         if caches_a_build_tool(text):
             problems.append(
                 f"{path.relative_to(ROOT)}: a rust-cache step does not set `cache-bin: false`, "
@@ -244,7 +277,7 @@ def main() -> int:
     print(
         f"{len(files)} workflows: every third-party action names a commit, "
         f"no cache holds a build tool, no install falls off the lockfile, "
-        f"every release artifact is checksummed"
+        f"every release artifact is checksummed, every workflow states its permissions"
     )
     return 0
 
