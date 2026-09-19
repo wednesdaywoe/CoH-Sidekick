@@ -99,7 +99,16 @@ function cspPlugin(): Plugin {
           `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
           `font-src 'self' https://fonts.gstatic.com data:`,
           // Same-origin icons + data URIs + OAuth (Discord) / Supabase avatars.
-          `img-src 'self' data: https://cdn.discordapp.com https://*.supabase.co`,
+          // F07: `https://*.supabase.co` was here, and it admits ANY Supabase
+          // project on the internet — an attacker-controllable origin class,
+          // inside the one directive that decides where a stranger's
+          // `avatar_url` can send a viewer's browser. Nothing in this app
+          // loads an image from Supabase Storage (the build previews are
+          // served to crawlers by the build-og Worker, never rendered
+          // in-product), and a census of production found every one of 452
+          // stored avatars on cdn.discordapp.com. So it bought nothing and
+          // cost the whole directive.
+          `img-src 'self' data: https://cdn.discordapp.com`,
           // The complete set of hosts the app legitimately talks to. Anything
           // else (i.e. an exfiltration attempt) is blocked by the browser:
           //   *.supabase.co  — shared builds + auth (REST + realtime websocket)

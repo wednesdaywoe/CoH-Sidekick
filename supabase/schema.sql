@@ -337,6 +337,42 @@ CREATE TRIGGER profiles_touch_updated
   BEFORE UPDATE ON profiles
   FOR EACH ROW EXECUTE FUNCTION touch_profile_updated_at();
 
+-- The one host an avatar may be served from -- SECURITY_AUDIT.md F07, and the
+-- SQL half of `supabase/functions/_shared/avatar-url.ts`.
+--
+-- `update-profile` is the live writer and applies the TypeScript rule; this
+-- covers the OTHER writer, the signup trigger below, whose input is the
+-- provider's claim at first insert. That is not attacker-controlled today --
+-- both providers are OAuth and neither lets the account holder choose what
+-- arrives -- but which providers are enabled lives in a hosted setting no file
+-- in this repository records, which is the F45 lesson, and the column is the
+-- one place a rule covers every writer at once.
+--
+-- Deliberately STRICTER than the TypeScript twin rather than equal to it: no
+-- port, and the host matched case-sensitively. Both are things Discord never
+-- sends, and a rule with two implementations should diverge toward refusal.
+-- A refused url becomes NULL, which is the same "no avatar" placeholder every
+-- render site already draws for an account without Discord.
+CREATE OR REPLACE FUNCTION storable_avatar_url(raw TEXT)
+RETURNS TEXT AS $$
+  SELECT CASE
+    WHEN raw IS NULL THEN NULL
+    WHEN length(raw) > 512 THEN NULL
+    -- A control character or a space is never part of a real url, and is how
+    -- one url is made to read as two.
+    WHEN raw ~ '[[:space:][:cntrl:]]' THEN NULL
+    -- The separator after the host must be present, so that
+    -- `https://cdn.discordapp.com@evil.example/` and
+    -- `https://cdn.discordapp.com.evil.example/` both fall through: in each the
+    -- character after `.com` is not one that ends an authority.
+    WHEN raw LIKE 'https://cdn.discordapp.com/%' THEN raw
+    WHEN raw LIKE 'https://cdn.discordapp.com?%' THEN raw
+    WHEN raw LIKE 'https://cdn.discordapp.com#%' THEN raw
+    WHEN raw = 'https://cdn.discordapp.com' THEN raw
+    ELSE NULL
+  END;
+$$ LANGUAGE sql IMMUTABLE;
+
 -- Seed a profile on first sign-up. Handle stays NULL until the user picks one.
 -- NULLIF(..., '') is required because Discord stores an empty string for
 -- global_name when the user hasn't set one — COALESCE only skips NULLs.
@@ -355,7 +391,7 @@ BEGIN
     ),
     NEW.raw_user_meta_data->>'provider_id',
     NEW.raw_user_meta_data->>'full_name',
-    NEW.raw_user_meta_data->>'avatar_url'
+    storable_avatar_url(NEW.raw_user_meta_data->>'avatar_url')
   )
   ON CONFLICT (user_id) DO NOTHING;
   RETURN NEW;
@@ -379,7 +415,7 @@ SELECT
   ),
   raw_user_meta_data->>'provider_id',
   raw_user_meta_data->>'full_name',
-  raw_user_meta_data->>'avatar_url'
+  storable_avatar_url(raw_user_meta_data->>'avatar_url')
 FROM auth.users
 ON CONFLICT (user_id) DO NOTHING;
 

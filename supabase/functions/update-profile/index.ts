@@ -17,6 +17,7 @@
  */
 
 import { createClient, type User } from 'https://esm.sh/@supabase/supabase-js@2';
+import { storableAvatarUrl } from '../_shared/avatar-url.ts';
 
 const HANDLE_REGEX = /^[a-z0-9][a-z0-9_-]{2,29}$/;
 const HANDLE_COOLDOWN_DAYS = 30;
@@ -162,8 +163,14 @@ Deno.serve(async (req: Request) => {
     if (typeof meta.full_name === 'string') {
       updates.discord_username = meta.full_name;
     }
+    // F07: `user_metadata` is writable by its own user, so this string is not
+    // Discord's — it is whatever the account holder last PUT. Checked against
+    // the one host an avatar has ever legitimately come from before it reaches
+    // a column four render sites put straight into an `<img src>` for
+    // strangers. A refusal stores NULL, which is the placeholder those sites
+    // already draw for an account with no Discord avatar.
     if (typeof meta.avatar_url === 'string') {
-      updates.avatar_url = meta.avatar_url;
+      updates.avatar_url = storableAvatarUrl(meta.avatar_url);
     }
 
     if (Object.keys(updates).length === 0) {
