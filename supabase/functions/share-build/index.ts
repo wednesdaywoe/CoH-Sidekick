@@ -14,6 +14,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { nanoid } from 'https://esm.sh/nanoid@5';
 import { handleCandidate, sanitizeAuthorName } from '../_shared/author-name.ts';
 import { mayWriteBuild } from '../_shared/build-ownership.ts';
+import { classifyCaller, type Caller, type Verdict } from '../_shared/caller-identity.ts';
 
 const SHARE_RATE_LIMIT = 10;  // max public shares per hour
 const VAULT_RATE_LIMIT = 50;  // max vault saves per hour (private library — more generous)
@@ -145,23 +146,36 @@ async function uploadPreviewImage(
   }
 }
 
-/** Extract authenticated user ID from JWT in Authorization header (if present) */
-async function getUserIdFromAuth(
+/**
+ * Who is calling - SECURITY_AUDIT.md F09. The rule and the reasoning live in
+ * `_shared/caller-identity.ts`; this is the half that needs the network.
+ *
+ * What this replaced returned `null` both for a signed-out visitor and for a
+ * session it could not confirm, and this function is the one place where that
+ * conflation costs something: `null` is the *more permissive* branch here,
+ * twice. It forces a requested `private` to `public` (below), and it files the
+ * row with `user_id: null`, which both hides the build from the library its
+ * owner expects it in and leaves it answering to the owner token alone. All of
+ * that under a 200 that tells the client the save worked.
+ *
+ * GoTrue reports a rejected token and an unreachable service the same way, as
+ * an `error` rather than a throw, so they are told apart by the error's name -
+ * auth-js raises `AuthRetryableFetchError` for the transport and an
+ * `AuthApiError` for a verdict. Both refuse; only the message differs.
+ */
+async function classifyRequestCaller(
   req: Request,
   supabaseUrl: string,
   supabaseServiceKey: string,
-): Promise<string | null> {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-
-  try {
-    const token = authHeader.replace('Bearer ', '');
+): Promise<Caller> {
+  return await classifyCaller(req.headers.get('authorization'), async (token): Promise<Verdict> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { data: { user } } = await supabase.auth.getUser(token);
-    return user?.id ?? null;
-  } catch {
-    return null;
-  }
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error) {
+      return { outcome: error.name === 'AuthRetryableFetchError' ? 'unreachable' : 'rejected' };
+    }
+    return data.user ? { outcome: 'user', userId: data.user.id } : { outcome: 'rejected' };
+  });
 }
 
 Deno.serve(async (req: Request) => {
@@ -173,10 +187,22 @@ Deno.serve(async (req: Request) => {
   try {
     const body = await req.json();
 
-    // ---- Extract authenticated user (if logged in via Discord OAuth) ----
+    // ---- Who is calling (F09) ----
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const authUserId = await getUserIdFromAuth(req, supabaseUrl, supabaseServiceKey);
+    const caller = await classifyRequestCaller(req, supabaseUrl, supabaseServiceKey);
+
+    // A session we cannot confirm is refused, not demoted to anonymous (F09).
+    // First thing after reading the body, before validation and before the
+    // rate-limit slot is spent, because none of that work is this caller's to
+    // have done.
+    if (caller.kind === 'unverified') {
+      return new Response(
+        JSON.stringify({ error: caller.detail, code: 'auth_unverified' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const authUserId = caller.kind === 'user' ? caller.userId : null;
 
     const isUpdate = !!(body.existing_id && (body.owner_token || authUserId));
 
@@ -184,6 +210,11 @@ Deno.serve(async (req: Request) => {
     // when an *authenticated* user asked for it — an anonymous request for
     // anything but public is forced to 'public', because there is no
     // persistent identity for them to reclaim a private/unlisted link with.
+    //
+    // This downgrade is only defensible because `authUserId` is now null for
+    // one reason and not two: a caller who asserted a session we could not
+    // confirm was refused above rather than arriving here as "anonymous" and
+    // having their private build published (F09).
     // (Previously inverted: `authUserId !== null` made logged-in "private"
     // saves PUBLIC and metered them against the public-share bucket, which is
     // why vault rows never appeared and library saves hit the strict share
