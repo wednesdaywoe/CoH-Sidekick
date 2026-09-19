@@ -10,6 +10,8 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+import { mayClaimBuild } from '../_shared/build-ownership.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -81,7 +83,6 @@ Deno.serve(async (req: Request) => {
 
       const tokenHash = await sha256(ownerToken);
 
-      // Verify token ownership
       const { data: existing } = await supabase
         .from('shared_builds')
         .select('id, user_id')
@@ -89,12 +90,23 @@ Deno.serve(async (req: Request) => {
         .eq('owner_token_hash', tokenHash)
         .single();
 
-      if (!existing) {
+      // A token holder can claim what nobody owns and re-claim what is already
+      // theirs. Taking a build from another account is F31: the old code ran
+      // the UPDATE regardless, so a token lifted from localStorage moved the
+      // row - see _shared/build-ownership.ts.
+      if (
+        !existing ||
+        !mayClaimBuild({
+          buildUserId: existing.user_id,
+          tokenMatches: true,
+          authUserId: user.id,
+        })
+      ) {
         failed.push(buildId);
         continue;
       }
 
-      // Already claimed by this user
+      // Already ours; the client re-sends its whole token map on every login.
       if (existing.user_id === user.id) {
         claimed.push(buildId);
         continue;

@@ -1,13 +1,16 @@
 /**
  * Supabase Edge Function: delete-build
  *
- * Deletes a shared build after verifying ownership via owner token
- * or authenticated user identity (Discord OAuth).
+ * Deletes a shared build after verifying ownership. An unclaimed build answers
+ * to its owner token; once an account owns it, only that account (Discord
+ * OAuth) can delete it. See _shared/build-ownership.ts.
  *
  * Deploy with: supabase functions deploy delete-build
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+import { mayWriteBuild } from '../_shared/build-ownership.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -69,31 +72,22 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Verify ownership via owner token OR authenticated user
-    let authorized = false;
+    // One read answers both questions the rule needs: whether the build exists,
+    // and whether an account owns it. A matching owner token used to be enough
+    // on its own, which let a token lifted from localStorage delete a claimed
+    // private build (F80) - see _shared/build-ownership.ts.
+    const { data: build } = await supabase
+      .from('shared_builds')
+      .select('id, user_id, owner_token_hash')
+      .eq('id', id)
+      .single();
 
-    if (owner_token) {
-      const tokenHash = await sha256(owner_token);
-      const { data: byToken } = await supabase
-        .from('shared_builds')
-        .select('id')
-        .eq('id', id)
-        .eq('owner_token_hash', tokenHash)
-        .single();
-      if (byToken) authorized = true;
-    }
+    const tokenMatches =
+      !!owner_token &&
+      !!build?.owner_token_hash &&
+      (await sha256(owner_token)) === build.owner_token_hash;
 
-    if (!authorized && authUserId) {
-      const { data: byUser } = await supabase
-        .from('shared_builds')
-        .select('id')
-        .eq('id', id)
-        .eq('user_id', authUserId)
-        .single();
-      if (byUser) authorized = true;
-    }
-
-    if (!authorized) {
+    if (!build || !mayWriteBuild({ buildUserId: build.user_id, tokenMatches, authUserId })) {
       return new Response(
         JSON.stringify({ error: 'Build not found or not authorized' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

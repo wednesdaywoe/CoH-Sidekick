@@ -13,6 +13,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { nanoid } from 'https://esm.sh/nanoid@5';
 import { handleCandidate, sanitizeAuthorName } from '../_shared/author-name.ts';
+import { mayWriteBuild } from '../_shared/build-ownership.ts';
 
 const SHARE_RATE_LIMIT = 10;  // max public shares per hour
 const VAULT_RATE_LIMIT = 50;  // max vault saves per hour (private library — more generous)
@@ -348,31 +349,26 @@ Deno.serve(async (req: Request) => {
 
     // ---- UPDATE existing build ----
     if (isUpdate) {
-      // Verify ownership via owner token OR authenticated user
-      let authorized = false;
+      // One read, then the shared rule: the owner token is the whole authority
+      // on an unclaimed build, and no authority at all once an account owns it
+      // (F30) - see _shared/build-ownership.ts. This path can also write
+      // `visibility`, so a token that outranked a session made a private build
+      // public.
+      const { data: existing } = await supabase
+        .from('shared_builds')
+        .select('id, user_id, owner_token_hash')
+        .eq('id', body.existing_id)
+        .single();
 
-      if (body.owner_token) {
-        const tokenHash = await sha256(body.owner_token);
-        const { data: byToken } = await supabase
-          .from('shared_builds')
-          .select('id')
-          .eq('id', body.existing_id)
-          .eq('owner_token_hash', tokenHash)
-          .single();
-        if (byToken) authorized = true;
-      }
+      const tokenMatches =
+        !!body.owner_token &&
+        !!existing?.owner_token_hash &&
+        (await sha256(body.owner_token)) === existing.owner_token_hash;
 
-      if (!authorized && authUserId) {
-        const { data: byUser } = await supabase
-          .from('shared_builds')
-          .select('id')
-          .eq('id', body.existing_id)
-          .eq('user_id', authUserId)
-          .single();
-        if (byUser) authorized = true;
-      }
-
-      if (!authorized) {
+      if (
+        !existing ||
+        !mayWriteBuild({ buildUserId: existing.user_id, tokenMatches, authUserId })
+      ) {
         return new Response(
           JSON.stringify({ error: 'Build not found or not authorized' }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
