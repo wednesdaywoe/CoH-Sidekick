@@ -57,7 +57,16 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 324 entries.** TWIN-5 opened and closed 2026-09-16, out of the twin-divergence
+**1 open, of 325 entries.** STALE-2, filed 2026-09-19 out of the engine rebuild that unblocked
+canonical's `sec-audit-f34-profiles`: `beta-engine-staleness` hashes the engine's INPUTS and never
+the engine, so it certified a shipped `.wasm` that no build reproduces.
+
+**A manifest that records only what went in cannot say what came out.** `_engine_manifest.json`
+holds a source hash and four bundle hashes, and not one byte of the two `.wasm` it certifies. Two
+rebuilds agreed with each other and both differed from the committed artifact by 291 bytes, every
+hashed input matching, the gate green.
+
+The previous frontier, retained because its lesson stands — TWIN-5 opened and closed 2026-09-16, out of the twin-divergence
 adjudication that unblocked ICON-2: one epic power carrying a family its powerset twin lacks,
 settled as authored content against the `.powers` defs rather than the live server the row had
 named. ROSTER-3 closed the same day.
@@ -925,7 +934,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 110 of 110 closed
+[Full detail](gaps/pipeline-provenance.md) — 110 of 111 closed
 
 - [x] **ICON-2** — `normalizeIconPath` read the client's own art extensions as filenames in both
   directions — `.dds` passed its "already has one" test untouched and `.texture` failed it and
@@ -1438,6 +1447,23 @@ measurement went, and where a closure for the residual belongs too.
   touched crate source too. Closed 2026-09-12: the set is DERIVED from the macros, checked
   against cargo's dep-info, and graded by five mutations.
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
+
+- [ ] **STALE-2** — `_engine_manifest.json` is a claim about two shipped `.wasm` with none of their
+  bytes in it: `fingerprintRebuild` walks only canonical's tree, so `source` and `bundles` grade the
+  INPUTS and nothing hashes `src/engine/wasm*/coh_wasm_bg.wasm`. Measured 2026-09-18 — the artifact
+  `642a28dfb3` shipped is not reproducible from the sources the manifest names: two rebuilds are
+  byte-identical to each other and both differ from it by **291 bytes** (code −214), every hashed
+  input matching and `beta-engine-staleness` green. One level below STALE-1: that was an input the
+  scan missed, this is every input matching and the output still differing. Cause unrecoverable
+  **Goal** — the gate's verdict rests on the artifact's own bytes, not only on its asserted inputs.
+  **Done when** — the manifest records a `sha256` per artifact and `--compare` grades it (the desync
+  half; NOT the half that catches what was measured); and the rebuild half is adjudicated in writing
+  — gate, advisory, or refused — against a measurement of whether `wasm-bindgen` output is
+  bit-identical ACROSS HOSTS, so far exercised only twice on one machine. The measurement is the
+  deliverable.
+  **Check** — `node -p "Object.keys(require('../CoH-Sidekick/src/engine/_engine_manifest.json')).join(' ')"`
+  — prints `source bundles` while open. An artifact key WITHOUT the cross-host measurement written
+  down means the cheap half shipped and the measured defect is still uncaught
 
 - [x] **Advisory checks** — adjudicated binary-first; Mids retired as an authority
 
