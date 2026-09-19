@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { getOwnedBuildIds, claimBuilds } from '@/services/sharedBuilds';
 import { isCalcDebugEnabled, enableCalcDebug, disableCalcDebug } from '@/utils/calc-debug';
+import { isCrashReportingEnabled, setCrashReporting, CRASH_REPORTING_NOTICE } from '@/utils/crash-consent';
 
 export function GeneralSettings() {
   const user = useAuthStore((s) => s.user);
@@ -29,6 +30,14 @@ export function GeneralSettings() {
   const [claimError, setClaimError] = useState<string | null>(null);
 
   const tokenOwnedIds = getOwnedBuildIds();
+
+  const [crashReports, setCrashReports] = useState(isCrashReportingEnabled);
+  const toggleCrashReports = useCallback(() => {
+    setCrashReports((on) => {
+      setCrashReporting(!on);
+      return !on;
+    });
+  }, []);
 
   const [calcDebug, setCalcDebug] = useState(isCalcDebugEnabled);
   const toggleCalcDebug = useCallback(() => {
@@ -235,6 +244,34 @@ export function GeneralSettings() {
 
       {/* Debug section */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-5 mb-6">
+        <h2 className="text-sm font-semibold text-gray-300 mb-3">Privacy</h2>
+
+        {/* F36: crash reporting ran on every production load with no consent, no notice and
+            no way to stop it. The notice is the point as much as the switch — see
+            utils/crash-consent.ts for what a report actually contains. */}
+        <label className="flex items-center gap-3 cursor-pointer mb-6">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={crashReports}
+            aria-label="Send crash reports"
+            onClick={toggleCrashReports}
+            className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+              crashReports ? 'bg-[var(--color-primary)]' : 'bg-gray-600'
+            }`}
+          >
+            <span
+              className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
+                crashReports ? 'translate-x-4.5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+          <div>
+            <p className="text-sm text-white">Send crash reports</p>
+            <p className="text-xs text-gray-500">{CRASH_REPORTING_NOTICE}</p>
+          </div>
+        </label>
+
         <h2 className="text-sm font-semibold text-gray-300 mb-3">Developer</h2>
 
         <label className="flex items-center gap-3 cursor-pointer">

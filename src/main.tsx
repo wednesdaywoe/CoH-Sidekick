@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import * as Sentry from '@sentry/react'
+import { isCrashReportingEnabled } from '@/utils/crash-consent'
 import './index.css'
 import App from './App'
 import { loadDataset, isDatasetId, type DatasetId } from '@/data/dataset'
@@ -43,6 +44,11 @@ installChunkErrorReload()
 if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
+    // F36. Checked here rather than around `init`, so the switch takes effect on the next
+    // crash instead of on the next reload — a setting you have to restart the app to apply
+    // is one people reasonably assume did not work. Returning null drops the event before
+    // it is sent.
+    beforeSend: (event) => (isCrashReportingEnabled() ? event : null),
     // Stale-tab chunk failures are recovered by installChunkErrorReload —
     // filter them here so Sentry doesn't log noise after every deploy.
     ignoreErrors: [
