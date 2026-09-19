@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Nothing that builds or publishes this project comes from an unpinned source.
 
-Three rules, one question: when CI produces an artifact, is every input to it something the
-repository named? SECURITY_AUDIT.md F14 and F43.
+Four rules, one question: when CI produces an artifact, can somebody say where every byte of it
+came from? Three are about the inputs (F14, F43) and the fourth is about the output (F40).
 
 **Why this exists.** SECURITY_AUDIT.md F14. `rc-bundle.yml` cuts the Windows release, and it
 reached for `Swatinem/rust-cache@v2`. A tag is a mutable pointer: whoever can move `v2` in that
@@ -32,6 +32,11 @@ drifted dependency tree does not merely fail to catch something, it certifies th
 Measured before removing it: in run 35464084784 the step emitted no npm error at all, so `npm ci`
 succeeded and the fallback has been dead code rather than load-bearing.
 
+**The fourth rule is the RC artifact itself (F40).** A bundle handed to a tester with no
+checksum is one nobody can tell apart from a different bundle, so every `upload-artifact` in
+`rc-bundle.yml` must be preceded by `rc-checksums.py`. Scoped to that file by name: `ci.yml`
+uploads logs and reports, which nobody verifies against anything.
+
 **How to grade this script**, since a passing run against a correct tree says nothing about
 whether the check works: `--self-test` re-runs every rule against text that deliberately breaks
 it and fails if any is let through.
@@ -56,6 +61,11 @@ FIRST_PARTY = ("actions/", "github/")
 
 # The step that must not hand a build tool to the job that cuts a release.
 CACHES_CARGO_BIN = "Swatinem/rust-cache"
+
+# The workflow that hands bundles to people, and the step that must come before each upload.
+RELEASE_WORKFLOW = "rc-bundle.yml"
+CHECKSUMS = "rc-checksums.py"
+UPLOAD = "uses: actions/upload-artifact"
 
 # An install that falls back off the lockfile. Matched on the fallback rather than on `npm ci`,
 # because `npm ci` alone is the thing we want.
@@ -115,6 +125,25 @@ def unlocked_installs(text: str) -> list[tuple[int, str]]:
     ]
 
 
+def unchecksummed_uploads(text: str) -> list[int]:
+    """Line numbers of artifact uploads in the release workflow with no checksum before them.
+
+    "Before" rather than "anywhere in the file" because three jobs each upload their own bundle,
+    so one checksum step and three uploads would otherwise read as covered.
+    """
+    unguarded = []
+    since_checksum = None
+    for number, line in enumerate(text.splitlines(), start=1):
+        bare = without_comment(line)
+        if CHECKSUMS in bare:
+            since_checksum = number
+        elif UPLOAD in bare:
+            if since_checksum is None:
+                unguarded.append(number)
+            since_checksum = None
+    return unguarded
+
+
 def self_test() -> int:
     """Grade both rules against text that breaks them. A check nobody has seen fail is a wish."""
     failures = []
@@ -156,11 +185,21 @@ def self_test() -> int:
     if unlocked_installs("      - run: npm ci  # not npm ci || npm install any more\n"):
         failures.append("a trailing comment was read as part of the command")
 
+    covered = "      - run: python3 scripts/keys/rc-checksums.py dist\n      - uses: actions/upload-artifact@v4\n"
+    if unchecksummed_uploads(covered):
+        failures.append("a checksummed upload was reported as unchecksummed")
+    if not unchecksummed_uploads("      - uses: actions/upload-artifact@v4\n"):
+        failures.append("an upload with no checksum before it was not caught")
+    # Three jobs, one checksum: the second and third uploads are not covered by the first.
+    three = covered + "      - uses: actions/upload-artifact@v4\n"
+    if len(unchecksummed_uploads(three)) != 1:
+        failures.append("one checksum step was read as covering a later, separate upload")
+
     for failure in failures:
         print(f"SELF-TEST FAILED: {failure}", file=sys.stderr)
     if failures:
         return 1
-    print("self-test: all three rules refuse what they are meant to refuse")
+    print("self-test: all four rules refuse what they are meant to refuse")
     return 0
 
 
@@ -186,6 +225,12 @@ def main() -> int:
                 f"{path.relative_to(ROOT)}:{number}: `{line}` installs off the lockfile when "
                 f"`npm ci` refuses; let it refuse"
             )
+        if path.name == RELEASE_WORKFLOW:
+            for number in unchecksummed_uploads(text):
+                problems.append(
+                    f"{path.relative_to(ROOT)}:{number}: an RC artifact is uploaded with no "
+                    f"{CHECKSUMS} step before it, so nobody can tell this bundle from another"
+                )
         if caches_a_build_tool(text):
             problems.append(
                 f"{path.relative_to(ROOT)}: a rust-cache step does not set `cache-bin: false`, "
@@ -198,7 +243,8 @@ def main() -> int:
         return 1
     print(
         f"{len(files)} workflows: every third-party action names a commit, "
-        f"no cache holds a build tool, no install falls off the lockfile"
+        f"no cache holds a build tool, no install falls off the lockfile, "
+        f"every release artifact is checksummed"
     )
     return 0
 
