@@ -33,10 +33,10 @@ jobs:
       # them. Its value is the day someone adds one that is not. Graded with --self-test rather
       # than only run: a check that has never been seen to refuse anything is a wish.
       # SECURITY_AUDIT.md F14.
-      - name: third-party actions name a commit
+      - name: every build input comes from a pinned source
         run: |
-          python3 scripts/keys/actions-are-pinned.py --self-test
-          python3 scripts/keys/actions-are-pinned.py
+          python3 scripts/keys/workflow-supply-chain.py --self-test
+          python3 scripts/keys/workflow-supply-chain.py
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
