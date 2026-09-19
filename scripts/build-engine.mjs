@@ -21,6 +21,7 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, copyFileSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { assertIncludesMatchDepInfo, fingerprintArtifacts, fingerprintRebuild } from './engine-fingerprint.mjs';
 import { fileURLToPath } from 'node:url';
@@ -33,9 +34,9 @@ function die(message) {
   process.exit(1);
 }
 
-function run(command, args, cwd) {
+function run(command, args, cwd, env) {
   console.log(`[build-engine] ${command} ${args.join(' ')}`);
-  execFileSync(command, args, { cwd, stdio: 'inherit' });
+  execFileSync(command, args, { cwd, stdio: 'inherit', env: env ? { ...process.env, ...env } : process.env });
 }
 
 // --- 1. locate the rebuild + verify the wasm-bindgen CLI matches its lockfile ---
@@ -74,10 +75,91 @@ console.log(`[build-engine] wasm-bindgen ${installedCliVersion} matches rebuild 
 
 // --- 2. build the wasm + emit the browser glue ---
 
-run('cargo', ['build', '--release', '--target', 'wasm32-unknown-unknown', '-p', 'coh_wasm'], rebuildDir);
+// STALE-3: make the build path-independent, so the gate can rebuild and compare instead of
+// taking this manifest's word for what came out.
+//
+// `core::panic::Location` puts the source path of every panic site in the .wasm's data section.
+// For workspace members cargo passes those relative, so they are already portable — measured, not
+// assumed: the shipped artifact carries zero strings under the checkout dir. What it does carry is
+// 22 under `$CARGO_HOME/registry` and 16 under the rustup toolchain dir, and those two move with
+// the machine. That is the whole of the difference: six builds across three environments gave
+// three binaries, each internally reproducible, differing only here.
+//
+// Both prefixes are host-specific, so neither can be committed as a literal in a cargo config —
+// they have to be read off the machine at build time, which is why this lives here and not in
+// `.cargo/config.toml`. (`-Zremap-path-scope`/`trim-paths` would be the supported answer; it is
+// still unstable on the 1.96.1 pin.)
+const cargoRegistrySrc = join(process.env.CARGO_HOME ?? join(homedir(), '.cargo'), 'registry', 'src');
+// The index hash is part of the path and is protocol-derived (`index.crates.io-…` for sparse),
+// so remap through it rather than up to it: a runner on a different protocol would otherwise
+// still differ, and the gate would red for the one reason it is meant to rule out.
+const registryIndexes = existsSync(cargoRegistrySrc)
+  ? readdirSync(cargoRegistrySrc).filter((entry) => entry.startsWith('index.crates.io-'))
+  : [];
+if (registryIndexes.length !== 1) {
+  die(
+    `expected exactly one crates.io registry index under ${cargoRegistrySrc}, found ${registryIndexes.length}` +
+      `${registryIndexes.length ? ` (${registryIndexes.join(', ')})` : ''}.\n` +
+      `The remap has to name one directory; pick it with CARGO_HOME rather than guess.`,
+  );
+}
+const registryPrefix = join(cargoRegistrySrc, registryIndexes[0]);
+
+// `rustc --print sysroot` answers for the toolchain rustup resolves IN THAT DIRECTORY, and the
+// two trees do not resolve alike: the rebuild pins 1.96.1 in rust-toolchain.toml, the beta pins
+// nothing and gets `stable`. Asked from the wrong cwd this returns a real path that is simply not
+// the one the build embeds, and the flag becomes a silent no-op — it would build, pass every gate
+// present, and leave all 16 toolchain strings in place. Hence cwd, and hence the assertion below.
+const sysrootPrefix = execFileSync('rustc', ['--print', 'sysroot'], { cwd: rebuildDir, encoding: 'utf8' }).trim();
+if (!sysrootPrefix) die('rustc --print sysroot returned nothing; cannot remap the toolchain path.');
+
+// RUSTFLAGS is split on spaces, and both prefixes are paths that may contain them. The encoded
+// form is unit-separator-delimited and has no such ambiguity.
+const UNIT_SEPARATOR = String.fromCharCode(0x1f);
+const remapFlags = [
+  `--remap-path-prefix=${registryPrefix}=/cargo`,
+  `--remap-path-prefix=${sysrootPrefix}=/rustc`,
+];
+console.log(`[build-engine] remapping ${registryPrefix} -> /cargo`);
+console.log(`[build-engine] remapping ${sysrootPrefix} -> /rustc`);
+
+run(
+  'cargo',
+  ['build', '--release', '--target', 'wasm32-unknown-unknown', '-p', 'coh_wasm'],
+  rebuildDir,
+  { CARGO_ENCODED_RUSTFLAGS: remapFlags.join(UNIT_SEPARATOR) },
+);
 
 const wasmArtifact = join(rebuildDir, 'target', 'wasm32-unknown-unknown', 'release', 'coh_wasm.wasm');
 if (!existsSync(wasmArtifact)) die(`cargo did not produce ${wasmArtifact}.`);
+
+// A remap that names the wrong prefix still builds and still passes everything downstream; the
+// only place it shows is the bytes. So read them back. Checking the two prefixes by name cannot
+// false-positive, and it is the direct proof that the flags above bit rather than resolved to
+// some real-but-unused path.
+const wasmBytes = readFileSync(wasmArtifact);
+for (const [label, prefix] of [['registry', registryPrefix], ['toolchain', sysrootPrefix]]) {
+  if (wasmBytes.includes(prefix)) {
+    die(
+      `the ${label} remap did not take: ${prefix} is still embedded in the built .wasm.\n` +
+        `The prefix must match what the compiler recorded, exactly and from its first character.`,
+    );
+  }
+}
+// And a wider sweep, because the two prefixes are what was MEASURED, not a proof that nothing
+// else carries the machine. A third family appearing later would otherwise re-host-lock the
+// artifact in silence, which is the failure this whole entry is about.
+const home = homedir();
+if (home.length > 1 && wasmBytes.includes(home)) {
+  const stray = [...new Set(String(wasmBytes).split(/[^\x20-\x7e]+/).filter((run) => run.includes(home)))];
+  die(
+    `the built .wasm still embeds paths under ${home}, beyond the two this build remaps:\n` +
+      stray.slice(0, 10).map((line) => `  ${line}`).join('\n') +
+      `${stray.length > 10 ? `\n  … and ${stray.length - 10} more` : ''}\n` +
+      `Each is a path that moves with the machine; remap it or the rebuild gate reds off this host.`,
+  );
+}
+console.log('[build-engine] no host-absolute paths remain in the built .wasm');
 
 // The fingerprint's compile-time include set is a regex over Rust source, because CI verifies
 // with node alone and cannot build. Cargo has just written down every file it ACTUALLY read, so

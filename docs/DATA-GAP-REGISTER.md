@@ -57,10 +57,10 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 326 entries.** STALE-3, filed 2026-09-19 out of measuring STALE-2's premise: the
-engine build is reproducible only on the machine that writes the manifest, so the
-rebuild-and-compare gate that would have caught STALE-2 is a false red anywhere else until two
-absolute paths are remapped out of the build.
+**1 open, of 326 entries.** STALE-3, filed 2026-09-19 out of measuring STALE-2's premise. The two
+absolute paths are remapped out of the build now, and host and container agree byte-for-byte, so
+what is left is a rebuild-and-compare that runs somewhere other than the machine writing the
+manifest.
 
 **Two builds in two directories on one machine is the evidence that cannot fail.** Cargo passes
 workspace member paths relative, so moving the checkout moves nothing. What moves the bytes is
@@ -1456,23 +1456,22 @@ measurement went, and where a closure for the residual belongs too.
   across hosts. Carried to STALE-3.
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
-- [ ] **STALE-3** — the engine build is reproducible only on `jpc`, the machine that writes the
-  manifest, so the rebuild-and-compare gate that would have caught STALE-2 cannot be built yet.
-  Measured 2026-09-19 over six builds: two same-host builds in different directories agree, and a
-  container with a different `$CARGO_HOME` and rustup path differs — three environments, three
-  binaries, each internally reproducible. Cause: `core::panic::Location` strings in the `data`
-  section carry the rustup toolchain dir and `$CARGO_HOME/registry`; the workspace path is NOT
-  embedded, which is why two directories on one machine could never see it. `wasm-bindgen` is not
-  the variable — its JS and `.d.ts` outputs are identical in every arm.
+- [ ] **STALE-3** — the engine build reproduces off `jpc` now, but nothing grades that: the
+  rebuild-and-compare gate that would have caught STALE-2 still does not exist. `panic::Location`
+  strings in the `data` section carried the rustup toolchain dir and `$CARGO_HOME/registry`; the
+  workspace path is NOT embedded, which is why two directories on one machine could never see it.
+  Both prefixes are host-specific, so `build-engine.mjs` derives them at build time — a cargo
+  config cannot hold them, and `trim-paths` is still unstable on 1.96.1.
+  **Landed 2026-09-19** — the two `--remap-path-prefix` flags and the artifacts rebuilt under them
+  (`cb71735b…`, 2529254 bytes). Host and a container differing in workspace path, `$CARGO_HOME`,
+  sysroot, `$HOME` and hostname agree byte-for-byte, against a no-remap control reproducing arm A
+  exactly. Not arm F's predicted bytes: that arm logged its result and never its flags.
   **Goal** — the shipped `.wasm` is reproducible by anyone on the pin, so the gate can rebuild
   rather than take the manifest's word for what came out.
-  **Done when** — the engine build remaps both paths (`--remap-path-prefix`; cargo's `trim-paths`
-  is still unstable on 1.96.1), the shipped artifacts are rebuilt under it, and a
-  rebuild-and-compare runs somewhere that is NOT the writer — canonical CI is self-hosted on `jpc`,
-  so a same-host job grades nothing the writer did not already grade.
-  **Check** — `grep -r remap-path-prefix` over the rebuild's cargo config and `build-engine.mjs`
-  finds nothing while open. A gate added WITHOUT the remaps is a guaranteed false red off `jpc`,
-  which is the failure mode that gets a check muted rather than fixed
+  **Done when** — a rebuild-and-compare runs somewhere that is NOT the writer; canonical CI is
+  self-hosted on `jpc`, so a same-host job grades nothing the writer did not already grade.
+  **Check** — `build-engine.mjs` fails the build when a remapped prefix is still embedded, so a
+  flag resolving to a real-but-unused path cannot pass as done
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
 - [x] **Advisory checks** — adjudicated binary-first; Mids retired as an authority
