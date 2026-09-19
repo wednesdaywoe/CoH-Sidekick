@@ -6,15 +6,36 @@
  * older visual template — see streams/BUILD_PREVIEW_BACKFILL_PLAN.md
  * (PREVBF6). No auth: any visitor's browser can be the one that generates
  * it, which is the whole point of "automatic on view". That's bounded on the
- * write side instead — version-gated (never accepts a write when the row's
- * `preview_template_version` is already current) plus a server-side shape
- * check (must decode to exactly 1200×800, under the existing byte cap). See
- * the plan doc's "Decision — anonymous-write security".
+ * write side instead - version-gated (never accepts a write when the row's
+ * `preview_template_version` is already current), a server-side shape check
+ * (must decode to exactly PREVIEW_CARD_WIDTH x PREVIEW_CARD_HEIGHT, under the
+ * existing byte cap), and a per-IP rolling window. See the plan doc's
+ * "Decision - anonymous-write security".
+ *
+ * **The window is SECURITY_AUDIT.md F11, and it is there for the one thing
+ * that decision did not have in front of it.** It priced the residual as a
+ * race on a build an attacker happened upon, and rejected a *per-build* limit
+ * as adding nothing the shape check did not already bound. That is true of one
+ * build. It is not true of the corpus: `preview_template_version` is in the
+ * anon `GRANT SELECT` list on `shared_builds` - it has to be, because it is the
+ * fact a visitor's own client reads to decide whether to capture at all - so
+ * one anonymous PostgREST query returns the complete list of writable targets.
+ * Measured 2026-09-19: **2,469 of 2,668 rows**, in one request. With no limit
+ * of any kind here, that is a scripted sweep rather than a race, and the image
+ * it plants is what the build-og Worker serves as `og:image` to every crawler
+ * that unfurls the link - `previewCacheKey` keys on `preview_template_version`,
+ * which is precisely the column this write moves, so the cache-busting built
+ * for a legitimate regeneration carries a planted image just as promptly.
+ *
+ * A per-IP window is the control that decision never weighed, and it restores
+ * the bound it thought it had: a visitor still backfills every stale build they
+ * actually look at, and a sweep of 2,469 needs 2,469 addresses.
  *
  * Deploy with: supabase functions deploy backfill-preview
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { callerIp, gradeWindow, windowStart } from '../_shared/rate-window.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,6 +51,16 @@ const CURRENT_PREVIEW_TEMPLATE_VERSION = 6;
 const PREVIEW_CARD_WIDTH = 1200;
 const PREVIEW_CARD_HEIGHT = 880;
 const MAX_PREVIEW_IMAGE_BYTES = 2 * 1024 * 1024;
+
+// Per-IP write allowance (F11). Generous against a human browsing build pages
+// - a backfill only fires for a build whose image is missing or stale, and a
+// build stops being a trigger for everyone the moment one visitor fills it in
+// - and ruinous against a sweep of the 2,469 rows currently in reach. Shares
+// the `rate_limits` table and the two-hour pg_cron sweep share-build already
+// has, under its own `action` so the two allowances never take from each other.
+const BACKFILL_RATE_LIMIT = 30;
+const RATE_WINDOW_HOURS = 1;
+const RATE_LIMIT_ACTION = 'preview';
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
@@ -98,6 +129,66 @@ Deno.serve(async (req: Request) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // ---- Per-IP rolling window (F11) ----
+    // Metered HERE, after the version gate: a request for a build that is
+    // already current is answered `skipped` above and costs nothing, so a
+    // visitor who reloads a finished page forever spends no allowance. What is
+    // metered is the thing worth bounding, which is the write.
+    const ip = callerIp(req.headers);
+    const since = windowStart(Date.now(), RATE_WINDOW_HOURS);
+
+    const { count } = await supabase
+      .from('rate_limits')
+      .select('*', { count: 'exact', head: true })
+      .eq('ip', ip)
+      .eq('action', RATE_LIMIT_ACTION)
+      .gte('created_at', since);
+
+    const used = count ?? 0;
+    if (used >= BACKFILL_RATE_LIMIT) {
+      const { data: oldest } = await supabase
+        .from('rate_limits')
+        .select('created_at')
+        .eq('ip', ip)
+        .eq('action', RATE_LIMIT_ACTION)
+        .gte('created_at', since)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      const verdict = gradeWindow({
+        used,
+        limit: BACKFILL_RATE_LIMIT,
+        oldest: oldest?.created_at as string | null | undefined,
+        now: Date.now(),
+        windowHours: RATE_WINDOW_HOURS,
+      });
+
+      return new Response(
+        JSON.stringify({
+          error: 'Too many preview backfills from this address. Please try again later.',
+          code: 'rate_limited',
+          action: RATE_LIMIT_ACTION,
+          limit: BACKFILL_RATE_LIMIT,
+          remaining: 0,
+          retryAfterSeconds: verdict.retryAfterSeconds,
+          resetAt: verdict.resetAt,
+        }),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+            'Retry-After': String(verdict.retryAfterSeconds),
+          },
+        },
+      );
+    }
+
+    // Spent before the write, not after: a slot that is only recorded on
+    // success is not a limit, because the way to exceed it is to fail.
+    await supabase.from('rate_limits').insert({ ip, action: RATE_LIMIT_ACTION });
 
     const path = `previews/${id}.png`;
     const { error: uploadError } = await supabase.storage

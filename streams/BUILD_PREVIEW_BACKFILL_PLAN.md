@@ -125,6 +125,40 @@ acceptable: still cosmetic-only, still narrow, and an owner re-sharing via
 EMBED3 is a separate, unrestricted write that always wins regardless of what
 this path last wrote.
 
+**Amended 2026-09-19, SECURITY_AUDIT.md F11 — one premise above was checked
+against the corpus and does not hold there.** The decision itself stands and is
+left as it was written; this is what was measured afterwards.
+
+The residual priced above is a *race*: an attacker who happens upon a build
+plants one image before the real capture lands. The per-build rate limit was
+rejected on that reading, and on that reading correctly — it adds nothing to a
+single build that the shape check does not already bound. What the reading
+missed is that the **target set is enumerable**. `preview_template_version` sits
+in the anon `GRANT SELECT` list on `shared_builds`, and it has to: it is the
+fact a visitor's own client reads to decide whether to capture at all. So one
+anonymous PostgREST query returns every writable row — measured 2026-09-19,
+**2,469 of 2,668**, in a single request — and with no limit of any kind on the
+function that is a scripted sweep, not a race. The image it plants is what the
+build-og Worker serves as `og:image` to every crawler that unfurls that build's
+link, and `previewCacheKey` keys on `preview_template_version`, the very column
+this write moves, so the cache-busting built for legitimate regeneration
+carries a planted image just as promptly.
+
+Owner-only triggering stays rejected, and so does a per-build limit. What was
+added is the control this section never weighed: a **per-IP rolling window**
+(30 writes/hour, sharing `rate_limits` with `share-build` under its own
+`action`), metered after the version gate so reloading a finished page costs
+nothing, and spent before the write so failing is not a way around it. A
+visitor still backfills every stale build they actually look at; a sweep of
+2,469 needs 2,469 addresses. The accepted residual is unchanged in kind and now
+bounded in quantity.
+
+One correction while here, to the text and not the code: this section says the
+shape check is "exactly 1200×630". The shipped check has always been against
+`PREVIEW_CARD_WIDTH` and `PREVIEW_CARD_HEIGHT`, which became 1200×880 when the
+card grew to seat the grid (see BUILD_PREVIEW_IMAGE_PLAN.md). The sentence was
+wrong about the code, not the other way round.
+
 ## Active
 
 - [x] **PREVBF1** — schema + version constant: add
