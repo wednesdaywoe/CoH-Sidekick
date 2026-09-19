@@ -1,11 +1,18 @@
 /**
- * The F73 projection, held in step across the four places that spell it.
+ * The published column lists, held in step with the things that read them.
+ *
+ * Two findings, one invariant. F73 is `shared_builds`; F34 is `profiles`. Both
+ * were fixed the same way -- REVOKE the table grant, GRANT the columns by name
+ * -- and both bought the same new way to be wrong: a list that has to agree
+ * with every reader of the table, in two languages and several files, with
+ * nothing but care holding them together.
+ *
+ * -- F73 --------------------------------------------------------------------
  *
  * SECURITY_AUDIT.md F73 was `SELECT b.*` — one wildcard that published every
  * column of `shared_builds`, including `owner_token_hash`, to anyone holding
- * the public anon key. Replacing a wildcard with a list closes that, and buys a
- * new way to be wrong: four lists that must agree, in two languages and three
- * files, with nothing but care holding them together.
+ * the public anon key. Replacing a wildcard with a list closes that. Four lists
+ * then have to agree:
  *
  *   1. `CREATE TABLE shared_builds` — what exists.
  *   2. `GRANT SELECT (...) ON public.shared_builds` — what anon may read.
@@ -19,6 +26,16 @@
  * whoever writes the ALTER TABLE remembering that three other lists exist.
  * Adding a column now fails this test until it is classified, which is the
  * loud failure the schema comment promises.
+ *
+ * -- F34 --------------------------------------------------------------------
+ *
+ * `profiles` published discord_id and discord_username -- 452 Discord
+ * identities -- to anyone holding the public anon key. The five columns granted
+ * back are the union of what three invoker-rights readers need, so here the
+ * lists must agree in the other direction too: grant too FEW and the browse
+ * breaks, because `shared_builds_with_author` is security_invoker and
+ * `search_authors` / `resolve_author` are both `prosecdef = false`. A reader
+ * that touches an ungranted column is a 42501 for every anonymous visitor.
  *
  * Parsed from the files rather than restated here — a copy of the list in the
  * assertion would agree with itself forever.
@@ -36,10 +53,10 @@ const GET_BUILD = readFileSync(join(HERE, 'functions/get-build/index.ts'), 'utf8
 /** The credential hash. Every list below is asserted not to carry it. */
 const SECRET = 'owner_token_hash';
 
-/** Columns of `CREATE TABLE shared_builds (...)`, in declaration order. */
-function tableColumns(): string[] {
-  const body = /CREATE TABLE shared_builds \(([\s\S]*?)\n\);/.exec(SCHEMA);
-  if (!body) throw new Error('CREATE TABLE shared_builds not found in schema.sql');
+/** Columns of `CREATE TABLE <table> (...)`, in declaration order. */
+function tableColumns(table = 'shared_builds'): string[] {
+  const body = new RegExp(`CREATE TABLE ${table} \\(([\\s\\S]*?)\\n\\);`).exec(SCHEMA);
+  if (!body) throw new Error(`CREATE TABLE ${table} not found in schema.sql`);
   return body[1]
     .split('\n')
     .map((line) => /^ {2}([a-z_]+) +[A-Z]/.exec(line))
@@ -53,9 +70,15 @@ function tableColumns(): string[] {
  * rather than first because schema.sql is cumulative and read top to bottom —
  * the final statement is the one whose effect survives.
  */
-function grantedColumns(): string[] {
-  const all = [...SCHEMA.matchAll(/GRANT SELECT \(([\s\S]*?)\) ON public\.shared_builds/g)];
-  if (all.length === 0) throw new Error('GRANT SELECT (...) ON public.shared_builds not found');
+function grantedColumns(table = 'shared_builds'): string[] {
+  // `[^)]` rather than a lazy `[\s\S]*?`: with two granted tables in the file,
+  // a lazy span starting at the FIRST `GRANT SELECT (` runs on until it meets
+  // `) ON public.<table>`, swallowing the other table's list and every comment
+  // between. A column list cannot contain a paren, so this cannot over-reach.
+  const all = [...SCHEMA.matchAll(
+    new RegExp(`GRANT SELECT \\(([^)]*)\\) ON public\\.${table}`, 'g'),
+  )];
+  if (all.length === 0) throw new Error(`GRANT SELECT (...) ON public.${table} not found`);
   return all[all.length - 1][1]
     .split(',')
     .map((s) => s.replace(/--.*$/gm, '').trim())
@@ -144,5 +167,156 @@ describe('F73 — the four lists agree', () => {
     // build_json is the only reason a detail read exists, and visibility and
     // user_id are what its own 404-or-not decision reads.
     expect(getBuildColumns()).toEqual(expect.arrayContaining(['build_json', 'visibility', 'user_id']));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// F34 — profiles
+// ---------------------------------------------------------------------------
+
+/** The five columns F34's migration deliberately withholds from anon. */
+const WITHHELD_FROM_ANON = [
+  'discord_id',
+  'discord_username',
+  'handle_changed_at',
+  'created_at',
+  'updated_at',
+];
+
+/**
+ * The LAST body of a `CREATE [OR REPLACE] FUNCTION <name>`, dollar-quoted.
+ * Last-wins for the same reason the grant and the view use it: schema.sql is
+ * cumulative, and the final definition is the one left standing.
+ */
+function functionBody(name: string): string {
+  const all = [...SCHEMA.matchAll(
+    new RegExp(`CREATE (?:OR REPLACE )?FUNCTION ${name}\\(([\\s\\S]*?)\\$\\$;`, 'g'),
+  )];
+  if (all.length === 0) throw new Error(`FUNCTION ${name} not found in schema.sql`);
+  return all[all.length - 1][0];
+}
+
+/**
+ * Columns of `profiles` that a body reads through the alias `p`. Covers the
+ * view and search_authors, which both alias it; resolve_author does not alias
+ * and is read separately below.
+ */
+function profileColumnsVia(alias: string, body: string): string[] {
+  const seen = [...body.matchAll(new RegExp(`\\b${alias}\\.([a-z_]+)`, 'g'))].map((m) => m[1]);
+  return [...new Set(seen)].sort();
+}
+
+/** `resolve_author` is `SELECT <list> FROM profiles` with no alias. */
+function resolveAuthorColumns(): string[] {
+  const body = functionBody('resolve_author');
+  const select = /AS \$\$\s*SELECT ([\s\S]*?)\s*FROM profiles/.exec(body);
+  if (!select) throw new Error('resolve_author SELECT list not found');
+  return select[1].split(',').map((c) => c.trim()).sort();
+}
+
+describe('F34 — the Discord identities are on no anon list', () => {
+  it('the table still has the columns, so this suite is testing something', () => {
+    // If discord_id ever moves or is dropped, this fails and the withheld list
+    // should be revisited rather than left here passing vacuously.
+    expect(tableColumns('profiles')).toEqual(expect.arrayContaining(WITHHELD_FROM_ANON));
+  });
+
+  it('none of the withheld five is granted to anon', () => {
+    const granted = grantedColumns('profiles');
+    for (const column of WITHHELD_FROM_ANON) {
+      expect(granted, `${column} must not be granted to anon`).not.toContain(column);
+    }
+  });
+
+  it('every profiles column is either granted or deliberately withheld', () => {
+    // The guard that fires when someone adds a column to profiles. It cannot
+    // decide whether the new column is public; it refuses to let the question
+    // go unasked.
+    expect(new Set(tableColumns('profiles')))
+      .toEqual(new Set([...grantedColumns('profiles'), ...WITHHELD_FROM_ANON]));
+  });
+
+  it('the grant goes to anon only — authenticated is still open, by decision', () => {
+    // Not an aspiration: if someone adds `authenticated` to F34's GRANT without
+    // first narrowing the two clients' `select('*')`, every signed-in user's
+    // own-profile read starts 42501-ing. That is the schema block's exit
+    // condition, and this is the tripwire on it.
+    const grant = /REVOKE SELECT ON public\.profiles FROM ([a-z, ]+);/.exec(SCHEMA);
+    expect(grant, 'F34 REVOKE not found in schema.sql').not.toBeNull();
+    expect(grant![1].trim()).toBe('anon');
+  });
+});
+
+describe('F34 — every anon-reachable reader stays inside the grant', () => {
+  // The direction F73 did not have to worry about. All three readers below are
+  // invoker-rights, so a column they touch but anon cannot read is not a quiet
+  // omission — it is a failed read for every anonymous visitor.
+
+  it('the view reads only granted columns of profiles, join predicate included', () => {
+    const all = [...SCHEMA.matchAll(/CREATE VIEW shared_builds_with_author[\s\S]*?;/g)];
+    const view = all[all.length - 1][0];
+    // Deliberately the WHOLE statement, not just the SELECT list: `LEFT JOIN
+    // profiles p ON p.user_id = b.user_id` needs SELECT on p.user_id as much
+    // as the projection does.
+    expect(profileColumnsVia('p', view)).toEqual(
+      expect.arrayContaining(['handle', 'display_name', 'avatar_url', 'user_id']),
+    );
+    for (const column of profileColumnsVia('p', view)) {
+      expect(grantedColumns('profiles'), `view reads p.${column}`).toContain(column);
+    }
+  });
+
+  it('search_authors reads only granted columns of profiles', () => {
+    for (const column of profileColumnsVia('p', functionBody('search_authors'))) {
+      expect(grantedColumns('profiles'), `search_authors reads p.${column}`).toContain(column);
+    }
+  });
+
+  it('resolve_author returns only granted columns of profiles', () => {
+    for (const column of resolveAuthorColumns()) {
+      expect(grantedColumns('profiles'), `resolve_author returns ${column}`).toContain(column);
+    }
+  });
+
+  it('the grant is exactly the union of the three, and carries nothing spare', () => {
+    // This is the sentence the schema block makes: the list is derived, not
+    // chosen. If it ever grows a column no reader needs, that column was
+    // published by decision and the decision should be written down first.
+    const all = [...SCHEMA.matchAll(/CREATE VIEW shared_builds_with_author[\s\S]*?;/g)];
+    const union = new Set([
+      ...profileColumnsVia('p', all[all.length - 1][0]),
+      ...profileColumnsVia('p', functionBody('search_authors')),
+      ...resolveAuthorColumns(),
+    ]);
+    expect(new Set(grantedColumns('profiles'))).toEqual(union);
+  });
+});
+
+describe('F34 — search_authors cannot go back to answering an empty query', () => {
+  const body = () => functionBody('search_authors');
+
+  it('rejects a query under two characters, whitespace not counted', () => {
+    // `q = ''` degenerated to ILIKE '%%' and returned all 530 rows in one call.
+    // btrim so that ' ' and '  ' are rejected too; COALESCE so that NULL is.
+    expect(body()).toMatch(/char_length\(btrim\(COALESCE\(q, ''\)\)\) >= 2/);
+  });
+
+  it('matches on the raw q, so trimming did not change what a real query finds', () => {
+    // The guard trims; the predicates must not. Trimming the match too would
+    // be a behaviour change smuggled in beside a security fix.
+    expect(body()).toMatch(/p\.display_name ILIKE '%' \|\| q \|\| '%'/);
+  });
+
+  it('clamps the caller-supplied limit', () => {
+    // q04 passed lim = 1000000 and was served. Both clients ask for 8.
+    expect(body()).toMatch(/LIMIT LEAST\(GREATEST\(COALESCE\(lim, 10\), 1\), 25\)/);
+  });
+
+  it('is still invoker-rights, which is what makes the grant bind on it', () => {
+    // A SECURITY DEFINER here would run as the owner and read every column of
+    // profiles regardless of what anon is granted — it would reopen F34
+    // through the RPC while the grant above still looked correct.
+    expect(body()).not.toMatch(/SECURITY DEFINER/);
+    expect(functionBody('resolve_author')).not.toMatch(/SECURITY DEFINER/);
   });
 });

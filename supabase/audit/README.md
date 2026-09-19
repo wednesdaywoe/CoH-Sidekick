@@ -11,6 +11,14 @@ of which was defeated by a character class nobody had listed. The same applies t
 these errored the first time they were executed against a real schema, and one finding reproduced
 outright, neither of which was visible in the text.
 
+**F34 has since been fixed from this evidence** (`schema.sql`, the block at the end of the file):
+`q01`/`q02` gave the grant state, `q03` the 452 Discord identities, `q04` the `search_authors`
+enumeration, and `q14` — added by the session rather than planned — the one answer that decided
+whether the fix was a fix at all, since an owner-rights view would have routed around the REVOKE.
+The transcripts are kept byte-stable and are **not** re-run to refresh them: `SECURITY_AUDIT.md`
+cites their numbers, and production counts move (`shared_builds` read 5,007, 5,014 and 5,015 on one
+day). To measure the post-fix state, run the queries and keep the new transcript beside the old.
+
 ## Running them
 
 Against production, from anywhere:

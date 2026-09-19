@@ -256,12 +256,16 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 -- display name independent of their Discord identity. Per-build author_name
 -- on shared_builds is preserved as-is (option 2: per-build name overrides).
 --
--- Field-name mapping (verified against live auth.users rows, 2026-05-01):
+-- Field-name mapping (the SHAPE was verified against live auth.users rows on
+-- 2026-05-01; the example values below are synthetic and must stay that way --
+-- the three that stood here were one real account's Discord identity,
+-- transcribed off the row that verified the mapping, in the same file whose
+-- F34 block at the end exists to stop publishing that exact column):
 --   Discord (iss = discord.com/api):
 --     provider_id                  Discord snowflake (immutable)
---     full_name                    Discord username, e.g. "savant01"
---     name                         Username + legacy '#0' suffix, e.g. "savant01#0"
---     custom_claims.global_name    Discord display name, e.g. "Savant"  (NESTED — not top-level;
+--     full_name                    Discord username, e.g. "tigereyes"
+--     name                         Username + legacy '#0' suffix, e.g. "tigereyes#0"
+--     custom_claims.global_name    Discord display name, e.g. "Tiger Eyes"  (NESTED — not top-level;
 --                                  empty string "" when user hasn't set one)
 --     avatar_url                   CDN URL
 --   SimpleLogin (iss = app.simplelogin.io) and other providers:
@@ -818,3 +822,267 @@ GRANT SELECT (
 --    GRANTs on the view, and access comes from Supabase's project-wide default
 --    privileges, which apply to newly created objects. If the browse 401s
 --    after this migration, that assumption is what to check first.
+
+-- ============================================
+-- F34 — profiles is readable column by column, not whole (PENDING DEPLOY)
+-- ============================================
+-- SECURITY_AUDIT.md F34: "profiles table fully readable by anon, including
+-- discord_id and discord_username". Measured on 2026-09-18 by
+-- supabase/audit/q01-q04 and q14, against production:
+--
+--   q02: profiles.relacl is {postgres=arwdDxtm/postgres, anon=arwdDxtm/postgres,
+--        authenticated=arwdDxtm/postgres, service_role=arwdDxtm/postgres} —
+--        anon holds EVERY table privilege, and the only policy is
+--        "Public read profiles [r] true".
+--   q01: has_column_privilege('anon', ...) is true for all ten columns.
+--   q03: 530 rows; 452 carry discord_id, discord_username and avatar_url;
+--        452 distinct discord_ids; 405 of those usernames differ from the
+--        display_name a card already shows, so the column is not a duplicate
+--        of something public — it is 452 Discord identities, additional.
+--        428 of them sit on profiles that never claimed a handle.
+--   q14: shared_builds_with_author is security_invoker = on, so it runs as the
+--        CALLER and a column REVOKE binds through it. Had it been owner-rights
+--        this migration would have been a no-op on the surface that matters
+--        most, which is why that query exists.
+--
+-- This is F73's mechanism, one table over, and the last untreated public table
+-- on it. The comment in step 2 of the F73 block above is the whole explanation
+-- and is not repeated here: a table-level SELECT grant covers every column,
+-- present and future, so column granularity means REVOKE first and re-GRANT by
+-- name, in that order.
+--
+-- **The list below is derived, not chosen.** It is the union of what the three
+-- anon-reachable readers of this table need, and every one of them is
+-- invoker-rights, so each needs the privilege in its own right:
+--
+--   shared_builds_with_author  p.handle, p.display_name, p.avatar_url,
+--                              and p.user_id for the join predicate
+--   search_authors             p.user_id, p.handle, p.display_name,
+--                              p.avatar_url  (prosecdef = false, q04)
+--   resolve_author             p.user_id, p.handle, p.display_name,
+--                              p.avatar_url, p.bio  (prosecdef = false, q04)
+--
+--   union  = user_id, handle, display_name, avatar_url, bio
+--   withheld = discord_id, discord_username, handle_changed_at,
+--              created_at, updated_at
+--
+-- Nothing was traded away to reach that split: the five withheld columns are
+-- read by no anon-reachable path. discord_id and discord_username are the
+-- finding. handle_changed_at gates the 30-day cooldown and is a server
+-- decision (update-profile, service role). created_at and updated_at are
+-- account-activity timestamps that no public surface renders, and they are
+-- withheld on the "default flipped from published to withheld" principle the
+-- F73 block states rather than because a threat was named for them.
+REVOKE SELECT ON public.profiles FROM anon;
+GRANT SELECT (
+  user_id,
+  handle,
+  display_name,
+  avatar_url,
+  bio
+) ON public.profiles TO anon;
+
+-- **`authenticated` is deliberately NOT revoked here, and that is a gap, not a
+-- conclusion.** It holds the same full table grant (q02, above), so every
+-- signed-in account can still read all 452 Discord identities — and sign-up is
+-- free Discord OAuth, so this migration raises the cost of the harvest from
+-- "hold the public anon key" to "hold an account". That is a real reduction
+-- and it is not a closure.
+--
+-- It is left open because the authenticated list is NOT determined the way the
+-- anon list above is, and guessing it would break the app: both clients read
+-- their OWN profile with a wildcard —
+--
+--   src/services/profile.ts:38            .from('profiles').select('*')
+--   crates/app/src/cloud/profile.rs:409   .select("profiles", "*", ...)
+--
+-- both reached only with a session (Header.tsx:889 and
+-- ProfileSettingsPage.tsx:56 pass user.id; profile.rs:542 returns early
+-- without one), so both run as `authenticated` and both would start failing
+-- with "permission denied for table profiles" the moment that role is
+-- revoked.
+-- Closing this half therefore means naming the columns in two clients across
+-- the repo boundary first, and deciding what a user may read of a profile that
+-- is not theirs — a question this table cannot answer with a grant, because a
+-- grant does not know whose row it is looking at. The honest shape of that fix
+-- is probably RLS, or a `profiles_public` view, not a longer GRANT list.
+--
+-- Exit condition: when both clients select named columns, revoke
+-- `authenticated` down to the same five plus whatever the own-profile surface
+-- genuinely needs (discord_username for the verified badge and
+-- handle_changed_at for the cooldown are the likely two), gated so it applies
+-- only to auth.uid() = user_id.
+--
+-- service_role keeps its grant, for the reason F73's step 2 gives: update-profile
+-- and share-build read and write this table under it, and seed_profile_on_signup
+-- is a trigger running as the definer.
+--
+-- Not touched, and worth someone's attention: anon also holds INSERT, UPDATE
+-- and DELETE on this table (q02's `arwdDxtm`). Nothing exploits that today
+-- because RLS is enabled and the only policy is FOR SELECT, so a write finds
+-- no permissive policy and is denied — but the grant is what would be left if
+-- a write policy were ever added for some other reason. It is out of F34's
+-- scope, which is SELECT.
+
+-- The second door. Narrowing the table grant does nothing to an RPC that
+-- selects from the table on the caller's behalf, and q04 measured what this one
+-- hands out:
+--
+--   search_authors('',  1000000) -> 530 rows, the whole table
+--   search_authors('a', 1000000) -> 328
+--   of the 530, 323 have no public builds at all
+--
+-- `q = ''` degenerates to ILIKE '%%'. One anonymous call returns every profile
+-- in the project, including the 500 that never claimed a handle and the 323
+-- that have never shared anything — people who are not, by any action of their
+-- own, publishing an author identity.
+--
+-- Both clients already honour a two-character minimum and ask for 8
+-- (AUTHOR_SEARCH_MIN / AUTHOR_SEARCH_LIMIT in profile.rs:440,445;
+-- `q.length < 2` and `limit = 8` in profile.ts:122,118). profile.rs:449 even
+-- states the reason in its doc comment — "the RPC would answer, and the answer
+-- would be most of the table". This moves that contract server-side, where it
+-- binds on a caller that is not one of our clients. No real call changes: the
+-- guard rejects only what both clients already refuse to send, and the clamp
+-- sits at 25, well above the 8 either asks for.
+--
+-- **What this buys, stated exactly, because F73's row is on this page for
+-- overstating its own fix.** It removes the single-call full-table dump. It
+-- does NOT make enumeration impossible: two-character prefixes still walk the
+-- table 25 rows at a time, and anyone willing to spend ~1,300 calls gets most
+-- of it. Closing THAT means rate-limiting or requiring a session, neither of
+-- which is a grant or a function body, and neither of which is in this change.
+-- What the REVOKE above does close completely is the Discord identities — they
+-- are on no path this function can reach, whatever it returns.
+--
+-- The guard is on btrim() so that '', ' ' and '  ' are all rejected; the
+-- MATCHING still uses the raw `q`, so a query with meaningful internal or
+-- surrounding whitespace behaves exactly as it does today. Trimming the match
+-- too would have been a behaviour change smuggled in beside a security fix.
+CREATE OR REPLACE FUNCTION search_authors(q TEXT, lim INT DEFAULT 10)
+RETURNS TABLE (
+  user_id      UUID,
+  handle       CITEXT,
+  display_name TEXT,
+  avatar_url   TEXT,
+  build_count  BIGINT,
+  sim          REAL
+)
+LANGUAGE sql STABLE AS $$
+  SELECT p.user_id, p.handle, p.display_name, p.avatar_url,
+         COUNT(b.id) FILTER (WHERE b.visibility = 'public') AS build_count,
+         GREATEST(
+           -- Prefix match: highest priority
+           CASE WHEN p.display_name ILIKE q || '%'        THEN 1.0 ELSE 0 END,
+           CASE WHEN p.handle::text ILIKE q || '%'        THEN 1.0 ELSE 0 END,
+           -- Substring match
+           CASE WHEN p.display_name ILIKE '%' || q || '%' THEN 0.8 ELSE 0 END,
+           CASE WHEN p.handle::text ILIKE '%' || q || '%' THEN 0.8 ELSE 0 END,
+           -- Trigram fuzzy (catches typos)
+           similarity(p.display_name, q),
+           COALESCE(similarity(p.handle::text, q), 0)
+         ) AS sim
+  FROM profiles p
+  LEFT JOIN shared_builds b ON b.user_id = p.user_id
+  -- F34: below two characters this matched every row. The clients never send
+  -- such a query; a direct caller did not have to be one of the clients.
+  WHERE char_length(btrim(COALESCE(q, ''))) >= 2
+    AND (p.display_name ILIKE '%' || q || '%'
+      OR p.handle::text   ILIKE '%' || q || '%'
+      OR p.display_name % q
+      OR p.handle::text   % q)
+  GROUP BY p.user_id, p.handle, p.display_name, p.avatar_url
+  ORDER BY sim DESC, build_count DESC
+  -- F34: `lim` was whatever the caller said. q04 passed 1000000 and was served.
+  LIMIT LEAST(GREATEST(COALESCE(lim, 10), 1), 25);
+$$;
+
+-- resolve_author is left exactly as it is. It takes a handle and returns the
+-- one row holding it, so it enumerates nothing: the 500 profiles with a NULL
+-- handle are unreachable through it by construction, and the five columns it
+-- returns are the five granted above.
+
+-- **Applying this: the REVOKE and the GRANT must not be separable.** Between
+-- them `anon` can read NOTHING of this table, so a deploy that commits the
+-- first and fails the second takes the whole author surface down -- the browse
+-- view, `search_authors` and `resolve_author` are all invoker-rights over these
+-- columns. One transaction, therefore.
+--
+-- And a trap measured on 2026-09-18 rather than assumed: **`supabase db query
+-- --linked` does not keep one session across the statements in a file.** A temp
+-- table created by the first statement is gone by the last, so a file reading
+-- `BEGIN; REVOKE ...; GRANT ...; COMMIT;` is not one transaction through that
+-- client -- each statement stands alone and the REVOKE commits by itself. Send
+-- the pair as ONE statement (a `DO $$ ... $$` block is one), or apply it
+-- through a client that holds the session. The same property is what makes a
+-- rehearsal safe when it is written as a single DO block ending in `RAISE
+-- EXCEPTION`: it cannot commit, whatever the client does with semicolons.
+--
+-- Rehearsed against production that way on 2026-09-18 and rolled back. After
+-- the REVOKE+GRANT, inside the aborted transaction: table SELECT false; the
+-- five withheld columns all false; the five granted all true; an `anon` browse
+-- of `shared_builds_with_author` still returned **2,667 public rows**; the five
+-- columns still read all **530** profiles; `resolve_author` still answered;
+-- `SELECT discord_id` failed with "permission denied for table profiles" and so
+-- did the `WHERE discord_id IS NOT NULL` filter. `authenticated` table SELECT
+-- remained true, as intended and as the gap above describes.
+--
+-- Confirming it took. (a) and (b) are SQL; (c) needs the public anon key,
+-- because what is being checked is what a stranger can do.
+--
+--   a. Exactly five column grants for anon, and no table-level SELECT:
+--
+--        SELECT grantee, column_name
+--        FROM information_schema.column_privileges
+--        WHERE table_name = 'profiles' AND privilege_type = 'SELECT'
+--          AND grantee = 'anon'
+--        ORDER BY column_name;
+--        -- avatar_url, bio, display_name, handle, user_id. Five rows.
+--
+--        SELECT grantee, privilege_type FROM information_schema.table_privileges
+--        WHERE table_name = 'profiles' AND grantee = 'anon'
+--          AND privilege_type = 'SELECT';
+--        -- must be empty. `authenticated` still has its row; see above.
+--
+--      Or re-run supabase/audit/q01 and q02 and read the profiles rows:
+--      anon_select flips to false for the five withheld columns, and
+--      anon_table_select flips to false.
+--
+--   b. The RPC no longer answers an empty query, and no longer takes a
+--      caller's word for the limit — this is q04's first two lines, which
+--      returned 530 and 328 on 2026-09-18:
+--
+--        SELECT count(*) FROM public.search_authors('',  1000000);  -- 0
+--        SELECT count(*) FROM public.search_authors('a', 1000000);  -- 0
+--        SELECT count(*) FROM public.search_authors('ab', 1000000); -- <= 25
+--
+--   c. From a shell, with the anon key. The first two must fail where they
+--      previously answered; the rest must keep working, because a fix that
+--      breaks the author surface is not a fix:
+--
+--        curl -sS -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--          "$URL/rest/v1/profiles?select=discord_id,discord_username&limit=1"
+--        curl -sS -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--          "$URL/rest/v1/profiles?select=*&limit=1"
+--        # each: 42501 / "permission denied for table profiles" — Postgres
+--        # reports the TABLE form even when the denial is column-level, so
+--        # that string is what a column REVOKE looks like. Before, the first
+--        # returned a Discord snowflake and username and the second ten keys.
+--
+--        curl -sS -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--          "$URL/rest/v1/profiles?select=handle,display_name,avatar_url&limit=3"
+--        curl -sS -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--          "$URL/rest/v1/shared_builds_with_author?select=id,name,author_handle,author_display_name,author_avatar_url&visibility=eq.public&limit=3"
+--        curl -sS -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--          -X POST -H "Content-Type: application/json" -d '{"h":"<a claimed handle>"}' \
+--          "$URL/rest/v1/rpc/resolve_author"
+--        # all three must answer as they do today. The middle one is the
+--        # browse, and is the read that q14 was run to protect.
+--
+--      A filter is a read too, and this one must also stop answering — the
+--      lesson F73's row records about itself:
+--
+--        curl -sS -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+--          "$URL/rest/v1/profiles?select=handle&discord_id=not.is.null&limit=1"
+--        # 42501. Filtering on a column needs SELECT on it, so the census
+--        # "how many accounts are Discord-linked" closes with the values.
