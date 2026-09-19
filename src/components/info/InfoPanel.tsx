@@ -4,9 +4,10 @@
  * Shows Base/Enhanced/Final values for enhanceable stats
  */
 
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { useUIStore, useBuildStore, useDominationActive, useScourgeActive, useFuryLevel, useContainmentActive, useCriticalHitsActive, useStalkerHidden, useStalkerTeamSize, useStalkerCritActive, useSentinelCritActive, useGlobalAdjuster } from '@/stores';
 import { getBaseToHit } from '@/data/purple-patch';
+import { descriptionRuns } from './powerDescription';
 import {
   lookupPower,
   getIOSet,
@@ -1372,15 +1373,15 @@ function PowerInfo({ powerName, powerSet }: PowerInfoProps) {
       })()}
 
       {/* Description (at bottom - least important info) */}
-      <p
-        className="text-sm text-slate-300 leading-relaxed"
-        dangerouslySetInnerHTML={{
-          __html: power.description
-            .replace(/<br\s*\/?>/gi, ' ')
-            .replace(/<[^>]+>/g, '')
-            .replace(/NOTE:\s*(.*?)(?:\.|$)/g, '<span class="block mt-1 text-amber-400 font-semibold">NOTE: $1.</span>')
-        }}
-      />
+      <p className="text-sm text-slate-300 leading-relaxed">
+        {descriptionRuns(power.description).map((run, i) =>
+          run.note ? (
+            <span key={i} className="block mt-1 text-amber-400 font-semibold">{run.text}</span>
+          ) : (
+            <Fragment key={i}>{run.text}</Fragment>
+          )
+        )}
+      </p>
     </div>
   );
 }
