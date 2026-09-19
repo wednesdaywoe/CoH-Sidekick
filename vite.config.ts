@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -6,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 import { execSync } from 'child_process'
 import { createHash } from 'node:crypto'
+import { existsSync } from 'node:fs'
 
 const BUILD_TIME = Date.now()
 
@@ -157,11 +159,58 @@ const engineNodeSwapPlugin: Plugin = {
   },
 }
 
+/**
+ * Vitest-only: swap a dataset's module graph for its prebuilt esbuild bundle.
+ *
+ * A dataset is ~7,300 generated modules and ~48 MB of TypeScript. 142 of the suite's
+ * test files reach one through `loadDataset()`, and each paid ~14s to transform and
+ * execute that graph again inside its own isolated worker — most of the suite's wall
+ * clock, for data that never changes between files.
+ *
+ * `scripts/build-dataset-bundles.mjs` flattens each dataset to one import-free ESM file
+ * before the run (~2s for all four). Node imports that natively in ~200ms, so the swap
+ * is worth roughly 50x per test file that loads a dataset.
+ *
+ * Only the dataset ROOT specifier is redirected — `./datasets/homecoming`, or the
+ * absolute form vite's alias plugin rewrites `@/data/datasets/homecoming` into. A test
+ * importing a file INSIDE the dataset folder still gets the real module, and so does an
+ * explicit `.../datasets/homecoming/index`, which is how
+ * `src/data/dataset-bundle-fidelity.test.ts` grades the bundle against the graph.
+ *
+ * Fails loud rather than falling through: a dataset root with no bundle means globalSetup
+ * did not run, and resolving to the graph instead would just be the slow suite, silently.
+ * Inert outside vitest — `dev`/`build` never see it.
+ */
+const datasetBundleSwapPlugin: Plugin = {
+  name: 'dataset-bundle-swap',
+  enforce: 'pre',
+  resolveId(source) {
+    if (!process.env.VITEST) return null
+    const id = source.replace(/\\/g, '/')
+    const match = /(?:^|\/)datasets\/([^/]+)$/.exec(id)
+    if (!match) return null
+    const name = match[1]
+    // Only a real dataset root — anything else that happens to sit under a "datasets"
+    // folder resolves normally.
+    if (!existsSync(path.resolve(__dirname, 'src/data/datasets', name, 'index.ts'))) return null
+    const bundle = path.resolve(__dirname, '.dataset-bundles', name + '.mjs')
+    if (!existsSync(bundle)) {
+      throw new Error(
+        `no test bundle for dataset '${name}' at ${bundle}. ` +
+          `vitest builds these in globalSetup (scripts/build-dataset-bundles.mjs); ` +
+          `run 'node scripts/build-dataset-bundles.mjs' if you are driving vite by hand.`,
+      )
+    }
+    return bundle
+  },
+}
+
 export default defineConfig({
   // Base path — '/' for custom domain (coh-sidekick.com)
   base: '/',
   plugins: [
     engineNodeSwapPlugin,
+    datasetBundleSwapPlugin,
     react(),
     tailwindcss(),
     VitePWA({
@@ -302,6 +351,22 @@ export default defineConfig({
   define: {
     __BUILD_TIME__: JSON.stringify(BUILD_TIME),
     __CHANGELOG_DATA__: CHANGELOG_DATA,
+  },
+  test: {
+    // Dataset loading is seconds, not milliseconds, so the 5s defaults are wrong for this
+    // suite — bare `vitest` used to red ~28 files on loadDataset alone. They belong here
+    // rather than in the npm script so every entry point grades identically.
+    testTimeout: 120_000,
+    hookTimeout: 120_000,
+    // Flatten each dataset to one ESM file before the run; see datasetBundleSwapPlugin.
+    globalSetup: ['./scripts/build-dataset-bundles.mjs'],
+    server: {
+      deps: {
+        // The bundles are plain, import-free ESM — let node import them directly. Routing
+        // 30 MB through vite's transform costs ~7s per test file and changes nothing.
+        external: [/[.]dataset-bundles[/]/],
+      },
+    },
   },
   resolve: {
     alias: {

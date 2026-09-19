@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { loadDataset } from '@/data/dataset';
+import { getActiveDataset, loadDataset } from '@/data/dataset';
 import {
   getDestinyEffects,
   getDestinyEffectsAtTime,
@@ -7,10 +7,6 @@ import {
   getDestinyTotalDuration,
   getDestinySustainedFloorTime,
 } from '@/data';
-import {
-  GENERATED_DESTINY_EFFECTS as HC_DESTINY_EFFECTS,
-  GENERATED_DESTINY_TIMELINE as HC_DESTINY_TIMELINE,
-} from '@/data/datasets/homecoming/generated/incarnate-effects';
 
 /**
  * Destiny buffs (Barrier, Ageless, …) apply several overlapping timed buffs at
@@ -129,8 +125,15 @@ describe('Destiny timeline guard — same-duration twins stay additive', () => {
     // Synthetic fixture: two same-duration tiers on one stat + one longer tier.
     // This models a resistible/unresistable twin represented as duplicate timeline
     // rows at equal duration. The resolver must sum both rows while active.
-    HC_DESTINY_EFFECTS[ID] = { recharge: 0.2 };
-    HC_DESTINY_TIMELINE[ID] = {
+    //
+    // Injected through the ACTIVE dataset, which is the object the resolver reads
+    // (`getActiveDataset().incarnateEffectsRaw.destiny`). Writing to the generated
+    // module's export instead would only be the same object by coincidence of how the
+    // dataset was loaded — and under vitest it is not: the dataset comes from the
+    // flattened bundle, so the write landed on a copy nothing reads.
+    const raw = getActiveDataset().incarnateEffectsRaw;
+    raw.destiny[ID] = { recharge: 0.2 };
+    raw.destinyTimeline[ID] = {
       recharge: [
         { value: 0.1, duration: 30 },
         { value: 0.2, duration: 30 },
