@@ -148,7 +148,7 @@ archived; what remains here are the SC-N routing/accounting invariants not yet b
   with the register, not with this line) —
   **SHIPPED 2026-07-05**, full narrative in
   [the archive](DEDUCTIVE_SCHEMA_HARNESS_ARCHIVE.md).
-- [~] **DSH6** — Converter repair: rework `extractEffects()` to build the DSH4
+- [x] **DSH6** — Converter repair: rework `extractEffects()` to build the DSH4
   internal effect list first (one record per template × attrib × pvMode ×
   resistibility, sign preserved), then project to `PowerEffects` at the end. The
   merge rules operate on matching identity keys only, dissolving collapse sites
@@ -156,11 +156,18 @@ archived; what remains here are the SC-N routing/accounting invariants not yet b
   `domination`, `selfPenalty`) **one harness-gated site at a time** — each site's
   diffs must go to zero before the next. Fold DSH2 table validation into the
   converter so it fails loudly at emit time.
+  **SHIPPED 2026-07-09.** All sub-items done: DSH6b's scalar-identity gate + the
+  conditional-p PvP-leak fix, the ally-team movement display branch, CONDTAG, the
+  Domination bolt-on retirement, `selfPenalty`→per-effect `toWho`, and the final
+  bolt-on retirements (`durationVariants` Phase 2R, `unresistable`+twin pre-scan
+  Phase 3, legacy `extractEffectsLegacy` deletion). `extractEffects` is now just
+  `templatesToAtoms → projectAtomsToEffects → extractSummon`. Marker corrected
+  2026-09 (body was fully shipped; tracker left `~`).
   needs: DEDUCTIVE_SCHEMA_HARNESS#DSH4, DEDUCTIVE_SCHEMA_HARNESS#DSH5
   - [x] **DSH6a** — general per-slot collapse detector (found clean by-type collapse
     essentially does not occur in HC → helped disprove the DSH6 rewrite). **SHIPPED
     2026-07-05**, full narrative in [the archive](DEDUCTIVE_SCHEMA_HARNESS_ARCHIVE.md).
-  - [~] **DSH6b** — Scalar-identity gate + converter fixes. **Ally/foe-targeted buff
+  - [x] **DSH6b** — Scalar-identity gate + converter fixes. **Ally/foe-targeted buff
     *display* is IN SCOPE** (decision 2026-07-05, user-chosen) — so the 69 class-absent
     + target-directed by-type flags (Speed Boost / Inertial Reduction +movement,
     Enforced Morale ally mez-resist) are real gaps to fix, not by-design drops.
@@ -261,7 +268,7 @@ archived; what remains here are the SC-N routing/accounting invariants not yet b
       (+4 guard [`self-penalty-towho.test.ts`](src/utils/calculations/self-penalty-towho.test.ts)),
       DSH6 detector-neutral, all 3 converter gates green.
       verify: file:src/utils/calculations/self-penalty-towho.test.ts, fn:hasSelfDirectedPenalty, tests:src>=805
-    - [~] Retire the remaining bolt-ons. **Finding (verify-don't-assume):** `unresistable`
+    - [x] Retire the remaining bolt-ons. **Finding (verify-don't-assume):** `unresistable`
       and `durationVariants` are NOT independently retireable — each *is* the projection of
       multiple atomic records into one single-value `PowerEffects` slot (an unresistable-twin
       flag / a `[{scale,duration}]` mini-list), with no second representation to converge onto;

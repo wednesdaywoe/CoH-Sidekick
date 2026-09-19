@@ -356,8 +356,8 @@ not the earlier "6 vs 5", which was an `rg` false match on `EffectArea`.)
   both datasets (de-risked: `toggle_ignore`-only, no drift; sole incidental change
   was Rest gaining `allowed_set_categories ['Rest Buff']`). 784 powers. This proved
   the full parser→export→converter→model→display path and the re-export workflow.
-- [~] **`IgnoreStrength` — CONFIRMED CALC GAP (not "moot" — that earlier call was
-  wrong).** The data is captured (`template.flags`), so nothing is lost; the gap is
+- [x] **`IgnoreStrength` — CONFIRMED CALC GAP (not "moot" — that earlier call was
+  wrong).** [Settled 2026-08-13; see the Next-steps closure note below for the leftover that was later closed.] The data is captured (`template.flags`), so nothing is lost; the gap is
   that the **converter only honors `IgnoreStrength` for regeneration** (the
   `resType === 'regeneration'` branch → `regenBuffUnenhanced`/`effects.n`). Every
   other real-stat effect that ignores strength is mishandled. After filtering the
@@ -444,7 +444,9 @@ not the earlier "6 vs 5", which was an `rg` false match on `EffectArea`.)
    Phoenix Awakening / Glitz / Soul Absorption now surface their advertised effects).
    Minor leftover: DNA Siphon's mode-gated *heal* bonus (heal-via-damage + mode) doesn't
    reach the Adaptation conditionalEffects — needs the heal/mode-conditional paths joined.
-- [ ] **Other clean power-field captures** (same pattern as the mez fields):
+- [x] **`IgnoreStrength` DONE**; **per-target HP-state leech effects DONE** (DNA Siphon / Phoenix Awakening / Glitz / Soul Absorption now surface their advertised effects).
+   Minor leftover: DNA Siphon's mode-gated *heal* bonus (heal-via-damage + mode) doesn't reach the Adaptation conditionalEffects — needs the heal/mode-conditional paths joined.
+   **2026-09-02 — leftover CLOSED.** DNA Siphon's Defensive mode bonus now emits as a `conditionalEffects` entry (`defensiveadaptation`) carrying `Heal` + `ignoreStrength: true`, and `adaptation-modes.test.ts` grades all three mode bonuses (5/5 green). The heal/mode-conditional path is joined; nothing left. The tracker heading above this carried a stale `~` — the work settled 2026-08-13. (same pattern as the mez fields):
   `TimeToRoot` (2,340 — animation lock, affects DPS/rotation), ~~`ModesDisallowed`
   (3,475)~~ **DONE 2026-07-04** (+`ModesRequired`/`ModesSuspended`, resolved to names —
   see the power-level mode-gates SHIPPED note above), `StrengthsDisallowed` (951),
