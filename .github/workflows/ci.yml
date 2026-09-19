@@ -27,6 +27,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Cheap, and before the install, because what it guards is what publishes this site.
+      # Vacuously green here today — every action in this repository is GitHub's own, and the
+      # rule deliberately allows those, since their trust root is the runner already executing
+      # them. Its value is the day someone adds one that is not. Graded with --self-test rather
+      # than only run: a check that has never been seen to refuse anything is a wish.
+      # SECURITY_AUDIT.md F14.
+      - name: third-party actions name a commit
+        run: |
+          python3 scripts/keys/actions-are-pinned.py --self-test
+          python3 scripts/keys/actions-are-pinned.py
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
