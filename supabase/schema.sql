@@ -824,7 +824,7 @@ GRANT SELECT (
 --    after this migration, that assumption is what to check first.
 
 -- ============================================
--- F34 — profiles is readable column by column, not whole (PENDING DEPLOY)
+-- F34 — profiles is readable column by column, not whole (DEPLOYED 2026-09-18)
 -- ============================================
 -- SECURITY_AUDIT.md F34: "profiles table fully readable by anon, including
 -- discord_id and discord_username". Measured on 2026-09-18 by
@@ -1026,6 +1026,24 @@ $$;
 -- `SELECT discord_id` failed with "permission denied for table profiles" and so
 -- did the `WHERE discord_id IS NOT NULL` filter. `authenticated` table SELECT
 -- remained true, as intended and as the gap above describes.
+--
+-- **Applied 2026-09-18 and measured closed.** The grant pair went as the single
+-- DO block described above; `search_authors` followed as its own statement,
+-- which is atomic by itself. Column state after: `anon` reads exactly
+-- user_id, handle, display_name, avatar_url, bio and none of the other five;
+-- `authenticated` still reads all ten, as the gap above describes.
+--
+-- As `anon`, in production: `SELECT discord_id`, `SELECT *` and the
+-- `WHERE discord_id IS NOT NULL` filter all denied; the five columns still read
+-- all 530 profiles; the browse view still served 2,668 public rows;
+-- `resolve_author` still answered. Through PostgREST with the public anon key,
+-- the same three reads answer `42501 permission denied for table profiles`
+-- where they previously returned Discord snowflakes and usernames.
+--
+-- `search_authors`, which returned 530 rows for an empty q and 328 for 'a' on
+-- the morning of the same day: **0 and 0**. A two-character query with
+-- `lim = 1000000` returns 8, the number that actually match, under the clamp of
+-- 25. The real client call still answers.
 --
 -- Confirming it took. (a) and (b) are SQL; (c) needs the public anon key,
 -- because what is being checked is what a stranger can do.
