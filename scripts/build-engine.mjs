@@ -22,7 +22,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, copyFileSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { assertIncludesMatchDepInfo, fingerprintRebuild } from './engine-fingerprint.mjs';
+import { assertIncludesMatchDepInfo, fingerprintArtifacts, fingerprintRebuild } from './engine-fingerprint.mjs';
 import { fileURLToPath } from 'node:url';
 
 const betaRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -186,13 +186,26 @@ const registryOut = join(betaRoot, 'src', 'data', 'generated', 'effect-registry.
 writeFileSync(registryOut, registryModule);
 console.log(`[build-engine] effect registry -> src/data/generated/effect-registry.generated.ts`);
 
-// --- 6. stamp the fingerprint of the rebuild sources these artifacts were built FROM ---
+// --- 6. stamp the fingerprint of the rebuild sources these artifacts were built FROM, and of
+// the artifacts themselves ---
 // The beta cannot detect its own engine going stale — it cannot see the rebuild. The rebuild's
 // CI can: the beta is public, so it checks the beta out with no secret and re-runs
 // engine-fingerprint.mjs against its own tree. This file is the thing it compares to, and it is
 // written HERE because this is the one moment both trees are in hand. See engine-fingerprint.mjs.
-const manifestOut = join(betaRoot, 'src', 'engine', '_engine_manifest.json');
-writeFileSync(manifestOut, `${JSON.stringify(fingerprintRebuild(rebuildDir), null, 2)}\n`);
-console.log(`[build-engine] fingerprint -> src/engine/_engine_manifest.json`);
+//
+// The `artifacts` half is hashed here too, and it is worth being precise about what that buys:
+// taken at this moment it agrees by construction, because these are the bytes step 2 just wrote.
+// It is not evidence the build reproduces. It is what lets `--compare` notice the manifest and the
+// committed `wasm*/` having drifted apart afterwards — a half-copied refresh, a stale `wasm-node`
+// beside a fresh `wasm`, a bad merge — which no input hash can see, since every input still
+// matches. STALE-2 is the row that separates the two.
+const engineDir = join(betaRoot, 'src', 'engine');
+const manifestOut = join(engineDir, '_engine_manifest.json');
+const manifest = { ...fingerprintRebuild(rebuildDir), artifacts: fingerprintArtifacts(engineDir) };
+writeFileSync(manifestOut, `${JSON.stringify(manifest, null, 2)}\n`);
+console.log(
+  `[build-engine] fingerprint -> src/engine/_engine_manifest.json ` +
+    `(${Object.keys(manifest.artifacts).length} artifacts hashed)`,
+);
 
 console.log(`\n[build-engine] done — ${datasets.length} dataset(s): ${datasets.join(', ')}`);

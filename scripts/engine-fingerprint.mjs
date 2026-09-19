@@ -46,6 +46,10 @@
  *
  * Usage as a script (this is what the rebuild's CI runs):
  *   node scripts/engine-fingerprint.mjs --rebuild-dir <path> [--compare <manifest.json>]
+ *
+ * `--compare` also grades the shipped artifacts against the `artifacts` key the manifest now
+ * carries, reading them from the manifest's own directory (override with `--engine-dir`). With
+ * no `--compare` this prints the INPUT halves only — it is a debugging aid, not the writer.
  */
 
 import { createHash } from 'node:crypto';
@@ -244,6 +248,51 @@ export function fingerprintRebuild(rebuildDir) {
   return { source: hashEntries(entries), bundles };
 }
 
+/**
+ * Hash the SHIPPED artifacts — the other half of the claim `_engine_manifest.json` makes.
+ *
+ * {@link fingerprintRebuild} grades the INPUTS: it walks canonical's tree and says the Rust the
+ * engine was built from has not moved. Nothing in it opens the two `.wasm` it certifies, so until
+ * 2026-09-19 the manifest was a statement about two binaries with none of their bytes in it, and
+ * `--compare` graded the premises while never reading the conclusion (STALE-2).
+ *
+ * What this catches, and what it cannot, because the difference is the whole point. At `--write`
+ * time the hash is taken of the artifact `build-engine.mjs` has just produced, so it agrees by
+ * construction — it can never be the evidence that the build REPRODUCES. What it catches is
+ * DESYNC between the manifest and the files beside it: a half-copied refresh, a stale `wasm-node`
+ * next to a fresh `wasm`, a hand-edited binary, a bad merge. Those are exactly the failures an
+ * input hash is structurally blind to, because every input still matches.
+ *
+ * The reproducibility half — rebuild in the gate and compare bytes — is a separate capability and
+ * is deliberately NOT this function. STALE-2 measured what it rests on: the build is not
+ * bit-identical across hosts as it stands, because panic-location strings in the data section
+ * carry the rustup toolchain path and `$CARGO_HOME`.
+ *
+ * The directories are DERIVED, like the include scan: every `wasm*` subdirectory of the engine
+ * dir, every file under it. `build-engine.mjs` emits `wasm/` and `wasm-node/` today; a third
+ * target is covered the day it is added rather than reopening the hole silently.
+ */
+export function fingerprintArtifacts(engineDir) {
+  if (!existsSync(engineDir)) throw new Error(`engine-fingerprint: no engine dir at ${engineDir}`);
+  /** @type {Record<string, string>} `<dir>/<file>` -> sha256 of its bytes */
+  const artifacts = {};
+  for (const name of readdirSync(engineDir).sort()) {
+    if (!name.startsWith('wasm') || !statSync(join(engineDir, name)).isDirectory()) continue;
+    for (const rel of filesUnder(join(engineDir, name))) {
+      artifacts[`${name}/${rel}`] = createHash('sha256')
+        .update(readFileSync(join(engineDir, name, rel)))
+        .digest('hex');
+    }
+  }
+  if (Object.keys(artifacts).length === 0) {
+    throw new Error(
+      `engine-fingerprint: no wasm*/ artifacts under ${engineDir} — expected the committed build ` +
+        `output \`npm run build:engine\` writes. A manifest with nothing to certify is worse than none.`,
+    );
+  }
+  return artifacts;
+}
+
 /** Human-readable diff of two fingerprints; empty array means they match. */
 export function diffFingerprints(committed, actual) {
   const problems = [];
@@ -262,6 +311,26 @@ export function diffFingerprints(committed, actual) {
     else if (!b) problems.push(`contract bundle "${ds}" is in the committed manifest but not in the rebuild.`);
     else problems.push(`contract bundle "${ds}" differs — committed ${a.slice(0, 12)}…, rebuild ${b.slice(0, 12)}…`);
   }
+
+  // The shipped artifacts themselves. A manifest written before this key existed cannot be graded,
+  // and skipping quietly would restore the exact blind spot the key was added to close — so it is
+  // a failure, not a pass (Rule 1: fail loud).
+  if (!committed.artifacts) {
+    problems.push(
+      `the committed manifest has no "artifacts" key: it predates artifact hashing and certifies\n` +
+        `    two .wasm with none of their bytes in it. Rebuild it with \`npm run build:engine\`.`,
+    );
+  } else {
+    const names = [...new Set([...Object.keys(committed.artifacts), ...Object.keys(actual.artifacts ?? {})])].sort();
+    for (const name of names) {
+      const a = committed.artifacts[name];
+      const b = actual.artifacts?.[name];
+      if (a === b) continue;
+      if (!a) problems.push(`shipped artifact "${name}" is on disk but not in the committed manifest.`);
+      else if (!b) problems.push(`shipped artifact "${name}" is in the committed manifest but not on disk.`);
+      else problems.push(`shipped artifact "${name}" is not the one the manifest records — manifest ${a.slice(0, 12)}…, on disk ${b.slice(0, 12)}…`);
+    }
+  }
   return problems;
 }
 
@@ -278,7 +347,8 @@ if (invokedDirectly) {
   const actual = fingerprintRebuild(rebuildDir);
 
   if (!comparePath) {
-    console.log(JSON.stringify(actual, null, 2));
+    const engineDir = arg('--engine-dir');
+    console.log(JSON.stringify(engineDir ? { ...actual, artifacts: fingerprintArtifacts(engineDir) } : actual, null, 2));
     process.exit(0);
   }
 
@@ -286,13 +356,20 @@ if (invokedDirectly) {
     console.error(`\n[engine-fingerprint] no manifest at ${comparePath} — run \`npm run build:engine\` in the beta and commit it.\n`);
     process.exit(1);
   }
+  // The shipped artifacts sit beside the manifest — `src/engine/_engine_manifest.json` next to
+  // `src/engine/wasm*/` — so the CI invocation needs no second path and cannot pass a mismatched one.
+  actual.artifacts = fingerprintArtifacts(arg('--engine-dir') ?? dirname(resolve(comparePath)));
+
   const problems = diffFingerprints(JSON.parse(readFileSync(comparePath, 'utf8')), actual);
   if (problems.length === 0) {
-    console.log(`[engine-fingerprint] beta engine artifacts match this rebuild (${Object.keys(actual.bundles).length} bundles).`);
+    console.log(
+      `[engine-fingerprint] beta engine artifacts match this rebuild ` +
+        `(${Object.keys(actual.bundles).length} bundles, ${Object.keys(actual.artifacts).length} artifacts).`,
+    );
     process.exit(0);
   }
   console.error(
-    `\n[engine-fingerprint] the beta is shipping a STALE engine:\n\n` +
+    `\n[engine-fingerprint] the beta's committed engine is not the one this rebuild describes:\n\n` +
       problems.map((p) => `  - ${p}`).join('\n') +
       `\n\nFix: in the beta checkout, run \`npm run build:engine\` against this rebuild and commit\n` +
       `the refreshed src/engine/wasm*/, public/engine/contract/ and src/engine/_engine_manifest.json.\n`,

@@ -2,7 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
-import { compileTimeIncludes, fingerprintRebuild } from '../../scripts/engine-fingerprint.mjs';
+import {
+  compileTimeIncludes,
+  diffFingerprints,
+  fingerprintArtifacts,
+  fingerprintRebuild,
+} from '../../scripts/engine-fingerprint.mjs';
 
 /**
  * The staleness gate's own blind spot — and the mutations that prove it closed.
@@ -147,6 +152,143 @@ describe('engine fingerprint', () => {
       );
       expect(() => compileTimeIncludes(root)).toThrow(/outside/);
     } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+/**
+ * The other half of the manifest's claim — and why the cheap half is still worth having.
+ *
+ * `fingerprintRebuild` grades the INPUTS. Until 2026-09-19 that was the whole manifest, so
+ * `_engine_manifest.json` was a statement about two `.wasm` with none of their bytes in it, and
+ * `--compare` graded the premises without ever opening the conclusion (STALE-2).
+ *
+ * `fingerprintArtifacts` is deliberately NOT the fix for what STALE-2 measured. At `--write` time
+ * it hashes the artifact `build-engine.mjs` has just produced, so it agrees by construction and
+ * can never be evidence that the build reproduces. It catches the OTHER failure: the manifest and
+ * the committed output dirs drifting apart — a half-copied refresh, a stale `wasm-node` next to a
+ * fresh `wasm`, a hand-edited binary, a bad merge. An input hash is structurally blind to every
+ * one of those, because each leaves all its inputs matching. Same mutation discipline as above:
+ * each check is an edit that must make the gate red.
+ */
+
+/** An engine dir shaped like the beta's `src/engine/`: the two wasm-bindgen output dirs. */
+function makeEngineDir(): string {
+  const root = mkdtempSync(join(tmpdir(), 'artifacts-'));
+  const write = (rel: string, body: string) => {
+    mkdirSync(dirname(join(root, rel)), { recursive: true });
+    writeFileSync(join(root, rel), body);
+  };
+  write('wasm/coh_wasm_bg.wasm', 'browser wasm bytes');
+  write('wasm/coh_wasm.js', 'export function init() {}');
+  write('wasm-node/coh_wasm_bg.wasm', 'browser wasm bytes');
+  write('wasm-node/coh_wasm.cjs', 'module.exports = {};');
+  // Not a wasm-bindgen output dir, and not build output — must stay out of the map.
+  write('_engine_manifest.json', '{}');
+  return root;
+}
+
+describe('engine artifact fingerprint', () => {
+  it('hashes every shipped artifact and nothing else in the engine dir', () => {
+    const root = makeEngineDir();
+    try {
+      expect(Object.keys(fingerprintArtifacts(root)).sort()).toEqual([
+        'wasm-node/coh_wasm.cjs',
+        'wasm-node/coh_wasm_bg.wasm',
+        'wasm/coh_wasm.js',
+        'wasm/coh_wasm_bg.wasm',
+      ]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('derives the output dirs, so a third wasm-bindgen target is covered the day it is added', () => {
+    const root = makeEngineDir();
+    try {
+      mkdirSync(join(root, 'wasm-bundler'));
+      writeFileSync(join(root, 'wasm-bundler/coh_wasm_bg.wasm'), 'a third target');
+      expect(fingerprintArtifacts(root)['wasm-bundler/coh_wasm_bg.wasm']).toBeDefined();
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('reds on a half-copied refresh: one output dir moved, the other left stale', () => {
+    // The shape no input hash can see — the rebuild sources are untouched, so `source` and
+    // `bundles` both still match and the old manifest called this fresh.
+    const root = makeEngineDir();
+    try {
+      const committed = { source: 's', bundles: {}, artifacts: fingerprintArtifacts(root) };
+      writeFileSync(join(root, 'wasm/coh_wasm_bg.wasm'), 'rebuilt browser wasm bytes');
+      const actual = { source: 's', bundles: {}, artifacts: fingerprintArtifacts(root) };
+      const problems = diffFingerprints(committed, actual);
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toMatch(/wasm\/coh_wasm_bg\.wasm/);
+      expect(problems[0]).not.toMatch(/wasm-node/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('reds on an artifact that is in the manifest but gone from disk, and the reverse', () => {
+    const root = makeEngineDir();
+    try {
+      const committed = { source: 's', bundles: {}, artifacts: fingerprintArtifacts(root) };
+      rmSync(join(root, 'wasm-node/coh_wasm.cjs'));
+      expect(diffFingerprints(committed, { source: 's', bundles: {}, artifacts: fingerprintArtifacts(root) })).toEqual([
+        expect.stringMatching(/wasm-node\/coh_wasm\.cjs.*not on disk/),
+      ]);
+
+      const thinner = { source: 's', bundles: {}, artifacts: fingerprintArtifacts(root) };
+      writeFileSync(join(root, 'wasm-node/coh_wasm.cjs'), 'module.exports = {};');
+      expect(diffFingerprints(thinner, { source: 's', bundles: {}, artifacts: fingerprintArtifacts(root) })).toEqual([
+        expect.stringMatching(/wasm-node\/coh_wasm\.cjs.*not in the committed manifest/),
+      ]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('reds on a manifest that predates the artifacts key rather than passing it', () => {
+    // Skipping quietly would restore the exact blind spot the key closes: a manifest with no
+    // artifacts in it is the STALE-2 shape, and a gate that passes it is the STALE-2 gate.
+    const root = makeEngineDir();
+    try {
+      const problems = diffFingerprints({ source: 's', bundles: {} }, {
+        source: 's',
+        bundles: {},
+        artifacts: fingerprintArtifacts(root),
+      });
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toMatch(/no "artifacts" key/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('fails loud on an engine dir with no artifacts rather than certifying nothing', () => {
+    const root = mkdtempSync(join(tmpdir(), 'artifacts-empty-'));
+    try {
+      expect(() => fingerprintArtifacts(root)).toThrow(/no wasm\*\/ artifacts/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+    expect(() => fingerprintArtifacts(join(tmpdir(), 'definitely-not-here-4f2a'))).toThrow(/no engine dir/);
+  });
+
+  it('keeps the two halves separate: an artifact edit must not move the input hashes', () => {
+    const rebuild = makeRebuild();
+    const root = makeEngineDir();
+    try {
+      const before = fingerprintRebuild(rebuild);
+      writeFileSync(join(root, 'wasm/coh_wasm_bg.wasm'), 'different bytes entirely');
+      const after = fingerprintRebuild(rebuild);
+      expect(after.source).toBe(before.source);
+      expect(after.bundles).toEqual(before.bundles);
+    } finally {
+      rmSync(rebuild, { recursive: true, force: true });
       rmSync(root, { recursive: true, force: true });
     }
   });

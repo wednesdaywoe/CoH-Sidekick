@@ -57,19 +57,20 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 325 entries.** STALE-2, filed 2026-09-19 out of the engine rebuild that unblocked
-canonical's `sec-audit-f34-profiles`: `beta-engine-staleness` hashes the engine's INPUTS and never
-the engine, so it certified a shipped `.wasm` that no build reproduces.
+**1 open, of 326 entries.** STALE-3, filed 2026-09-19 out of measuring STALE-2's premise: the
+engine build is reproducible only on the machine that writes the manifest, so the
+rebuild-and-compare gate that would have caught STALE-2 is a false red anywhere else until two
+absolute paths are remapped out of the build.
 
-**A manifest that records only what went in cannot say what came out.** `_engine_manifest.json`
-holds a source hash and four bundle hashes, and not one byte of the two `.wasm` it certifies. Two
-rebuilds agreed with each other and both differed from the committed artifact by 291 bytes, every
-hashed input matching, the gate green.
+**Two builds in two directories on one machine is the evidence that cannot fail.** Cargo passes
+workspace member paths relative, so moving the checkout moves nothing. What moves the bytes is
+`$CARGO_HOME` and the rustup toolchain dir, carried in panic-location strings: six builds, three
+environments, three different binaries, each internally reproducible.
 
-The previous frontier, retained because its lesson stands — TWIN-5 opened and closed 2026-09-16, out of the twin-divergence
-adjudication that unblocked ICON-2: one epic power carrying a family its powerset twin lacks,
-settled as authored content against the `.powers` defs rather than the live server the row had
-named. ROSTER-3 closed the same day.
+The previous frontier, retained because its lesson stands — STALE-2 opened and closed 2026-09-19:
+`_engine_manifest.json` held a source hash and four bundle hashes and not one byte of the two
+`.wasm` it certified, so `--compare` graded the claim's premises without opening the thing being
+certified. It now carries a `sha256` per artifact. TWIN-5 and ROSTER-3 closed 2026-09-16.
 
 **A gate nobody has seen green on a clean tree has not been passing; it has been unread.** The
 shared-test digest was UNVERIFIED from the moment each stamp was written (FORK-8), because the
@@ -934,7 +935,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 110 of 111 closed
+[Full detail](gaps/pipeline-provenance.md) — 111 of 112 closed
 
 - [x] **ICON-2** — `normalizeIconPath` read the client's own art extensions as filenames in both
   directions — `.dds` passed its "already has one" test untouched and `.texture` failed it and
@@ -1448,22 +1449,31 @@ measurement went, and where a closure for the residual belongs too.
   against cargo's dep-info, and graded by five mutations.
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
-- [ ] **STALE-2** — `_engine_manifest.json` is a claim about two shipped `.wasm` with none of their
-  bytes in it: `fingerprintRebuild` walks only canonical's tree, so `source` and `bundles` grade the
-  INPUTS and nothing hashes `src/engine/wasm*/coh_wasm_bg.wasm`. Measured 2026-09-18 — the artifact
-  `642a28dfb3` shipped is not reproducible from the sources the manifest names: two rebuilds are
-  byte-identical to each other and both differ from it by **291 bytes** (code −214), every hashed
-  input matching and `beta-engine-staleness` green. One level below STALE-1: that was an input the
-  scan missed, this is every input matching and the output still differing. Cause unrecoverable
-  **Goal** — the gate's verdict rests on the artifact's own bytes, not only on its asserted inputs.
-  **Done when** — the manifest records a `sha256` per artifact and `--compare` grades it (the desync
-  half; NOT the half that catches what was measured); and the rebuild half is adjudicated in writing
-  — gate, advisory, or refused — against a measurement of whether `wasm-bindgen` output is
-  bit-identical ACROSS HOSTS, so far exercised only twice on one machine. The measurement is the
-  deliverable.
-  **Check** — `node -p "Object.keys(require('../CoH-Sidekick/src/engine/_engine_manifest.json')).join(' ')"`
-  — prints `source bundles` while open. An artifact key WITHOUT the cross-host measurement written
-  down means the cheap half shipped and the measured defect is still uncaught
+- [x] **STALE-2** — `_engine_manifest.json` was a claim about two shipped `.wasm` with none of
+  their bytes in it: it graded the INPUTS, and nothing hashed `src/engine/wasm*/coh_wasm_bg.wasm`.
+  Closed 2026-09-19 — the manifest carries a `sha256` per artifact, `--compare` grades it, seven
+  mutations red. The rebuild half is adjudicated against six measured builds: not bit-identical
+  across hosts. Carried to STALE-3.
+  story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
+
+- [ ] **STALE-3** — the engine build is reproducible only on `jpc`, the machine that writes the
+  manifest, so the rebuild-and-compare gate that would have caught STALE-2 cannot be built yet.
+  Measured 2026-09-19 over six builds: two same-host builds in different directories agree, and a
+  container with a different `$CARGO_HOME` and rustup path differs — three environments, three
+  binaries, each internally reproducible. Cause: `core::panic::Location` strings in the `data`
+  section carry the rustup toolchain dir and `$CARGO_HOME/registry`; the workspace path is NOT
+  embedded, which is why two directories on one machine could never see it. `wasm-bindgen` is not
+  the variable — its JS and `.d.ts` outputs are identical in every arm.
+  **Goal** — the shipped `.wasm` is reproducible by anyone on the pin, so the gate can rebuild
+  rather than take the manifest's word for what came out.
+  **Done when** — the engine build remaps both paths (`--remap-path-prefix`; cargo's `trim-paths`
+  is still unstable on 1.96.1), the shipped artifacts are rebuilt under it, and a
+  rebuild-and-compare runs somewhere that is NOT the writer — canonical CI is self-hosted on `jpc`,
+  so a same-host job grades nothing the writer did not already grade.
+  **Check** — `grep -r remap-path-prefix` over the rebuild's cargo config and `build-engine.mjs`
+  finds nothing while open. A gate added WITHOUT the remaps is a guaranteed false red off `jpc`,
+  which is the failure mode that gets a check muted rather than fixed
+  story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
 - [x] **Advisory checks** — adjudicated binary-first; Mids retired as an authority
 
