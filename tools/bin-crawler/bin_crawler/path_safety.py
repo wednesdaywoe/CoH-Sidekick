@@ -6,20 +6,22 @@ ground truth. Nothing between the binary and the filesystem looks at them: a
 category of `..` writes a directory up, and `exported_powers/` is a trust root
 nothing hashes, so the write leaves no trace to find afterwards either.
 
-WHY THIS IS NOT WIRED INTO THE EXPORTER YET, which is the part worth reading.
-`_export_fingerprint.py` hashes `export_powers.py` byte for byte, and
-`src/data/export-staleness.test.ts` asserts every dataset's recorded fingerprint
-equals the current source's. So ANY edit to that file — a comment, an import —
-declares the committed export stale, and the only green path back is re-running
-the export from the gitignored `.pigg` archives for all four forks. That is the
-gate working as designed and it should not be given a door; it is also 79,281
-files of churn that this change has no business triggering, since the check is
-provably a no-op on every name the forks actually ship.
+Wired into `_write_power_tree` at two call sites, and WHAT THAT COST is the part
+worth reading. `_export_fingerprint.py` hashes `export_powers.py` byte for byte
+and `src/data/export-staleness.test.ts` asserts every dataset's recorded
+fingerprint equals the current source's, so adding the import declared all four
+committed exports stale and the only green path back was re-running the export
+from the gitignored `.pigg` archives. That was done: the wiring is provably
+inert, zero of the 79,297 committed power files moved, and the whole diff is
+this call plus a fingerprint bump in fourteen manifests.
 
-So the rule lives here, where the fingerprint does not reach (it globs
-`parser/**/*.py` plus the exporter entry modules), and `tests/test_export_path_components.py`
-grades it against the whole committed tree. Wiring is two call sites in
-`_write_power_tree` and belongs in the next commit that re-exports anyway.
+This module is NOT itself inside that fingerprint — the glob is
+`parser/**/*.py` plus the exporter entry modules, and this file is neither. So a
+future change to the rule below changes what the exporter writes and no
+staleness gate notices. That is true of every helper under `bin_crawler/` that
+an exporter imports (`assets_dir.py` has the same property), and it is why
+`tests/test_export_path_components.py` grades the rule against the whole
+committed tree rather than leaning on the fingerprint to notice.
 """
 from __future__ import annotations
 

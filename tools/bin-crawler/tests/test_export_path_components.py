@@ -10,11 +10,11 @@ What this grades: that the refusal fires on the shapes that escape a directory,
 and that it does NOT fire on any name the four committed forks actually ship —
 a validator nobody can regen past gets deleted, and the hole comes back with it.
 
-What it cannot grade: the exporter itself. `bin_crawler/path_safety.py` says why
-the call sites are not there yet — editing `export_powers.py` declares all four
-committed exports stale, and this check is provably a no-op on them. Until that
-wiring lands, this sweep is the live half: a future export that writes a name
-which is not a name goes red here.
+What it cannot grade: that `_write_power_tree` still calls it. The call sites
+landed with the re-export that the fingerprint bump forced, and nothing here
+would go red if a later edit removed them — this sweep reads the committed tree,
+not the exporter. It is the half that survives regen: a future export that
+writes a name which is not a name goes red here.
 
 It also cannot say whether the binary a future regen reads is the game's. That
 is the other half of F78 and it is still open.

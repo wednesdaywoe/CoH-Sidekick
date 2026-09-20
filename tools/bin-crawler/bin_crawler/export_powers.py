@@ -36,6 +36,7 @@ from bin_crawler.parser._attrib_names import parse_mode_table, parse_stack_key_t
 from bin_crawler.parser._pigg import BinResolver
 from bin_crawler.assets_dir import add_source_arguments, resolve_export_source
 from bin_crawler._export_fingerprint import parser_fingerprint
+from bin_crawler.path_safety import safe_path_component
 from bin_crawler.parser._enums import (
     POWER_TYPE, EFFECT_AREA, PVP_FLAG, CASTABLE_AFTER_DEATH,
     SHOW_POWER_SETTING,
@@ -718,7 +719,11 @@ def _write_power_tree(powers, ps_records, ps_available, msgs, set_cats_index,
     total_files = 0
     for cat in sorted(grouped):
         for ps in sorted(grouped[cat]):
-            ps_dir = output_dir / cat.lower() / ps.lower()
+            # Both halves come straight out of powers.bin and have never
+            # been looked at before becoming a directory name (F78).
+            ps_dir = (output_dir
+                      / safe_path_component(cat.lower(), 'power category')
+                      / safe_path_component(ps.lower(), 'powerset'))
             ps_dir.mkdir(parents=True, exist_ok=True)
 
             powers_in_set = grouped[cat][ps]
@@ -797,7 +802,12 @@ def _write_power_tree(powers, ps_records, ps_available, msgs, set_cats_index,
                 safe_name = re.sub(r'[<>:"/\\|?*]+', '_', pw.power_name).lower()
                 # Collapse runs of underscores from the substitution.
                 safe_name = re.sub(r'_+', '_', safe_name).strip('_')
-                fname = safe_name + '.json'
+                # The substitution above covers the Windows-reserved set;
+                # this also catches controls, device names and traversal,
+                # and is the one boundary that refuses rather than rewrites.
+                fname = safe_path_component(safe_name + '.json',
+                                            'power filename',
+                                            permit_edge_dots=True)
                 with open(ps_dir / fname, 'w') as f:
                     json.dump(pw_dict, f, indent=2)
                 total_files += 1
