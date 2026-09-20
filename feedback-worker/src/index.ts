@@ -3,12 +3,19 @@
  *
  * Receives feedback form submissions and sends formatted emails via Resend.
  * Deploy: `wrangler deploy`
- * Secrets: `wrangler secret put RESEND_API_KEY` and `wrangler secret put FEEDBACK_EMAIL`
+ * Secrets: `wrangler secret put RESEND_API_KEY` and `wrangler secret put FEEDBACK_EMAIL`,
+ * plus `wrangler secret put DESKTOP_CLIENT_TOKEN` for the desktop arm below.
  */
 
 interface Env {
   RESEND_API_KEY: string;
   FEEDBACK_EMAIL: string;
+  /**
+   * Shared secret the desktop build sends as `X-Sidekick-Desktop`. Unset means the desktop arm
+   * is closed and every native submission 403s, which is the behaviour this worker had before
+   * the header existed — see `isDesktopClient`.
+   */
+  DESKTOP_CLIENT_TOKEN?: string;
 }
 
 interface BuildContext {
@@ -53,6 +60,45 @@ const ALLOWED_ORIGINS = [
   'https://wednesdaywoe.github.io',
   'http://localhost:3000',
 ];
+
+/** The header the desktop build carries in place of an `Origin` the browser would have set. */
+const DESKTOP_CLIENT_HEADER = 'X-Sidekick-Desktop';
+
+/**
+ * Is this the desktop build?
+ *
+ * The origin allow-list above is browser hygiene: it stops another site's page posting here with
+ * a user's cookies attached. It was never a defence against a native client, which sets whatever
+ * headers it likes — and native `reqwest` sets no `Origin` at all, so the desktop app 403'd on
+ * every submission from the day it shipped (F35). This is the door for it.
+ *
+ * It is a shared secret rather than a marker header because a marker anyone can read in a public
+ * repository admits anyone, and this worker spends Resend mail on what it admits. A token baked
+ * into a shipped binary is not a real secret either — it raises the cost from reading a source
+ * file to unpacking a bundle, and no further. What bounds the damage is that the token is
+ * rotatable here without shipping a new build to anyone but the RC group.
+ *
+ * Fails closed: an unconfigured `DESKTOP_CLIENT_TOKEN` refuses every native submission rather
+ * than admitting all of them.
+ */
+function isDesktopClient(request: Request, env: Env): boolean {
+  const expected = env.DESKTOP_CLIENT_TOKEN;
+  if (!expected) return false;
+  const presented = request.headers.get(DESKTOP_CLIENT_HEADER);
+  if (!presented) return false;
+  return timingSafeEqual(presented, expected);
+}
+
+/** Compare without leaking the matching prefix through timing. */
+function timingSafeEqual(a: string, b: string): boolean {
+  const encoder = new TextEncoder();
+  const left = encoder.encode(a);
+  const right = encoder.encode(b);
+  if (left.length !== right.length) return false;
+  let diff = 0;
+  for (let i = 0; i < left.length; i += 1) diff |= left[i] ^ right[i];
+  return diff === 0;
+}
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
   const allowed = origin && ALLOWED_ORIGINS.some(o => origin.startsWith(o));
@@ -251,8 +297,9 @@ export default {
       });
     }
 
-    // Validate origin in production
-    const isAllowed = origin && ALLOWED_ORIGINS.some(o => origin.startsWith(o));
+    // Validate origin in production — or accept the desktop build, which has no origin to send
+    const isAllowed =
+      (origin && ALLOWED_ORIGINS.some(o => origin.startsWith(o))) || isDesktopClient(request, env);
     if (!isAllowed) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403,
