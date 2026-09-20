@@ -170,20 +170,25 @@ describe('BPORT11 — every slot a synthetic still supplies keeps an arm that ca
   it('counts what a reachable conditional would actually be credited for', () => {
     // Pinned so the population is a measurement rather than a claim. A dataset refresh that
     // moves these is a fact worth seeing; a refresh that empties one is worth seeing more.
+    // Two moved at i28p4 RC3 and both are one cause, named rather than bumped: damageBuff
+    // 48 -> 52 is Spotlight and regenBuff 20 -> 24 is Lightfield, each on the same four Light
+    // Affinity ATs and each gated on `chain_jolt_mode`. That is upstream's own token — HC hung
+    // the Radiance rework on the existing Chain Jolt mode rather than minting one — so the
+    // gate reads oddly here and in the UI, and is faithful to the export either way.
     const top = [...credits].filter(([, n]) => n >= 20).sort((a, b) => b[1] - a[1]);
     expect(Object.fromEntries(top)).toEqual({
       recoveryBuffUnenhanced: 110,
       regenBuffUnenhanced: 95,
       resistance: 65,
       defenseBuff: 64,
+      damageBuff: 52,
       absorb: 50,
-      damageBuff: 48,
       maxHPBuffUnenhanced: 43,
       tohitBuffUnenhanced: 37,
       enduranceDiscount: 29,
       tohitBuff: 25,
+      regenBuff: 24,
       rechargeBuff: 20,
-      regenBuff: 20,
     });
     // The gate is doing real work, not waving everything through: `slow` mints 175 times and
     // is credited 12, `rechargeDebuff` mints 134 and is credited none — both are foe debuffs

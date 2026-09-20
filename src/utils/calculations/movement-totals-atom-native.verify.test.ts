@@ -173,10 +173,13 @@ describe('BPORT11 cluster 4 — the movement cluster, censused off the atoms', (
     // directly: the population is real, non-empty, and fork-shaped.
     // 1624 is likewise a fresh census — the old arm asserted only that the two gates agreed,
     // and never said on how many. Pinned so the gate cannot go quiet the way its bag twin did.
+    // 1624 -> 1620 at i28p4 RC3, resolved by name rather than bumped: the four that left are
+    // Radiance on controller, corruptor, defender and mastermind, which the Light Affinity
+    // rework stopped giving a combat debuff. Three static forks did not move a single power.
     const carrying = [...views()].filter(([, p]) => carries_combat_debuff(p as never)).map(([id]) => id);
     expect(carrying, 'carries_combat_debuff answered for nothing').not.toHaveLength(0);
-    expect(carrying).toHaveLength(1624);
-    expect(byFork(carrying)).toEqual({ homecoming: 433, rebirth: 387, thunderspy: 361, brainstorm: 443 });
+    expect(carrying).toHaveLength(1620);
+    expect(byFork(carrying)).toEqual({ homecoming: 433, rebirth: 387, thunderspy: 361, brainstorm: 439 });
   });
 
   it('restores the jump root two forks lost to an untagged bag entry', () => {
