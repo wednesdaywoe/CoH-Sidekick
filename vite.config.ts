@@ -312,6 +312,21 @@ export default defineConfig({
             // objection doesn't apply — a typical visitor holds one. Capped by entry
             // count (≈2 deploys × 3 datasets) and deliberately given NO maxAgeSeconds:
             // a TTL would expire the very chunk a stale shell still needs.
+            //
+            // It does not cover the FIRST visit, and cannot. The worker is installing
+            // while that page boots, so it is not controlling it yet when the boot
+            // fetches its dataset chunk — that fetch goes around the worker and is
+            // never stored. So a first visit ends with the deploy-N shell precached
+            // and nothing in this cache, and the next visit after a deploy asks origin
+            // for a chunk that is no longer there. Measured on coh-sidekick.com
+            // 2026-09-20 with a fresh profile: after a full successful load,
+            // `controller` was null and the only cache was the precache.
+            //
+            // Adding `clientsClaim` does not close it — measured against a local build
+            // of this config the same day, the claim lands after the boot fetch, so
+            // that visit still stores no dataset chunk. What closes it is the recovery
+            // in index.html and chunk-error-reload.ts, which throws the stale shell
+            // away instead of trying to keep feeding it.
             urlPattern: ({ url, sameOrigin }) =>
               sameOrigin && /^\/assets\/dataset-[a-z]+-[\w-]+\.js$/.test(url.pathname),
             handler: 'CacheFirst',

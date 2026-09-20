@@ -189,15 +189,33 @@
       </div>
     </div>
     <!--
-      Reveal the stale-cache recovery hint (#load-trouble) when a dynamically
-      imported module fails to load or when loading stalls. Registered as a
-      classic (non-module) script BEFORE main.tsx so the listeners are in place
-      before the app bundle runs and can throw. data-cfasync="false" keeps
-      Cloudflare Rocket Loader from deferring it.
+      Recover from — or, failing that, explain — a boot that cannot load a
+      dynamically imported module.
+
+      The usual cause is a stale precached shell. The service worker answers the
+      navigation with deploy N's index.html, that shell imports
+      `dataset-<id>-<N-hash>.js`, and deploy N+1 has already deleted that file
+      from origin. The tab cannot escape on its own, because every reload is
+      answered by the same cached shell and fails identically — only a hard
+      refresh, which bypasses the worker, gets out. So the first module failure
+      drops the precache, unregisters the worker and reloads: the hard refresh,
+      performed for the user instead of asked of them. The hint (#load-trouble)
+      is what is left when that cannot run, or ran and did not work.
+
+      Registered as a classic (non-module) script BEFORE main.tsx so the
+      listeners are in place before the app bundle runs and can throw. It lives
+      here rather than in chunk-error-reload.ts because in this failure React
+      never mounts, so nothing in the app bundle gets to run.
+      data-cfasync="false" keeps Cloudflare Rocket Loader from deferring it.
     -->
     <script data-cfasync="false">
       (function () {
         var shown = false;
+        var recovering = false;
+        // Shared with src/utils/chunk-error-reload.ts. Whichever of the two sees
+        // a failure first owns the single recovery a session is allowed, so the
+        // other falls through to its own message instead of reloading again.
+        var RECOVERY_FLAG = 'sidekick-sw-recovery-attempted';
         function showLoadTrouble() {
           if (shown) return;
           var el = document.getElementById('load-trouble');
@@ -209,21 +227,86 @@
         function isModuleLoadError(msg) {
           return /dynamically imported module|dynamic import|Importing a module script failed|Failed to fetch|module script|preload|ChunkLoadError/i.test(msg || '');
         }
+        /*
+         * Throw away the stale shell and reload. Returns true when a reload is
+         * on its way, false when the caller should fall back to the hint.
+         *
+         * Only Cache Storage is touched, never localStorage or IndexedDB, so no
+         * saved build is at risk.
+         *
+         * Deleting the precache is the part that makes the reload count.
+         * Workbox's precache strategy falls back to the network when the entry
+         * it wants is missing, so a still-controlled tab with an emptied
+         * precache fetches the current index.html and the current chunks it
+         * names. Measured against a local build 2026-09-20: precache deleted,
+         * worker left in place, page loaded.
+         *
+         * Unregistering is belt-and-braces on top of that, and it often no-ops — the
+         * reloaded page re-registers the same scope fast enough that the browser
+         * revives the registration it was uninstalling, so no fresh install runs
+         * (also measured). It stays because when it does take, the next visit
+         * starts from a clean install rather than an empty precache.
+         *
+         * The document is re-fetched with `cache: 'reload'` first because GitHub
+         * Pages serves index.html with max-age=600 — without that the browser's
+         * own HTTP cache would hand back the same stale HTML for up to ten more
+         * minutes and the recovery would burn itself for nothing.
+         */
+        function recoverFromStaleShell() {
+          if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return false;
+          try {
+            if (sessionStorage.getItem(RECOVERY_FLAG) === '1') return false;
+            sessionStorage.setItem(RECOVERY_FLAG, '1');
+          } catch (e) {
+            // Storage blocked (private mode, third-party restrictions). Without
+            // somewhere to record the attempt this could reload forever, so it
+            // does not get to start.
+            return false;
+          }
+          var reload = function () { window.location.reload(); };
+          var dropped = window.caches
+            ? window.caches.keys().then(function (keys) {
+                return Promise.all(keys.map(function (k) {
+                  return /^workbox-precache/.test(k) ? window.caches.delete(k) : null;
+                }));
+              })
+            : Promise.resolve();
+          dropped
+            .then(function () { return navigator.serviceWorker.getRegistrations(); })
+            .then(function (regs) {
+              return Promise.all(regs.map(function (r) { return r.unregister(); }));
+            })
+            .then(function () {
+              return fetch(window.location.href, { cache: 'reload', credentials: 'same-origin' });
+            })
+            .then(reload, reload);
+          return true;
+        }
+        function onModuleLoadFailure() {
+          if (recovering) return;
+          if (recoverFromStaleShell()) {
+            recovering = true;
+            return;
+          }
+          showLoadTrouble();
+        }
         // Vite's official signal that a dynamic-import preload failed.
-        window.addEventListener('vite:preloadError', showLoadTrouble);
+        window.addEventListener('vite:preloadError', onModuleLoadFailure);
         // The failed import() surfaces as an unhandled promise rejection
         // (matches the "error loading dynamically imported module" report).
         window.addEventListener('unhandledrejection', function (e) {
           var r = e && e.reason;
           var msg = r && (r.message || (typeof r === 'string' ? r : ''));
-          if (isModuleLoadError(msg)) showLoadTrouble();
+          if (isModuleLoadError(msg)) onModuleLoadFailure();
         });
         window.addEventListener('error', function (e) {
-          if (e && e.message && isModuleLoadError(e.message)) showLoadTrouble();
+          if (e && e.message && isModuleLoadError(e.message)) onModuleLoadFailure();
         }, true);
         // Safety net for a silent stall. The homecoming dataset chunk is large
         // (~16MB), so keep this generous to avoid nagging genuinely slow loads;
-        // real chunk-404 failures trip the listeners above near-instantly.
+        // real chunk-404 failures trip the listeners above near-instantly. A
+        // stall is not evidence of a stale shell — it is as likely to be a slow
+        // network — so it shows the hint rather than spending the recovery.
         setTimeout(showLoadTrouble, 20000);
       })();
     </script>

@@ -10,18 +10,33 @@
  *   - Chrome:  "Failed to fetch dynamically imported module"
  *   - Firefox: "error loading dynamically imported module"
  *
- * The service worker (vite-plugin-pwa, prompt mode) is the real fix: it
- * precaches the shell so a controlled tab keeps serving the *old* chunks
- * from cache until the user accepts the update — no 404. This guard only
- * matters for pages the SW doesn't yet control: a deploy landing during a
- * user's first-ever session, before the SW takes over. In that narrow case
- * we reload once to pick up current assets.
+ * The service worker (vite-plugin-pwa, prompt mode) is meant to absorb this:
+ * it precaches the shell so a controlled tab keeps serving the *old* chunks
+ * from cache until the user accepts the update — no 404. It holds only while
+ * the old chunks are still somewhere. They are not always: the dataset chunks
+ * are deliberately kept out of precache (8-15 MB each, see vite.config.ts) and
+ * land in the `sidekick-datasets` runtime cache only if they were fetched
+ * while the worker was in control. When that cache is empty or has evicted the
+ * entry, a controlled tab asks origin for a chunk the current deploy no longer
+ * has, and gets a 404.
+ *
+ * Which is why the two paths below differ by who is serving the page. On an
+ * uncontrolled page a plain reload fetches current assets and fixes it. On a
+ * controlled page a plain reload is answered by the same precached shell and
+ * fails identically — every time, forever. So there we drop the precache and
+ * the worker first, which is what a hard refresh does, and only then reload.
  *
  * Recovery is intentionally silent — the "update available" prompt owns all
  * update messaging now; this is just plumbing. A sessionStorage flag
  * prevents an infinite reload loop if the fresh page also fails (a real
  * bug, not stale assets): the second hit shows a manual-reload toast
  * instead of auto-reloading.
+ *
+ * The same recovery is inlined in index.html, and has to be: in the common
+ * case the failing import is the dataset chunk the boot path needs, so React
+ * never mounts and nothing in this bundle ever runs. This copy covers a lazy
+ * chunk that fails after the app is alive. They share RECOVERY_FLAG so only
+ * one of them can spend the session's single recovery.
  */
 
 import { useUIStore } from '@/stores/uiStore';
@@ -35,10 +50,64 @@ const CHUNK_ERROR_PATTERNS: RegExp[] = [
 ];
 
 const RELOAD_FLAG = 'sidekick-chunk-reload-attempted';
+/** Shared with the inline boot script in index.html — see the note above. */
+const RECOVERY_FLAG = 'sidekick-sw-recovery-attempted';
 
 function isChunkLoadError(message: string | undefined | null): boolean {
   if (!message) return false;
   return CHUNK_ERROR_PATTERNS.some((p) => p.test(message));
+}
+
+/**
+ * Throw away the stale shell and the worker serving it, then reload. Returns
+ * true when a reload is on its way, false when the caller should handle it.
+ *
+ * Only Cache Storage is touched, never localStorage or IndexedDB, so no saved
+ * build is at risk.
+ *
+ * Deleting the precache is the part that makes the reload count: workbox's
+ * precache strategy falls back to the network when the entry it wants is gone,
+ * so a still-controlled tab with an emptied precache fetches the current
+ * index.html and the current chunks it names. Unregistering is belt-and-braces
+ * on top of that, and often no-ops, because the reloaded page re-registers the
+ * same scope fast enough that the browser revives the registration it was
+ * uninstalling. Both measured against a local build on 2026-09-20; the long
+ * version is in the index.html copy.
+ *
+ * The document is re-fetched with `cache: 'reload'` first because GitHub Pages
+ * serves index.html with max-age=600 — otherwise the browser's own HTTP cache
+ * hands back the same stale HTML for up to ten more minutes and the recovery is
+ * spent for nothing.
+ */
+function recoverFromStaleShell(): boolean {
+  if (!navigator.serviceWorker?.controller) return false;
+  try {
+    if (sessionStorage.getItem(RECOVERY_FLAG) === '1') return false;
+    sessionStorage.setItem(RECOVERY_FLAG, '1');
+  } catch {
+    // Storage blocked (private mode, third-party restrictions). With nowhere to
+    // record the attempt this could reload forever, so it does not get to start.
+    return false;
+  }
+
+  void (async () => {
+    try {
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(
+          keys.filter((k) => k.startsWith('workbox-precache')).map((k) => caches.delete(k)),
+        );
+      }
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((r) => r.unregister()));
+      await fetch(window.location.href, { cache: 'reload', credentials: 'same-origin' });
+    } catch {
+      // Whatever failed, the reload is still the best move left.
+    }
+    window.location.reload();
+  })();
+
+  return true;
 }
 
 let handled = false;
@@ -76,10 +145,19 @@ function handleChunkError(message: string) {
     return;
   }
 
-  // First hit: a stale-asset 404 on a page the SW doesn't yet control. Reload
-  // once to fetch current assets. No toast — the update prompt owns update
+  // First hit. No toast on either path — the update prompt owns update
   // messaging, and the reload is immediate so a toast wouldn't paint anyway.
   sessionStorage.setItem(RELOAD_FLAG, '1');
+
+  // A service worker is serving this page, so reloading into the same precached
+  // shell would reproduce the failure exactly. Drop the shell first.
+  if (recoverFromStaleShell()) {
+    console.warn('[sidekick] chunk load failed — dropping the stale shell and reloading:', message);
+    return;
+  }
+
+  // Nothing controls this page: a stale-asset 404 on a tab the worker hasn't
+  // taken over. Reload once to fetch current assets.
   console.warn('[sidekick] chunk load failed — auto-reloading once:', message);
   window.location.reload();
 }
