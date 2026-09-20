@@ -57,15 +57,23 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 326 entries.** STALE-3, filed 2026-09-19 out of measuring STALE-2's premise. The two
-absolute paths are remapped out of the build now, and host and container agree byte-for-byte, so
-what is left is a rebuild-and-compare that runs somewhere other than the machine writing the
-manifest.
+**0 open, of 326 entries.** STALE-3 closed 2026-09-19: a second machine now rebuilds the engine
+and compares the bytes, and the writer's own agreement with itself has stopped being the evidence.
 
-**Two builds in two directories on one machine is the evidence that cannot fail.** Cargo passes
-workspace member paths relative, so moving the checkout moves nothing. What moves the bytes is
-`$CARGO_HOME` and the rustup toolchain dir, carried in panic-location strings: six builds, three
-environments, three different binaries, each internally reproducible.
+**A gate's first run is a measurement, and this one failed three times before it passed.** The
+mac: cargo's `-C metadata` hashes rustc's verbose version, which names the host triple, so the
+symbol hashes and then the codegen order move. That one has no fix at the pin, and it is the
+bound on what the gate can claim.
+
+**The shipped binary recorded whether an OPTIONAL COMPONENT was installed.** With `rust-src`
+present rustc rewrites std's virtual `/rustc/<hash>/library/…` to the local copy, which the
+sysroot remap then rewrote again. jpc had it, espresso did not, 192 bytes apart. The absence
+check could not see it; the artifact is asserted by SHAPE now.
+
+**Two CLIs at the same version are not the same CLI.** wasm-bindgen 0.2.126 installed without
+`--locked` resolved walrus 0.26.4 on one box and 0.26.5 on the other, and writes that version
+into the artifact's `producers` section. One byte, and the version check is blind to it by
+construction: both CLIs report 0.2.126 correctly.
 
 The previous frontier, retained because its lesson stands — STALE-2 opened and closed 2026-09-19:
 `_engine_manifest.json` held a source hash and four bundle hashes and not one byte of the two
@@ -334,6 +342,25 @@ ninth is BPORT13's: a bag supplier on one fork that the supply census cannot see
 
 Open work that lives inside a closed entry. Each names its host; the host's narrative is where the
 measurement went, and where a closure for the residual belongs too.
+
+- **The engine reproduces within one host triple, not across** — host **STALE-3**
+  ([pipeline-provenance](gaps/pipeline-provenance.md)). Cargo's `-C metadata` hash takes in
+  rustc's verbose version, which names the host, so the same source on the same pin gives
+  different mangled symbols on `aarch64-apple-darwin` than on `x86_64-unknown-linux-gnu` —
+  measured off the rlib names, `18a107c2…` against `b458a9c6…` — and the reordered codegen moves
+  the code, data and type sections. A second `-C metadata` accumulates rather than replaces, so
+  there is no stable flag that removes it, and `trim-paths` would not touch this anyway. Nothing
+  shipped is wrong: the gate runs on espresso, which shares jpc's triple, and reproduces exactly.
+  What is bounded is the CLAIM — "anyone on the pin can rebuild these bytes" holds only for
+  x86_64 Linux.
+  **Goal** — the shipped `.wasm` is reproducible from the pin on any host, so the claim does not
+  carry an unwritten "…if your machine is like mine".
+  **Done when** — the build runs inside an image pinned by digest, the WRITER included, and a
+  rebuild of that image on a foreign triple reproduces the committed artifacts; or the pin moves
+  to a toolchain where the host is out of the metadata hash and a cross-triple arm is measured
+  green.
+  **Check** — `npm run verify:engine` in `../CoH-Sidekick` on an arm64 macOS box reds today, with
+  `DOES NOT REPRODUCE` on both `.wasm` and nothing else moved. Falsified if it passes.
 
 - **The supply census is blind to the overrides layer** — host **PROD6B-BETA-PARITY**
   ([pipeline-provenance](gaps/pipeline-provenance.md), BPORT13). STRIP-1 named five bag suppliers
@@ -935,7 +962,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 111 of 112 closed
+[Full detail](gaps/pipeline-provenance.md) — 112 of 112 closed
 
 - [x] **ICON-2** — `normalizeIconPath` read the client's own art extensions as filenames in both
   directions — `.dds` passed its "already has one" test untouched and `.texture` failed it and
@@ -1456,22 +1483,11 @@ measurement went, and where a closure for the residual belongs too.
   across hosts. Carried to STALE-3.
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
-- [ ] **STALE-3** — the engine build reproduces off `jpc` now, but nothing grades that: the
-  rebuild-and-compare gate that would have caught STALE-2 still does not exist. `panic::Location`
-  strings in the `data` section carried the rustup toolchain dir and `$CARGO_HOME/registry`; the
-  workspace path is NOT embedded, which is why two directories on one machine could never see it.
-  Both prefixes are host-specific, so `build-engine.mjs` derives them at build time — a cargo
-  config cannot hold them, and `trim-paths` is still unstable on 1.96.1.
-  **Landed 2026-09-19** — the two `--remap-path-prefix` flags and the artifacts rebuilt under them
-  (`cb71735b…`, 2529254 bytes). Host and a container differing in workspace path, `$CARGO_HOME`,
-  sysroot, `$HOME` and hostname agree byte-for-byte, against a no-remap control reproducing arm A
-  exactly. Not arm F's predicted bytes: that arm logged its result and never its flags.
-  **Goal** — the shipped `.wasm` is reproducible by anyone on the pin, so the gate can rebuild
-  rather than take the manifest's word for what came out.
-  **Done when** — a rebuild-and-compare runs somewhere that is NOT the writer; canonical CI is
-  self-hosted on `jpc`, so a same-host job grades nothing the writer did not already grade.
-  **Check** — `build-engine.mjs` fails the build when a remapped prefix is still embedded, so a
-  flag resolving to a real-but-unused path cannot pass as done
+- [x] **STALE-3** — the engine reproduced off `jpc` and nothing graded it. Closed 2026-09-19 —
+  `--verify` rebuilds into a scratch tree and grades the bytes; espresso reproduced all 8, nine
+  mutations red. Three host-specific families on contact: the host triple in `-C metadata`
+  (residual), `rust-src` rewriting std's paths, walrus in `producers`.
+  **Check** — `npm run verify:engine` in `../CoH-Sidekick`, on a box that is not `jpc`.
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
 - [x] **Advisory checks** — adjudicated binary-first; Mids retired as an authority

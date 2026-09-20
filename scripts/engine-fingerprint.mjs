@@ -50,6 +50,11 @@
  * `--compare` also grades the shipped artifacts against the `artifacts` key the manifest now
  * carries, reading them from the manifest's own directory (override with `--engine-dir`). With
  * no `--compare` this prints the INPUT halves only — it is a debugging aid, not the writer.
+ *
+ * {@link gradeRebuild} is here for the same reason as the hash: it is the verdict
+ * `build-engine.mjs --verify` reaches when it has rebuilt the engine and wants to know whether
+ * the bytes match. That script cannot run without cargo, so a rule written inside it could never
+ * be graded by the beta's own suite; written here it is a pure function the vitest file mutates.
  */
 
 import { createHash } from 'node:crypto';
@@ -291,6 +296,62 @@ export function fingerprintArtifacts(engineDir) {
     );
   }
   return artifacts;
+}
+
+/**
+ * Grade a REBUILD against the committed engine — the half no hash taken at write time can do.
+ *
+ * {@link fingerprintArtifacts} at `--write` time hashes the file the writer has just produced, so
+ * it agrees by construction; it catches the manifest and the tree drifting apart afterwards and
+ * cannot be evidence that the build reproduces. The only evidence for that is building a second
+ * time somewhere else and comparing, which is what `build-engine.mjs --verify` does and what this
+ * function judges (STALE-3).
+ *
+ * Three verdicts, not two, and the third is the point. If the rebuild's sources are not the ones
+ * the committed artifacts were built from, the bytes SHOULD differ and this run has measured
+ * staleness, not reproducibility — reporting that as "does not reproduce" would be a true failure
+ * with a false diagnosis, which is the shape STALE-1 already cost. It is still not a pass: a gate
+ * that reports green when it could not grade is the family of defect this row belongs to.
+ *
+ * @param {{manifest: {source?: string, bundles?: Record<string,string>, artifacts?: Record<string,string>}, inputs: {source: string, bundles?: Record<string,string>}, committed: Record<string,string>, rebuilt: Record<string,string>}} args
+ * @returns {{verdict: 'reproduces'|'inconclusive'|'differs', problems: string[]}}
+ */
+export function gradeRebuild({ manifest, inputs, committed, rebuilt }) {
+  if (inputs.source !== manifest.source) {
+    return {
+      verdict: 'inconclusive',
+      problems: [
+        `the rebuild's engine sources are not the ones the committed artifacts were built from ` +
+          `(manifest ${String(manifest.source).slice(0, 12)}…, rebuild ${inputs.source.slice(0, 12)}…), ` +
+          `so a byte difference below would not be a reproducibility failure. That mismatch is what ` +
+          `\`engine-fingerprint.mjs --compare\` grades; fix the staleness, then re-run this.`,
+      ],
+    };
+  }
+
+  const problems = [];
+  for (const name of [...new Set([...Object.keys(committed), ...Object.keys(rebuilt)])].sort()) {
+    const a = committed[name];
+    const b = rebuilt[name];
+    if (a === b) continue;
+    if (!a) problems.push(`${name}: this build produced it, the beta does not ship it.`);
+    else if (!b) problems.push(`${name}: the beta ships it, this build did not produce it.`);
+    else problems.push(`${name}: committed ${a.slice(0, 12)}…, rebuilt ${b.slice(0, 12)}… — DOES NOT REPRODUCE.`);
+  }
+
+  // And the manifest against the files beside it. `--compare` grades that too; it is repeated
+  // here because this is the only caller holding all three, so it can name which of the three
+  // moved rather than leaving two red jobs pointing at each other.
+  if (!manifest.artifacts) {
+    problems.push(`the committed manifest has no "artifacts" key — rebuild it with \`npm run build:engine\`.`);
+  } else {
+    for (const name of [...new Set([...Object.keys(manifest.artifacts), ...Object.keys(committed)])].sort()) {
+      if (manifest.artifacts[name] === committed[name]) continue;
+      problems.push(`${name}: the committed file and the manifest disagree — manifest desync, not a build difference.`);
+    }
+  }
+
+  return { verdict: problems.length === 0 ? 'reproduces' : 'differs', problems };
 }
 
 /** Human-readable diff of two fingerprints; empty array means they match. */

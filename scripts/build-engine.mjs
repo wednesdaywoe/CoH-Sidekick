@@ -13,21 +13,41 @@
  *   3. Copy the rebuild's per-dataset contract bundles into public/engine/contract/
  *      as <server>.json.gz (what engine.ts fetches at boot).
  *
- * The rebuild repo is located via COH_REBUILD_DIR, defaulting to the sibling checkout.
- * Every input is verified before use; a missing rebuild, a version skew, or a missing
- * bundle aborts with a specific message rather than emitting a half-built engine.
+ * The rebuild repo is located via COH_REBUILD_DIR (or --rebuild-dir), defaulting to the
+ * sibling checkout. Every input is verified before use; a missing rebuild, a version skew,
+ * or a missing bundle aborts with a specific message rather than emitting a half-built engine.
+ *
+ * `--verify` runs steps 1 and 2 into a scratch directory and compares what came out against
+ * the committed artifacts instead of replacing them (STALE-3). It writes nothing into the
+ * beta tree. That mode exists so a machine which is NOT the one that wrote the manifest can
+ * rebuild and grade the bytes: every hash in `_engine_manifest.json` is taken of the file the
+ * writer had just produced, so it agrees by construction and can never be the evidence that
+ * the build reproduces. Only a second build somewhere else is.
+ *
+ * It lives HERE rather than in a gate script of its own because the two must build alike. The
+ * remap flags below are derived per host, and STALE-3's own arm F is the lesson: it logged the
+ * bytes it produced and not the flags that produced them, so its number was unreproducible
+ * three days later. A verifier that spells the flags a second time is arm F with a green tick.
  */
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, copyFileSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { existsSync, mkdirSync, mkdtempSync, copyFileSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { assertIncludesMatchDepInfo, fingerprintArtifacts, fingerprintRebuild } from './engine-fingerprint.mjs';
+import { assertIncludesMatchDepInfo, fingerprintArtifacts, fingerprintRebuild, gradeRebuild } from './engine-fingerprint.mjs';
 import { fileURLToPath } from 'node:url';
 
 const betaRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const rebuildDir = resolve(process.env.COH_REBUILD_DIR ?? join(betaRoot, '..', 'coh-sidekick-1.0'));
+
+const flagValue = (flag) => {
+  const i = process.argv.indexOf(flag);
+  return i === -1 ? null : process.argv[i + 1];
+};
+/** Rebuild-and-compare instead of rebuild-and-replace. Writes nothing into the beta tree. */
+const verifyOnly = process.argv.includes('--verify');
+const rebuildDir = resolve(flagValue('--rebuild-dir') ?? process.env.COH_REBUILD_DIR ?? join(betaRoot, '..', 'coh-sidekick-1.0'));
+const engineDir = resolve(flagValue('--engine-dir') ?? join(betaRoot, 'src', 'engine'));
 
 function die(message) {
   console.error(`\n[build-engine] ${message}\n`);
@@ -60,7 +80,7 @@ try {
 } catch {
   die(
     `wasm-bindgen CLI not found. Install the pinned version:\n` +
-      `  cargo install -f wasm-bindgen-cli --version ${requiredCliVersion}`,
+      `  cargo install -f wasm-bindgen-cli --version ${requiredCliVersion} --locked`,
   );
 }
 
@@ -68,10 +88,17 @@ if (installedCliVersion !== requiredCliVersion) {
   die(
     `wasm-bindgen CLI ${installedCliVersion} != crate-resolved ${requiredCliVersion}.\n` +
       `The CLI and the linked lib must match. Install the pinned version:\n` +
-      `  cargo install -f wasm-bindgen-cli --version ${requiredCliVersion}`,
+      `  cargo install -f wasm-bindgen-cli --version ${requiredCliVersion} --locked`,
   );
 }
 console.log(`[build-engine] wasm-bindgen ${installedCliVersion} matches rebuild lockfile`);
+// `--locked` in both hints above, and it is not tidiness. The version equality checked here is
+// the CLI's OWN version, and two CLIs at 0.2.126 installed on different days resolve different
+// versions of walrus, which wasm-bindgen writes into the .wasm's `producers` section. That is a
+// one-byte difference in a shipped artifact, invisible to every check that existed, and it is
+// what the rebuild gate caught on its first foreign run (2026-09-19): jpc `walrus 0.26.4`,
+// espresso `0.26.5`, everything else byte-identical. Installing from the crate's own lockfile is
+// what makes two hosts agree; this script cannot verify it, the gate is what notices.
 
 // --- 2. build the wasm + emit the browser glue ---
 
@@ -113,13 +140,43 @@ const registryPrefix = join(cargoRegistrySrc, registryIndexes[0]);
 const sysrootPrefix = execFileSync('rustc', ['--print', 'sysroot'], { cwd: rebuildDir, encoding: 'utf8' }).trim();
 if (!sysrootPrefix) die('rustc --print sysroot returned nothing; cannot remap the toolchain path.');
 
+// The third family, and it is not a path the builder chose — it is an OPTIONAL COMPONENT.
+//
+// rustc ships std already virtualised: a panic site in `alloc` is recorded as
+// `/rustc/<commit-hash>/library/alloc/src/...`, which is the same on every machine. But when the
+// `rust-src` component is installed, rustc translates that virtual prefix BACK to the local copy
+// under `<sysroot>/lib/rustlib/src/rust`, so the real sysroot path is what reaches the .wasm —
+// and the remap above then rewrites it to `/rustc/lib/rustlib/src/rust/library/...`. Two hosts on
+// the same toolchain, same triple, same flags, differing only in whether someone once ran
+// `rustup component add rust-src`, produce 192 bytes of different string data and, once every
+// later address has shifted, a different code section too. Measured, 2026-09-19: jpc (rust-src
+// installed) against espresso (not), both x86_64 Linux on the 1.96.1 pin.
+//
+// So map the local rust-src tree onto the spelling a machine without it emits anyway. This rule
+// is listed FIRST and rustc takes the longest match, so the sysroot rule below cannot shadow it.
+const rustcCommitHash = execFileSync('rustc', ['-vV'], { cwd: rebuildDir, encoding: 'utf8' })
+  .split('\n')
+  .find((line) => line.startsWith('commit-hash: '))
+  ?.slice('commit-hash: '.length)
+  .trim();
+if (!rustcCommitHash || !/^[0-9a-f]{40}$/.test(rustcCommitHash)) {
+  die(
+    `rustc -vV gave no usable commit-hash (got ${JSON.stringify(rustcCommitHash ?? null)}).\n` +
+      `That hash IS the virtual prefix std's paths carry, so without it a host with the rust-src\n` +
+      `component installed cannot be made to agree with one without it.`,
+  );
+}
+const rustSrcPrefix = join(sysrootPrefix, 'lib', 'rustlib', 'src', 'rust');
+
 // RUSTFLAGS is split on spaces, and both prefixes are paths that may contain them. The encoded
 // form is unit-separator-delimited and has no such ambiguity.
 const UNIT_SEPARATOR = String.fromCharCode(0x1f);
 const remapFlags = [
+  `--remap-path-prefix=${rustSrcPrefix}=/rustc/${rustcCommitHash}`,
   `--remap-path-prefix=${registryPrefix}=/cargo`,
   `--remap-path-prefix=${sysrootPrefix}=/rustc`,
 ];
+console.log(`[build-engine] remapping ${rustSrcPrefix} -> /rustc/${rustcCommitHash}`);
 console.log(`[build-engine] remapping ${registryPrefix} -> /cargo`);
 console.log(`[build-engine] remapping ${sysrootPrefix} -> /rustc`);
 
@@ -146,6 +203,24 @@ for (const [label, prefix] of [['registry', registryPrefix], ['toolchain', sysro
     );
   }
 }
+// Every `/rustc/…` left in the bytes must be the virtualised form std already ships with, which
+// is the one spelling a machine cannot influence. This is the check that would have caught the
+// rust-src collision above by itself: under the old flags jpc emitted `/rustc/lib/rustlib/src/…`
+// and no assertion looked, so the difference only surfaced as a hash mismatch on another box,
+// three sections away from its cause. Reading the shape rather than the absence of one prefix
+// generalises: any future rule that maps something else under `/rustc` reds here.
+const VIRTUAL_STD_PREFIX = /\/rustc\/(?![0-9a-f]{40}\/)[\x20-\x7e]{0,60}/g;
+const strayStd = [...new Set(String(wasmBytes).match(VIRTUAL_STD_PREFIX) ?? [])];
+if (strayStd.length > 0) {
+  die(
+    `the .wasm carries \`/rustc/…\` paths that are not std's virtualised \`/rustc/<commit-hash>/\`:\n` +
+      strayStd.slice(0, 10).map((line) => `  ${line}`).join('\n') +
+      `${strayStd.length > 10 ? `\n  … and ${strayStd.length - 10} more` : ''}\n` +
+      `The usual cause is the rust-src component: rustc rewrites std's virtual paths to the local\n` +
+      `copy when it is installed, so this host embeds something a host without it does not.`,
+  );
+}
+
 // And a wider sweep, because the two prefixes are what was MEASURED, not a proof that nothing
 // else carries the machine. A third family appearing later would otherwise re-host-lock the
 // artifact in silence, which is the failure this whole entry is about.
@@ -173,17 +248,76 @@ try {
   die(error.message);
 }
 
-const wasmOutDir = join(betaRoot, 'src', 'engine', 'wasm');
+// Under `--verify` the glue is emitted into a scratch tree and the committed one is left alone:
+// a gate that overwrites what it is grading has graded nothing, and on a CI runner it would also
+// leave the checkout dirty for whatever runs next.
+const outEngineDir = verifyOnly ? mkdtempSync(join(tmpdir(), 'coh-engine-verify-')) : engineDir;
+if (verifyOnly) console.log(`[build-engine] --verify: emitting into ${outEngineDir}, comparing against ${engineDir}`);
+
+const wasmOutDir = join(outEngineDir, 'wasm');
 mkdirSync(wasmOutDir, { recursive: true });
 run('wasm-bindgen', ['--target', 'web', '--out-dir', wasmOutDir, '--out-name', 'coh_wasm', wasmArtifact], betaRoot);
 
-const nodeOutDir = join(betaRoot, 'src', 'engine', 'wasm-node');
+const nodeOutDir = join(outEngineDir, 'wasm-node');
 mkdirSync(nodeOutDir, { recursive: true });
 run('wasm-bindgen', ['--target', 'nodejs', '--out-dir', nodeOutDir, '--out-name', 'coh_wasm', wasmArtifact], betaRoot);
 // The emitted glue is CommonJS but lands as `.js`, which this ESM package would parse as a
 // module — the gates `require` it as `.cjs`. Rename rather than leave both, or the stale one
 // keeps being the file that loads.
 renameSync(join(nodeOutDir, 'coh_wasm.js'), join(nodeOutDir, 'coh_wasm.cjs'));
+
+// --- 2b. --verify: grade what this build produced against what is committed (STALE-3) ---
+//
+// This is the half `_engine_manifest.json` structurally cannot do. Its `artifacts` hashes are
+// taken at write time of the files step 2 has just written, so they agree by construction; they
+// catch the manifest and the committed tree DRIFTING APART afterwards (STALE-2) and say nothing
+// about whether the build reproduces. The only evidence for that is a second build, and a second
+// build on the writer's own machine grades the writer's machine. So the verdict below is worth
+// exactly as much as the distance between the runner and `jpc` — see the job in canonical's CI.
+//
+// Three-way, because with the rebuilt bytes in hand all three disagreements are distinguishable
+// and they have different fixes. Saying which one it is matters more than saying it is red: a
+// stale beta reds this job for a reason that is not reproducibility, and reporting THAT as a
+// reproducibility failure is STALE-1's lesson (a true message with the wrong diagnosis) repeated.
+if (verifyOnly) {
+  const manifestPath = join(engineDir, '_engine_manifest.json');
+  if (!existsSync(manifestPath)) {
+    die(`no manifest at ${manifestPath} — nothing to compare this build against.`);
+  }
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  const rebuilt = fingerprintArtifacts(outEngineDir);
+  const committed = fingerprintArtifacts(engineDir);
+  const inputs = fingerprintRebuild(rebuildDir);
+
+  // The verdict itself is in engine-fingerprint.mjs, for the same reason the hash is: this file
+  // needs a real cargo build to run, so nothing in the beta's own CI could ever grade a rule
+  // written here. Over there it is a pure function the vitest suite mutates.
+  const { verdict, problems } = gradeRebuild({ manifest, inputs, committed, rebuilt });
+
+  if (verdict === 'inconclusive') {
+    die(`INCONCLUSIVE — ${problems[0]}\nScratch build left at ${outEngineDir}.`);
+  }
+  if (verdict === 'differs') {
+    console.error(
+      `\n[build-engine] --verify: this host's build is not the engine the beta ships:\n\n` +
+        problems.map((p) => `  - ${p}`).join('\n') +
+        `\n\nScratch build left at ${outEngineDir} for diffing.\n` +
+        `A "DOES NOT REPRODUCE" line means the .wasm still carries something that moves with the\n` +
+        `machine. The two remapped prefixes are already asserted absent from the bytes above, so a\n` +
+        `third family is the thing to look for: \`strings\` both .wasm and diff them.\n`,
+    );
+    process.exit(1);
+  }
+
+  rmSync(outEngineDir, { recursive: true, force: true });
+  console.log(
+    `[build-engine] --verify: ${Object.keys(rebuilt).length} artifact(s) rebuilt on this host are byte-identical\n` +
+      `                        to the committed ones, and the manifest records those same bytes.\n` +
+      `                        (Contract bundles and the generated TS modules are the input half — ` +
+      `\`engine-fingerprint.mjs --compare\` grades those.)`,
+  );
+  process.exit(0);
+}
 
 // --- 3. copy the per-dataset contract bundles ---
 
@@ -281,7 +415,6 @@ console.log(`[build-engine] effect registry -> src/data/generated/effect-registr
 // committed `wasm*/` having drifted apart afterwards — a half-copied refresh, a stale `wasm-node`
 // beside a fresh `wasm`, a bad merge — which no input hash can see, since every input still
 // matches. STALE-2 is the row that separates the two.
-const engineDir = join(betaRoot, 'src', 'engine');
 const manifestOut = join(engineDir, '_engine_manifest.json');
 const manifest = { ...fingerprintRebuild(rebuildDir), artifacts: fingerprintArtifacts(engineDir) };
 writeFileSync(manifestOut, `${JSON.stringify(manifest, null, 2)}\n`);

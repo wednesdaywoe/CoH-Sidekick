@@ -7,6 +7,7 @@ import {
   diffFingerprints,
   fingerprintArtifacts,
   fingerprintRebuild,
+  gradeRebuild,
 } from '../../scripts/engine-fingerprint.mjs';
 
 /**
@@ -291,5 +292,108 @@ describe('engine artifact fingerprint', () => {
       rmSync(rebuild, { recursive: true, force: true });
       rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+
+/**
+ * The rebuild verdict — the half the hashes above structurally cannot reach.
+ *
+ * `fingerprintArtifacts` is taken of the file `build-engine.mjs` has just written, so the manifest
+ * agrees with the tree by construction. That catches the two drifting apart afterwards and is
+ * silent on whether the build REPRODUCES, which is the question STALE-3 asks: build a second time
+ * on a machine that is not the writer, and compare. `gradeRebuild` is the judgement in that
+ * comparison, and it lives in the shared module rather than in `build-engine.mjs` because the
+ * script needs a real cargo build to run and the beta's CI has neither Rust nor a canonical
+ * checkout — a rule written there could never be graded here.
+ *
+ * The real-build arm runs in canonical's CI on a foreign runner. These are its mutations.
+ */
+describe('rebuild verdict', () => {
+  const artifacts = { 'wasm/coh_wasm_bg.wasm': 'aaa', 'wasm-node/coh_wasm_bg.wasm': 'bbb' };
+  const manifest = { source: 'src-hash', bundles: {}, artifacts };
+  const inputs = { source: 'src-hash', bundles: {} };
+
+  it('passes only when all three agree: committed, rebuilt, and what the manifest records', () => {
+    expect(gradeRebuild({ manifest, inputs, committed: artifacts, rebuilt: { ...artifacts } })).toEqual({
+      verdict: 'reproduces',
+      problems: [],
+    });
+  });
+
+  it('reds when the rebuilt bytes differ from the shipped ones — the property itself', () => {
+    const { verdict, problems } = gradeRebuild({
+      manifest,
+      inputs,
+      committed: artifacts,
+      rebuilt: { ...artifacts, 'wasm/coh_wasm_bg.wasm': 'ccc' },
+    });
+    expect(verdict).toBe('differs');
+    expect(problems).toEqual([expect.stringMatching(/wasm\/coh_wasm_bg\.wasm.*DOES NOT REPRODUCE/)]);
+  });
+
+  it('calls a stale rebuild INCONCLUSIVE rather than a reproducibility failure', () => {
+    // The bytes WILL differ here and saying "does not reproduce" would be true and misdiagnosed,
+    // sending someone hunting host-specific strings in a .wasm built from other sources. STALE-1
+    // is the row that cost: its staleness message was true and its "the tree moved" was wrong.
+    const { verdict, problems } = gradeRebuild({
+      manifest,
+      inputs: { source: 'moved-on', bundles: {} },
+      committed: artifacts,
+      rebuilt: { ...artifacts, 'wasm/coh_wasm_bg.wasm': 'ccc' },
+    });
+    expect(verdict).toBe('inconclusive');
+    expect(problems[0]).toMatch(/not the ones the committed artifacts were built from/);
+    expect(problems[0]).not.toMatch(/DOES NOT REPRODUCE/);
+  });
+
+  it('does not let inconclusive read as a pass', () => {
+    // A gate that cannot grade must not report green. This is the assertion that stops someone
+    // "fixing" the noisy stale case by returning reproduces with an empty problem list.
+    expect(
+      gradeRebuild({ manifest, inputs: { source: 'moved-on', bundles: {} }, committed: artifacts, rebuilt: artifacts })
+        .verdict,
+    ).toBe('inconclusive');
+  });
+
+  it('names an artifact only one side has, in both directions', () => {
+    const extra = gradeRebuild({
+      manifest,
+      inputs,
+      committed: artifacts,
+      rebuilt: { ...artifacts, 'wasm-bundler/coh_wasm_bg.wasm': 'ddd' },
+    });
+    expect(extra.problems).toEqual([expect.stringMatching(/wasm-bundler.*the beta does not ship it/)]);
+
+    const missing = gradeRebuild({
+      manifest,
+      inputs,
+      committed: artifacts,
+      rebuilt: { 'wasm/coh_wasm_bg.wasm': 'aaa' },
+    });
+    expect(missing.problems).toEqual([expect.stringMatching(/wasm-node.*this build did not produce it/)]);
+  });
+
+  it('separates a manifest desync from a build difference, because the fixes differ', () => {
+    // The committed file and the rebuild agree; the manifest is the odd one out. Reporting that
+    // as "does not reproduce" would send someone to the compiler for a bookkeeping error.
+    const { verdict, problems } = gradeRebuild({
+      manifest: { ...manifest, artifacts: { ...artifacts, 'wasm/coh_wasm_bg.wasm': 'stale-record' } },
+      inputs,
+      committed: artifacts,
+      rebuilt: { ...artifacts },
+    });
+    expect(verdict).toBe('differs');
+    expect(problems).toEqual([expect.stringMatching(/manifest desync, not a build difference/)]);
+  });
+
+  it('reds on a manifest with no artifacts key instead of grading the pair it can see', () => {
+    const { verdict, problems } = gradeRebuild({
+      manifest: { source: 'src-hash', bundles: {} },
+      inputs,
+      committed: artifacts,
+      rebuilt: { ...artifacts },
+    });
+    expect(verdict).toBe('differs');
+    expect(problems).toEqual([expect.stringMatching(/no "artifacts" key/)]);
   });
 });
