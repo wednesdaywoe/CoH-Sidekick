@@ -15,13 +15,15 @@ from the gitignored `.pigg` archives. That was done: the wiring is provably
 inert, zero of the 79,297 committed power files moved, and the whole diff is
 this call plus a fingerprint bump in fourteen manifests.
 
-This module is NOT itself inside that fingerprint — the glob is
-`parser/**/*.py` plus the exporter entry modules, and this file is neither. So a
-future change to the rule below changes what the exporter writes and no
-staleness gate notices. That is true of every helper under `bin_crawler/` that
-an exporter imports (`assets_dir.py` has the same property), and it is why
-`tests/test_export_path_components.py` grades the rule against the whole
-committed tree rather than leaning on the fingerprint to notice.
+This module WAS outside that fingerprint — the glob was `parser/**/*.py` plus
+the exporter entry modules, and this file is neither — so a change to the rule
+below changed what the exporter writes with no staleness gate to notice. F78's
+second half closed that by widening the glob to every `.py` in the package, so
+this file, `assets_dir.py` and every other helper an exporter imports are now
+inside it. `tests/test_export_path_components.py` still grades the rule against
+the whole committed tree rather than leaning on the fingerprint: a fingerprint
+says the tree was written by this exporter, and the sweep says every name in it
+is a name.
 """
 from __future__ import annotations
 

@@ -48,6 +48,17 @@ accepted trade for a glob nobody has to maintain. Modules an exporter never
 imports (`server.py`, `preflight.py`) are swept in too; at their churn that is
 cheaper than a rule deciding which imports count.
 
+
+**The tax, stated so the next person is not surprised by it.** The fingerprint
+is over source BYTES, so editing a comment in any `.py` here — this file, a
+docstring in `path_safety.py`, anything — invalidates all eighteen manifests
+and the only way back to green is re-running every export (about twenty-five
+minutes across the four datasets). That was already true of `parser/**` and its
+63 commits in six months; widening the glob extended it to a dozen quieter
+files. It is the price of a glob nobody maintains, and it is paid in machine
+time rather than in a stale guard nobody notices. Batch source edits, then
+re-export once.
+
 The salvage surface (`export_salvage.py` → HC-only
 `exported_powers/salvage.json`, stamped alongside as
 `salvage_export_manifest.json`) is HC-only: Rebirth/Thunderspy piggs carry no
