@@ -31,7 +31,7 @@ export const AttenuationBlanket: Power = {
   "stats": {
     "accuracy": 1,
     "recharge": 2,
-    "endurance": 0.104,
+    "endurance": 0.13,
     "castTime": 0.5,
     "activatePeriod": 0.5
   },
@@ -49,13 +49,11 @@ export const AttenuationBlanket: Power = {
     ["Resistance","Cold",3.5,1,0.75,"Melee_Res_Dmg","Res","Magnitude","Self","PvE",false,"Replace",2,null,null,1],
     ["Resistance","Energy",3.5,1,0.75,"Melee_Res_Dmg","Res","Magnitude","Self","PvE",false,"Replace",2,null,null,1],
     ["Resistance","Negative",3.5,1,0.75,"Melee_Res_Dmg","Res","Magnitude","Self","PvE",false,"Replace",2,null,null,1],
-    ["Endurance",null,0.25,1,10.25,"Melee_Ones","Res","Magnitude","Target","PvE",false,"Replace",2,null,null,1,null,true],
-    ["Recovery",null,0.25,1,10.25,"Melee_Ones","Res","Magnitude","Target","PvE",false,"Replace",2,null,null,1,null,true],
+    ["Endurance",null,2,1,0.75,"Melee_Res_Boolean","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
+    ["Recovery",null,2,1,0.75,"Melee_Res_Boolean","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
     ["Resistance","Fire",3.5,1,0.75,"Melee_Res_Dmg","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,true],
     ["Resistance","Cold",3.5,1,0.75,"Melee_Res_Dmg","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,true],
     ["Resistance","Energy",3.5,1,0.75,"Melee_Res_Dmg","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,true],
-    ["Resistance","Negative",3.5,1,0.75,"Melee_Res_Dmg","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,true],
-    ["Endurance",null,0.25,1,10.25,"Melee_Ones","Res","Magnitude","Target","PvP",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["Recovery",null,0.25,1,10.25,"Melee_Ones","Res","Magnitude","Target","PvP",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,true]
+    ["Resistance","Negative",3.5,1,0.75,"Melee_Res_Dmg","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,true]
   ]
 };

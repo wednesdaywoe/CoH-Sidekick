@@ -21,7 +21,7 @@
   "activation_time": 0.5,
   "recharge_time": 2.0,
   "activate_period": 0.5,
-  "endurance_cost": 0.104,
+  "endurance_cost": 0.13,
   "interrupt_time": 0.0,
   "target_type": "Self",
   "target_type_secondary": "None",
@@ -110,37 +110,6 @@
             "IgnoreResistance"
           ],
           "flags_raw": 1056
-        },
-        {
-          "attribs": [
-            "Endurance",
-            "Recovery"
-          ],
-          "type": "Magnitude",
-          "application_type": "OnTick",
-          "aspect": "Resistance",
-          "target": "AnyAffected",
-          "table": "Melee_Ones",
-          "scale": 0.25,
-          "duration": "10.25 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Replace",
-          "stack_limit": 2,
-          "stack_key": null,
-          "flags": [
-            "IgnoreStrength",
-            "IgnoreResistance"
-          ],
-          "flags_raw": 1072
         }
       ]
     },
@@ -197,7 +166,23 @@
             "IgnoreResistance"
           ],
           "flags_raw": 1056
-        },
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
         {
           "attribs": [
             "Endurance",
@@ -207,9 +192,9 @@
           "application_type": "OnTick",
           "aspect": "Resistance",
           "target": "AnyAffected",
-          "table": "Melee_Ones",
-          "scale": 0.25,
-          "duration": "10.25 seconds",
+          "table": "Melee_Res_Boolean",
+          "scale": 2.0,
+          "duration": "0.75 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
           "duration_expression": [],
@@ -223,6 +208,11 @@
           "stack": "Replace",
           "stack_limit": 2,
           "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
           "flags": [
             "IgnoreStrength",
             "IgnoreResistance"

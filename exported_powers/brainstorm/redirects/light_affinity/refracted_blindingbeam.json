@@ -5,7 +5,7 @@
   "type": "Click",
   "display_name": "Refracted Blinding Beam",
   "display_fullname": "Redirects Light Affinity Refracted BlindingBeam",
-  "display_help": "Casts a brilliant beam of light at your enemy, holding them in place with a dazzling layer of light and harshly lowering their chance to hit. This beam then refracts off this layer, lowering the chance to hit and perception of all targets for some time.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, your beams charge up and pulse a buff to Damage and Chance To Hit on allies, and a debuff to Damage, Chance To Hit, and Defense on enemies.",
+  "display_help": "Casts a brilliant beam of light at your enemy, holding them in place with a dazzling layer of light. This beam then refracts off this layer, lowering the chance to hit and perception of all targets for some time.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will apply an additional, harsh debuff to ToHit and Damage.",
   "display_short_help": "Ranged Foe Hold, -ToHit, -Perception",
   "icon": "lightaffinity_blindingbeam.png",
   "auto_issue": false,
@@ -14,7 +14,7 @@
   "accuracy": 1.0,
   "effect_area": "Sphere",
   "max_targets_hit": 16,
-  "radius": 15.0,
+  "radius": 25.0,
   "arc": 0.0,
   "range": 1000.0,
   "range_secondary": 0.0,
@@ -82,7 +82,7 @@
           "aspect": "Current",
           "target": "AnyAffected",
           "table": "Ranged_Debuff_ToHit",
-          "scale": 0.75,
+          "scale": 1.0,
           "duration": "30 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -167,7 +167,7 @@
           "aspect": "Current",
           "target": "AnyAffected",
           "table": "Ranged_Debuff_ToHit",
-          "scale": 0.75,
+          "scale": 1.0,
           "duration": "30 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -200,7 +200,7 @@
           "target": "AnyAffected",
           "table": "Ranged_Ones",
           "scale": -0.9,
-          "duration": "30 seconds",
+          "duration": "2.5 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
           "duration_expression": [],
@@ -224,6 +224,117 @@
             "Damaged"
           ],
           "flags_raw": 1280
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "ToHit"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Debuff_ToHit",
+          "scale": 1.0,
+          "duration": "30 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "While Radiance is active"
+          },
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "Smashing_Dmg",
+            "Lethal_Dmg",
+            "Fire_Dmg",
+            "Cold_Dmg",
+            "Energy_Dmg",
+            "Negative_Energy_Dmg",
+            "Psionic_Dmg",
+            "Toxic_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Strength",
+          "target": "AnyAffected",
+          "table": "Ranged_Debuff_Dam",
+          "scale": 1.0,
+          "duration": "30 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "While Radiance is active"
+          },
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/DEBUFFDAMAGECONTINUING.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
         }
       ]
     }

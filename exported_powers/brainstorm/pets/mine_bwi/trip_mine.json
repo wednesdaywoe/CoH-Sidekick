@@ -73,7 +73,7 @@
           "aspect": "Absolute",
           "target": "AnyAffected",
           "table": "Melee_Damage",
-          "scale": 2.0,
+          "scale": 2.0086,
           "duration": "0 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -95,7 +95,10 @@
             "display_attrib_defense_float": null,
             "display_info": null
           },
-          "flags_raw": 1280
+          "flags": [
+            "IgnoreSuppressErrors"
+          ],
+          "flags_raw": 1049856
         },
         {
           "attribs": [
@@ -106,7 +109,7 @@
           "aspect": "Absolute",
           "target": "AnyAffected",
           "table": "Melee_Damage",
-          "scale": 1.75,
+          "scale": 1.7575,
           "duration": "0 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -128,78 +131,10 @@
             "display_attrib_defense_float": null,
             "display_info": null
           },
-          "flags_raw": 1280
-        },
-        {
-          "attribs": [
-            "Immobilized"
+          "flags": [
+            "IgnoreSuppressErrors"
           ],
-          "type": "Duration",
-          "application_type": "OnTick",
-          "aspect": "Current",
-          "target": "AnyAffected",
-          "table": "Ranged_PvPMez",
-          "scale": 1.0,
-          "duration": "0 seconds",
-          "magnitude": 2.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Stack",
-          "stack_limit": 2,
-          "stack_key": null,
-          "messages": {
-            "display_attacker_hit": "You Immobilize {PlayerDest} with your {PowerName}.",
-            "display_victim_hit": "{PlayerSource} Immobilizes you with their {PowerName}.",
-            "display_float": null,
-            "display_attrib_defense_float": null,
-            "display_info": null
-          },
-          "fx": {
-            "continuing_bits": [],
-            "continuing_fx": null,
-            "conditional_bits": [],
-            "conditional_fx": "POWERS/COLDCONTROL/DEEPFREEZE.FX"
-          },
-          "suppress_events": [
-            {
-              "event": "Stunned",
-              "event_id": 23,
-              "duration": 15.0,
-              "always": 0
-            },
-            {
-              "event": "Immobilized",
-              "event_id": 24,
-              "duration": 15.0,
-              "always": 0
-            },
-            {
-              "event": "Held",
-              "event_id": 25,
-              "duration": 15.0,
-              "always": 0
-            },
-            {
-              "event": "Sleep",
-              "event_id": 26,
-              "duration": 15.0,
-              "always": 0
-            },
-            {
-              "event": "Terrorized",
-              "event_id": 27,
-              "duration": 15.0,
-              "always": 0
-            }
-          ],
-          "flags_raw": 2560
+          "flags_raw": 1049856
         }
       ]
     },
@@ -209,12 +144,17 @@
       "delay": 0.0,
       "radius_inner": -1.0,
       "radius_outer": -1.0,
-      "requires_expression": [],
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "player",
+        "eq"
+      ],
       "tags": [],
       "flags": [],
       "is_pvp": "EITHER",
-      "requires_pv": "EITHER",
-      "requires_default": "SATISFIED",
+      "requires_pv": "PVP_ONLY",
+      "requires_default": "UNSATISFIED",
       "eval_flags": 0,
       "templates": [
         {
@@ -226,7 +166,7 @@
           "aspect": "Absolute",
           "target": "AnyAffected",
           "table": "Melee_Damage",
-          "scale": 0.25,
+          "scale": 0.2507,
           "duration": "0 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -248,159 +188,10 @@
             "display_attrib_defense_float": null,
             "display_info": null
           },
-          "flags_raw": 1280
-        }
-      ]
-    },
-    {
-      "chance": 0.25,
-      "ppm": 0.0,
-      "delay": 0.0,
-      "radius_inner": -1.0,
-      "radius_outer": -1.0,
-      "requires_expression": [
-        "enttype",
-        "target>",
-        "player",
-        "eq"
-      ],
-      "tags": [],
-      "flags": [],
-      "is_pvp": "EITHER",
-      "requires_pv": "PVP_ONLY",
-      "requires_default": "UNSATISFIED",
-      "eval_flags": 0,
-      "templates": [
-        {
-          "attribs": [
-            "Immobilized"
+          "flags": [
+            "IgnoreSuppressErrors"
           ],
-          "type": "Duration",
-          "application_type": "OnTick",
-          "aspect": "Current",
-          "target": "AnyAffected",
-          "table": "Ranged_PvPMez",
-          "scale": 1.0,
-          "duration": "0 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Stack",
-          "stack_limit": 2,
-          "stack_key": null,
-          "messages": {
-            "display_attacker_hit": "You Immobilize {PlayerDest} with your {PowerName}.",
-            "display_victim_hit": "{PlayerSource} Immobilizes you with their {PowerName}.",
-            "display_float": null,
-            "display_attrib_defense_float": null,
-            "display_info": null
-          },
-          "fx": {
-            "continuing_bits": [],
-            "continuing_fx": null,
-            "conditional_bits": [],
-            "conditional_fx": "POWERS/COLDCONTROL/DEEPFREEZE.FX"
-          },
-          "suppress_events": [
-            {
-              "event": "Stunned",
-              "event_id": 23,
-              "duration": 15.0,
-              "always": 0
-            },
-            {
-              "event": "Immobilized",
-              "event_id": 24,
-              "duration": 15.0,
-              "always": 0
-            },
-            {
-              "event": "Held",
-              "event_id": 25,
-              "duration": 15.0,
-              "always": 0
-            },
-            {
-              "event": "Sleep",
-              "event_id": 26,
-              "duration": 15.0,
-              "always": 0
-            },
-            {
-              "event": "Terrorized",
-              "event_id": 27,
-              "duration": 15.0,
-              "always": 0
-            }
-          ],
-          "flags_raw": 2560
-        }
-      ]
-    },
-    {
-      "chance": 0.25,
-      "ppm": 0.0,
-      "delay": 0.0,
-      "radius_inner": -1.0,
-      "radius_outer": -1.0,
-      "requires_expression": [
-        "enttype",
-        "target>",
-        "critter",
-        "eq"
-      ],
-      "tags": [],
-      "flags": [],
-      "is_pvp": "EITHER",
-      "requires_pv": "PVE_ONLY",
-      "requires_default": "SATISFIED",
-      "eval_flags": 0,
-      "templates": [
-        {
-          "attribs": [
-            "Immobilized"
-          ],
-          "type": "Duration",
-          "application_type": "OnTick",
-          "aspect": "Current",
-          "target": "AnyAffected",
-          "table": "Ranged_Immobilize",
-          "scale": 5.0,
-          "duration": "0 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Stack",
-          "stack_limit": 2,
-          "stack_key": null,
-          "messages": {
-            "display_attacker_hit": "You Immobilize {PlayerDest} with your {PowerName}.",
-            "display_victim_hit": "{PlayerSource} Immobilizes you with their {PowerName}.",
-            "display_float": null,
-            "display_attrib_defense_float": null,
-            "display_info": null
-          },
-          "fx": {
-            "continuing_bits": [],
-            "continuing_fx": null,
-            "conditional_bits": [],
-            "conditional_fx": "POWERS/COLDCONTROL/DEEPFREEZE.FX"
-          },
-          "flags_raw": 2560
+          "flags_raw": 1049856
         }
       ]
     },
@@ -410,78 +201,11 @@
       "delay": 0.0,
       "radius_inner": -1.0,
       "radius_outer": -1.0,
-      "requires_expression": [
-        "enttype",
-        "target>",
-        "player",
-        "eq"
-      ],
+      "requires_expression": [],
       "tags": [],
       "flags": [],
       "is_pvp": "EITHER",
-      "requires_pv": "PVP_ONLY",
-      "requires_default": "UNSATISFIED",
-      "eval_flags": 0,
-      "templates": [
-        {
-          "attribs": [
-            "Knockback"
-          ],
-          "type": "Magnitude",
-          "application_type": "OnTick",
-          "aspect": "Current",
-          "target": "AnyAffected",
-          "table": "Melee_Knockback",
-          "scale": 1.0,
-          "duration": "0 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Stack",
-          "stack_limit": 2,
-          "stack_key": null,
-          "messages": {
-            "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
-            "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
-            "display_float": null,
-            "display_attrib_defense_float": null,
-            "display_info": null
-          },
-          "suppress_events": [
-            {
-              "event": "Knocked",
-              "event_id": 34,
-              "duration": 10.0,
-              "always": 0
-            }
-          ],
-          "flags_raw": 1280
-        }
-      ]
-    },
-    {
-      "chance": 0.6600000262260437,
-      "ppm": 0.0,
-      "delay": 0.0,
-      "radius_inner": -1.0,
-      "radius_outer": -1.0,
-      "requires_expression": [
-        "enttype",
-        "target>",
-        "critter",
-        "eq"
-      ],
-      "tags": [],
-      "flags": [],
-      "is_pvp": "EITHER",
-      "requires_pv": "PVE_ONLY",
+      "requires_pv": "EITHER",
       "requires_default": "SATISFIED",
       "eval_flags": 0,
       "templates": [
@@ -516,7 +240,10 @@
             "display_attrib_defense_float": null,
             "display_info": null
           },
-          "flags_raw": 1280
+          "flags": [
+            "IgnoreSuppressErrors"
+          ],
+          "flags_raw": 1049856
         }
       ]
     },
@@ -566,7 +293,10 @@
             "conditional_bits": [],
             "conditional_fx": null
           },
-          "flags_raw": 1280
+          "flags": [
+            "IgnoreSuppressErrors"
+          ],
+          "flags_raw": 1049856
         },
         {
           "attribs": [
@@ -594,9 +324,110 @@
           "stack_limit": 2,
           "stack_key": null,
           "flags": [
-            "IgnoreStrength"
+            "IgnoreStrength",
+            "IgnoreSuppressErrors"
           ],
-          "flags_raw": 1296
+          "flags_raw": 1049872
+        },
+        {
+          "attribs": [
+            "Immobilized"
+          ],
+          "type": "Duration",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Immobilize",
+          "scale": 5.0,
+          "duration": "0 seconds",
+          "magnitude": 2.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You Immobilize {PlayerDest} with your {PowerName}.",
+            "display_victim_hit": "{PlayerSource} Immobilizes you with their {PowerName}.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": null,
+            "conditional_bits": [],
+            "conditional_fx": "POWERS/COLDCONTROL/DEEPFREEZE.FX"
+          },
+          "flags": [
+            "IgnoreSuppressErrors"
+          ],
+          "flags_raw": 1051136
+        }
+      ]
+    },
+    {
+      "chance": 0.25,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Immobilized"
+          ],
+          "type": "Duration",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Immobilize",
+          "scale": 5.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You Immobilize {PlayerDest} with your {PowerName}.",
+            "display_victim_hit": "{PlayerSource} Immobilizes you with their {PowerName}.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": null,
+            "conditional_bits": [],
+            "conditional_fx": "POWERS/COLDCONTROL/DEEPFREEZE.FX"
+          },
+          "flags": [
+            "IgnoreSuppressErrors"
+          ],
+          "flags_raw": 1051136
         }
       ]
     }

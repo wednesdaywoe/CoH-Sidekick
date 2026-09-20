@@ -14,8 +14,8 @@ export const ClarifyingBeam: Power = {
   "available": 9,
   "autoIssue": false,
   "free": false,
-  "description": "You shine light on your ally to cleanse them of their wounds. This beam then refracts off this cleansing layer, healing all allies around your target, as well as increasing their resistance to all damage by filtering incoming attacks through a layer of light.\n\nRadiance:\nUnder the effects of Radiance, your beams charge up and pulse a buff to Damage and Chance To Hit on allies, and a debuff to Damage, Chance To Hit, and Defense on enemies.",
-  "shortHelp": "Ally Heal, +Res (DMG)",
+  "description": "You shine light on your ally to cleanse them of their wounds. This beam then refracts off this cleansing layer, increasing the resistance to Energy and Negative Energy damage of all allies around your target by filtering incoming attacks through the cleansing light.\n\nRadiance:\nUnder the effects of Radiance, this power will apply an additional Heal to all allies.",
+  "shortHelp": "Ally Heal, +Res (Energy, Negative)",
   "icon": "lightaffinity_clarifyingbeam.png",
   "powerType": "Click",
   "targetType": "Ally (Alive)",
@@ -42,33 +42,19 @@ export const ClarifyingBeam: Power = {
     "Resist Damage"
   ],
   "maxSlots": 6,
-  "damage": [
-    {
-      "type": "Heal",
-      "scale": 0.6,
-      "table": "Ranged_Heal"
-    },
-    {
-      "type": "Heal",
-      "scale": 1.8,
-      "table": "Ranged_Heal"
-    }
-  ],
+  "damage": {
+    "type": "Heal",
+    "scale": 1.5,
+    "table": "Ranged_Heal"
+  },
   "atoms": [
-    ["Resistance","Smashing",1,1,120,"Ranged_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
-    ["Resistance","Lethal",1,1,120,"Ranged_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
-    ["Resistance","Fire",1,1,120,"Ranged_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
-    ["Resistance","Cold",1,1,120,"Ranged_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
+    ["Meta",null,0,0,120,"Melee_Ones","Cur","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null",["Friend"]],
     ["Resistance","Energy",1,1,120,"Ranged_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
     ["Resistance","Negative",1,1,120,"Ranged_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
-    ["Resistance","Psionic",1,1,120,"Ranged_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
-    ["Resistance","Toxic",1,1,120,"Ranged_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
-    ["Meta",null,0,0,120,"Melee_Ones","Cur","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null",["Friend"]],
-    ["Heal",null,0.6,1,0,"Ranged_Heal","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
     ["Meta",null,1,1,0,"Melee_Ones","Abs","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null",["Friend"]],
-    ["Heal",null,1.8,1,0,"Ranged_Heal","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1],
+    ["Heal",null,1.5,1,0,"Ranged_Heal","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1],
     ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,null,true],
     ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,null,true],
-    ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true]
+    ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Self","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true]
   ]
 };

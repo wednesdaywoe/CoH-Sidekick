@@ -5,8 +5,8 @@
   "type": "Click",
   "display_name": "Purifying Beam",
   "display_fullname": "Controller Buff Light Affinity Clarifying Beam",
-  "display_help": "You shine light on your ally to cleanse them of their wounds. This beam then refracts off this cleansing layer, healing all allies around your target, as well as increasing their resistance to all damage by filtering incoming attacks through a layer of light.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, your beams charge up and pulse a buff to Damage and Chance To Hit on allies, and a debuff to Damage, Chance To Hit, and Defense on enemies.",
-  "display_short_help": "Ally Heal, +Res (DMG)",
+  "display_help": "You shine light on your ally to cleanse them of their wounds. This beam then refracts off this cleansing layer, increasing the resistance to Energy and Negative Energy damage of all allies around your target by filtering incoming attacks through the cleansing light.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will apply an additional Heal to all allies.",
+  "display_short_help": "Ally Heal, +Res (Energy, Negative)",
   "icon": "lightaffinity_clarifyingbeam.png",
   "auto_issue": false,
   "auto_issue_keeps_level": false,
@@ -144,7 +144,7 @@
           "aspect": "Absolute",
           "target": "AnyAffected",
           "table": "Ranged_Heal",
-          "scale": 1.8,
+          "scale": 1.5,
           "duration": "0 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -194,7 +194,7 @@
           "type": "Magnitude",
           "application_type": "OnTick",
           "aspect": "Absolute",
-          "target": "AnyAffected",
+          "target": "Self",
           "table": "Ranged_Ones",
           "scale": 0.0,
           "duration": "0 seconds",
@@ -214,17 +214,12 @@
           "params": {
             "power_names": [
               "Redirects.Light_Affinity.Prism",
-              "Redirects.Light_Affinity.Radiance_Buff",
-              "Redirects.Light_Affinity.Radiance_Debuff"
+              "Redirects.Light_Affinity.Radiance_Heal"
             ],
             "count": 1,
             "type": "Power"
           },
-          "flags": [
-            "CopyBoosts"
-          ],
-          "flags_raw": 1280,
-          "flags2_raw": 4
+          "flags_raw": 1280
         }
       ]
     }

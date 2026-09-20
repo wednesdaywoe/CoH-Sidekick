@@ -42,6 +42,9 @@ export const DisruptionAura: Power = {
     "EnduranceReduction",
     "Recharge"
   ],
+  "allowedSetCategories": [
+    "Threat Duration"
+  ],
   "maxSlots": 6,
   "atoms": [
     ["Resistance","Smashing",-2,1,2.25,"Melee_Debuff_Res_Dmg","Res","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.5],

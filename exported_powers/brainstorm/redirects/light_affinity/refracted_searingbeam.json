@@ -5,7 +5,7 @@
   "type": "Click",
   "display_name": "Refracted Searing Beam",
   "display_fullname": "Redirects Light Affinity Refracted SearingBeam",
-  "display_help": "Fire an intense beam of light that burns your target, leaving them with reduced regeneration and secondary effect strength for some time. This beam then refracts around this burning light, causing minor Fire Damage Over Time and lowering the Damage Resistance of all targets. This searing light is especially damaging vs Undead targets.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, your beams charge up and pulse a buff to Damage and Chance To Hit on allies, and a debuff to Damage, Chance To Hit, and Defense on enemies.",
+  "display_help": "Fire an intense beam of light that burns your target, leaving them with reduced regeneration and secondary effect strength for some time. This beam then refracts around this burning light, causing minor Fire Damage Over Time and lowering the Damage Resistance of all targets. This searing light is especially damaging vs Undead targets.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will deal additional Fire Damage Over Time.",
   "display_short_help": "Ranged Foe -Regeneration, -Special, -Res (DMG), Fire DoT, Special vs. Undead",
   "icon": "lightaffinity_searingbeam.png",
   "auto_issue": false,
@@ -14,7 +14,7 @@
   "accuracy": 1.0,
   "effect_area": "Sphere",
   "max_targets_hit": 16,
-  "radius": 15.0,
+  "radius": 25.0,
   "arc": 0.0,
   "range": 1000.0,
   "range_secondary": 0.0,
@@ -26,7 +26,7 @@
   "target_type": "Foe",
   "target_type_secondary": "None",
   "targets_autohit": [
-    "Foe"
+    "None"
   ],
   "targets_affected": [
     "Foe"
@@ -35,7 +35,8 @@
     "EnduranceDiscount",
     "Range",
     "Recharge",
-    "Damage"
+    "Damage",
+    "Accuracy"
   ],
   "allowed_set_categories": [
     "Corruptor Archetype Sets",
@@ -228,6 +229,58 @@
           "table": "Ranged_Damage",
           "scale": 0.35,
           "duration": "4.1 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 1.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage over time.",
+            "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage over time.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags_raw": 1280
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Fire_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Damage",
+          "scale": 0.0233,
+          "duration": "29.1 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
           "duration_expression": [],

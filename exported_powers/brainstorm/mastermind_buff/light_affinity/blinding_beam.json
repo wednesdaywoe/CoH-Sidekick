@@ -5,7 +5,7 @@
   "type": "Click",
   "display_name": "Blinding Beam",
   "display_fullname": "Mastermind Buff Light Affinity Blinding Beam",
-  "display_help": "Casts a brilliant beam of light at your enemy, holding them in place with a dazzling layer of light and harshly lowering their chance to hit. This beam then refracts off this layer, lowering the chance to hit and perception of all targets for some time.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, your beams charge up and pulse a buff to Damage and Chance To Hit on allies, and a debuff to Damage, Chance To Hit, and Defense on enemies.",
+  "display_help": "Casts a brilliant beam of light at your enemy, holding them in place with a dazzling layer of light. This beam then refracts off this layer, lowering the chance to hit and perception of all targets for some time.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will apply an additional, harsh debuff to ToHit and Damage.",
   "display_short_help": "Ranged Foe Hold, -ToHit, -Perception",
   "icon": "lightaffinity_blindingbeam.png",
   "auto_issue": false,
@@ -98,106 +98,6 @@
           "params": {
             "power_names": [
               "Redirects.Light_Affinity.Refracted_BlindingBeam"
-            ],
-            "count": 1,
-            "type": "Power"
-          },
-          "flags": [
-            "CopyBoosts"
-          ],
-          "flags_raw": 1280,
-          "flags2_raw": 4
-        },
-        {
-          "attribs": [
-            "ToHit"
-          ],
-          "type": "Magnitude",
-          "application_type": "OnTick",
-          "aspect": "Current",
-          "target": "AnyAffected",
-          "table": "Ranged_Debuff_ToHit",
-          "scale": 0.75,
-          "duration": "30 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Replace",
-          "stack_limit": 2,
-          "stack_key": null,
-          "messages": {
-            "display_attacker_hit": null,
-            "display_victim_hit": null,
-            "display_float": null,
-            "display_attrib_defense_float": null,
-            "display_info": "Unresistable, Main Target Only"
-          },
-          "fx": {
-            "continuing_bits": [],
-            "continuing_fx": "PFX",
-            "conditional_bits": [],
-            "conditional_fx": null
-          },
-          "flags": [
-            "IgnoreResistance"
-          ],
-          "flags_raw": 1056
-        }
-      ]
-    },
-    {
-      "chance": 1.0,
-      "ppm": 0.0,
-      "delay": 0.0,
-      "radius_inner": -1.0,
-      "radius_outer": -1.0,
-      "requires_expression": [
-        "kChain_Jolt_Mode",
-        "Source.Mode?"
-      ],
-      "tags": [],
-      "flags": [],
-      "is_pvp": "EITHER",
-      "requires_pv": "EITHER",
-      "requires_default": "UNSATISFIED",
-      "eval_flags": 0,
-      "templates": [
-        {
-          "attribs": [
-            "Execute_Power"
-          ],
-          "type": "Magnitude",
-          "application_type": "OnTick",
-          "aspect": "Absolute",
-          "target": "AnyAffected",
-          "table": "Ranged_Ones",
-          "scale": 0.0,
-          "duration": "0 seconds",
-          "magnitude": 0.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Stack",
-          "stack_limit": 2,
-          "stack_key": null,
-          "params": {
-            "power_names": [
-              "Redirects.Light_Affinity.Prism",
-              "Redirects.Light_Affinity.Radiance_Buff",
-              "Redirects.Light_Affinity.Radiance_Debuff"
             ],
             "count": 1,
             "type": "Power"
@@ -363,6 +263,59 @@
             "conditional_fx": "PFX"
           },
           "flags_raw": 2560
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "Self",
+          "table": "Ranged_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Redirects.Light_Affinity.Prism",
+              "Redirects.Light_Affinity.Radiance_Heal_Med"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags_raw": 1280
         }
       ]
     }

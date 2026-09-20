@@ -14,7 +14,7 @@ export const Magnify: Power = {
   "available": 19,
   "autoIssue": false,
   "free": false,
-  "description": "You concentrate your powers and create a lens around your ally, magnifying their Damage, Crowd Control strength, Radius of AoEs, Power Range, and the strength of Heals and Absorb used on them. This lens also increases their resistance to all damage by filtering incoming attacks.",
+  "description": "You concentrate your powers and create a lens around your ally, magnifying their Damage, Crowd Control strength, Radius of AoEs, Power Range, and the strength of Heals and Absorb used on them. This lens also increases their resistance to all damage by filtering incoming attacks through the lens.\n\nRadiance:\nUnder the effects of Radiance, this power will produce a powerful heal from your location, effecting yourself and all allies.",
   "shortHelp": "Ally +DMG, +Mez Duration, +Radius, +Range, +Healing/Absorb, +Res (DMG)",
   "icon": "lightaffinity_magnify.png",
   "powerType": "Click",
@@ -28,7 +28,7 @@ export const Magnify: Power = {
     "range": 80,
     "recharge": 60,
     "endurance": 10.4,
-    "castTime": 2.27
+    "castTime": 1.67
   },
   "allowedEnhancements": [
     "Resistance",
@@ -57,15 +57,15 @@ export const Magnify: Power = {
     ["Enhancement","Sleep",0.3,1,180,"Melee_Ones","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
     ["Unmapped",null,0.3,1,180,"Melee_Ones","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
     ["Range",null,0.3,1,180,"Melee_Ones","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
-    ["HealResistance",null,-0.3,1,180,"Melee_Ones","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
-    ["Absorb",null,-0.3,1,180,"Melee_Ones","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
-    ["Resistance","Smashing",1.5,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
-    ["Resistance","Lethal",1.5,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
-    ["Resistance","Fire",1.5,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
-    ["Resistance","Cold",1.5,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
-    ["Resistance","Energy",1.5,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
-    ["Resistance","Negative",1.5,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
-    ["Resistance","Psionic",1.5,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
-    ["Resistance","Toxic",1.5,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1]
+    ["HealResistance",null,-0.1,1,180,"Melee_Ones","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
+    ["Absorb",null,-0.1,1,180,"Melee_Ones","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
+    ["Resistance","Smashing",1,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
+    ["Resistance","Lethal",1,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
+    ["Resistance","Fire",1,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
+    ["Resistance","Cold",1,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
+    ["Resistance","Energy",1,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
+    ["Resistance","Negative",1,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
+    ["Resistance","Psionic",1,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
+    ["Resistance","Toxic",1,1,180,"Melee_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1]
   ]
 };

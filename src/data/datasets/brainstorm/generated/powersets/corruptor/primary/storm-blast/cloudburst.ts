@@ -57,7 +57,7 @@ export const Cloudburst: Power = {
   },
   "atoms": [
     ["Damage","Cold",0.2275,1,2.9,"Ranged_Damage","Abs","Magnitude","Target","PvE",true,"Stack",2,null,0.30000001192092896,1],
-    ["Meta",null,1,188,8,"Melee_Ones","Cur","Constant","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"WetStatus",null,"set_mode"],
+    ["Meta",null,1,189,8,"Melee_Ones","Cur","Constant","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"WetStatus",null,"set_mode"],
     ["GrantPower",null,0,0,0,"Melee_Ones","Cur","Magnitude","SelfAndPets","Any",true,"Stack",2,null,null,0.5,null,null,null,null,null,null,["kLightningCat5","Source.Mode?","!"],null,null,null,null,null,null,null,null,null,"IncreaseStormStrength"],
     ["GrantPower",null,0,0,0,"Melee_Ones","Cur","Magnitude","SelfAndPets","Any",true,"Replace",2,null,null,0.25,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"StormBrewing"],
     ["RechargeTime",null,0.1,1,8,"Melee_Slow","Cur","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,true,null,null,null,null,["temporary_powers.temporary_powers.StormBlast_InStormCell","target.ownPower?"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"stormblast_instormcell"],

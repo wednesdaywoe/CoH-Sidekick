@@ -14,7 +14,7 @@ export const ProtectiveBeam: Power = {
   "available": 0,
   "autoIssue": false,
   "free": false,
-  "description": "Casts a protective beam of light around an ally, encasing them in a thin, prismatic barrier that absorbs enemy hits. The beam then refracts off this barrier, coating all allies around your target, as well as increasing their defense against all damage for some time.\n\nRadiance:\nUnder the effects of Radiance, your beams charge up and pulse a buff to Damage and Chance To Hit on allies, and a debuff to Damage, Chance To Hit, and Defense on enemies.",
+  "description": "Casts a protective beam of light around an ally, encasing them in a thin, prismatic barrier that absorbs enemy hits. The beam then refracts off this barrier, coating all allies around your target and increasing their defense against all damage for some time.\n\nRadiance:\nUnder the effects of Radiance, this power will apply an additional layer of Absorb on all allies.",
   "shortHelp": "Ally +Absorb, +Def (All)",
   "icon": "lightaffinity_protectivebeam.png",
   "powerType": "Click",
@@ -55,11 +55,10 @@ export const ProtectiveBeam: Power = {
     ["Defense","Psionic",0.75,1,120,"Ranged_Buff_Def","Cur","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
     ["Defense","Toxic",0.75,1,120,"Ranged_Buff_Def","Cur","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"]],
     ["Meta",null,0,0,120,"Melee_Ones","Cur","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null",["Friend"]],
-    ["Absorb",null,0.25,1,120,"Ranged_Heal","Max","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Friend"],0.1],
     ["Meta",null,1,1,0,"Melee_Ones","Abs","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null",["Friend"]],
     ["Absorb",null,0.75,1,120,"Ranged_Heal","Max","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.1],
     ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,null,true],
     ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,null,true],
-    ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true]
+    ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Self","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true]
   ]
 };

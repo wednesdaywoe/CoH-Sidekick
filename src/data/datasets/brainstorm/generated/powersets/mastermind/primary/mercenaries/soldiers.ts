@@ -15,6 +15,7 @@ export const Soldiers: Power = {
   "autoIssue": false,
   "free": false,
   "description": "Calls forth one to three Mercenary Soldiers (depending on your level) to do your bidding. The third Soldier you gain will be a Medic. All Soldiers use Sub Machine Guns, but these can be upgraded.\n\nYou may only have 3 Soldiers under your control at any given time. If you attempt to call more Soldiers, you can only replace the ones you have lost in battle. If you already have three, the power will fail.\n\nIn PvE this power will also summon all your active henchmen so long they are not currentlly engaged in combat and are outside of your Supremacy range.",
+  "shortHelp": "Summon Soldier",
   "icon": "paramilitary_draftarmy.png",
   "powerType": "Click",
   "targetType": "Location",

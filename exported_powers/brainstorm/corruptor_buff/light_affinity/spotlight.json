@@ -5,8 +5,8 @@
   "type": "Toggle",
   "display_name": "Spotlight",
   "display_fullname": "Corruptor Buff Light Affinity Spotlight",
-  "display_help": "Select an ally to be bathed in a constant column of light! While under the spotlight, incoming attacks will be deflected by continuous absorption, their wounds will be mended, and crowd control effects will be shrugged off. Additionally, debuffs against your target will be much weaker and your ally's taunt effects will be strengthened.",
-  "display_short_help": "Toggle: Ally, +Absorb over time, +Res (Mez, Knock, Debuff), +Def,+Str (Taunt)",
+  "display_help": "Select an ally to be bathed in a constant column of light! While under the spotlight, incoming attacks will be deflected by continuous absorption, their wounds will be mended, and crowd control effects will be shrugged off. Additionally, debuffs against your target will be much weaker and your ally's taunt effects will be strengthened.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will apply an additional Damage Buff to your target.",
+  "display_short_help": "Toggle: Ally, +Absorb over time, +Heal over time, +Res (Mez, Knock, Debuff),+Str (Taunt)",
   "icon": "lightaffinity_spotlight.png",
   "auto_issue": false,
   "auto_issue_keeps_level": false,
@@ -18,7 +18,7 @@
   "arc": 0.0,
   "range": 80.0,
   "range_secondary": 0.0,
-  "activation_time": 0.67,
+  "activation_time": 1.13,
   "recharge_time": 15.0,
   "activate_period": 2.0,
   "endurance_cost": 0.78,
@@ -41,7 +41,11 @@
     "Healing"
   ],
   "cast_through": [],
-  "toggle_ignore": [],
+  "toggle_ignore": [
+    "hold",
+    "sleep",
+    "stun"
+  ],
   "num_allowed": 1,
   "requires": [],
   "activate_requires": [],
@@ -65,6 +69,41 @@
       "templates": [
         {
           "attribs": [
+            "Null"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Strength",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": 1.0,
+          "duration": "2 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "PFX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "NoHitDelay"
+          ],
+          "flags_raw": 66816
+        },
+        {
+          "attribs": [
             "Absorb"
           ],
           "type": "Magnitude",
@@ -72,7 +111,7 @@
           "aspect": "Maximum",
           "target": "AnyAffected",
           "table": "Ranged_Heal",
-          "scale": 0.2,
+          "scale": 0.25,
           "duration": "10 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -94,6 +133,11 @@
             "display_attrib_defense_float": null,
             "display_info": null
           },
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
           "flags": [
             "IgnoreCombatMods"
           ],
@@ -108,7 +152,7 @@
           "aspect": "Absolute",
           "target": "AnyAffected",
           "table": "Ranged_Heal",
-          "scale": 0.2,
+          "scale": 0.25,
           "duration": "0 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -130,6 +174,11 @@
             "display_attrib_defense_float": null,
             "display_info": null
           },
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
           "flags_raw": 1280
         },
         {
@@ -165,6 +214,14 @@
           "stack": "Continuous",
           "stack_limit": 2,
           "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Stunned",
+            "Held",
+            "Held",
+            "Sleep",
+            "Sleep"
+          ],
           "flags": [
             "IgnoreStrength",
             "IgnoreResistance"
@@ -196,25 +253,56 @@
           "stack": "Continuous",
           "stack_limit": 2,
           "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
           "flags": [
             "IgnoreStrength",
             "IgnoreResistance",
             "Boost"
           ],
           "flags_raw": 5168
-        },
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
         {
           "attribs": [
-            "Null"
+            "Smashing_Dmg",
+            "Lethal_Dmg",
+            "Fire_Dmg",
+            "Cold_Dmg",
+            "Energy_Dmg",
+            "Negative_Energy_Dmg",
+            "Psionic_Dmg",
+            "Toxic_Dmg"
           ],
           "type": "Magnitude",
           "application_type": "OnTick",
           "aspect": "Strength",
           "target": "AnyAffected",
-          "table": "Melee_Ones",
-          "scale": 1.0,
+          "table": "Melee_Buff_Dmg",
+          "scale": 1.5,
           "duration": "2 seconds",
-          "magnitude": 0.0,
+          "magnitude": 1.0,
           "delay": 0.0,
           "duration_expression": [],
           "magnitude_expression": [],
@@ -227,16 +315,19 @@
           "stack": "Replace",
           "stack_limit": 2,
           "stack_key": null,
-          "fx": {
-            "continuing_bits": [],
-            "continuing_fx": "PFX",
-            "conditional_bits": [],
-            "conditional_fx": null
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "While Radiance is active"
           },
           "flags": [
-            "NoHitDelay"
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
           ],
-          "flags_raw": 66816
+          "flags_raw": 112
         }
       ]
     },
@@ -288,6 +379,11 @@
           "stack": "Continuous",
           "stack_limit": 2,
           "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
           "flags": [
             "IgnoreStrength",
             "IgnoreResistance"
@@ -304,8 +400,8 @@
           "application_type": "OnTick",
           "aspect": "Current",
           "target": "AnyAffected",
-          "table": "Melee_Ones",
-          "scale": -1.0,
+          "table": "Ranged_Ones",
+          "scale": -8.0,
           "duration": "2 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -320,6 +416,11 @@
           "stack": "Continuous",
           "stack_limit": 2,
           "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
           "flags": [
             "IgnoreStrength",
             "IgnoreResistance"
@@ -336,8 +437,8 @@
           "application_type": "OnTick",
           "aspect": "Resistance",
           "target": "AnyAffected",
-          "table": "Melee_Ones",
-          "scale": 1.0,
+          "table": "Ranged_Ones",
+          "scale": 0.5,
           "duration": "2 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -352,6 +453,11 @@
           "stack": "Continuous",
           "stack_limit": 2,
           "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
           "flags": [
             "IgnoreStrength",
             "IgnoreResistance"
@@ -384,16 +490,14 @@
             "Immobilized",
             "Stunned",
             "Sleep",
-            "Knockup",
-            "Knockback",
             "Repel"
           ],
           "type": "Magnitude",
           "application_type": "OnTick",
           "aspect": "Resistance",
           "target": "AnyAffected",
-          "table": "Melee_Res_Boolean",
-          "scale": 5.0,
+          "table": "Ranged_Res_Boolean",
+          "scale": 2.0,
           "duration": "2 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -408,6 +512,11 @@
           "stack": "Continuous",
           "stack_limit": 2,
           "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
           "flags": [
             "IgnoreStrength",
             "IgnoreResistance"
@@ -425,7 +534,7 @@
           "aspect": "Resistance",
           "target": "AnyAffected",
           "table": "Melee_Ones",
-          "scale": 1.0,
+          "scale": 0.5,
           "duration": "2 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -440,6 +549,11 @@
           "stack": "Continuous",
           "stack_limit": 2,
           "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
           "flags": [
             "IgnoreStrength",
             "IgnoreResistance"
@@ -457,7 +571,7 @@
           "aspect": "Current",
           "target": "AnyAffected",
           "table": "Melee_Ones",
-          "scale": -1.0,
+          "scale": -8.0,
           "duration": "2 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -472,6 +586,11 @@
           "stack": "Continuous",
           "stack_limit": 2,
           "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
           "flags": [
             "IgnoreStrength",
             "IgnoreResistance"

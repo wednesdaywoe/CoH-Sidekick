@@ -43,6 +43,7 @@ export const SeekerDrones: Power = {
     "Accurate To-Hit Debuff",
     "Defender Archetype Sets",
     "Pet Damage",
+    "Ranged AoE Damage",
     "Stuns",
     "To Hit Debuff",
     "Universal Damage Sets"

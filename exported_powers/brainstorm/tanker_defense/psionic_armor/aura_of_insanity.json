@@ -1612,13 +1612,13 @@
                       "attribs": [
                         "Confused"
                       ],
-                      "type": "Magnitude",
+                      "type": "Duration",
                       "application_type": "OnTick",
                       "aspect": "Current",
                       "target": "AnyAffected",
-                      "table": "Melee_Ones",
-                      "scale": 2.5,
-                      "duration": "4 seconds",
+                      "table": "Melee_PvPMez",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
                       "magnitude": 2.5,
                       "delay": 0.0,
                       "duration_expression": [],
@@ -1653,10 +1653,214 @@
                           "always": 0
                         }
                       ],
-                      "flags": [
-                        "IgnoreResistance"
+                      "flags_raw": 2560
+                    },
+                    {
+                      "attribs": [
+                        "Regeneration"
                       ],
-                      "flags_raw": 1056
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": -0.75,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was stunned"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Smashing_Dmg",
+                        "Lethal_Dmg",
+                        "Fire_Dmg",
+                        "Cold_Dmg",
+                        "Energy_Dmg",
+                        "Negative_Energy_Dmg",
+                        "Psionic_Dmg",
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Resistance",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was asleep"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Sleep",
+                          "event_id": 26,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Base_Defense"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was held"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Held",
+                          "event_id": 25,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "ToHit"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_DeBuff_ToHit",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was terrorized"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Terrorized",
+                          "event_id": 27,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
                     }
                   ]
                 },
@@ -1678,13 +1882,13 @@
                       "attribs": [
                         "Stunned"
                       ],
-                      "type": "Magnitude",
+                      "type": "Duration",
                       "application_type": "OnTick",
                       "aspect": "Current",
                       "target": "AnyAffected",
-                      "table": "Melee_Ones",
-                      "scale": 2.5,
-                      "duration": "4 seconds",
+                      "table": "Melee_PvPMez",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
                       "magnitude": 2.5,
                       "delay": 0.0,
                       "duration_expression": [],
@@ -1725,14 +1929,20 @@
                           "always": 0
                         },
                         {
-                          "event": "Stunned",
-                          "event_id": 23,
+                          "event": "Immobilized",
+                          "event_id": 24,
                           "duration": 15.0,
                           "always": 0
                         },
                         {
-                          "event": "Immobilized",
-                          "event_id": 24,
+                          "event": "Held",
+                          "event_id": 25,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Sleep",
+                          "event_id": 26,
                           "duration": 15.0,
                           "always": 0
                         },
@@ -1743,10 +1953,214 @@
                           "always": 0
                         }
                       ],
-                      "flags": [
-                        "IgnoreResistance"
+                      "flags_raw": 2560
+                    },
+                    {
+                      "attribs": [
+                        "Regeneration"
                       ],
-                      "flags_raw": 1056
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": -0.75,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was stunned"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Smashing_Dmg",
+                        "Lethal_Dmg",
+                        "Fire_Dmg",
+                        "Cold_Dmg",
+                        "Energy_Dmg",
+                        "Negative_Energy_Dmg",
+                        "Psionic_Dmg",
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Resistance",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was asleep"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Sleep",
+                          "event_id": 26,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Base_Defense"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was held"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Held",
+                          "event_id": 25,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "ToHit"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_DeBuff_ToHit",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was terrorized"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Terrorized",
+                          "event_id": 27,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
                     }
                   ]
                 },
@@ -1768,13 +2182,13 @@
                       "attribs": [
                         "Sleep"
                       ],
-                      "type": "Magnitude",
+                      "type": "Duration",
                       "application_type": "OnTick",
                       "aspect": "Current",
                       "target": "AnyAffected",
-                      "table": "Melee_Ones",
-                      "scale": 2.5,
-                      "duration": "4 seconds",
+                      "table": "Melee_PvPMez",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
                       "magnitude": 2.5,
                       "delay": 0.0,
                       "duration_expression": [],
@@ -1815,14 +2229,20 @@
                           "always": 0
                         },
                         {
-                          "event": "Stunned",
-                          "event_id": 23,
+                          "event": "Immobilized",
+                          "event_id": 24,
                           "duration": 15.0,
                           "always": 0
                         },
                         {
-                          "event": "Immobilized",
-                          "event_id": 24,
+                          "event": "Held",
+                          "event_id": 25,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Sleep",
+                          "event_id": 26,
                           "duration": 15.0,
                           "always": 0
                         },
@@ -1833,10 +2253,214 @@
                           "always": 0
                         }
                       ],
-                      "flags": [
-                        "IgnoreResistance"
+                      "flags_raw": 2560
+                    },
+                    {
+                      "attribs": [
+                        "Regeneration"
                       ],
-                      "flags_raw": 1056
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": -0.75,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was stunned"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Smashing_Dmg",
+                        "Lethal_Dmg",
+                        "Fire_Dmg",
+                        "Cold_Dmg",
+                        "Energy_Dmg",
+                        "Negative_Energy_Dmg",
+                        "Psionic_Dmg",
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Resistance",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was asleep"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Sleep",
+                          "event_id": 26,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Base_Defense"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was held"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Held",
+                          "event_id": 25,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "ToHit"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_DeBuff_ToHit",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was terrorized"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Terrorized",
+                          "event_id": 27,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
                     }
                   ]
                 },
@@ -1858,13 +2482,13 @@
                       "attribs": [
                         "Held"
                       ],
-                      "type": "Magnitude",
+                      "type": "Duration",
                       "application_type": "OnTick",
                       "aspect": "Current",
                       "target": "AnyAffected",
-                      "table": "Melee_Ones",
-                      "scale": 2.5,
-                      "duration": "4 seconds",
+                      "table": "Melee_PvPMez",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
                       "magnitude": 2.5,
                       "delay": 0.0,
                       "duration_expression": [],
@@ -1893,10 +2517,246 @@
                         ],
                         "conditional_fx": null
                       },
-                      "flags": [
-                        "IgnoreResistance"
+                      "suppress_events": [
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Immobilized",
+                          "event_id": 24,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Held",
+                          "event_id": 25,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Sleep",
+                          "event_id": 26,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Terrorized",
+                          "event_id": 27,
+                          "duration": 15.0,
+                          "always": 0
+                        }
                       ],
-                      "flags_raw": 1056
+                      "flags_raw": 2560
+                    },
+                    {
+                      "attribs": [
+                        "Regeneration"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": -0.75,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was stunned"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Smashing_Dmg",
+                        "Lethal_Dmg",
+                        "Fire_Dmg",
+                        "Cold_Dmg",
+                        "Energy_Dmg",
+                        "Negative_Energy_Dmg",
+                        "Psionic_Dmg",
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Resistance",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was asleep"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Sleep",
+                          "event_id": 26,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Base_Defense"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was held"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Held",
+                          "event_id": 25,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "ToHit"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_DeBuff_ToHit",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was terrorized"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Terrorized",
+                          "event_id": 27,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
                     }
                   ]
                 },
@@ -1918,13 +2778,13 @@
                       "attribs": [
                         "Terrorized"
                       ],
-                      "type": "Magnitude",
+                      "type": "Duration",
                       "application_type": "OnTick",
                       "aspect": "Current",
                       "target": "AnyAffected",
-                      "table": "Melee_Ones",
-                      "scale": 2.5,
-                      "duration": "4 seconds",
+                      "table": "Melee_PvPMez",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
                       "magnitude": 2.5,
                       "delay": 0.0,
                       "duration_expression": [],
@@ -1965,14 +2825,20 @@
                           "always": 0
                         },
                         {
-                          "event": "Stunned",
-                          "event_id": 23,
+                          "event": "Immobilized",
+                          "event_id": 24,
                           "duration": 15.0,
                           "always": 0
                         },
                         {
-                          "event": "Immobilized",
-                          "event_id": 24,
+                          "event": "Held",
+                          "event_id": 25,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Sleep",
+                          "event_id": 26,
                           "duration": 15.0,
                           "always": 0
                         },
@@ -1983,10 +2849,214 @@
                           "always": 0
                         }
                       ],
-                      "flags": [
-                        "IgnoreResistance"
+                      "flags_raw": 2560
+                    },
+                    {
+                      "attribs": [
+                        "Regeneration"
                       ],
-                      "flags_raw": 1056
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": -0.75,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was stunned"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Smashing_Dmg",
+                        "Lethal_Dmg",
+                        "Fire_Dmg",
+                        "Cold_Dmg",
+                        "Energy_Dmg",
+                        "Negative_Energy_Dmg",
+                        "Psionic_Dmg",
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Resistance",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was asleep"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Sleep",
+                          "event_id": 26,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Base_Defense"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was held"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Held",
+                          "event_id": 25,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "ToHit"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_DeBuff_ToHit",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was terrorized"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Terrorized",
+                          "event_id": 27,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
                     }
                   ]
                 }
@@ -2025,13 +3095,13 @@
                       "attribs": [
                         "Confused"
                       ],
-                      "type": "Magnitude",
+                      "type": "Duration",
                       "application_type": "OnTick",
                       "aspect": "Current",
                       "target": "AnyAffected",
-                      "table": "Melee_Ones",
-                      "scale": 2.5,
-                      "duration": "4 seconds",
+                      "table": "Melee_PvPMez",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
                       "magnitude": 2.5,
                       "delay": 0.0,
                       "duration_expression": [],
@@ -2066,10 +3136,214 @@
                           "always": 0
                         }
                       ],
-                      "flags": [
-                        "IgnoreResistance"
+                      "flags_raw": 2560
+                    },
+                    {
+                      "attribs": [
+                        "Regeneration"
                       ],
-                      "flags_raw": 1056
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": -0.75,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was stunned"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Smashing_Dmg",
+                        "Lethal_Dmg",
+                        "Fire_Dmg",
+                        "Cold_Dmg",
+                        "Energy_Dmg",
+                        "Negative_Energy_Dmg",
+                        "Psionic_Dmg",
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Resistance",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was asleep"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Sleep",
+                          "event_id": 26,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "Base_Defense"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was held"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Held",
+                          "event_id": 25,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    },
+                    {
+                      "attribs": [
+                        "ToHit"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_DeBuff_ToHit",
+                      "scale": 1.0,
+                      "duration": "4 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": "For up to 4 seconds after a target was terrorized"
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "required_events": [
+                        {
+                          "event": "Terrorized",
+                          "event_id": 27,
+                          "duration": 4.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
                     }
                   ]
                 },
@@ -2106,13 +3380,13 @@
                           "attribs": [
                             "Stunned"
                           ],
-                          "type": "Magnitude",
+                          "type": "Duration",
                           "application_type": "OnTick",
                           "aspect": "Current",
                           "target": "AnyAffected",
-                          "table": "Melee_Ones",
-                          "scale": 2.5,
-                          "duration": "4 seconds",
+                          "table": "Melee_PvPMez",
+                          "scale": 1.0,
+                          "duration": "0 seconds",
                           "magnitude": 2.5,
                           "delay": 0.0,
                           "duration_expression": [],
@@ -2171,10 +3445,214 @@
                               "always": 0
                             }
                           ],
-                          "flags": [
-                            "IgnoreResistance"
+                          "flags_raw": 2560
+                        },
+                        {
+                          "attribs": [
+                            "Regeneration"
                           ],
-                          "flags_raw": 1056
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Current",
+                          "target": "AnyAffected",
+                          "table": "Melee_Ones",
+                          "scale": -0.75,
+                          "duration": "4 seconds",
+                          "magnitude": 1.0,
+                          "delay": 0.0,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "Stack",
+                          "stack_limit": 2,
+                          "stack_key": null,
+                          "messages": {
+                            "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                            "display_victim_hit": null,
+                            "display_float": null,
+                            "display_attrib_defense_float": null,
+                            "display_info": "For up to 4 seconds after a target was stunned"
+                          },
+                          "fx": {
+                            "continuing_bits": [],
+                            "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                            "conditional_bits": [],
+                            "conditional_fx": null
+                          },
+                          "required_events": [
+                            {
+                              "event": "Stunned",
+                              "event_id": 23,
+                              "duration": 4.0,
+                              "always": 0
+                            }
+                          ],
+                          "flags": [
+                            "IgnoreStrength"
+                          ],
+                          "flags_raw": 1296
+                        },
+                        {
+                          "attribs": [
+                            "Smashing_Dmg",
+                            "Lethal_Dmg",
+                            "Fire_Dmg",
+                            "Cold_Dmg",
+                            "Energy_Dmg",
+                            "Negative_Energy_Dmg",
+                            "Psionic_Dmg",
+                            "Toxic_Dmg"
+                          ],
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Resistance",
+                          "target": "AnyAffected",
+                          "table": "Melee_Debuff_Def",
+                          "scale": 1.0,
+                          "duration": "4 seconds",
+                          "magnitude": 1.0,
+                          "delay": 0.0,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "Stack",
+                          "stack_limit": 2,
+                          "stack_key": null,
+                          "messages": {
+                            "display_attacker_hit": null,
+                            "display_victim_hit": null,
+                            "display_float": null,
+                            "display_attrib_defense_float": null,
+                            "display_info": "For up to 4 seconds after a target was asleep"
+                          },
+                          "fx": {
+                            "continuing_bits": [],
+                            "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                            "conditional_bits": [],
+                            "conditional_fx": null
+                          },
+                          "required_events": [
+                            {
+                              "event": "Sleep",
+                              "event_id": 26,
+                              "duration": 4.0,
+                              "always": 0
+                            }
+                          ],
+                          "flags": [
+                            "IgnoreStrength"
+                          ],
+                          "flags_raw": 1296
+                        },
+                        {
+                          "attribs": [
+                            "Base_Defense"
+                          ],
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Current",
+                          "target": "AnyAffected",
+                          "table": "Melee_Debuff_Def",
+                          "scale": 1.0,
+                          "duration": "4 seconds",
+                          "magnitude": 1.0,
+                          "delay": 0.0,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "Stack",
+                          "stack_limit": 2,
+                          "stack_key": null,
+                          "messages": {
+                            "display_attacker_hit": null,
+                            "display_victim_hit": null,
+                            "display_float": null,
+                            "display_attrib_defense_float": null,
+                            "display_info": "For up to 4 seconds after a target was held"
+                          },
+                          "fx": {
+                            "continuing_bits": [],
+                            "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                            "conditional_bits": [],
+                            "conditional_fx": null
+                          },
+                          "required_events": [
+                            {
+                              "event": "Held",
+                              "event_id": 25,
+                              "duration": 4.0,
+                              "always": 0
+                            }
+                          ],
+                          "flags": [
+                            "IgnoreStrength"
+                          ],
+                          "flags_raw": 1296
+                        },
+                        {
+                          "attribs": [
+                            "ToHit"
+                          ],
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Current",
+                          "target": "AnyAffected",
+                          "table": "Melee_DeBuff_ToHit",
+                          "scale": 1.0,
+                          "duration": "4 seconds",
+                          "magnitude": 1.0,
+                          "delay": 0.0,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "Stack",
+                          "stack_limit": 2,
+                          "stack_key": null,
+                          "messages": {
+                            "display_attacker_hit": null,
+                            "display_victim_hit": null,
+                            "display_float": null,
+                            "display_attrib_defense_float": null,
+                            "display_info": "For up to 4 seconds after a target was terrorized"
+                          },
+                          "fx": {
+                            "continuing_bits": [],
+                            "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                            "conditional_bits": [],
+                            "conditional_fx": null
+                          },
+                          "required_events": [
+                            {
+                              "event": "Terrorized",
+                              "event_id": 27,
+                              "duration": 4.0,
+                              "always": 0
+                            }
+                          ],
+                          "flags": [
+                            "IgnoreStrength"
+                          ],
+                          "flags_raw": 1296
                         }
                       ]
                     },
@@ -2211,13 +3689,13 @@
                               "attribs": [
                                 "Sleep"
                               ],
-                              "type": "Magnitude",
+                              "type": "Duration",
                               "application_type": "OnTick",
                               "aspect": "Current",
                               "target": "AnyAffected",
-                              "table": "Melee_Ones",
-                              "scale": 2.5,
-                              "duration": "4 seconds",
+                              "table": "Melee_PvPMez",
+                              "scale": 1.0,
+                              "duration": "0 seconds",
                               "magnitude": 2.5,
                               "delay": 0.0,
                               "duration_expression": [],
@@ -2276,10 +3754,214 @@
                                   "always": 0
                                 }
                               ],
-                              "flags": [
-                                "IgnoreResistance"
+                              "flags_raw": 2560
+                            },
+                            {
+                              "attribs": [
+                                "Regeneration"
                               ],
-                              "flags_raw": 1056
+                              "type": "Magnitude",
+                              "application_type": "OnTick",
+                              "aspect": "Current",
+                              "target": "AnyAffected",
+                              "table": "Melee_Ones",
+                              "scale": -0.75,
+                              "duration": "4 seconds",
+                              "magnitude": 1.0,
+                              "delay": 0.0,
+                              "duration_expression": [],
+                              "magnitude_expression": [],
+                              "application_period": 0.0,
+                              "tick_chance": 1.0,
+                              "tick_mag_multiplier": 1.0,
+                              "tick_mag_additive": 0.0,
+                              "jit_requires": [],
+                              "caster_stack": "Individual",
+                              "stack": "Stack",
+                              "stack_limit": 2,
+                              "stack_key": null,
+                              "messages": {
+                                "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                                "display_victim_hit": null,
+                                "display_float": null,
+                                "display_attrib_defense_float": null,
+                                "display_info": "For up to 4 seconds after a target was stunned"
+                              },
+                              "fx": {
+                                "continuing_bits": [],
+                                "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                                "conditional_bits": [],
+                                "conditional_fx": null
+                              },
+                              "required_events": [
+                                {
+                                  "event": "Stunned",
+                                  "event_id": 23,
+                                  "duration": 4.0,
+                                  "always": 0
+                                }
+                              ],
+                              "flags": [
+                                "IgnoreStrength"
+                              ],
+                              "flags_raw": 1296
+                            },
+                            {
+                              "attribs": [
+                                "Smashing_Dmg",
+                                "Lethal_Dmg",
+                                "Fire_Dmg",
+                                "Cold_Dmg",
+                                "Energy_Dmg",
+                                "Negative_Energy_Dmg",
+                                "Psionic_Dmg",
+                                "Toxic_Dmg"
+                              ],
+                              "type": "Magnitude",
+                              "application_type": "OnTick",
+                              "aspect": "Resistance",
+                              "target": "AnyAffected",
+                              "table": "Melee_Debuff_Def",
+                              "scale": 1.0,
+                              "duration": "4 seconds",
+                              "magnitude": 1.0,
+                              "delay": 0.0,
+                              "duration_expression": [],
+                              "magnitude_expression": [],
+                              "application_period": 0.0,
+                              "tick_chance": 1.0,
+                              "tick_mag_multiplier": 1.0,
+                              "tick_mag_additive": 0.0,
+                              "jit_requires": [],
+                              "caster_stack": "Individual",
+                              "stack": "Stack",
+                              "stack_limit": 2,
+                              "stack_key": null,
+                              "messages": {
+                                "display_attacker_hit": null,
+                                "display_victim_hit": null,
+                                "display_float": null,
+                                "display_attrib_defense_float": null,
+                                "display_info": "For up to 4 seconds after a target was asleep"
+                              },
+                              "fx": {
+                                "continuing_bits": [],
+                                "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                                "conditional_bits": [],
+                                "conditional_fx": null
+                              },
+                              "required_events": [
+                                {
+                                  "event": "Sleep",
+                                  "event_id": 26,
+                                  "duration": 4.0,
+                                  "always": 0
+                                }
+                              ],
+                              "flags": [
+                                "IgnoreStrength"
+                              ],
+                              "flags_raw": 1296
+                            },
+                            {
+                              "attribs": [
+                                "Base_Defense"
+                              ],
+                              "type": "Magnitude",
+                              "application_type": "OnTick",
+                              "aspect": "Current",
+                              "target": "AnyAffected",
+                              "table": "Melee_Debuff_Def",
+                              "scale": 1.0,
+                              "duration": "4 seconds",
+                              "magnitude": 1.0,
+                              "delay": 0.0,
+                              "duration_expression": [],
+                              "magnitude_expression": [],
+                              "application_period": 0.0,
+                              "tick_chance": 1.0,
+                              "tick_mag_multiplier": 1.0,
+                              "tick_mag_additive": 0.0,
+                              "jit_requires": [],
+                              "caster_stack": "Individual",
+                              "stack": "Stack",
+                              "stack_limit": 2,
+                              "stack_key": null,
+                              "messages": {
+                                "display_attacker_hit": null,
+                                "display_victim_hit": null,
+                                "display_float": null,
+                                "display_attrib_defense_float": null,
+                                "display_info": "For up to 4 seconds after a target was held"
+                              },
+                              "fx": {
+                                "continuing_bits": [],
+                                "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                                "conditional_bits": [],
+                                "conditional_fx": null
+                              },
+                              "required_events": [
+                                {
+                                  "event": "Held",
+                                  "event_id": 25,
+                                  "duration": 4.0,
+                                  "always": 0
+                                }
+                              ],
+                              "flags": [
+                                "IgnoreStrength"
+                              ],
+                              "flags_raw": 1296
+                            },
+                            {
+                              "attribs": [
+                                "ToHit"
+                              ],
+                              "type": "Magnitude",
+                              "application_type": "OnTick",
+                              "aspect": "Current",
+                              "target": "AnyAffected",
+                              "table": "Melee_DeBuff_ToHit",
+                              "scale": 1.0,
+                              "duration": "4 seconds",
+                              "magnitude": 1.0,
+                              "delay": 0.0,
+                              "duration_expression": [],
+                              "magnitude_expression": [],
+                              "application_period": 0.0,
+                              "tick_chance": 1.0,
+                              "tick_mag_multiplier": 1.0,
+                              "tick_mag_additive": 0.0,
+                              "jit_requires": [],
+                              "caster_stack": "Individual",
+                              "stack": "Stack",
+                              "stack_limit": 2,
+                              "stack_key": null,
+                              "messages": {
+                                "display_attacker_hit": null,
+                                "display_victim_hit": null,
+                                "display_float": null,
+                                "display_attrib_defense_float": null,
+                                "display_info": "For up to 4 seconds after a target was terrorized"
+                              },
+                              "fx": {
+                                "continuing_bits": [],
+                                "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                                "conditional_bits": [],
+                                "conditional_fx": null
+                              },
+                              "required_events": [
+                                {
+                                  "event": "Terrorized",
+                                  "event_id": 27,
+                                  "duration": 4.0,
+                                  "always": 0
+                                }
+                              ],
+                              "flags": [
+                                "IgnoreStrength"
+                              ],
+                              "flags_raw": 1296
                             }
                           ]
                         },
@@ -2316,13 +3998,13 @@
                                   "attribs": [
                                     "Held"
                                   ],
-                                  "type": "Magnitude",
+                                  "type": "Duration",
                                   "application_type": "OnTick",
                                   "aspect": "Current",
                                   "target": "AnyAffected",
-                                  "table": "Melee_Ones",
-                                  "scale": 2.5,
-                                  "duration": "4 seconds",
+                                  "table": "Melee_PvPMez",
+                                  "scale": 1.0,
+                                  "duration": "0 seconds",
                                   "magnitude": 2.5,
                                   "delay": 0.0,
                                   "duration_expression": [],
@@ -2383,10 +4065,214 @@
                                       "always": 0
                                     }
                                   ],
-                                  "flags": [
-                                    "IgnoreResistance"
+                                  "flags_raw": 2560
+                                },
+                                {
+                                  "attribs": [
+                                    "Regeneration"
                                   ],
-                                  "flags_raw": 1056
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Ones",
+                                  "scale": -0.75,
+                                  "duration": "4 seconds",
+                                  "magnitude": 1.0,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "Stack",
+                                  "stack_limit": 2,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                                    "display_victim_hit": null,
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": "For up to 4 seconds after a target was stunned"
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                                    "conditional_bits": [],
+                                    "conditional_fx": null
+                                  },
+                                  "required_events": [
+                                    {
+                                      "event": "Stunned",
+                                      "event_id": 23,
+                                      "duration": 4.0,
+                                      "always": 0
+                                    }
+                                  ],
+                                  "flags": [
+                                    "IgnoreStrength"
+                                  ],
+                                  "flags_raw": 1296
+                                },
+                                {
+                                  "attribs": [
+                                    "Smashing_Dmg",
+                                    "Lethal_Dmg",
+                                    "Fire_Dmg",
+                                    "Cold_Dmg",
+                                    "Energy_Dmg",
+                                    "Negative_Energy_Dmg",
+                                    "Psionic_Dmg",
+                                    "Toxic_Dmg"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Resistance",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Debuff_Def",
+                                  "scale": 1.0,
+                                  "duration": "4 seconds",
+                                  "magnitude": 1.0,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "Stack",
+                                  "stack_limit": 2,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": null,
+                                    "display_victim_hit": null,
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": "For up to 4 seconds after a target was asleep"
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                                    "conditional_bits": [],
+                                    "conditional_fx": null
+                                  },
+                                  "required_events": [
+                                    {
+                                      "event": "Sleep",
+                                      "event_id": 26,
+                                      "duration": 4.0,
+                                      "always": 0
+                                    }
+                                  ],
+                                  "flags": [
+                                    "IgnoreStrength"
+                                  ],
+                                  "flags_raw": 1296
+                                },
+                                {
+                                  "attribs": [
+                                    "Base_Defense"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Debuff_Def",
+                                  "scale": 1.0,
+                                  "duration": "4 seconds",
+                                  "magnitude": 1.0,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "Stack",
+                                  "stack_limit": 2,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": null,
+                                    "display_victim_hit": null,
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": "For up to 4 seconds after a target was held"
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                                    "conditional_bits": [],
+                                    "conditional_fx": null
+                                  },
+                                  "required_events": [
+                                    {
+                                      "event": "Held",
+                                      "event_id": 25,
+                                      "duration": 4.0,
+                                      "always": 0
+                                    }
+                                  ],
+                                  "flags": [
+                                    "IgnoreStrength"
+                                  ],
+                                  "flags_raw": 1296
+                                },
+                                {
+                                  "attribs": [
+                                    "ToHit"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_DeBuff_ToHit",
+                                  "scale": 1.0,
+                                  "duration": "4 seconds",
+                                  "magnitude": 1.0,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "Stack",
+                                  "stack_limit": 2,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": null,
+                                    "display_victim_hit": null,
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": "For up to 4 seconds after a target was terrorized"
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                                    "conditional_bits": [],
+                                    "conditional_fx": null
+                                  },
+                                  "required_events": [
+                                    {
+                                      "event": "Terrorized",
+                                      "event_id": 27,
+                                      "duration": 4.0,
+                                      "always": 0
+                                    }
+                                  ],
+                                  "flags": [
+                                    "IgnoreStrength"
+                                  ],
+                                  "flags_raw": 1296
                                 }
                               ]
                             },
@@ -2408,13 +4294,13 @@
                                   "attribs": [
                                     "Terrorized"
                                   ],
-                                  "type": "Magnitude",
+                                  "type": "Duration",
                                   "application_type": "OnTick",
                                   "aspect": "Current",
                                   "target": "AnyAffected",
-                                  "table": "Melee_Ones",
-                                  "scale": 2.5,
-                                  "duration": "4 seconds",
+                                  "table": "Melee_PvPMez",
+                                  "scale": 1.0,
+                                  "duration": "0 seconds",
                                   "magnitude": 2.5,
                                   "delay": 0.0,
                                   "duration_expression": [],
@@ -2428,13 +4314,6 @@
                                   "stack": "Stack",
                                   "stack_limit": 2,
                                   "stack_key": null,
-                                  "messages": {
-                                    "display_attacker_hit": "You Terrorize {PlayerDest} with your {PowerName}.",
-                                    "display_victim_hit": "{PlayerSource} Terrorizes you with their {PowerName}.",
-                                    "display_float": null,
-                                    "display_attrib_defense_float": null,
-                                    "display_info": null
-                                  },
                                   "fx": {
                                     "continuing_bits": [],
                                     "continuing_fx": null,
@@ -2473,10 +4352,214 @@
                                       "always": 0
                                     }
                                   ],
-                                  "flags": [
-                                    "IgnoreResistance"
+                                  "flags_raw": 2560
+                                },
+                                {
+                                  "attribs": [
+                                    "Regeneration"
                                   ],
-                                  "flags_raw": 1056
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Ones",
+                                  "scale": -0.75,
+                                  "duration": "4 seconds",
+                                  "magnitude": 1.0,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "Stack",
+                                  "stack_limit": 2,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                                    "display_victim_hit": null,
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": "For up to 4 seconds after a target was stunned"
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                                    "conditional_bits": [],
+                                    "conditional_fx": null
+                                  },
+                                  "required_events": [
+                                    {
+                                      "event": "Stunned",
+                                      "event_id": 23,
+                                      "duration": 4.0,
+                                      "always": 0
+                                    }
+                                  ],
+                                  "flags": [
+                                    "IgnoreStrength"
+                                  ],
+                                  "flags_raw": 1296
+                                },
+                                {
+                                  "attribs": [
+                                    "Smashing_Dmg",
+                                    "Lethal_Dmg",
+                                    "Fire_Dmg",
+                                    "Cold_Dmg",
+                                    "Energy_Dmg",
+                                    "Negative_Energy_Dmg",
+                                    "Psionic_Dmg",
+                                    "Toxic_Dmg"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Resistance",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Debuff_Def",
+                                  "scale": 1.0,
+                                  "duration": "4 seconds",
+                                  "magnitude": 1.0,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "Stack",
+                                  "stack_limit": 2,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": null,
+                                    "display_victim_hit": null,
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": "For up to 4 seconds after a target was asleep"
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                                    "conditional_bits": [],
+                                    "conditional_fx": null
+                                  },
+                                  "required_events": [
+                                    {
+                                      "event": "Sleep",
+                                      "event_id": 26,
+                                      "duration": 4.0,
+                                      "always": 0
+                                    }
+                                  ],
+                                  "flags": [
+                                    "IgnoreStrength"
+                                  ],
+                                  "flags_raw": 1296
+                                },
+                                {
+                                  "attribs": [
+                                    "Base_Defense"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Debuff_Def",
+                                  "scale": 1.0,
+                                  "duration": "4 seconds",
+                                  "magnitude": 1.0,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "Stack",
+                                  "stack_limit": 2,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": null,
+                                    "display_victim_hit": null,
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": "For up to 4 seconds after a target was held"
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                                    "conditional_bits": [],
+                                    "conditional_fx": null
+                                  },
+                                  "required_events": [
+                                    {
+                                      "event": "Held",
+                                      "event_id": 25,
+                                      "duration": 4.0,
+                                      "always": 0
+                                    }
+                                  ],
+                                  "flags": [
+                                    "IgnoreStrength"
+                                  ],
+                                  "flags_raw": 1296
+                                },
+                                {
+                                  "attribs": [
+                                    "ToHit"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_DeBuff_ToHit",
+                                  "scale": 1.0,
+                                  "duration": "4 seconds",
+                                  "magnitude": 1.0,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "Stack",
+                                  "stack_limit": 2,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": null,
+                                    "display_victim_hit": null,
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": "For up to 4 seconds after a target was terrorized"
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                                    "conditional_bits": [],
+                                    "conditional_fx": null
+                                  },
+                                  "required_events": [
+                                    {
+                                      "event": "Terrorized",
+                                      "event_id": 27,
+                                      "duration": 4.0,
+                                      "always": 0
+                                    }
+                                  ],
+                                  "flags": [
+                                    "IgnoreStrength"
+                                  ],
+                                  "flags_raw": 1296
                                 }
                               ]
                             }

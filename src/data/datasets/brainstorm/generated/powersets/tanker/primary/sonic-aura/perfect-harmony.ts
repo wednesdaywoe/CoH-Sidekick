@@ -14,8 +14,8 @@ export const PerfectHarmony: Power = {
   "available": 25,
   "autoIssue": false,
   "free": false,
-  "description": "You attune your body with your sonic powers and block outside harm. This allows you to heal over time, gain Resistance and Defense to all damage types, and become highly resistant to Knock Back, Sleep, Disorient, Immobilization, and Hold effects.",
-  "shortHelp": "Self +Res(All DMG, Knock Back, Repel, Stun, Hold, Sleep, Immobilize), +DEF(All DMG), Heal over Time",
+  "description": "You attune your body with your sonic powers and block outside harm. This allows you to heal over time, gain increased endurance recovery, Resistance and Defense to all damage types, and become highly resistant to Knock Back, Sleep, Disorient, Immobilization, and Hold effects.",
+  "shortHelp": "Self +Res(All DMG, Knock Back, Repel, Stun, Hold, Sleep, Immobilize), +DEF(All DMG), +Recovery, Heal over Time",
   "icon": "sonicaura_noisecancellation.png",
   "powerType": "Click",
   "targetType": "Self",
@@ -45,6 +45,7 @@ export const PerfectHarmony: Power = {
   ],
   "allowedSetCategories": [
     "Defense Sets",
+    "Endurance Modification",
     "Healing",
     "Resist Damage"
   ],

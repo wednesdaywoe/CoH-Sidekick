@@ -53,7 +53,7 @@ export const SharePain: Power = {
     }
   ],
   "atoms": [
-    ["Heal",null,4,1,0,"Ranged_Heal","Abs","Magnitude","Target","PvE",false,"Stack",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.5],
+    ["Heal",null,4,1,0,"Ranged_Heal","Abs","Magnitude","Target","PvE",true,"Stack",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.5],
     ["HealResistance",null,1,1,15,"Ranged_Ones","Res","Magnitude","Self","PvE",false,"Stack",2,null,null,1,null,true],
     ["Regeneration",null,-1,1,15,"Ranged_Ones","Cur","Magnitude","Self","PvE",false,"Stack",2,null,null,1,null,true],
     ["Damage","Special",2,1,0,"Ranged_Damage","Abs","Magnitude","Self","Any",false,"Stack",2,null,null,1,null,true],
@@ -66,7 +66,7 @@ export const SharePain: Power = {
     ["DamageBuff","Psionic",2.5,1,15,"Ranged_Buff_Dmg","Str","Magnitude","Self","Any",false,"Stack",2,null,null,1,null,true],
     ["DamageBuff","Toxic",2.5,1,15,"Ranged_Buff_Dmg","Str","Magnitude","Self","Any",false,"Stack",2,null,null,1,null,true],
     ["Heal",null,4,1,0,"Ranged_Heal","Abs","Magnitude","Target","PvP",true,"Stack",2,null,null,1,null,null,null,null,null,null,null,true,null,null,null,null,null,null,null,null,null,null,null,null,0.5],
-    ["Regeneration",null,-0.5,1,20,"Ranged_Ones","Cur","Magnitude","Self","PvP",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["HealResistance",null,0.5,1,20,"Ranged_Ones","Res","Magnitude","Self","PvP",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,true]
+    ["Regeneration",null,-1,1,20,"Ranged_Ones","Cur","Magnitude","Self","PvP",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["HealResistance",null,1,1,20,"Ranged_Ones","Res","Magnitude","Self","PvP",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,true]
   ]
 };

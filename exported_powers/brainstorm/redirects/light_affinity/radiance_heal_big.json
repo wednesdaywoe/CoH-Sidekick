@@ -1,36 +1,37 @@
 {
-  "name": "Poisonous_Ray",
-  "full_name": "V_Arachnos.Bane_Spider_Lt.Poisonous_Ray",
-  "short_name": "Poisonous_Ray",
+  "name": "Radiance_Heal_Big",
+  "full_name": "Redirects.Light_Affinity.Radiance_Heal_Big",
+  "short_name": "Radiance_Heal_Big",
   "type": "Click",
-  "display_name": "Poisonous Ray",
-  "display_fullname": "V Arachnos Bane Spider Lt Poisonous Ray",
-  "display_help": "You fire a Poisonous Ray from your mace causing damage over time as reducing the target's defense.",
-  "display_short_help": "Ranged, Superior DoT(Toxic), Foe -DEF",
-  "icon": "banespider_poisonousray.png",
+  "display_name": "Radiance",
+  "display_fullname": "Redirects Light Affinity Radiance Heal Big",
+  "display_help": "You concentrate your powers, and emit even more powerful light from yourself! While under the effects of Radiance, you and your allies will immediately recover Endurance, then get a large boost to Damage and ToHit, as well as unlock <color #fcfc95>Radiance Bonuses</color> on all other Light Affinity powers for 20 seconds.<br><br>Additionally, you and your allies will gain a slightly weaker boost to Damage and ToHit, as well as ToHit debuff resistance, Perception, and Perception debuff resistance that lingers beyond the Radiance Bonus.",
+  "display_short_help": "Self +Special, Ally (+DMG, +ToHit, +End, +Perception), RES (ToHit, Perception)",
+  "icon": "lightaffinity_prism.png",
   "auto_issue": false,
   "auto_issue_keeps_level": false,
-  "free": false,
-  "accuracy": 1.05,
-  "effect_area": "SingleTarget",
-  "max_targets_hit": 0,
-  "radius": 0.0,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 255,
+  "radius": 25.0,
   "arc": 0.0,
-  "range": 40.0,
+  "range": 1000.0,
   "range_secondary": 0.0,
-  "activation_time": 1.67,
-  "time_to_root": 1.67,
-  "recharge_time": 9.0,
+  "activation_time": 0.0,
+  "recharge_time": 8.0,
   "activate_period": 0.0,
-  "endurance_cost": 12.6,
+  "endurance_cost": 0.0,
   "interrupt_time": 0.0,
-  "target_type": "Foe",
+  "target_type": "Self",
   "target_type_secondary": "None",
   "targets_autohit": [
-    "None"
+    "Friend",
+    "Self"
   ],
   "targets_affected": [
-    "Foe"
+    "Friend",
+    "Self"
   ],
   "boosts_allowed": [],
   "allowed_set_categories": null,
@@ -42,8 +43,7 @@
   "target_requires": [],
   "slot_requires": [],
   "attack_types": [
-    104,
-    144
+    112
   ],
   "effects": [
     {
@@ -62,20 +62,20 @@
       "templates": [
         {
           "attribs": [
-            "Toxic_Dmg"
+            "Heal_Dmg"
           ],
           "type": "Magnitude",
           "application_type": "OnTick",
           "aspect": "Absolute",
           "target": "AnyAffected",
-          "table": "Ranged_Damage",
-          "scale": 0.2,
-          "duration": "4.1 seconds",
+          "table": "Ranged_Heal",
+          "scale": 3.0,
+          "duration": "0 seconds",
           "magnitude": 1.0,
-          "delay": 0.0,
+          "delay": 0.5,
           "duration_expression": [],
           "magnitude_expression": [],
-          "application_period": 0.5,
+          "application_period": 0.0,
           "tick_chance": 1.0,
           "tick_mag_multiplier": 1.0,
           "tick_mag_additive": 0.0,
@@ -85,32 +85,26 @@
           "stack_limit": 2,
           "stack_key": null,
           "messages": {
-            "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Toxic damage over time.",
-            "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Toxic damage over time.",
+            "display_attacker_hit": "You heal {PlayerDest} with {PowerName} for {Damage} health points.",
+            "display_victim_hit": "{PlayerSource} heals you with their {PowerName} for {Damage} health points.",
             "display_float": null,
             "display_attrib_defense_float": null,
-            "display_info": null
-          },
-          "fx": {
-            "continuing_bits": [],
-            "continuing_fx": "V_COV/ENEMYPOWERS/ARACHNOS/BANEMACE/BANEMACEHITCONTINUING.FX",
-            "conditional_bits": [],
-            "conditional_fx": null
+            "display_info": "During Radiance"
           },
           "flags_raw": 1280
         },
         {
           "attribs": [
-            "Base_Defense"
+            "Null"
           ],
           "type": "Magnitude",
           "application_type": "OnTick",
           "aspect": "Current",
           "target": "AnyAffected",
-          "table": "Ranged_Debuff_Def",
-          "scale": 1.0,
-          "duration": "15 seconds",
-          "magnitude": 1.0,
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "2.25 seconds",
+          "magnitude": 0.0,
           "delay": 0.0,
           "duration_expression": [],
           "magnitude_expression": [],
@@ -125,7 +119,7 @@
           "stack_key": null,
           "fx": {
             "continuing_bits": [],
-            "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+            "continuing_fx": "PFX",
             "conditional_bits": [],
             "conditional_fx": null
           },
@@ -134,6 +128,9 @@
       ]
     }
   ],
+  "show_in_inventory": "Never",
+  "show_in_manage": false,
+  "show_in_info": false,
   "available_level": 0,
-  "powerset": "V_Arachnos.Bane_Spider_Lt"
+  "powerset": "Redirects.Light_Affinity"
 }

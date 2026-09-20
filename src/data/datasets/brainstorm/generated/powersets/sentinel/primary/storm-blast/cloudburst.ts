@@ -65,7 +65,7 @@ export const Cloudburst: Power = {
     }
   ],
   "atoms": [
-    ["Meta",null,1,188,8,"Melee_Ones","Cur","Constant","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"WetStatus",null,"set_mode"],
+    ["Meta",null,1,189,8,"Melee_Ones","Cur","Constant","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"WetStatus",null,"set_mode"],
     ["Damage","Cold",0.2275,1,2.9,"Ranged_Damage","Abs","Magnitude","Target","Any",true,"Stack",2,null,0.30000001192092896,1],
     ["Damage","Cold",0.2275,1,2.9,"Ranged_InherentDamage","Abs","Magnitude","Target","PvE",true,"Stack",2,null,0.30000001192092896,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,"SentCrit,SentCritST"],
     ["GrantPower",null,0,0,0,"Melee_Ones","Cur","Magnitude","SelfAndPets","Any",true,"Stack",2,null,null,0.5,null,null,null,null,null,null,["kLightningCat5","Source.Mode?","!"],null,null,null,null,null,null,null,null,null,"IncreaseStormStrength"],

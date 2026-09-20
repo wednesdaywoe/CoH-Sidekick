@@ -14,7 +14,7 @@ export const BlindingBeam: Power = {
   "available": 0,
   "autoIssue": false,
   "free": false,
-  "description": "Casts a brilliant beam of light at your enemy, holding them in place with a dazzling layer of light and harshly lowering their chance to hit. This beam then refracts off this layer, lowering the chance to hit and perception of all targets for some time.\n\nRadiance:\nUnder the effects of Radiance, your beams charge up and pulse a buff to Damage and Chance To Hit on allies, and a debuff to Damage, Chance To Hit, and Defense on enemies.",
+  "description": "Casts a brilliant beam of light at your enemy, holding them in place with a dazzling layer of light. This beam then refracts off this layer, lowering the chance to hit and perception of all targets for some time.\n\nRadiance:\nUnder the effects of Radiance, this power will apply an additional, harsh debuff to ToHit and Damage.",
   "shortHelp": "Ranged Foe Hold, -ToHit, -Perception",
   "icon": "lightaffinity_blindingbeam.png",
   "powerType": "Click",
@@ -46,12 +46,11 @@ export const BlindingBeam: Power = {
   ],
   "maxSlots": 6,
   "atoms": [
-    ["ToHit",null,0.75,1,30,"Ranged_Debuff_ToHit","Cur","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","critter","eq"],null,null,null,null,null,null,null,null,null,null,null,null,["Foe"]],
+    ["ToHit",null,1,1,30,"Ranged_Debuff_ToHit","Cur","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","critter","eq"],null,null,null,null,null,null,null,null,null,null,null,null,["Foe"]],
     ["Perception",null,-0.9,1,30,"Melee_Ones","Cur","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","critter","eq"],null,null,null,null,null,null,null,null,null,null,null,null,["Foe"]],
-    ["ToHit",null,0.75,1,30,"Ranged_Debuff_ToHit","Cur","Magnitude","Target","Any",false,"Replace",2,null,null,1],
     ["Mez","Held",8,3,0,"Ranged_Immobilize","Cur","Duration","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","critter","eq"]],
     ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,null,true],
-    ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true],
-    ["Mez","Held",1,3,0,"Ranged_PvPMez","Cur","Duration","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","player","eq"],true]
+    ["Mez","Held",1,3,0,"Ranged_PvPMez","Cur","Duration","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","player","eq"],true],
+    ["ExecutePower",null,0,0,0,"Ranged_Ones","Abs","Magnitude","Self","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true]
   ]
 };

@@ -64,8 +64,8 @@ export const HandClap: Power = {
   },
   "atoms": [
     ["Damage","Smashing",1.2428,1,0,"Melee_Damage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","critter","eq"]],
-    ["Mez","Knockback",0.67,1,0,"Melee_Ones","Cur","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","critter","eq"],null,null,null,null,null,null,null,0.7],
-    ["Mez","Stunned",4,2,0,"Melee_Stun","Cur","Duration","Target","Any",true,"Replace",2,null,null,0.699999988079071,null,null,null,null,null,null,["enttype","target>","critter","eq"]],
+    ["Mez","Stunned",4,2,0,"Melee_Stun","Cur","Duration","Target","Any",true,"Replace",2,null,null,0.5,null,null,null,null,null,null,["enttype","target>","critter","eq"]],
+    ["Mez","Knockback",0.67,1,0,"Melee_Ones","Cur","Magnitude","Target","Any",true,"Stack",2,null,null,0.5,null,null,null,null,null,null,["enttype","target>","critter","eq"]],
     ["Damage","Smashing",0.1864,1,0,"Melee_Damage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","critter","eq","kUnleashMight","Source.Mode?","&&"],true,null,null,null,null,null,null,null,null,"Might",null,null,null,null,null,null,null,null,null,null,"unleashmight"],
     ["Damage","Fire",0.4928,1,0,"Melee_Damage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,0,null,null,null,null,null,null,["enttype","target>","critter","eq","0","&&"],true,null,null,null,null,null,null,null,null,"FieryEmbrace"],
     ["Mez","Stunned",1,2,0,"Melee_PvPMez","Cur","Duration","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,["enttype","target>","player","eq"],true],
@@ -89,8 +89,13 @@ export const HandClap: Power = {
   "specialEffects": [
     {
       "kind": "effect-proc",
-      "chance": 0.699999988079071,
+      "chance": 0.5,
       "label": "Stun"
+    },
+    {
+      "kind": "effect-proc",
+      "chance": 0.5,
+      "label": "Knockback"
     }
   ]
 };

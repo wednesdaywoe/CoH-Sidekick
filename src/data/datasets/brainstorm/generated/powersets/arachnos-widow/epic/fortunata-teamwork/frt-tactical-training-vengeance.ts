@@ -21,7 +21,7 @@ export const FRTTacticalTrainingVengeance: Power = {
   "targetType": "Dead Teammate",
   "effectArea": "AoE",
   "targetsAffected": [
-    "Teammate",
+    "Friend",
     "Self"
   ],
   "stats": {
@@ -81,7 +81,7 @@ export const FRTTacticalTrainingVengeance: Power = {
     ["DamageBuff","Negative",3.5,1,120,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!"]],
     ["DamageBuff","Psionic",3.5,1,120,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!"]],
     ["DamageBuff","Toxic",3.5,1,120,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!"]],
-    ["Meta",null,1,47,120,"Melee_Ones","Cur","Constant","Target","Any",false,"Ignore",2,null,130,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!"],null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+    ["Meta",null,1,48,120,"Melee_Ones","Cur","Constant","Target","Any",false,"Ignore",2,null,130,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!"],null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
     ["Heal",null,1,1,0,"Melee_Heal","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1],
     ["Mez","Terrorized",-10,1,120,"Melee_Ones","Cur","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,["kVengeance_Mode","target.mode?","!","isPVPMap?","!","&&"]],
     ["MezResist","Terrorized",1,1,120,"Melee_Ones","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!","isPVPMap?","&&"],true]

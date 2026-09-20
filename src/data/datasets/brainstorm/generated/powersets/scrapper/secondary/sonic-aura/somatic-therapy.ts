@@ -14,7 +14,7 @@ export const SomaticTherapy: Power = {
   "available": 3,
   "autoIssue": false,
   "free": false,
-  "description": "Change the amplitude and signal of your sonic emissions to generate an absorption shield and heal yourself over time.",
+  "description": "Modulate and tune your sonic emissions to generate an absorption shield and heal yourself over time.",
   "shortHelp": "Click: Self +Absorb, +Heal over Time",
   "icon": "sonicaura_equalization.png",
   "powerType": "Click",

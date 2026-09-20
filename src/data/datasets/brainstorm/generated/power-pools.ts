@@ -235,7 +235,7 @@ export const POWER_POOLS_RAW = {
         "atoms": [
           ["Movement","Run",1,1,0.75,"Melee_SpeedRunning","Cur","Magnitude","Self","PvE",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,true,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Run",1.938,1,0.75,"Melee_Ones","Max","Magnitude","Self","PvE",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
-          ["Meta",null,1,161,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+          ["Meta",null,1,162,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
           ["GlobalChanceMod",null,1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true],
           ["Movement","Run",1,1,0.75,"Melee_SpeedRunning","Cur","Magnitude","Self","PvP",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,true,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Run",1.938,1,0.75,"Melee_Ones","Max","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,true,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true]
@@ -1369,7 +1369,7 @@ export const POWER_POOLS_RAW = {
           ["Movement","FlyMode",1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Control",2,1,0.75,"Melee_Control","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Friction",2,1,0.75,"Melee_Friction","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
-          ["Meta",null,1,168,0.75,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+          ["Meta",null,1,169,0.75,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
           ["GlobalChanceMod",null,1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Overlap",2,null,null,1,null,true],
           ["Meta",null,0,0,0.75,"Melee_Ones","Str","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null"],
           ["Movement","FlyMode",0.1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Backup",null,null,null,null,null,null,null,null,null,null,null,true],
@@ -1853,7 +1853,7 @@ export const POWER_POOLS_RAW = {
         },
         "effectArea": "SingleTarget",
         "atoms": [
-          ["Meta",null,1,162,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+          ["Meta",null,1,163,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
           ["GlobalChanceMod",null,1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true],
           ["Movement","JumpHeight",1,1,0.75,"Melee_Leap","Cur","Magnitude","Self","PvE",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,true,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Jump",1,1,0.75,"Melee_SpeedJumping","Cur","Magnitude","Self","PvE",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,true,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
@@ -2322,7 +2322,7 @@ export const POWER_POOLS_RAW = {
           ["Movement","FlyMode",1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Control",2,1,0.75,"Melee_Control","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Friction",2,1,0.75,"Melee_Friction","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
-          ["Meta",null,1,163,0.75,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+          ["Meta",null,1,164,0.75,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
           ["GlobalChanceMod",null,1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Overlap",2,null,null,1,null,true],
           ["Meta",null,0,0,0.75,"Melee_Ones","Str","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null"],
           ["Movement","FlyMode",0.1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Backup",null,null,null,null,null,null,null,null,null,null,null,true],
@@ -2590,7 +2590,7 @@ export const POWER_POOLS_RAW = {
         "effectArea": "SingleTarget",
         "atoms": [
           ["Stealth","Translucency",0.85,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1],
-          ["Meta",null,1,104,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,"StealthToggle",null,null,null,null,null,null,"set_mode",null,null,null,null,null,null,null,null,null,true],
+          ["Meta",null,1,105,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,"StealthToggle",null,null,null,null,null,null,"set_mode",null,null,null,null,null,null,null,null,null,true],
           ["Stealth","RadiusPvE",55,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,"OutOfCombat",["Attacked","source.EventTimeSince>","10",">","HitByFoe","source.EventTimeSince>","10",">","&&","MissionObjectClick","source.EventTimeSince>","10",">","&&"],null,null,true,null,"StealthToggle",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Stealth","RadiusPvP",611,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,"OutOfCombat",["Attacked","source.EventTimeSince>","10",">","HitByFoe","source.EventTimeSince>","10",">","&&","MissionObjectClick","source.EventTimeSince>","10",">","&&"],null,null,true,null,"StealthToggle",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["ThreatLevel",null,-1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,"OutOfCombat",["Attacked","source.EventTimeSince>","10",">","HitByFoe","source.EventTimeSince>","10",">","&&","MissionObjectClick","source.EventTimeSince>","10",">","&&"],null,null,true,null,"StealthToggle",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
@@ -2776,7 +2776,7 @@ export const POWER_POOLS_RAW = {
           ["Stealth","Translucency",0.85,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1],
           ["Meta",null,0,0,0.75,"Melee_Ones","Str","Magnitude","Self","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null"],
           ["GlobalChanceMod",null,1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true],
-          ["Meta",null,1,104,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,"StealthToggle",null,null,null,null,null,null,"set_mode",null,null,null,null,null,null,null,null,null,true],
+          ["Meta",null,1,105,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,"StealthToggle",null,null,null,null,null,null,"set_mode",null,null,null,null,null,null,null,null,null,true],
           ["Stealth","RadiusPvE",36,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,"OutOfCombat",["Attacked","source.EventTimeSince>","10",">","HitByFoe","source.EventTimeSince>","10",">","&&","MissionObjectClick","source.EventTimeSince>","10",">","&&"],null,null,true,null,"StealthToggle",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Stealth","RadiusPvP",389,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,"OutOfCombat",["Attacked","source.EventTimeSince>","10",">","HitByFoe","source.EventTimeSince>","10",">","&&","MissionObjectClick","source.EventTimeSince>","10",">","&&"],null,null,true,null,"StealthToggle",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Stealth","Translucency",0.7,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,null,null,null,null,"OutOfCombat",["Attacked","source.EventTimeSince>","10",">","HitByFoe","source.EventTimeSince>","10",">","&&","MissionObjectClick","source.EventTimeSince>","10",">","&&"],null,null,true],
@@ -3249,7 +3249,7 @@ export const POWER_POOLS_RAW = {
           ["DamageBuff","Negative",3.5,1,120,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!"]],
           ["DamageBuff","Psionic",3.5,1,120,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!"]],
           ["DamageBuff","Toxic",3.5,1,120,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!"]],
-          ["Meta",null,1,47,120,"Melee_Ones","Cur","Constant","Target","Any",false,"Ignore",2,null,130,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!"],null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+          ["Meta",null,1,48,120,"Melee_Ones","Cur","Constant","Target","Any",false,"Ignore",2,null,130,1,null,true,null,null,null,null,["kVengeance_Mode","target.mode?","!"],null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
           ["Heal",null,1,1,0,"Melee_Heal","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1]
         ]
       },
@@ -3534,7 +3534,7 @@ export const POWER_POOLS_RAW = {
           ["Movement","Jump",1.65,1,0.75,"Melee_Ones","Max","Magnitude","Self","PvE",false,"Suppress",2,null,null,1,null,true,null,null,null,null,null,null,null,true,null,"TravelMaxBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Control",10,1,0.75,"Melee_Ones","Cur","Magnitude","Self","PvE",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,true,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Friction",2,1,0.75,"Melee_Ones","Cur","Magnitude","Self","PvE",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,true,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
-          ["Meta",null,1,167,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+          ["Meta",null,1,168,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
           ["GlobalChanceMod",null,1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true],
           ["Movement","JumpHeight",1,1,0.75,"Melee_Leap","Cur","Magnitude","Self","PvP",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,true,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Jump",1,1,0.75,"Melee_SpeedJumping","Cur","Magnitude","Self","PvP",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,true,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
@@ -4648,7 +4648,7 @@ export const POWER_POOLS_RAW = {
           ["Damage","Energy",1.48,1,0,"Ranged_InherentDamage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,0.20000000298023224,null,null,null,null,null,null,["enttype","target>","critter","eq","arch","source>","Class_Stalker","eq","&&","kHeld","target>","0",">","kSleep","target>","0",">","||","kMeter","source>",".9","<","&&","&&"],true,null,null,null,null,null,null,null,null,null,"Class_Stalker"],
           ["Damage","Energy",1.48,1,0,"Ranged_Damage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","critter","eq","kArcaneBolt","Source.Mode?","&&"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"arcanebolt"],
           ["Meta",null,1,1,0,"Melee_Ones","Str","Magnitude","Self","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","critter","eq","kArcaneBolt","Source.Mode?","&&"],true,null,null,null,null,null,null,null,null,null,null,"cancel_mods",null,0.5,null,null,null,null,null,null,"arcanebolt"],
-          ["Meta",null,1,65,0,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,["enttype","target>","critter","eq","kArcaneBolt","Source.Mode?","&&"],true,null,null,null,null,null,null,null,null,null,null,"unset_mode",null,null,null,null,null,null,null,null,"arcanebolt"],
+          ["Meta",null,1,66,0,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,["enttype","target>","critter","eq","kArcaneBolt","Source.Mode?","&&"],true,null,null,null,null,null,null,null,null,null,null,"unset_mode",null,null,null,null,null,null,null,null,"arcanebolt"],
           ["Damage","Energy",1.891,1,0,"Ranged_PvPDamage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","player","eq"],true],
           ["Damage","Energy",0.9455,1,0,"Ranged_PvPDamage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","player","eq","kTerrorized","target>","0",">","kImmobilized","target>","0",">","||","kHeld","target>","0",">","||","kStunned","target>","0",">","||","Sleep","target.EventTimeSince>","3","<=","||","arch","source>","Class_Controller","eq","&&","&&"],true,null,null,null,null,null,null,null,null,"Containment,Controller"],
           ["Damage","Energy",1.891,1,0,"Ranged_PvPDamage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","player","eq","kHitPoints%","target>","10","-","100","*","50","10","-","/","0","100","minmax","rand","100","*","<","arch","source>","Class_Corruptor","eq","&&","&&"],true,null,null,null,null,null,null,null,null,"Corruptor"],
@@ -4657,7 +4657,7 @@ export const POWER_POOLS_RAW = {
           ["Damage","Energy",1.891,1,0,"Ranged_PvPDamage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,0.20000000298023224,null,null,null,null,null,null,["enttype","target>","player","eq","arch","source>","Class_Stalker","eq","&&","kHeld","target>","0",">","kSleep","target>","0",">","||","kMeter","source>",".9","<","&&","&&"],true,null,null,null,null,null,null,null,null,null,"Class_Stalker"],
           ["Mez","Knockback",0.67,1,0,"Ranged_Ones","Cur","Magnitude","Target","Any",true,"Stack",2,null,null,0.25,null,null,null,null,null,null,["enttype","target>","player","eq"],true],
           ["Damage","Energy",1.891,1,0,"Ranged_PvPDamage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","player","eq","kArcaneBolt","Source.Mode?","&&"],true],
-          ["Meta",null,1,65,0,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,["enttype","target>","player","eq","kArcaneBolt","Source.Mode?","&&"],true,null,null,null,null,null,null,null,null,null,null,"unset_mode"],
+          ["Meta",null,1,66,0,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,["enttype","target>","player","eq","kArcaneBolt","Source.Mode?","&&"],true,null,null,null,null,null,null,null,null,null,null,"unset_mode"],
           ["Meta",null,1,1,0,"Melee_Ones","Str","Magnitude","Self","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","player","eq","kArcaneBolt","Source.Mode?","&&"],true,null,null,null,null,null,null,null,null,null,null,"cancel_mods",null,0.5]
         ],
         "conditionalEffects": [
@@ -4726,7 +4726,7 @@ export const POWER_POOLS_RAW = {
           ["Movement","Friction",2,1,0.75,"Melee_Friction","Cur","Magnitude","Self","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["GlobalChanceMod",null,1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Overlap",2,null,null,1,null,true],
           ["Meta",null,0,0,0.75,"Melee_Ones","Str","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null"],
-          ["Meta",null,1,164,0.75,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+          ["Meta",null,1,165,0.75,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
           ["Movement","FlyMode",0.1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Backup",null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","FlyMode",2,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"HypersonicFly"],
           ["Movement","Fly",1.1788,1,0.75,"Melee_SpeedFlying","Cur","Magnitude","Self","PvE",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,true,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
@@ -4911,7 +4911,7 @@ export const POWER_POOLS_RAW = {
         "effectArea": "SingleTarget",
         "atoms": [
           ["RechargePower",null,1,1,0,"Ranged_Ones","Cur","Magnitude","Self","Any",false,"Ignore",2,null,null,-0.75,null,true,null,null,null,null,["EndActivateClick","target.EventCount>","0",">","EndActivateInsp","target.EventCount>","0",">","+","kArcaneBolt","Source.Mode?","!","&&"],true,null,null,null,null,null,null,null,null,"ArcanePower",null,null,null,1],
-          ["Meta",null,1,65,15,"Melee_Ones","Cur","Constant","Self","Any",false,"Ignore",2,null,15.25,-0.75,null,true,null,null,null,null,["EndActivateClick","target.EventCount>","0",">","EndActivateInsp","target.EventCount>","0",">","+","kArcaneBolt","Source.Mode?","!","&&"],true,null,null,null,null,null,null,null,null,"ArcanePower",null,"set_mode"],
+          ["Meta",null,1,66,15,"Melee_Ones","Cur","Constant","Self","Any",false,"Ignore",2,null,15.25,-0.75,null,true,null,null,null,null,["EndActivateClick","target.EventCount>","0",">","EndActivateInsp","target.EventCount>","0",">","+","kArcaneBolt","Source.Mode?","!","&&"],true,null,null,null,null,null,null,null,null,"ArcanePower",null,"set_mode"],
           ["GlobalChanceMod",null,0.1,1,600,"Melee_Ones","Cur","Magnitude","Self","Any",false,"StackThenIgnore",25,null,null,1,null,true,null,null,null,null,["EndActivateClick","target.EventCount>","0",">","EndActivateInsp","target.EventCount>","0",">","+","kArcaneBolt","Source.Mode?","!","&&"],true,null,null,null,null,null,null,null,null,"ArcanePower,ArcanePowerBoost"],
           ["GlobalChanceMod",null,-1000,1,1.5,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["EndActivateClick","target.EventCount>","0",">","EndActivateInsp","target.EventCount>","0",">","+","kArcaneBolt","Source.Mode?","!","&&"],true,null,null,null,null,null,null,null,null,"ArcanePower,ArcanePowerBoost"]
         ]
@@ -5179,9 +5179,9 @@ export const POWER_POOLS_RAW = {
         "atoms": [
           ["Movement","Run",1,1,0.75,"Melee_SpeedRunning","Cur","Magnitude","Self","PvE",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,true,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Run",1.938,1,0.75,"Melee_Ones","Max","Magnitude","Self","PvE",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
-          ["Meta",null,1,166,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+          ["Meta",null,1,167,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
           ["GlobalChanceMod",null,1,1,0.75,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true],
-          ["Meta",null,1,104,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,"StealthToggle",null,null,null,null,null,null,"set_mode",null,null,null,null,null,null,null,null,null,true],
+          ["Meta",null,1,105,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,"StealthToggle",null,null,null,null,null,null,"set_mode",null,null,null,null,null,null,null,null,null,true],
           ["Movement","JumpHeight",0.1,1,0.75,"Melee_Leap","Cur","Expression","Self","Any",false,"Suppress",2,null,null,1,null,true,null,null,null,null,null,null,null,true,null,"TravelBuff",["Redirects.Pool_Speed.Super_Speed_Momentum","source.ownPowerNum?","@StdResult","*"],null,null,null,"MomentumLeap",null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Jump",0.075,1,0.75,"Melee_SpeedJumping","Cur","Expression","Self","Any",false,"Suppress",2,null,null,1,null,true,null,null,null,null,null,null,null,true,null,"TravelBuff",["Redirects.Pool_Speed.Super_Speed_Momentum","source.ownPowerNum?","@StdResult","*"],null,null,null,"MomentumLeap",null,null,null,null,null,null,null,null,null,null,null,true],
           ["Movement","Control",-0.1,1,0.75,"Melee_Ones","Cur","Expression","Self","Any",false,"Suppress",2,null,null,1,null,true,null,null,null,null,null,null,null,true,null,"TravelBuff",["Redirects.Pool_Speed.Super_Speed_Momentum","source.ownPowerNum?","@StdResult","*"],null,null,null,"MomentumLeap",null,null,null,null,null,null,null,null,null,null,null,true],
@@ -5423,9 +5423,9 @@ export const POWER_POOLS_RAW = {
           }
         ],
         "modesDisallowed": [
-          "NoTeleport",
           "Disable_Pool",
           "Disable_Recall",
+          "NoTeleport",
           "Peacebringer_Blaster_Mode",
           "Peacebringer_Tanker_Mode",
           "Warshade_Blaster_Mode",
@@ -5479,7 +5479,6 @@ export const POWER_POOLS_RAW = {
           "Suppress_TravelToggles"
         ],
         "modesDisallowed": [
-          "NoTeleport",
           "Disable_Pool",
           "Disable_Teleport",
           "Disable_Travel",
@@ -5554,13 +5553,13 @@ export const POWER_POOLS_RAW = {
               ["Movement","Control",8,0,1,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"TeleHover"],
               ["Movement","Friction",8,0,1,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"TeleHover"],
               ["Mez","Intangible",8,0,1,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"TeleHover"],
-              ["Meta",null,1,66,1,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"TeleHover",null,"set_mode"],
+              ["Meta",null,1,67,1,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"TeleHover",null,"set_mode"],
               ["Movement","FlyMode",1,1,15,"Ranged_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Self"],1],
               ["Movement","Fly",500,1,15,"Melee_SpeedFlying","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Self"],1],
               ["Movement","Control",8,0,15,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Self"],1],
               ["Movement","Friction",8,0,15,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Self"],1],
               ["Mez","Intangible",8,0,15,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Self"],1],
-              ["Meta",null,1,66,15,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode",["Self"],1,null,null,null,["Attacked","Event_11","HitByOther","MissionObjectClick","Event_39"]],
+              ["Meta",null,1,67,15,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode",["Self"],1,null,null,null,["Attacked","Event_11","HitByOther","MissionObjectClick","Event_39"]],
               ["Mez","Untouchable",1000,1000,3,"Ranged_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["Temporary_Powers.Temporary_Powers.NoPhase","source.ownPower?","!"],null,null,true,null,null,null,null,null,null,null,null,null,["Self"],1],
               ["Stealth","Translucency",0.25,1,3,"Ranged_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,["Temporary_Powers.Temporary_Powers.NoPhase","source.ownPower?","!"],null,null,true,null,null,null,null,0,null,null,null,null,["Self"],2.5],
               ["Meta",null,-1,1,3,"Melee_Ones","Abs","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["Temporary_Powers.Temporary_Powers.NoPhase","source.ownPower?","!"],null,null,true,null,null,null,null,null,null,null,null,"designer_status",["Self"],1,["Attacked","HitByFoe","MissionObjectClick"],10,true,["Attacked","Event_11","HitByOther","MissionObjectClick","Event_39"]],
@@ -5575,10 +5574,10 @@ export const POWER_POOLS_RAW = {
           "Suppress_TravelToggles"
         ],
         "modesDisallowed": [
-          "NoTeleport",
           "Disable_Pool",
           "Disable_Teleport",
           "Disable_Travel",
+          "NoTeleport",
           "Peacebringer_Blaster_Mode",
           "Peacebringer_Tanker_Mode",
           "Warshade_Blaster_Mode",
@@ -5609,13 +5608,13 @@ export const POWER_POOLS_RAW = {
           ["Movement","Control",8,0,1,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"TeleHover",null,null,["Self"]],
           ["Movement","Friction",8,0,1,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"TeleHover",null,null,["Self"]],
           ["Mez","Intangible",8,0,1,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"TeleHover",null,null,["Self"]],
-          ["Meta",null,1,66,1,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"TeleHover",null,"set_mode",["Self"]],
+          ["Meta",null,1,67,1,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"TeleHover",null,"set_mode",["Self"]],
           ["Movement","FlyMode",1,1,15,"Ranged_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Self"],1],
           ["Movement","Fly",500,1,15,"Melee_SpeedFlying","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Self"],1],
           ["Movement","Control",8,0,15,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Self"],1],
           ["Movement","Friction",8,0,15,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Self"],1],
           ["Mez","Intangible",8,0,15,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,["Self"],1],
-          ["Meta",null,1,66,15,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode",["Self"],1,null,null,null,["Attacked","Event_11","HitByOther","MissionObjectClick","Event_39"]],
+          ["Meta",null,1,67,15,"Ranged_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode",["Self"],1,null,null,null,["Attacked","Event_11","HitByOther","MissionObjectClick","Event_39"]],
           ["Mez","Untouchable",1000,1000,3,"Ranged_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["Temporary_Powers.Temporary_Powers.NoPhase","source.ownPower?","!"],null,null,true,null,null,null,null,null,null,null,null,null,["Self"],1],
           ["Stealth","Translucency",0.25,1,3,"Ranged_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,null,null,null,null,null,["Temporary_Powers.Temporary_Powers.NoPhase","source.ownPower?","!"],null,null,true,null,null,null,null,0,null,null,null,null,["Self"],2.5],
           ["Meta",null,-1,1,3,"Melee_Ones","Abs","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["Temporary_Powers.Temporary_Powers.NoPhase","source.ownPower?","!"],null,null,true,null,null,null,null,null,null,null,null,"designer_status",["Self"],1,["Attacked","HitByFoe","MissionObjectClick"],10,true,["Attacked","Event_11","HitByOther","MissionObjectClick","Event_39"]],
@@ -5646,10 +5645,10 @@ export const POWER_POOLS_RAW = {
           "Suppress_TravelToggles"
         ],
         "modesDisallowed": [
-          "NoTeleport",
           "Disable_Pool",
           "Disable_Teleport",
           "Disable_Travel",
+          "NoTeleport",
           "Peacebringer_Blaster_Mode",
           "Peacebringer_Tanker_Mode",
           "Warshade_Blaster_Mode",
@@ -5717,8 +5716,8 @@ export const POWER_POOLS_RAW = {
           "Suppress_TravelToggles"
         ],
         "modesDisallowed": [
-          "NoTeleport",
           "Disable_Pool",
+          "NoTeleport",
           "Peacebringer_Blaster_Mode",
           "Peacebringer_Tanker_Mode",
           "Warshade_Blaster_Mode",
@@ -6011,7 +6010,7 @@ export const POWER_POOLS_RAW = {
         "effectArea": "SingleTarget",
         "atoms": [
           ["Meta",null,1,1,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"ninja_run",null,null,null,null,null,["Stunned","Held","Sleep"]],
-          ["Meta",null,1,165,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+          ["Meta",null,1,166,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
           ["GlobalChanceMod",null,-1,1,999999,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"OnActivate"],
           ["GlobalChanceMod",null,-1,1,999999,"Melee_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"OnActivate"],
           ["Movement","JumpHeight",0.25,1,0.75,"Melee_Leap","Cur","Magnitude","Self","PvE",false,"Suppress",2,null,null,1,null,null,null,null,null,null,null,null,null,true,null,"TravelBuff",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],

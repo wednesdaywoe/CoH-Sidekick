@@ -21,7 +21,7 @@ export const FRTMindLink: Power = {
   "targetType": "Self",
   "effectArea": "AoE",
   "targetsAffected": [
-    "Teammate",
+    "Friend",
     "Self"
   ],
   "stats": {

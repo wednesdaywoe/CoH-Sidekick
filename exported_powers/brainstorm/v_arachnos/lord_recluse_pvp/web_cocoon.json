@@ -6,7 +6,7 @@
   "display_name": "Toxic Web Cocoon",
   "display_fullname": "V Arachnos Lord Recluse PvP Web Cocoon",
   "display_help": "Lord Recluse can fire a more powerful version of the Web Cocoon. The sinewy fibers of this Cocoon are strong enough to completely Hold one target. Targets able to resist the Hold are still likely to have their attack and movement speed dramatically slowed. Web Cocoon can also bring down flying targets and prevent foes from jumping.<br><br>It is rumored Lord Recluse had Arachnos design and sell web grenade technology as a message to flying heroes, chief amongst them his eternal rival, Statesman.",
-  "display_short_help": "Ranged, Moderate DoT(Toxic), Foe Hold, -SPD, -Recharge, -Jump, -Fly",
+  "display_short_help": "Ranged, Moderate DoT(Toxic), Foe -SPD, -Recharge, -Jump, -Fly",
   "icon": "banespidertraining_webcocoon.png",
   "auto_issue": false,
   "auto_issue_keeps_level": false,
@@ -211,16 +211,16 @@
         },
         {
           "attribs": [
-            "Held"
+            "XPDebtProtection"
           ],
-          "type": "Duration",
+          "type": "Magnitude",
           "application_type": "OnTick",
-          "aspect": "Current",
+          "aspect": "Absolute",
           "target": "AnyAffected",
-          "table": "Ranged_Immobilize",
-          "scale": 10.0,
-          "duration": "0 seconds",
-          "magnitude": 3.0,
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "8.5 seconds",
+          "magnitude": 1.0,
           "delay": 0.0,
           "duration_expression": [],
           "magnitude_expression": [],
@@ -233,23 +233,37 @@
           "stack": "Stack",
           "stack_limit": 2,
           "stack_key": null,
-          "messages": {
-            "display_attacker_hit": "You Hold {PlayerDest} with your {PowerName}.",
-            "display_victim_hit": "{PlayerSource} Holds you with their {PowerName}.",
-            "display_float": null,
-            "display_attrib_defense_float": null,
-            "display_info": null
-          },
-          "fx": {
-            "continuing_bits": [],
-            "continuing_fx": null,
-            "conditional_bits": [
-              387
-            ],
-            "conditional_fx": "V_COV/ENEMYPOWERS/ARACHNOS/ARACHNOID_WEBTRAPCAGE.FX"
-          },
-          "flags_raw": 2560
-        },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 112
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Arachnos_Base_Core_PvP",
+        "target.VillainName>",
+        "!",
+        "FreedomCorps_Base_Core_PvP",
+        "target.VillainName>",
+        "!",
+        "&&"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
         {
           "attribs": [
             "Toxic_Dmg"
@@ -282,23 +296,45 @@
             "display_info": null
           },
           "flags_raw": 1280
-        },
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Arachnos_Base_Core_PvP",
+        "target.VillainName>",
+        "FreedomCorps_Base_Core_PvP",
+        "target.VillainName>",
+        "||"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
         {
           "attribs": [
-            "XPDebtProtection"
+            "Unique1_Dmg"
           ],
           "type": "Magnitude",
           "application_type": "OnTick",
           "aspect": "Absolute",
           "target": "AnyAffected",
-          "table": "Ranged_Ones",
-          "scale": 1.0,
-          "duration": "8.5 seconds",
+          "table": "Ranged_Damage",
+          "scale": 0.125,
+          "duration": "7.1 seconds",
           "magnitude": 1.0,
-          "delay": 0.0,
+          "delay": 1.0,
           "duration_expression": [],
           "magnitude_expression": [],
-          "application_period": 0.0,
+          "application_period": 1.0,
           "tick_chance": 1.0,
           "tick_mag_multiplier": 1.0,
           "tick_mag_additive": 0.0,
@@ -307,12 +343,14 @@
           "stack": "Stack",
           "stack_limit": 2,
           "stack_key": null,
-          "flags": [
-            "IgnoreStrength",
-            "IgnoreResistance",
-            "IgnoreCombatMods"
-          ],
-          "flags_raw": 112
+          "messages": {
+            "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Unique damage over time.",
+            "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Unique damage over time.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags_raw": 1280
         }
       ]
     }

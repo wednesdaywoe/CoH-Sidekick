@@ -5,8 +5,8 @@
   "type": "Click",
   "display_name": "Tartarus Laser",
   "display_fullname": "Council Bulwark Tartarus Laser",
-  "display_help": "Bulwark gathers reserve power and unleashes its greatest weapon on all enemies before it in a wide. Foes caught in the blast risk being vaporized on the spot, survivors have their damage resistance and regeneration rate reduced.",
-  "display_short_help": "Ranged (Cone), Extreme DMG(Energy), Foe -Regen, -Resist(All)",
+  "display_help": "Bulwark gathers reserve power and unleashes its greatest weapon on all enemies before it in a wide cone. Foes caught in the blast risk being vaporized on the spot, survivors have their damage resistance and regeneration rate reduced.",
+  "display_short_help": "Autohit: Ranged (Cone), Extreme DMG(Energy), Foe -Regen, -Resist(All)",
   "icon": "beamrifle_piercingbeam.png",
   "auto_issue": false,
   "auto_issue_keeps_level": false,
@@ -58,13 +58,13 @@
       "is_pvp": "EITHER",
       "requires_pv": "EITHER",
       "requires_default": "SATISFIED",
-      "eval_flags": 6,
+      "eval_flags": 0,
       "templates": [
         {
           "attribs": [
             "Energy_Dmg"
           ],
-          "type": "Expression",
+          "type": "Magnitude",
           "application_type": "OnTick",
           "aspect": "Absolute",
           "target": "AnyAffected",
@@ -74,17 +74,7 @@
           "magnitude": 1.0,
           "delay": 0.0,
           "duration_expression": [],
-          "magnitude_expression": [
-            "1",
-            "1",
-            "@ToHit",
-            "-",
-            "@ToHitRoll",
-            "*",
-            "-",
-            "@StdResult",
-            "*"
-          ],
+          "magnitude_expression": [],
           "application_period": 0.0,
           "tick_chance": 1.0,
           "tick_mag_multiplier": 1.0,

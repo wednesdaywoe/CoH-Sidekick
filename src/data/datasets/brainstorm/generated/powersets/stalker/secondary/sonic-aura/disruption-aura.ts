@@ -38,7 +38,6 @@ export const DisruptionAura: Power = {
     "maxTargets": 10
   },
   "allowedEnhancements": [
-    "Taunt",
     "EnduranceReduction",
     "Recharge"
   ],

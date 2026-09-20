@@ -5,7 +5,7 @@
   "type": "Click",
   "display_name": "Magnify",
   "display_fullname": "Defender Buff Light Affinity Magnify",
-  "display_help": "You concentrate your powers and create a lens around your ally, magnifying their Damage, Crowd Control strength, Radius of AoEs, Power Range, and the strength of Heals and Absorb used on them. This lens also increases their resistance to all damage by filtering incoming attacks.",
+  "display_help": "You concentrate your powers and create a lens around your ally, magnifying their Damage, Crowd Control strength, Radius of AoEs, Power Range, and the strength of Heals and Absorb used on them. This lens also increases their resistance to all damage by filtering incoming attacks through the lens.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will produce a powerful heal from your location, effecting yourself and all allies.",
   "display_short_help": "Ally +DMG, +Mez Duration, +Radius, +Range, +Healing/Absorb, +Res (DMG)",
   "icon": "lightaffinity_magnify.png",
   "auto_issue": false,
@@ -18,7 +18,7 @@
   "arc": 0.0,
   "range": 80.0,
   "range_secondary": 0.0,
-  "activation_time": 2.27,
+  "activation_time": 1.67,
   "recharge_time": 60.0,
   "activate_period": 0.0,
   "endurance_cost": 10.4,
@@ -78,8 +78,8 @@
           "application_type": "OnTick",
           "aspect": "Strength",
           "target": "AnyAffected",
-          "table": "Ranged_Buff_Dmg",
-          "scale": 2.0,
+          "table": "Melee_Buff_Dmg",
+          "scale": 3.0,
           "duration": "180 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -153,7 +153,7 @@
           "aspect": "Resistance",
           "target": "AnyAffected",
           "table": "Melee_Ones",
-          "scale": -0.3,
+          "scale": -0.1,
           "duration": "180 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -191,7 +191,7 @@
           "aspect": "Resistance",
           "target": "AnyAffected",
           "table": "Melee_Res_Dmg",
-          "scale": 1.5,
+          "scale": 1.0,
           "duration": "180 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -211,6 +211,61 @@
             "KeepThroughDeath"
           ],
           "flags_raw": 17440
+        }
+      ]
+    }
+  ],
+  "activation_effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "Self",
+          "table": "Ranged_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Redirects.Light_Affinity.Prism",
+              "Redirects.Light_Affinity.Radiance_Heal_Big"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags_raw": 1280
         }
       ]
     }

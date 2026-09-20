@@ -1,41 +1,37 @@
 {
-  "name": "Bend_Light_Copy",
-  "full_name": "Redirects.Light_Affinity.Bend_Light_Copy",
-  "short_name": "Bend_Light_Copy",
-  "type": "Auto",
-  "display_name": "Bend Light",
-  "display_fullname": "Redirects Light Affinity Bend Light Copy",
-  "display_help": "You bend the light around you suddenly, emitting a bright flash that can placate and lower the damage of nearby enemies. Meanwhile, yourself and allies will gain a brief, but powerful boost to their Defense, Damage Resistance, and will be stealthed from enemies.<br><br>This power is mutually exclusive from Sanctuary of Light.",
-  "display_short_help": "PBAoE Ally (+Def, +Res, (DMG), +Stealth), Enemy -DMG, Plactate",
-  "icon": "lightaffinity_bendlight.png",
+  "name": "Radiance_Heal",
+  "full_name": "Redirects.Light_Affinity.Radiance_Heal",
+  "short_name": "Radiance_Heal",
+  "type": "Click",
+  "display_name": "Radiance",
+  "display_fullname": "Redirects Light Affinity Radiance Heal",
+  "display_help": "You concentrate your powers, and emit even more powerful light from yourself! While under the effects of Radiance, you and your allies will immediately recover Endurance, then get a large boost to Damage and ToHit, as well as unlock <color #fcfc95>Radiance Bonuses</color> on all other Light Affinity powers for 20 seconds.<br><br>Additionally, you and your allies will gain a slightly weaker boost to Damage and ToHit, as well as ToHit debuff resistance, Perception, and Perception debuff resistance that lingers beyond the Radiance Bonus.",
+  "display_short_help": "Self +Special, Ally (+DMG, +ToHit, +End, +Perception), RES (ToHit, Perception)",
+  "icon": "lightaffinity_prism.png",
   "auto_issue": false,
   "auto_issue_keeps_level": false,
-  "free": false,
+  "free": true,
   "accuracy": 1.0,
   "effect_area": "Sphere",
-  "max_targets_hit": 16,
-  "radius": 15.0,
+  "max_targets_hit": 255,
+  "radius": 25.0,
   "arc": 0.0,
-  "range": 80.0,
+  "range": 1000.0,
   "range_secondary": 0.0,
   "activation_time": 0.0,
-  "recharge_time": 120.0,
-  "activate_period": 0.2,
+  "recharge_time": 8.0,
+  "activate_period": 0.0,
   "endurance_cost": 0.0,
   "interrupt_time": 0.0,
   "target_type": "Self",
   "target_type_secondary": "None",
   "targets_autohit": [
-    "Foe"
+    "Friend"
   ],
   "targets_affected": [
-    "Foe"
+    "Friend"
   ],
-  "boosts_allowed": [
-    "Taunt",
-    "Recharge",
-    "Debuff_ToHit"
-  ],
+  "boosts_allowed": [],
   "allowed_set_categories": null,
   "cast_through": [],
   "toggle_ignore": [],
@@ -44,7 +40,9 @@
   "activate_requires": [],
   "target_requires": [],
   "slot_requires": [],
-  "attack_types": [],
+  "attack_types": [
+    112
+  ],
   "effects": [
     {
       "chance": 1.0,
@@ -62,16 +60,16 @@
       "templates": [
         {
           "attribs": [
-            "Placate"
+            "Null"
           ],
-          "type": "Duration",
+          "type": "Magnitude",
           "application_type": "OnTick",
-          "aspect": "Absolute",
+          "aspect": "Current",
           "target": "AnyAffected",
-          "table": "Melee_Taunt",
-          "scale": 10.0,
-          "duration": "0 seconds",
-          "magnitude": 3.0,
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "2.25 seconds",
+          "magnitude": 0.0,
           "delay": 0.0,
           "duration_expression": [],
           "magnitude_expression": [],
@@ -81,7 +79,7 @@
           "tick_mag_additive": 0.0,
           "jit_requires": [],
           "caster_stack": "Individual",
-          "stack": "Replace",
+          "stack": "Stack",
           "stack_limit": 2,
           "stack_key": null,
           "fx": {
@@ -90,14 +88,14 @@
             "conditional_bits": [],
             "conditional_fx": null
           },
-          "flags_raw": 2560
+          "flags_raw": 1280
         }
       ]
     }
   ],
-  "modes_disallowed": [
-    "Disable_All"
-  ],
-  "available_level": 3,
+  "show_in_inventory": "Never",
+  "show_in_manage": false,
+  "show_in_info": false,
+  "available_level": 0,
   "powerset": "Redirects.Light_Affinity"
 }

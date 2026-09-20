@@ -5,8 +5,8 @@
   "type": "Toggle",
   "display_name": "Lightfield",
   "display_fullname": "Corruptor Buff Light Affinity Lightfield",
-  "display_help": "You emit a radiant field of light that emboldens and protects you and your allies that bathe in it. Allies inside this field will gain increased health regeneration, and a constant refreshing amount of absorption. Lightfield also protects allies from Immobilization, Disorient, and Hold effects, and gain improved perception and resistance to perception and ToHit debuffs.<br><br>Allies will retain bonuses from Lightfield for some time after leaving the field's area.",
-  "display_short_help": "Toggle: PBAoE Team +Res(Hold, Immobilize, Disorient, ToHit, Perception), +Absorb, +Regeneration, +Perception",
+  "display_help": "You emit a radiant field of light that emboldens and protects you and your allies that bathe in it. Allies inside this field will gain a constant, stacking amount of absorption. Lightfield also protects allies from Immobilization, Disorient, and Hold effects.<br><br>Allies will retain bonuses from Lightfield for some time after leaving the field's area.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will apply an additional buff to Regeneration to yourself and all allies.<br>",
+  "display_short_help": "Toggle: PBAoE Team +Res(Hold, Immobilize, Disorient), +Absorb",
   "icon": "lightaffinity_lightfield.png",
   "auto_issue": false,
   "auto_issue_keeps_level": false,
@@ -14,24 +14,24 @@
   "accuracy": 1.0,
   "effect_area": "Sphere",
   "max_targets_hit": 255,
-  "radius": 40.0,
+  "radius": 25.0,
   "arc": 0.0,
   "range": 0.0,
   "range_secondary": 0.0,
   "activation_time": 0.67,
   "time_to_root": 0.67,
-  "recharge_time": 10.0,
+  "recharge_time": 15.0,
   "activate_period": 1.0,
-  "endurance_cost": 0.39,
+  "endurance_cost": 0.4,
   "interrupt_time": 0.0,
   "target_type": "Self",
   "target_type_secondary": "None",
   "targets_autohit": [
-    "Leaguemate",
+    "Friend",
     "Self"
   ],
   "targets_affected": [
-    "Leaguemate",
+    "Friend",
     "Self"
   ],
   "boosts_allowed": [
@@ -88,183 +88,6 @@
       "templates": [
         {
           "attribs": [
-            "Regeneration"
-          ],
-          "type": "Magnitude",
-          "application_type": "OnTick",
-          "aspect": "Current",
-          "target": "AnyAffected",
-          "table": "Ranged_Ones",
-          "scale": 1.0,
-          "duration": "15 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Replace",
-          "stack_limit": 2,
-          "stack_key": null,
-          "fx": {
-            "continuing_bits": [],
-            "continuing_fx": "PFX2",
-            "conditional_bits": [],
-            "conditional_fx": null
-          },
-          "flags": [
-            "IgnoreResistance"
-          ],
-          "flags_raw": 1056
-        },
-        {
-          "attribs": [
-            "Absorb"
-          ],
-          "type": "Magnitude",
-          "application_type": "OnTick",
-          "aspect": "Maximum",
-          "target": "AnyAffected",
-          "table": "Ranged_Heal",
-          "scale": 0.25,
-          "duration": "15 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Replace",
-          "stack_limit": 2,
-          "stack_key": null,
-          "messages": {
-            "display_attacker_hit": "You grant {PlayerDest} {Damage} points of absorption over time with {PowerName}.",
-            "display_victim_hit": "{PlayerSource} grants you {Damage} points of absorption over time with their {PowerName}.",
-            "display_float": null,
-            "display_attrib_defense_float": null,
-            "display_info": null
-          },
-          "flags": [
-            "NoFloaters",
-            "IgnoreCombatMods"
-          ],
-          "flags_raw": 321
-        },
-        {
-          "attribs": [
-            "PerceptionRadius"
-          ],
-          "type": "Magnitude",
-          "application_type": "OnTick",
-          "aspect": "Current",
-          "target": "Self",
-          "table": "Melee_Ones",
-          "scale": 0.6,
-          "duration": "15 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Replace",
-          "stack_limit": 2,
-          "stack_key": null,
-          "cancel_events": [
-            "Stunned",
-            "Held",
-            "Sleep"
-          ],
-          "flags": [
-            "IgnoreResistance"
-          ],
-          "flags_raw": 1056
-        },
-        {
-          "attribs": [
-            "PerceptionRadius"
-          ],
-          "type": "Magnitude",
-          "application_type": "OnTick",
-          "aspect": "Resistance",
-          "target": "Self",
-          "table": "Melee_Ones",
-          "scale": 0.6,
-          "duration": "15 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Replace",
-          "stack_limit": 2,
-          "stack_key": null,
-          "cancel_events": [
-            "Stunned",
-            "Held",
-            "Sleep"
-          ],
-          "flags": [
-            "IgnoreStrength",
-            "IgnoreResistance"
-          ],
-          "flags_raw": 1072
-        },
-        {
-          "attribs": [
-            "ToHit",
-            "Accuracy"
-          ],
-          "type": "Magnitude",
-          "application_type": "OnTick",
-          "aspect": "Resistance",
-          "target": "AnyAffected",
-          "table": "Ranged_Res_Boolean",
-          "scale": 2.0,
-          "duration": "15 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Replace",
-          "stack_limit": 2,
-          "stack_key": null,
-          "cancel_events": [
-            "Stunned",
-            "Held",
-            "Sleep"
-          ],
-          "flags": [
-            "IgnoreStrength",
-            "IgnoreResistance"
-          ],
-          "flags_raw": 1072
-        },
-        {
-          "attribs": [
             "Null"
           ],
           "type": "Magnitude",
@@ -294,6 +117,43 @@
             "conditional_fx": null
           },
           "flags_raw": 1280
+        },
+        {
+          "attribs": [
+            "Absorb"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Maximum",
+          "target": "AnyAffected",
+          "table": "Ranged_Heal",
+          "scale": 0.15,
+          "duration": "15 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "StackThenIgnore",
+          "stack_limit": 5,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You grant {PlayerDest} {Damage} points of absorption over time with {PowerName}.",
+            "display_victim_hit": "{PlayerSource} grants you {Damage} points of absorption over time with their {PowerName}.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags": [
+            "NoFloaters",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 321
         }
       ]
     },
@@ -393,6 +253,114 @@
             "IgnoreResistance"
           ],
           "flags_raw": 1072
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Regeneration"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 2.0,
+          "duration": "1 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Continuous",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "While Radiance is active"
+          },
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        }
+      ]
+    }
+  ],
+  "activation_effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Null"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "1 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "PFX2",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags_raw": 1280
         }
       ]
     }

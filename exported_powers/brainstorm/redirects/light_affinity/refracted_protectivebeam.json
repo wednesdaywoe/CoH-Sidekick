@@ -5,7 +5,7 @@
   "type": "Click",
   "display_name": "Refracted Protective Beam",
   "display_fullname": "Redirects Light Affinity Refracted ProtectiveBeam",
-  "display_help": "Casts a protective beam of light around an ally, encasing them in a thin, prismatic barrier that absorbs enemy hits. The beam then refracts off this barrier, coating all allies around your target, as well as increasing their defense against all damage for some time.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, your beams charge up and pulse a buff to Damage and Chance To Hit on allies, and a debuff to Damage, Chance To Hit, and Defense on enemies.",
+  "display_help": "Casts a protective beam of light around an ally, encasing them in a thin, prismatic barrier that absorbs enemy hits. The beam then refracts off this barrier, coating all allies around your target and increasing their defense against all damage for some time.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will apply an additional layer of Absorb on all allies.",
   "display_short_help": "Ally +Absorb, +Def (All)",
   "icon": "lightaffinity_protectivebeam.png",
   "auto_issue": false,
@@ -19,7 +19,7 @@
   "range": 1000.0,
   "range_secondary": 0.0,
   "activation_time": 0.0,
-  "recharge_time": 8.0,
+  "recharge_time": 6.0,
   "activate_period": 0.0,
   "endurance_cost": 0.0,
   "interrupt_time": 0.0,
@@ -150,12 +150,15 @@
       "delay": 0.0,
       "radius_inner": -1.0,
       "radius_outer": -1.0,
-      "requires_expression": [],
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
       "tags": [],
       "flags": [],
       "is_pvp": "EITHER",
       "requires_pv": "EITHER",
-      "requires_default": "SATISFIED",
+      "requires_default": "UNSATISFIED",
       "eval_flags": 0,
       "templates": [
         {
@@ -167,10 +170,10 @@
           "aspect": "Maximum",
           "target": "AnyAffected",
           "table": "Ranged_Heal",
-          "scale": 0.25,
-          "duration": "120 seconds",
+          "scale": 0.375,
+          "duration": "30 seconds",
           "magnitude": 1.0,
-          "delay": 0.1,
+          "delay": 0.0,
           "duration_expression": [],
           "magnitude_expression": [],
           "application_period": 0.0,
@@ -187,7 +190,7 @@
             "display_victim_hit": "{PlayerSource} grants you {Damage} points of absorption over time with their {PowerName}.",
             "display_float": null,
             "display_attrib_defense_float": null,
-            "display_info": "Secondary Targets Only"
+            "display_info": "While Radiance is active"
           },
           "flags": [
             "IgnoreCombatMods"

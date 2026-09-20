@@ -85,7 +85,7 @@ export const BoomerangSlice: Power = {
     ["Damage","Lethal",0.1,1,2.1,"Melee_Damage","Abs","Magnitude","Target","Any",true,"Stack",2,null,1,1,null,null,null,null,null,null,["enttype","target>","critter","eq"],null,null,null,null,null,null,null,null,null,null,null,null,null,1],
     ["Damage","Fire",0.3932,1,0,"Melee_Damage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,0,null,null,null,null,null,null,["enttype","target>","critter","eq"],null,null,null,null,null,null,null,null,null,"FieryEmbrace"],
     ["Damage","Lethal",0.6148,1,0,"Melee_Damage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","critter","eq","kRendingSliceCooldown","Source.Mode?","0","==","&&"]],
-    ["Meta",null,1,64,14,"Melee_Ones","Cur","Constant","Self","Any",false,"Ignore",2,null,null,1,null,true,null,null,null,null,["enttype","target>","critter","eq","kRendingSliceCooldown","Source.Mode?","0","==","&&"],null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
+    ["Meta",null,1,65,14,"Melee_Ones","Cur","Constant","Self","Any",false,"Ignore",2,null,null,1,null,true,null,null,null,null,["enttype","target>","critter","eq","kRendingSliceCooldown","Source.Mode?","0","==","&&"],null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
     ["Defense","All",0.5,1,15,"Melee_Debuff_Def","Cur","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,true],
     ["Resistance","Smashing",-1.2,1,15,"Melee_Debuff_Res_Dmg","Res","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,1,true],
     ["Resistance","Lethal",-1.2,1,15,"Melee_Debuff_Res_Dmg","Res","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,1,true],
@@ -99,7 +99,7 @@ export const BoomerangSlice: Power = {
     ["Damage","Lethal",1.0701,1,0,"Melee_PvPDamage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","player","eq"],true],
     ["Damage","Lethal",0.1,1,2.1,"Melee_PvPDamage","Abs","Magnitude","Target","Any",true,"Stack",2,null,1,1,null,null,null,null,null,null,["enttype","target>","player","eq"],true,null,null,null,null,null,null,null,null,null,null,null,null,1],
     ["Damage","Lethal",0.4509,1,0,"Melee_PvPDamage","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1,null,null,null,null,null,null,["enttype","target>","player","eq","kRendingSliceCooldown","Source.Mode?","0","==","&&"],true],
-    ["Meta",null,1,64,14,"Melee_Ones","Cur","Constant","Self","Any",false,"Ignore",2,null,null,1,null,true,null,null,null,null,["enttype","target>","player","eq","kRendingSliceCooldown","Source.Mode?","0","==","&&"],true,null,null,null,null,null,null,null,null,null,null,"set_mode"]
+    ["Meta",null,1,65,14,"Melee_Ones","Cur","Constant","Self","Any",false,"Ignore",2,null,null,1,null,true,null,null,null,null,["enttype","target>","player","eq","kRendingSliceCooldown","Source.Mode?","0","==","&&"],true,null,null,null,null,null,null,null,null,null,null,"set_mode"]
   ],
   "requires": [
     "Tanker_Melee.Broad_Sword.Slice",

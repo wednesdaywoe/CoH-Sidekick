@@ -14,8 +14,8 @@ export const Lightfield: Power = {
   "available": 7,
   "autoIssue": false,
   "free": false,
-  "description": "You emit a radiant field of light that emboldens and protects you and your allies that bathe in it. Allies inside this field will gain increased health regeneration, and a constant refreshing amount of absorption. Lightfield also protects allies from Immobilization, Disorient, and Hold effects, and gain improved perception and resistance to perception and ToHit debuffs.\n\nAllies will retain bonuses from Lightfield for some time after leaving the field's area.",
-  "shortHelp": "Toggle: PBAoE Team +Res(Hold, Immobilize, Disorient, ToHit, Perception), +Absorb, +Regeneration, +Perception",
+  "description": "You emit a radiant field of light that emboldens and protects you and your allies that bathe in it. Allies inside this field will gain a constant, stacking amount of absorption. Lightfield also protects allies from Immobilization, Disorient, and Hold effects.\n\nAllies will retain bonuses from Lightfield for some time after leaving the field's area.\n\nRadiance:\nUnder the effects of Radiance, this power will apply an additional buff to Regeneration to yourself and all allies.",
+  "shortHelp": "Toggle: PBAoE Team +Res(Hold, Immobilize, Disorient), +Absorb",
   "icon": "lightaffinity_lightfield.png",
   "powerType": "Toggle",
   "targetType": "Self",
@@ -26,14 +26,14 @@ export const Lightfield: Power = {
     "stun"
   ],
   "targetsAffected": [
-    "Leaguemate",
+    "Friend",
     "Self"
   ],
   "stats": {
     "accuracy": 1,
     "radius": 25,
     "recharge": 15,
-    "endurance": 0.52,
+    "endurance": 0.4,
     "castTime": 0.67,
     "activatePeriod": 1,
     "maxTargets": 255
@@ -48,18 +48,32 @@ export const Lightfield: Power = {
   ],
   "maxSlots": 6,
   "atoms": [
-    ["Regeneration",null,1,1,15,"Ranged_Ones","Cur","Magnitude","Target","Any",false,"Replace",2,null,null,1],
-    ["Absorb",null,0.25,1,15,"Ranged_Heal","Max","Magnitude","Target","Any",true,"Replace",2,null,null,1],
-    ["Perception",null,0.6,1,15,"Melee_Ones","Cur","Magnitude","Target","Any",false,"Replace",2,null,null,1],
-    ["Perception",null,0.6,1,15,"Melee_Ones","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
-    ["ToHit",null,2,1,15,"Ranged_Res_Boolean","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
-    ["Accuracy",null,2,1,15,"Ranged_Res_Boolean","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true],
     ["Meta",null,0,0,1,"Melee_Ones","Cur","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null"],
+    ["Absorb",null,0.15,1,15,"Ranged_Heal","Max","Magnitude","Target","Any",true,"StackThenIgnore",5,null,null,1],
     ["Mez","Held",-20,1,15,"Ranged_Res_Boolean","Cur","Magnitude","Target","PvE",false,"Replace",2,null,null,1],
     ["Mez","Immobilized",-20,1,15,"Ranged_Res_Boolean","Cur","Magnitude","Target","PvE",false,"Replace",2,null,null,1],
     ["Mez","Stunned",-20,1,15,"Ranged_Res_Boolean","Cur","Magnitude","Target","PvE",false,"Replace",2,null,null,1],
     ["MezResist","Held",2,1,15,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,true],
     ["MezResist","Immobilized",2,1,15,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Stunned",2,1,15,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,true]
+    ["MezResist","Stunned",2,1,15,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["Regeneration",null,2,1,1,"Ranged_Ones","Cur","Magnitude","Target","Any",false,"Continuous",2,null,null,1,null,null,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"chain_jolt_mode"]
+  ],
+  "conditionalEffects": [
+    {
+      "id": "chain_jolt_mode",
+      "label": "Chain Jolt Mode",
+      "scope": "global",
+      "defaultActive": false,
+      "effects": {
+        "buffDuration": 1,
+        "durations": {
+          "regenBuff": 1
+        },
+        "regenBuff": {
+          "scale": 2,
+          "table": "Ranged_Ones"
+        }
+      }
+    }
   ]
 };

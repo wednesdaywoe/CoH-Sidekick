@@ -5,8 +5,8 @@
   "type": "Click",
   "display_name": "Refracted Purifying Beam",
   "display_fullname": "Redirects Light Affinity Refracted ClarifyingBeam",
-  "display_help": "You shine light on your ally to cleanse them of their wounds. This beam then refracts off this cleansing layer, healing all allies around your target, as well as increasing their resistance to all damage by filtering incoming attacks through a layer of light.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, your beams charge up and pulse a buff to Damage and Chance To Hit on allies, and a debuff to Damage, Chance To Hit, and Defense on enemies.",
-  "display_short_help": "Ally Heal, +Res (DMG)",
+  "display_help": "You shine light on your ally to cleanse them of their wounds. This beam then refracts off this cleansing layer, increasing the resistance to Energy and Negative Energy damage of all allies around your target by filtering incoming attacks through the cleansing light.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will apply an additional Heal to all allies.",
+  "display_short_help": "Ally Heal, +Res (Energy, Negative)",
   "icon": "lightaffinity_clarifyingbeam.png",
   "auto_issue": false,
   "auto_issue_keeps_level": false,
@@ -19,7 +19,7 @@
   "range": 1000.0,
   "range_secondary": 0.0,
   "activation_time": 0.0,
-  "recharge_time": 8.0,
+  "recharge_time": 6.0,
   "activate_period": 0.0,
   "endurance_cost": 0.0,
   "interrupt_time": 0.0,
@@ -66,48 +66,6 @@
       "templates": [
         {
           "attribs": [
-            "Smashing_Dmg",
-            "Lethal_Dmg",
-            "Fire_Dmg",
-            "Cold_Dmg",
-            "Energy_Dmg",
-            "Negative_Energy_Dmg",
-            "Psionic_Dmg",
-            "Toxic_Dmg"
-          ],
-          "type": "Magnitude",
-          "application_type": "OnTick",
-          "aspect": "Resistance",
-          "target": "AnyAffected",
-          "table": "Ranged_Res_Dmg",
-          "scale": 1.0,
-          "duration": "120 seconds",
-          "magnitude": 1.0,
-          "delay": 0.0,
-          "duration_expression": [],
-          "magnitude_expression": [],
-          "application_period": 0.0,
-          "tick_chance": 1.0,
-          "tick_mag_multiplier": 1.0,
-          "tick_mag_additive": 0.0,
-          "jit_requires": [],
-          "caster_stack": "Individual",
-          "stack": "Replace",
-          "stack_limit": 2,
-          "stack_key": null,
-          "fx": {
-            "continuing_bits": [],
-            "continuing_fx": "PFX",
-            "conditional_bits": [],
-            "conditional_fx": null
-          },
-          "flags": [
-            "IgnoreResistance"
-          ],
-          "flags_raw": 1056
-        },
-        {
-          "attribs": [
             "Null"
           ],
           "type": "Magnitude",
@@ -137,6 +95,43 @@
             "conditional_fx": null
           },
           "flags_raw": 1280
+        },
+        {
+          "attribs": [
+            "Energy_Dmg",
+            "Negative_Energy_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Resistance",
+          "target": "AnyAffected",
+          "table": "Ranged_Res_Dmg",
+          "scale": 1.0,
+          "duration": "120 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "PFX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreResistance",
+            "KeepThroughDeath"
+          ],
+          "flags_raw": 17440
         }
       ]
     },
@@ -146,12 +141,15 @@
       "delay": 0.0,
       "radius_inner": -1.0,
       "radius_outer": -1.0,
-      "requires_expression": [],
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
       "tags": [],
       "flags": [],
       "is_pvp": "EITHER",
       "requires_pv": "EITHER",
-      "requires_default": "SATISFIED",
+      "requires_default": "UNSATISFIED",
       "eval_flags": 0,
       "templates": [
         {
@@ -163,7 +161,7 @@
           "aspect": "Absolute",
           "target": "AnyAffected",
           "table": "Ranged_Heal",
-          "scale": 0.6,
+          "scale": 0.75,
           "duration": "0 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
@@ -183,7 +181,7 @@
             "display_victim_hit": "{PlayerSource} heals you with their {PowerName} for {Damage} health points.",
             "display_float": null,
             "display_attrib_defense_float": null,
-            "display_info": null
+            "display_info": "While Radiance is active"
           },
           "flags_raw": 1280
         }

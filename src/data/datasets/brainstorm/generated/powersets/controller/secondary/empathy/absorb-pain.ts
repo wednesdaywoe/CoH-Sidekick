@@ -54,7 +54,7 @@ export const AbsorbPain: Power = {
   ],
   "atoms": [
     ["Absorb",null,5,1,15,"Ranged_Heal","Max","Expression","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,["@StdResult","Cur.kHitPoints","target>","Max.kHitPoints","target>","-","+","0","@StdResult","minmax","0.5","*"]],
-    ["Heal",null,5,1,0,"Ranged_Heal","Abs","Magnitude","Target","Any",false,"Stack",2,null,null,1],
+    ["Heal",null,5,1,0,"Ranged_Heal","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1],
     ["Regeneration",null,-1,1,15,"Ranged_Ones","Cur","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true],
     ["HealResistance",null,1,1,15,"Ranged_Ones","Res","Magnitude","Self","Any",false,"Replace",2,null,null,1,null,true],
     ["Damage","Special",3,1,0,"Ranged_Damage","Abs","Magnitude","Self","PvE",false,"Stack",2,null,null,1,null,true],

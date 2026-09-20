@@ -5,7 +5,7 @@
   "type": "Click",
   "display_name": "Protective Beam",
   "display_fullname": "Controller Buff Light Affinity Protective Beam",
-  "display_help": "Casts a protective beam of light around an ally, encasing them in a thin, prismatic barrier that absorbs enemy hits. The beam then refracts off this barrier, coating all allies around your target, as well as increasing their defense against all damage for some time.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, your beams charge up and pulse a buff to Damage and Chance To Hit on allies, and a debuff to Damage, Chance To Hit, and Defense on enemies.",
+  "display_help": "Casts a protective beam of light around an ally, encasing them in a thin, prismatic barrier that absorbs enemy hits. The beam then refracts off this barrier, coating all allies around your target and increasing their defense against all damage for some time.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will apply an additional layer of Absorb on all allies.",
   "display_short_help": "Ally +Absorb, +Def (All)",
   "icon": "lightaffinity_protectivebeam.png",
   "auto_issue": false,
@@ -197,7 +197,7 @@
           "type": "Magnitude",
           "application_type": "OnTick",
           "aspect": "Absolute",
-          "target": "AnyAffected",
+          "target": "Self",
           "table": "Ranged_Ones",
           "scale": 0.0,
           "duration": "0 seconds",
@@ -217,17 +217,12 @@
           "params": {
             "power_names": [
               "Redirects.Light_Affinity.Prism",
-              "Redirects.Light_Affinity.Radiance_Buff",
-              "Redirects.Light_Affinity.Radiance_Debuff"
+              "Redirects.Light_Affinity.Radiance_Heal"
             ],
             "count": 1,
             "type": "Power"
           },
-          "flags": [
-            "CopyBoosts"
-          ],
-          "flags_raw": 1280,
-          "flags2_raw": 4
+          "flags_raw": 1280
         }
       ]
     }

@@ -14,12 +14,17 @@ export const Spotlight: Power = {
   "available": 27,
   "autoIssue": false,
   "free": false,
-  "description": "Select an ally to be bathed in a constant column of light! While under the spotlight, incoming attacks will be deflected by continuous absorption, their wounds will be mended, and crowd control effects will be shrugged off. Additionally, debuffs against your target will be much weaker and your ally's taunt effects will be strengthened.",
+  "description": "Select an ally to be bathed in a constant column of light! While under the spotlight, incoming attacks will be deflected by continuous absorption, their wounds will be mended, and crowd control effects will be shrugged off. Additionally, debuffs against your target will be much weaker and your ally's taunt effects will be strengthened.\n\nRadiance:\nUnder the effects of Radiance, this power will apply an additional Damage Buff to your target.",
   "shortHelp": "Toggle: Ally, +Absorb over time, +Heal over time, +Res (Mez, Knock, Debuff),+Str (Taunt)",
   "icon": "lightaffinity_spotlight.png",
   "powerType": "Toggle",
   "targetType": "Ally (Alive)",
   "effectArea": "AoE",
+  "toggleIgnoreMez": [
+    "hold",
+    "sleep",
+    "stun"
+  ],
   "procsOnlyOnMainTarget": true,
   "targetsAffected": [
     "Friend"
@@ -29,7 +34,7 @@ export const Spotlight: Power = {
     "range": 80,
     "recharge": 15,
     "endurance": 0.78,
-    "castTime": 0.67,
+    "castTime": 1.13,
     "activatePeriod": 2,
     "maxTargets": 1
   },
@@ -45,12 +50,13 @@ export const Spotlight: Power = {
   "maxSlots": 6,
   "damage": {
     "type": "Heal",
-    "scale": 0.2,
+    "scale": 0.25,
     "table": "Ranged_Heal"
   },
   "atoms": [
-    ["Absorb",null,0.2,1,10,"Ranged_Heal","Max","Magnitude","Target","Any",true,"Stack",2,null,null,1],
-    ["Heal",null,0.2,1,0,"Ranged_Heal","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1],
+    ["Meta",null,1,0,2,"Melee_Ones","Str","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null"],
+    ["Absorb",null,0.25,1,10,"Ranged_Heal","Max","Magnitude","Target","Any",true,"Stack",2,null,null,1],
+    ["Heal",null,0.25,1,0,"Ranged_Heal","Abs","Magnitude","Target","Any",true,"Stack",2,null,null,1],
     ["Defense","All",1,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","Any",false,"Continuous",2,null,null,1,null,true],
     ["ToHit",null,1,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","Any",false,"Continuous",2,null,null,1,null,true],
     ["Movement","Run",1,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","Any",false,"Continuous",2,null,null,1,null,true],
@@ -63,7 +69,6 @@ export const Spotlight: Power = {
     ["RechargeTime",null,1,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","Any",false,"Continuous",2,null,null,1,null,true],
     ["Enhancement","Taunt",0.3333,1,2,"Melee_Ones","Str","Magnitude","Target","Any",false,"Continuous",2,null,null,1,null,true],
     ["Enhancement","Placate",0.3333,1,2,"Melee_Ones","Str","Magnitude","Target","Any",false,"Continuous",2,null,null,1,null,true],
-    ["Meta",null,1,0,2,"Melee_Ones","Str","Magnitude","Target","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"null"],
     ["Mez","Confused",-20,1,2,"Ranged_Res_Boolean","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
     ["Mez","Terrorized",-20,1,2,"Ranged_Res_Boolean","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
     ["Mez","Held",-20,1,2,"Ranged_Res_Boolean","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
@@ -73,26 +78,51 @@ export const Spotlight: Power = {
     ["Mez","Knockup",-20,1,2,"Ranged_Res_Boolean","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
     ["Mez","Knockback",-20,1,2,"Ranged_Res_Boolean","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
     ["Mez","Repel",-20,1,2,"Ranged_Res_Boolean","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
-    ["Mez","Knockup",-1,1,2,"Melee_Ones","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
-    ["Mez","Knockback",-1,1,2,"Melee_Ones","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
-    ["Mez","Repel",-1,1,2,"Melee_Ones","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
-    ["MezResist","Knockup",1,1,2,"Melee_Ones","Res","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
-    ["MezResist","Knockback",1,1,2,"Melee_Ones","Res","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
-    ["MezResist","Repel",1,1,2,"Melee_Ones","Res","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
-    ["MezResist","Confused",5,1,2,"Melee_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Terrorized",5,1,2,"Melee_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Held",5,1,2,"Melee_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Immobilized",5,1,2,"Melee_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Stunned",5,1,2,"Melee_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Sleep",5,1,2,"Melee_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Knockup",5,1,2,"Melee_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Knockback",5,1,2,"Melee_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Repel",5,1,2,"Melee_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Knockup",1,1,2,"Melee_Ones","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Knockback",1,1,2,"Melee_Ones","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["MezResist","Repel",1,1,2,"Melee_Ones","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["Mez","Knockup",-1,1,2,"Melee_Ones","Cur","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["Mez","Knockback",-1,1,2,"Melee_Ones","Cur","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
-    ["Mez","Repel",-1,1,2,"Melee_Ones","Cur","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true]
+    ["Mez","Knockup",-8,1,2,"Ranged_Ones","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
+    ["Mez","Knockback",-8,1,2,"Ranged_Ones","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
+    ["Mez","Repel",-8,1,2,"Ranged_Ones","Cur","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
+    ["MezResist","Knockup",0.5,1,2,"Ranged_Ones","Res","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
+    ["MezResist","Knockback",0.5,1,2,"Ranged_Ones","Res","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
+    ["MezResist","Repel",0.5,1,2,"Ranged_Ones","Res","Magnitude","Target","PvE",false,"Continuous",2,null,null,1,null,true],
+    ["DamageBuff","Smashing",1.5,1,2,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"chain_jolt_mode"],
+    ["DamageBuff","Lethal",1.5,1,2,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"chain_jolt_mode"],
+    ["DamageBuff","Fire",1.5,1,2,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"chain_jolt_mode"],
+    ["DamageBuff","Cold",1.5,1,2,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"chain_jolt_mode"],
+    ["DamageBuff","Energy",1.5,1,2,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"chain_jolt_mode"],
+    ["DamageBuff","Negative",1.5,1,2,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"chain_jolt_mode"],
+    ["DamageBuff","Psionic",1.5,1,2,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"chain_jolt_mode"],
+    ["DamageBuff","Toxic",1.5,1,2,"Melee_Buff_Dmg","Str","Magnitude","Target","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,["kChain_Jolt_Mode","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"chain_jolt_mode"],
+    ["MezResist","Confused",2,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["MezResist","Terrorized",2,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["MezResist","Held",2,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["MezResist","Immobilized",2,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["MezResist","Stunned",2,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["MezResist","Sleep",2,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["MezResist","Repel",2,1,2,"Ranged_Res_Boolean","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["MezResist","Knockup",0.5,1,2,"Melee_Ones","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["MezResist","Knockback",0.5,1,2,"Melee_Ones","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["MezResist","Repel",0.5,1,2,"Melee_Ones","Res","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["Mez","Knockup",-8,1,2,"Melee_Ones","Cur","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["Mez","Knockback",-8,1,2,"Melee_Ones","Cur","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true],
+    ["Mez","Repel",-8,1,2,"Melee_Ones","Cur","Magnitude","Target","PvP",false,"Continuous",2,null,null,1,null,true,null,null,null,null,null,true]
+  ],
+  "conditionalEffects": [
+    {
+      "id": "chain_jolt_mode",
+      "label": "Chain Jolt Mode",
+      "scope": "global",
+      "defaultActive": false,
+      "effects": {
+        "buffDuration": 2,
+        "damageBuff": {
+          "ignoreStrength": true,
+          "scale": 1.5,
+          "table": "Melee_Buff_Dmg"
+        },
+        "durations": {
+          "damageBuff": 2
+        }
+      }
+    }
   ]
 };

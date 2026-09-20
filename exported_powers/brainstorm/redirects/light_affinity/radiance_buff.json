@@ -2,11 +2,11 @@
   "name": "Radiance_Buff",
   "full_name": "Redirects.Light_Affinity.Radiance_Buff",
   "short_name": "Radiance_Buff",
-  "type": "Click",
+  "type": "Auto",
   "display_name": "Radiance",
   "display_fullname": "Redirects Light Affinity Radiance Buff",
-  "display_help": "You concentrate your powers, and emit even more powerful beams of light from yourself! While under the effects of Radiance, you and your allies will immediately recover Endurance.<br><br>Additionally, all your Beams will become <color #fcfc95>Radiant Beams</color>, greatly buffing the Damage and ToHit of allies and lowering the Damage, ToHit, and Defense of enemies within the Radiant Light.",
-  "display_short_help": "Self +Special, Ally (+DMG, +ToHit, +End) Foe (-DMG, -ToHit, -Def)",
+  "display_help": "You concentrate your powers, and emit even more powerful light from yourself! While under the effects of Radiance, you and your allies will immediately recover Endurance, then get a large boost to Damage and ToHit, as well as unlock <color #fcfc95>Radiance Bonuses</color> on all other Light Affinity powers for 20 seconds.<br><br>Additionally, you and your allies will gain a slightly weaker boost to Damage and ToHit, as well as ToHit debuff resistance, Perception, and Perception debuff resistance that lingers beyond the Radiance Bonus.",
+  "display_short_help": "Self +Special, Ally (+DMG, +ToHit, +End, +Perception), RES (ToHit, Perception)",
   "icon": "lightaffinity_prism.png",
   "auto_issue": false,
   "auto_issue_keeps_level": false,
@@ -20,7 +20,7 @@
   "range_secondary": 0.0,
   "activation_time": 0.0,
   "recharge_time": 90.0,
-  "activate_period": 0.0,
+  "activate_period": 2.0,
   "endurance_cost": 0.0,
   "interrupt_time": 0.0,
   "target_type": "Anything",
@@ -34,15 +34,19 @@
     "Self"
   ],
   "boosts_allowed": [
-    "Res_Damage",
-    "EnduranceDiscount",
-    "Recharge",
-    "Heal"
+    "Recovery",
+    "Buff_ToHit"
   ],
-  "allowed_set_categories": null,
+  "allowed_set_categories": [
+    "Endurance Modification",
+    "To Hit Buff"
+  ],
   "cast_through": [],
   "toggle_ignore": [],
   "num_allowed": 1,
+  "lifetime": 30.0,
+  "destroy_on_limit": true,
+  "stacking_usage": false,
   "requires": [],
   "activate_requires": [],
   "target_requires": [],
@@ -76,8 +80,8 @@
           "aspect": "Current",
           "target": "AnyAffected",
           "table": "Melee_Buff_ToHit",
-          "scale": 3.0,
-          "duration": "20 seconds",
+          "scale": 1.5,
+          "duration": "2.25 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
           "duration_expression": [],
@@ -91,11 +95,16 @@
           "stack": "Replace",
           "stack_limit": 2,
           "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/BUFFTOHITCONT.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
           "flags": [
-            "IgnoreResistance",
-            "IgnoreCombatMods"
+            "IgnoreResistance"
           ],
-          "flags_raw": 96
+          "flags_raw": 1056
         },
         {
           "attribs": [
@@ -113,8 +122,8 @@
           "aspect": "Strength",
           "target": "AnyAffected",
           "table": "Melee_Buff_Dmg",
-          "scale": 6.0,
-          "duration": "20 seconds",
+          "scale": 1.5,
+          "duration": "2.25 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
           "duration_expression": [],
@@ -130,7 +139,7 @@
           "stack_key": null,
           "fx": {
             "continuing_bits": [],
-            "continuing_fx": "PFX2",
+            "continuing_fx": "GENERICCONTINUING/BUFFDAMAGECONTINUING.FX",
             "conditional_bits": [],
             "conditional_fx": null
           },
@@ -140,11 +149,114 @@
             "IgnoreCombatMods"
           ],
           "flags_raw": 112
+        },
+        {
+          "attribs": [
+            "PerceptionRadius"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 0.9,
+          "duration": "2.25 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "PerceptionRadius"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Resistance",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 0.9,
+          "duration": "2.25 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        },
+        {
+          "attribs": [
+            "ToHit"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Resistance",
+          "target": "AnyAffected",
+          "table": "Ranged_Res_Boolean",
+          "scale": 2.0,
+          "duration": "2.25 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "cancel_events": [
+            "Stunned",
+            "Held",
+            "Sleep"
+          ],
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
         }
       ]
     }
   ],
-  "procs_allowed": false,
   "show_in_inventory": "Never",
   "show_in_manage": false,
   "show_in_info": false,

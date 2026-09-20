@@ -5,8 +5,8 @@
   "type": "Click",
   "display_name": "Prismatic Shield",
   "display_fullname": "Controller Buff Light Affinity Sanctuary of Light",
-  "display_help": "You summon a protective sphere of light, creating a shield for yourself and allies. Your defense and resistance vs all damage is greatly increased while inside the shield, and you are protected from crowd control effects and defense debuffs. Enemies inside the Prismatic Shield will deal greatly reduced damage.",
-  "display_short_help": "Summon Prismatic Shield, Ally (+Def, +Res (DMG, Def), Mez Protection), Foe -DMG",
+  "display_help": "You summon a protective sphere of light, creating a shield for yourself and allies. Your defense and resistance vs all damage and defense debuffs is greatly increased while inside the shield. Enemies inside the Prismatic Shield will deal reduced damage.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will apply an additional, brief Hold to all enemies in range that can overcome weak foes.",
+  "display_short_help": "Summon Prismatic Shield, Ally (+Def, +Res (DMG, Def)), Foe -DMG",
   "icon": "lightaffinity_bendlight.png",
   "auto_issue": false,
   "auto_issue_keeps_level": false,
@@ -22,7 +22,7 @@
   "time_to_root": 1.07,
   "recharge_time": 150.0,
   "activate_period": 0.0,
-  "endurance_cost": 20.155,
+  "endurance_cost": 20.26,
   "interrupt_time": 0.0,
   "target_type": "Self",
   "target_type_secondary": "None",
@@ -42,12 +42,7 @@
     "Defense Sets",
     "Resist Damage"
   ],
-  "cast_through": [
-    "hold",
-    "sleep",
-    "stun",
-    "terror"
-  ],
+  "cast_through": [],
   "toggle_ignore": [],
   "num_allowed": 1,
   "requires": [],
@@ -80,7 +75,7 @@
           "target": "Self",
           "table": "Melee_Level",
           "scale": 1.0,
-          "duration": "30 seconds",
+          "duration": "45 seconds",
           "magnitude": 1.0,
           "delay": 0.0,
           "duration_expression": [],
@@ -111,6 +106,61 @@
           ],
           "flags_raw": 1280,
           "flags2_raw": 44
+        }
+      ]
+    }
+  ],
+  "activation_effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "Self",
+          "table": "Ranged_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Redirects.Light_Affinity.Prism",
+              "Redirects.Light_Affinity.Radiance_Debuff"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags_raw": 1280
         }
       ]
     }

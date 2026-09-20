@@ -91,7 +91,7 @@ export const BlackDwarf: Power = {
     ["Meta",null,1,39,2,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
     ["Meta",null,1,25,2,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
     ["Meta",null,1,5,2,"Melee_Ones","Cur","Constant","Self","Any",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"set_mode"],
-    ["Meta",null,1,1,2,"Melee_Ones","Cur","Constant","Self","Any",false,"Extend",2,null,3,1,null,true,null,null,null,null,["kMiniature","Source.Mode?","!"],null,null,null,null,null,null,null,null,null,null,null,"set_costume"],
+    ["Meta",null,1,1,2,"Melee_Ones","Cur","Constant","Self","Any",false,"Extend",2,null,1,1,null,true,null,null,null,null,["kMiniature","Source.Mode?","!"],null,null,null,null,null,null,null,null,null,null,null,"set_costume"],
     ["Resistance","Smashing",5,1,2,"Melee_Res_Dmg","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,true],
     ["Resistance","Lethal",5,1,2,"Melee_Res_Dmg","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,true],
     ["Resistance","Fire",5,1,2,"Melee_Res_Dmg","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,null,null,null,null,null,null,true],
@@ -127,7 +127,7 @@ export const BlackDwarf: Power = {
     ["Movement","Fly",0.5,1,2.03,"Melee_Ones","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"OnActivate"],
     ["Movement","Jump",0.5,1,2.03,"Melee_Ones","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"OnActivate"],
     ["Movement","JumpHeight",0.5,1,2.03,"Melee_Ones","Res","Magnitude","Self","PvP",false,"Replace",2,null,null,1,null,true,null,null,null,null,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"OnActivate"],
-    ["Meta",null,1,1,2,"Melee_Ones","Cur","Constant","Self","Any",false,"Extend",2,null,3,1,null,true,null,null,null,null,["kMiniature","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,"set_costume"]
+    ["Meta",null,1,1,2,"Melee_Ones","Cur","Constant","Self","Any",false,"Extend",2,null,1,1,null,true,null,null,null,null,["kMiniature","Source.Mode?"],true,null,null,null,null,null,null,null,null,null,null,"set_costume"]
   ],
   "setsModes": [
     "Suppress_PoolToggles",

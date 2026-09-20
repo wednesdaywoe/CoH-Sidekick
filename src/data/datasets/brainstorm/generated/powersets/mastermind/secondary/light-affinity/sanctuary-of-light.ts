@@ -14,18 +14,12 @@ export const SanctuaryofLight: Power = {
   "available": 29,
   "autoIssue": false,
   "free": false,
-  "description": "You summon a protective sphere of light, creating a shield for yourself and allies. Your defense and resistance vs all damage is greatly increased while inside the shield, and you are protected from crowd control effects and defense debuffs. Enemies inside the Prismatic Shield will deal greatly reduced damage.",
-  "shortHelp": "Summon Prismatic Shield, Ally (+Def, +Res (DMG, Def), Mez Protection), Foe -DMG",
+  "description": "You summon a protective sphere of light, creating a shield for yourself and allies. Your defense and resistance vs all damage and defense debuffs is greatly increased while inside the shield. Enemies inside the Prismatic Shield will deal reduced damage.\n\nRadiance:\nUnder the effects of Radiance, this power will apply an additional, brief Hold to all enemies in range that can overcome weak foes.",
+  "shortHelp": "Summon Prismatic Shield, Ally (+Def, +Res (DMG, Def)), Foe -DMG",
   "icon": "lightaffinity_bendlight.png",
   "powerType": "Click",
   "targetType": "Self",
   "effectArea": "SingleTarget",
-  "castThroughMez": [
-    "hold",
-    "sleep",
-    "stun",
-    "terror"
-  ],
   "targetsAffected": [
     "Self"
   ],
@@ -33,7 +27,7 @@ export const SanctuaryofLight: Power = {
     "accuracy": 1,
     "range": 60,
     "recharge": 150,
-    "endurance": 20.155,
+    "endurance": 20.26,
     "castTime": 1.07
   },
   "allowedEnhancements": [
@@ -50,7 +44,7 @@ export const SanctuaryofLight: Power = {
   "summon": {
     "copyBoosts": true,
     "displayName": "Prismatic Shield",
-    "duration": 30,
+    "duration": 45,
     "isPseudoPet": true,
     "powers": [
       "Pets.ResistAll.ResistAll",
@@ -60,7 +54,7 @@ export const SanctuaryofLight: Power = {
     "resolvedEntities": [
       {
         "displayName": "Prismatic Shield",
-        "duration": 30,
+        "duration": 45,
         "copyCreatorMods": true,
         "abilities": [
           {
@@ -106,78 +100,6 @@ export const SanctuaryofLight: Power = {
                 "type": "DefenseDebuffResist",
                 "scale": 1,
                 "table": "Ranged_Res_Boolean"
-              },
-              {
-                "type": "ConfuseProtection",
-                "scale": 50,
-                "table": "Melee_Res_Boolean",
-                "ignoreStrength": true
-              },
-              {
-                "type": "FearProtection",
-                "scale": 50,
-                "table": "Melee_Res_Boolean",
-                "ignoreStrength": true
-              },
-              {
-                "type": "HoldProtection",
-                "scale": 50,
-                "table": "Melee_Res_Boolean",
-                "ignoreStrength": true
-              },
-              {
-                "type": "ImmobilizeProtection",
-                "scale": 50,
-                "table": "Melee_Res_Boolean",
-                "ignoreStrength": true
-              },
-              {
-                "type": "StunProtection",
-                "scale": 50,
-                "table": "Melee_Res_Boolean",
-                "ignoreStrength": true
-              },
-              {
-                "type": "SleepProtection",
-                "scale": 50,
-                "table": "Melee_Res_Boolean",
-                "ignoreStrength": true
-              },
-              {
-                "type": "KnockupProtection",
-                "scale": 50,
-                "table": "Melee_Res_Boolean",
-                "ignoreStrength": true
-              },
-              {
-                "type": "KnockbackProtection",
-                "scale": 50,
-                "table": "Melee_Res_Boolean",
-                "ignoreStrength": true
-              },
-              {
-                "type": "KnockupProtection",
-                "scale": 1,
-                "table": "Melee_Ones",
-                "ignoreStrength": true
-              },
-              {
-                "type": "KnockbackProtection",
-                "scale": 1,
-                "table": "Melee_Ones",
-                "ignoreStrength": true
-              },
-              {
-                "type": "KnockupResist",
-                "scale": 1,
-                "table": "Melee_Ones",
-                "ignoreStrength": true
-              },
-              {
-                "type": "KnockbackResist",
-                "scale": 1,
-                "table": "Melee_Ones",
-                "ignoreStrength": true
               }
             ],
             "recharge": 0,
@@ -187,7 +109,7 @@ export const SanctuaryofLight: Power = {
             "targetsAffected": [
               "Teammate"
             ],
-            "radius": 25,
+            "radius": 30,
             "maxTargets": 255
           }
         ]
@@ -196,6 +118,6 @@ export const SanctuaryofLight: Power = {
     "entity": "PL_StaticObject"
   },
   "atoms": [
-    ["EntCreate",null,1,1,30,"Melee_Level","Cur","Magnitude","Self","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,30]
+    ["EntCreate",null,1,1,45,"Melee_Level","Cur","Magnitude","Self","Any",true,"Replace",2,null,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,45]
   ]
 };

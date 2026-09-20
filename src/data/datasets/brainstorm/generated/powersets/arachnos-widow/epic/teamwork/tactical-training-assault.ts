@@ -26,7 +26,7 @@ export const TacticalTrainingAssault: Power = {
     "stun"
   ],
   "targetsAffected": [
-    "Teammate",
+    "Friend",
     "Self"
   ],
   "stats": {

@@ -72,7 +72,7 @@ export const ArcticFog: Power = {
     ["Resistance","Energy",2,1,0.75,"Ranged_Res_Dmg","Res","Magnitude","Target","Any",false,"Replace",2,null,null,1],
     ["Stealth","RadiusPvP",390,1,0.75,"Melee_Ones","Cur","Magnitude","Target","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,"OutOfCombat",["Attacked","target.EventTimeSince>","10",">","HitByFoe","target.EventTimeSince>","10",">","&&","MissionObjectClick","target.EventTimeSince>","10",">","&&"],null,null,true,null,"StealthToggle",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
     ["Stealth","RadiusPvE",35.5,1,0.75,"Melee_Ones","Cur","Magnitude","Target","Any",false,"Suppress",2,null,null,1,null,null,null,null,null,"OutOfCombat",["MissionObjectClick","target.EventTimeSince>","10",">"],null,null,true,null,"StealthToggle",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true],
-    ["Meta",null,1,104,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,"StealthToggle",null,null,null,null,null,null,"set_mode",null,null,null,null,null,null,null,null,null,true]
+    ["Meta",null,1,105,0.75,"Melee_Ones","Cur","Constant","Self","Any",false,"Stack",2,null,null,1,null,true,null,null,null,null,null,null,null,null,null,"StealthToggle",null,null,null,null,null,null,"set_mode",null,null,null,null,null,null,null,null,null,true]
   ],
   "setsModes": [
     "Hidden_Attack"

@@ -21,7 +21,7 @@ export const NWMindLink: Power = {
   "targetType": "Self",
   "effectArea": "AoE",
   "targetsAffected": [
-    "Teammate",
+    "Friend",
     "Self"
   ],
   "stats": {
