@@ -36,6 +36,7 @@ from bin_crawler.parser._attrib_names import parse_mode_table, parse_stack_key_t
 from bin_crawler.parser._pigg import BinResolver
 from bin_crawler.assets_dir import add_source_arguments, resolve_export_source
 from bin_crawler._export_fingerprint import parser_fingerprint
+from bin_crawler._export_digest import ExportTree
 from bin_crawler.path_safety import safe_path_component
 from bin_crawler.parser._enums import (
     POWER_TYPE, EFFECT_AREA, PVP_FLAG, CASTABLE_AFTER_DEATH,
@@ -604,7 +605,7 @@ _CURVE_ENUMS_BY_FLAVOR = {
 
 
 def _export_enhancement_curves(resolver: BinResolver, powers_data,
-                               output_dir: Path) -> None:
+                               output_dir: Path, tree: ExportTree) -> None:
     """Write enhancement_curves.json: the ED tier curves + boost-type→attrib
     schedule assignment from dim_returns.bin, and the three boost_effect_*
     effectiveness tables. Absence of a bin is surfaced (warning + null in the
@@ -633,17 +634,17 @@ def _export_enhancement_curves(resolver: BinResolver, powers_data,
 
     output_dir.mkdir(parents=True, exist_ok=True)
     out_path = output_dir / 'enhancement_curves.json'
-    with open(out_path, 'w') as f:
-        json.dump({
-            'source': 'dim_returns.bin + boost_effect_*.bin',
-            'dataset_flavor': flavor,
-            'dim_returns': [asdict(s) for s in dim_sets],
-            'boost_effectiveness': effect_tables,
-        }, f, indent=2)
+    tree.write_json(out_path, {
+        'source': 'dim_returns.bin + boost_effect_*.bin',
+        'dataset_flavor': flavor,
+        'dim_returns': [asdict(s) for s in dim_sets],
+        'boost_effectiveness': effect_tables,
+    }, indent=2)
     print(f'  {len(dim_sets)} ED curve sets -> {out_path}', flush=True)
 
 
-def _export_leveling_schedule(resolver: BinResolver, output_dir: Path) -> None:
+def _export_leveling_schedule(resolver: BinResolver, output_dir: Path,
+                              tree: ExportTree) -> None:
     """Write leveling_schedule.json (schedules.bin: power picks, slot grants,
     pool/epic unlocks, inspiration slots per level) and exemplar_handicaps.json
     (the exemplar magnitude clamp curves). Absence of a bin is surfaced as a
@@ -654,11 +655,10 @@ def _export_leveling_schedule(resolver: BinResolver, output_dir: Path) -> None:
         print('Parsing schedules.bin...', flush=True)
         schedule = parse_schedules(resolver.read('schedules.bin'))
         out_path = output_dir / 'leveling_schedule.json'
-        with open(out_path, 'w') as f:
-            json.dump({
-                'source': 'schedules.bin',
-                'schedule': asdict(schedule),
-            }, f, indent=2)
+        tree.write_json(out_path, {
+            'source': 'schedules.bin',
+            'schedule': asdict(schedule),
+        }, indent=2)
         print(f'  {len(schedule.power)} power-pick levels, '
               f'{len(schedule.assignable_boost)} slot grants -> {out_path}',
               flush=True)
@@ -671,11 +671,10 @@ def _export_leveling_schedule(resolver: BinResolver, output_dir: Path) -> None:
         curves = parse_exemplar_handicaps(
             resolver.read('exemplar_handicaps.bin'))
         out_path = output_dir / 'exemplar_handicaps.json'
-        with open(out_path, 'w') as f:
-            json.dump({
-                'source': 'exemplar_handicaps.bin',
-                'curves': asdict(curves),
-            }, f, indent=2)
+        tree.write_json(out_path, {
+            'source': 'exemplar_handicaps.bin',
+            'curves': asdict(curves),
+        }, indent=2)
         print(f'  {len(curves.limits)}-level exemplar clamp curves '
               f'-> {out_path}', flush=True)
     else:
@@ -683,7 +682,7 @@ def _export_leveling_schedule(resolver: BinResolver, output_dir: Path) -> None:
               'clamp curves exported', file=sys.stderr)
 
 
-def _export_boostsets(boost_sets, output_dir: Path) -> None:
+def _export_boostsets(boost_sets, output_dir: Path, tree: ExportTree) -> None:
     """Write boostsets.json: the full IO-set records from boostsets.bin —
     name/rarity/category/allowed_powers plus the trailing block (piece
     variant names, set-bonus tiers, level range) that the ad-hoc
@@ -691,22 +690,38 @@ def _export_boostsets(boost_sets, output_dir: Path) -> None:
     every dataset gets one now, not just Rebirth."""
     output_dir.mkdir(parents=True, exist_ok=True)
     out_path = output_dir / 'boostsets.json'
-    with open(out_path, 'w') as f:
-        json.dump([asdict(s) for s in boost_sets], f, indent=2)
+    tree.write_json(out_path, [asdict(s) for s in boost_sets], indent=2)
     print(f'  {len(boost_sets)} IO sets -> {out_path}', flush=True)
 
 
 def _write_power_tree(powers, ps_records, ps_available, msgs, set_cats_index,
                       mode_table, stack_key_table, output_dir: Path,
-                      dataset_flavor='homecoming'):
+                      tree: ExportTree, dataset_flavor='homecoming'):
     """Group powers by category/powerset and write category/powerset/power.json
     trees plus a per-powerset index.json. Shared by the main PLAYER_CATEGORIES
     pass and the boost-piece pass in main() — the on-disk format for a power
     doesn't depend on which category set filtered it in. Returns
     (total_files, grouped) so the caller can log counts or stamp a manifest."""
     grouped: dict[str, dict[str, list]] = {}
+    # Group on the FOLDED name, because the folded name is what becomes the
+    # directory two lines down. Grouping on the raw one made a case-variant pair
+    # two groups sharing one directory, and the second group's index.json simply
+    # overwrote the first's: HC, Brainstorm and Thunderspy each shipped one
+    # powerset whose index listed 3 of its 72 powers, the other 69 sitting
+    # unlisted in the same directory. Every power FILE was written, so nothing
+    # downstream that reads a power directly saw it; anything enumerating the
+    # set through index.json saw a third of one percent of it. Found by the F78
+    # content digest, which counted one more write than the tree held (PROV-7).
+    #
+    # `spelling` keeps the first raw pair seen per folded key so the emitted
+    # `key` and the display fallback stay exactly what they were for every set
+    # that never collided — the merge changes the three that did, and nothing
+    # else.
+    spelling: dict[tuple[str, str], tuple[str, str]] = {}
     for pw in powers:
-        grouped.setdefault(pw.category, {}).setdefault(pw.powerset, []).append(pw)
+        fcat, fps = pw.category.lower(), pw.powerset.lower()
+        grouped.setdefault(fcat, {}).setdefault(fps, []).append(pw)
+        spelling.setdefault((fcat, fps), (pw.category, pw.powerset))
 
     # The game engine matches power/powerset names case-insensitively, and the
     # binaries exploit that: powers.bin and powersets.bin legitimately disagree
@@ -717,16 +732,17 @@ def _write_power_tree(powers, ps_records, ps_available, msgs, set_cats_index,
     availability_misses = 0
 
     total_files = 0
-    for cat in sorted(grouped):
-        for ps in sorted(grouped[cat]):
+    for fcat in sorted(grouped):
+        for fps in sorted(grouped[fcat]):
+            cat, ps = spelling[(fcat, fps)]
             # Both halves come straight out of powers.bin and have never
             # been looked at before becoming a directory name (F78).
             ps_dir = (output_dir
-                      / safe_path_component(cat.lower(), 'power category')
-                      / safe_path_component(ps.lower(), 'powerset'))
+                      / safe_path_component(fcat, 'power category')
+                      / safe_path_component(fps, 'powerset'))
             ps_dir.mkdir(parents=True, exist_ok=True)
 
-            powers_in_set = grouped[cat][ps]
+            powers_in_set = grouped[fcat][fps]
 
             # Write index.json for the powerset
             # Find matching powerset record
@@ -778,8 +794,7 @@ def _write_power_tree(powers, ps_records, ps_available, msgs, set_cats_index,
                 index_data['help'] = msgs.resolve(index_data['help'])
                 index_data['short_help'] = msgs.resolve(index_data['short_help'])
 
-            with open(ps_dir / 'index.json', 'w') as f:
-                json.dump(index_data, f, indent=2)
+            tree.write_json(ps_dir / 'index.json', index_data, indent=2)
             total_files += 1
 
             # Write individual power files
@@ -808,8 +823,7 @@ def _write_power_tree(powers, ps_records, ps_available, msgs, set_cats_index,
                 fname = safe_path_component(safe_name + '.json',
                                             'power filename',
                                             permit_edge_dots=True)
-                with open(ps_dir / fname, 'w') as f:
-                    json.dump(pw_dict, f, indent=2)
+                tree.write_json(ps_dir / fname, pw_dict, indent=2)
                 total_files += 1
 
     if availability_misses:
@@ -837,6 +851,10 @@ def main():
         output_dir = Path('./exported_powers') / source_name
     else:
         output_dir = Path(args.output_dir)
+    # The one door every exported file goes through. It records what was
+    # written so the manifest can stamp `content_digest` — the guard that the
+    # committed bytes are the exported ones (F78/PROV-1). See _export_digest.py.
+    tree = ExportTree(output_dir)
     categories = set(args.categories) if args.categories else PLAYER_CATEGORIES
 
     resolver = BinResolver(assets_dir)
@@ -926,10 +944,10 @@ def main():
         set_cats_index = build_power_category_index(boost_sets)
         print(f'  {len(boost_sets)} IO sets loaded, '
               f'{len(set_cats_index)} powers indexed.', flush=True)
-        _export_boostsets(boost_sets, output_dir)
+        _export_boostsets(boost_sets, output_dir, tree)
 
-    _export_enhancement_curves(resolver, powers_data, output_dir)
-    _export_leveling_schedule(resolver, output_dir)
+    _export_enhancement_curves(resolver, powers_data, output_dir, tree)
+    _export_leveling_schedule(resolver, output_dir, tree)
 
     # Filter to player categories
     player_powers = [pw for pw in all_powers if pw.category in categories]
@@ -1016,7 +1034,7 @@ def main():
 
     total_files, grouped = _write_power_tree(
         player_powers, ps_records, ps_available, msgs, set_cats_index,
-        mode_table, stack_key_table, output_dir,
+        mode_table, stack_key_table, output_dir, tree,
         dataset_flavor=dataset_flavor)
 
     print(f'\nExported {total_files} files to {output_dir}/')
@@ -1033,30 +1051,6 @@ def main():
     # SUBSET (`--categories`): a partial tree must not claim whole-dataset
     # currency, and stamping the current fingerprint over stale sibling
     # categories would defeat the guard.
-    if not args.categories:
-        manifest = {
-            'schema': 'bin-crawler-export-manifest/2',
-            'note': ('parser_fingerprint is the sha256 of the powers exporter '
-                     '(bin_crawler/parser/**/*.py + export_powers.py) at export '
-                     'time. If it disagrees with the current committed exporter '
-                     'source, THIS tree is stale — re-run export_powers for this '
-                     'dataset and commit. Guarded by '
-                     'src/data/export-staleness.test.ts. `source` names the '
-                     'assets shard the bytes were read from; guarded by '
-                     'src/data/export-provenance.test.ts.'),
-            'parser_fingerprint': parser_fingerprint(),
-            'source': resolver.provenance(),
-            'categories': len(grouped),
-            'power_files': total_files,
-        }
-        with open(output_dir / '_export_manifest.json', 'w') as f:
-            json.dump(manifest, f, indent=2)
-            f.write('\n')
-        print(f'  Manifest: parser_fingerprint={manifest["parser_fingerprint"][:12]}…')
-    else:
-        print('  Manifest: SKIPPED (partial --categories export; not stamping '
-              'whole-dataset currency)')
-
     # Boost-piece power templates (Boosts.*/Set_Bonus.*) — written as a
     # separate tree, not folded into `categories`/`grouped` above, so the
     # manifest counts and player-power semantics (Grant_Power target
@@ -1064,16 +1058,51 @@ def main():
     # under an explicit --categories override for the same reason the
     # Primalist gating and manifest stamping are: it's an advanced override,
     # respect it as given.
+    #
+    # This runs BEFORE the manifest is stamped, and that order is now load-
+    # bearing rather than incidental. It used to run after, which was harmless
+    # while the manifest only recorded fingerprints; `content_digest` has to
+    # cover every file the export wrote, so stamping first would hash a tree
+    # missing its 6,478 boost-piece files and the gate would be red on a
+    # perfectly good export.
     if not args.categories:
         boost_piece_powers = [pw for pw in all_powers if pw.category in BOOST_PIECE_CATEGORIES]
         if boost_piece_powers:
             bp_total, bp_grouped = _write_power_tree(
                 boost_piece_powers, ps_records, ps_available, msgs,
                 set_cats_index, mode_table, stack_key_table, output_dir,
-                dataset_flavor=dataset_flavor)
+                tree, dataset_flavor=dataset_flavor)
             print(f'\nExported {bp_total} boost-piece files '
                   f'({len(boost_piece_powers)} powers, {len(bp_grouped)} categories) '
                   f'to {output_dir}/boosts/ + {output_dir}/set_bonus/')
+
+    if not args.categories:
+        manifest = {
+            'schema': 'bin-crawler-export-manifest/3',
+            'note': ('parser_fingerprint is the sha256 of the powers exporter '
+                     '(every .py in bin_crawler) at export time. If it '
+                     'disagrees with the current committed exporter source, '
+                     'THIS tree is stale — re-run export_powers for this '
+                     'dataset and commit. Guarded by '
+                     'src/data/export-staleness.test.ts. `source` names the '
+                     'assets shard the bytes were read from; guarded by '
+                     'src/data/export-provenance.test.ts. `content_digest` is '
+                     'the sha256 of the bytes this export WROTE; guarded by '
+                     'src/data/export-contents.test.ts.'),
+            'parser_fingerprint': parser_fingerprint(),
+            'source': resolver.provenance(),
+            'content_digest': tree.digest(),
+            'file_count': tree.file_count,
+            'categories': len(grouped),
+            'power_files': total_files,
+        }
+        tree.write_manifest(output_dir / '_export_manifest.json', manifest)
+        print(f'  Manifest: parser_fingerprint={manifest["parser_fingerprint"][:12]}… '
+              f'content_digest={manifest["content_digest"][:12]}… '
+              f'({manifest["file_count"]} files)')
+    else:
+        print('  Manifest: SKIPPED (partial --categories export; not stamping '
+              'whole-dataset currency)')
 
 
 if __name__ == '__main__':

@@ -37,6 +37,7 @@ from bin_crawler.parser._messages import load_messages
 from bin_crawler.assets_dir import add_source_arguments, resolve_export_source
 from bin_crawler.assets_sources import dataset_for_path
 from bin_crawler._export_fingerprint import incarnate_recipes_fingerprint
+from bin_crawler._export_digest import ExportTree
 
 _RESOLVED_FIELDS = ("display_name", "display_help", "display_short_help",
                     "display_tab_name")
@@ -100,19 +101,23 @@ def main():
             d[f + "_resolved"] = messages.resolve(key) if (messages and key) else key
         out_records.append(d)
 
+    # indent=1 is this surface's own formatting and must survive the move
+    # behind the write boundary — the digest is over bytes (F78/PROV-1).
+    tree = ExportTree(out_file.parent)
     out = {"recipes": out_records}
-    out_file.write_text(json.dumps(out, indent=1), encoding="utf-8")
+    tree.write_json(out_file, out, indent=1)
     print(f"Wrote {out_file} ({len(out_records)} records)")
 
     manifest = {
-        "schema": "bin-crawler-export-manifest/2",
+        "schema": "bin-crawler-export-manifest/3",
         "incarnate_recipes_fingerprint": incarnate_recipes_fingerprint(),
         "source": resolver.provenance(),
+        "content_digest": tree.digest(),
+        "file_count": tree.file_count,
         "incarnate_recipes_records": len(out_records),
     }
     manifest_file = out_file.parent / "incarnate_recipes_export_manifest.json"
-    manifest_file.write_text(json.dumps(manifest, indent=2) + "\n",
-                             encoding="utf-8")
+    tree.write_manifest(manifest_file, manifest)
     print(f"Stamped {manifest_file}")
 
 

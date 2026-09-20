@@ -24,6 +24,7 @@ from bin_crawler.parser._salvage import parse_salvage
 from bin_crawler.parser._messages import load_messages
 from bin_crawler.assets_dir import add_source_arguments, resolve_export_source
 from bin_crawler._export_fingerprint import salvage_fingerprint
+from bin_crawler._export_digest import ExportTree
 
 
 def main():
@@ -56,8 +57,12 @@ def main():
         by_cat[r.category] = by_cat.get(r.category, 0) + 1
     print(f"Parsed {len(records)} salvage records: {by_cat}")
 
+    # Every written file goes through the tree, which records it for
+    # `content_digest` — the guard that the committed bytes are the exported
+    # ones (F78/PROV-1). See _export_digest.py.
+    tree = ExportTree(out_file.parent)
     out = {"salvage": [asdict(r) for r in records]}
-    out_file.write_text(json.dumps(out, indent=2), encoding="utf-8")
+    tree.write_json(out_file, out, indent=2)
     print(f"Wrote {out_file}")
 
     # Stamp the export-staleness manifest, exactly as the powers/classes/entities
@@ -70,20 +75,24 @@ def main():
     # no manifest. Guarded by src/data/export-staleness.test.ts. See
     # _export_fingerprint.py.
     manifest = {
-        "schema": "bin-crawler-export-manifest/2",
+        "schema": "bin-crawler-export-manifest/3",
         "note": ("salvage_fingerprint is the sha256 of the salvage exporter "
-                 "(bin_crawler/parser/**/*.py + export_salvage.py) at export "
-                 "time. If it disagrees with the current committed exporter "
-                 "source, THIS salvage.json is stale — re-run export_salvage and "
-                 "commit. Guarded by src/data/export-staleness.test.ts. `source` "
-                 "names the assets shard the bytes were read from; guarded by "
-                 "src/data/export-provenance.test.ts."),
+                 "(every .py in bin_crawler) at export time. If it disagrees "
+                 "with the current committed exporter source, THIS salvage.json "
+                 "is stale — re-run export_salvage and commit. Guarded by "
+                 "src/data/export-staleness.test.ts. `source` names the assets "
+                 "shard the bytes were read from; guarded by "
+                 "src/data/export-provenance.test.ts. `content_digest` is the "
+                 "sha256 of the bytes this export WROTE; guarded by "
+                 "src/data/export-contents.test.ts."),
         "salvage_fingerprint": salvage_fingerprint(),
         "source": resolver.provenance(),
+        "content_digest": tree.digest(),
+        "file_count": tree.file_count,
         "salvage_records": len(records),
     }
     manifest_file = out_file.parent / "salvage_export_manifest.json"
-    manifest_file.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    tree.write_manifest(manifest_file, manifest)
     print(f"  Manifest: salvage_fingerprint={manifest['salvage_fingerprint'][:12]}…")
 
 

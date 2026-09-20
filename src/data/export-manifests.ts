@@ -16,9 +16,10 @@
  * The map of surface→dataset→manifest path lives here so the two guards cannot
  * drift into disagreeing about which trees exist.
  */
+import { createHash } from 'node:crypto';
 import { readFileSync, existsSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join, dirname, basename } from 'node:path';
+import { join, dirname, basename, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -58,6 +59,34 @@ interface AssetsSources {
 export const ASSETS_SOURCES: AssetsSources = JSON.parse(
   readFileSync(join(PKG_ROOT, 'assets_sources.json'), 'utf-8'),
 );
+
+
+/** A path as the Python records it: POSIX, relative to `root`. */
+export function posixRel(root: string, file: string): string {
+  return relative(root, file).split('\\').join('/');
+}
+
+/**
+ * sha256 over a set of files — the TS half of `_export_fingerprint._fold`.
+ *
+ * Sorted by relpath, folded as `relpath\0<bytes>\0`. Both guards use it: the
+ * staleness guard over the exporter's SOURCE, the contents guard over the
+ * export's OUTPUT. The Python has exactly one implementation for the same four
+ * uses, and these two must match it byte for byte — a divergence surfaces as a
+ * permanently-red guard, never a silent gap, which is why it lives here once
+ * rather than in each test.
+ */
+export function foldFiles(entries: { rel: string; bytes: Buffer }[]): string {
+  const ordered = [...entries].sort((a, b) => (a.rel < b.rel ? -1 : a.rel > b.rel ? 1 : 0));
+  const h = createHash('sha256');
+  for (const e of ordered) {
+    h.update(e.rel, 'utf-8');
+    h.update(Buffer.from([0]));
+    h.update(e.bytes);
+    h.update(Buffer.from([0]));
+  }
+  return h.digest('hex');
+}
 
 const posix = (p: string) => p.split('\\').join('/');
 const expandHome = (p: string) => (p.startsWith('~/') ? join(homedir(), p.slice(2)) : p);

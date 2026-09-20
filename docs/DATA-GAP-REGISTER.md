@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 326 entries.** STALE-3 closed 2026-09-19: a second machine now rebuilds the engine
+**0 open, of 328 entries.** STALE-3 closed 2026-09-19: a second machine now rebuilds the engine
 and compares the bytes, and the writer's own agreement with itself has stopped being the evidence.
 
 **A gate's first run is a measurement, and this one failed three times before it passed.** The
@@ -962,7 +962,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 112 of 112 closed
+[Full detail](gaps/pipeline-provenance.md) — 114 of 114 closed
 
 - [x] **ICON-2** — `normalizeIconPath` read the client's own art extensions as filenames in both
   directions — `.dds` passed its "already has one" test untouched and `.texture` failed it and
@@ -1417,6 +1417,8 @@ measurement went, and where a closure for the residual belongs too.
 - [x] **VENDOR-1** — the beta's vendored export sat a parser commit behind, and three converter defaults stated the gap as a rule
 - [x] **PROV-1** — the export manifest named the parser, never the assets tree the bytes came from
 - [x] **PROV-2** — stale in-repo asset twins shared a shard name with the live installs
+- [x] **PROV-6** — the export tree was a trust root nothing hashed, and 2,158 orphan files had been sitting in it since before `tables/` and `entities/` existed
+- [x] **PROV-7** — the powers exporter grouped on the raw powerset name and wrote to the folded one, so a case-variant pair shared a directory and one `index.json` overwrote the other on three forks
 - [x] **INHERENT-3** — the committed `exported_powers/` was not reproducible by a plain export run
 - [x] **SOURCE-1** — second-source constants the export did not surface (the engine's wholesale Rule-0 holes)
 - [x] **TWIN-1** — converter-twin shape divergences, burned down entry by entry

@@ -23,17 +23,33 @@ matches. If the parser changed but a dataset was not re-exported, its recorded
 fingerprint diverges from the current source and the guard goes red; the only
 way to make it green is to actually re-export (which re-stamps).
 
-Scope: each fingerprint covers ONE exporter surface — every `.py` under
-`parser/` plus that exporter's entry module (`export_powers.py` for
-`parser_fingerprint`, `export_classes.py` for `classes_fingerprint`,
-`export_entities.py` for `entities_fingerprint`, `export_salvage.py` for
-`salvage_fingerprint`). It is a directory GLOB, not a curated allowlist (the
-project keeps burning on hand-maintained allowlists), so it is self-maintaining
-as parser files come and go. It intentionally OVER-covers: the fingerprints
-share the whole `parser/` glob, so a `_powers.py` edit also forces a harmless
-classes/entities/salvage re-export and vice-versa (near-zero diff) — an accepted
-trade for a self-maintaining glob. The salvage surface (`export_salvage.py` →
-HC-only `exported_powers/salvage.json`, stamped alongside as
+Scope: every `.py` in the package — `parser/**/*.py`, the exporter entry
+modules, and the helpers beside them. It is a directory GLOB, not a curated
+allowlist (the project keeps burning on hand-maintained allowlists), so it is
+self-maintaining as files come and go.
+
+**The glob used to stop at `parser/` plus one entry module, and that was a
+hole.** `export_powers.py` imports `path_safety.py`; every exporter imports
+`assets_dir.py`; `export_entities.py` imports `export_powers.py` itself. None of
+those were covered, so a change to the path rule or the source resolver changed
+what the exporter WRITES with no staleness gate to notice — recorded as
+deliberately unfixed in F78's row, and closed here because the digest work below
+was paying for a re-export anyway. The cost of widening is near nothing: the
+non-parser modules took 1–3 commits each over six months against `parser/`'s 63,
+so parser churn already dominates when a re-export is forced.
+
+It intentionally OVER-covers, and now maximally so: all five fingerprints fold
+the same file set and are therefore EQUAL by construction. The five names and
+the five manifest keys stay because each still answers a per-surface question
+("is THIS tree current?") and the manifest schema is read by two guards; what
+they no longer do is differ. A `_powers.py` edit forces a harmless
+classes/entities/salvage re-export and vice-versa (near-zero diff) — the
+accepted trade for a glob nobody has to maintain. Modules an exporter never
+imports (`server.py`, `preflight.py`) are swept in too; at their churn that is
+cheaper than a rule deciding which imports count.
+
+The salvage surface (`export_salvage.py` → HC-only
+`exported_powers/salvage.json`, stamped alongside as
 `salvage_export_manifest.json`) is HC-only: Rebirth/Thunderspy piggs carry no
 `salvage.bin`, so those exports early-return and no manifest is written.
 
@@ -56,23 +72,19 @@ from pathlib import Path
 _PKG_ROOT = Path(__file__).resolve().parent
 
 
-def _parser_py_files(pkg_root: Path) -> list[Path]:
-    """Every `.py` under `parser/`, sorted, `__pycache__` excluded."""
-    return [p for p in sorted((pkg_root / "parser").rglob("*.py"))
-            if "__pycache__" not in p.parts]
+def _fold(entries: list[tuple[str, bytes]]) -> str:
+    """sha256 hex of `(relpath, bytes)` pairs, deterministic and order-independent.
 
-
-def _fingerprint(pkg_root: Path, files: list[Path]) -> str:
-    """sha256 hex of `files`, deterministic and order-independent.
-
-    Files are keyed by their POSIX path relative to `bin_crawler` and folded in
-    sorted-relpath order as `relpath\\0<bytes>\\0` — so the caller need not
-    pre-sort `files`.
+    Folded in sorted-relpath order as `relpath\\0<bytes>\\0`, so the caller need
+    not pre-sort. This is THE "hash a set of files" primitive for the package:
+    `_export_digest.ExportTree` folds an export's OUTPUT with it, the
+    fingerprints below fold the exporter's SOURCE with it, and
+    `src/data/export-staleness.test.ts` + `src/data/export-contents.test.ts`
+    replicate it in TS. One algorithm, four call sites, no drift.
     """
-    entries = [(f.relative_to(pkg_root).as_posix(), f.read_bytes()) for f in files]
-    entries.sort(key=lambda e: e[0])
+    ordered = sorted(entries, key=lambda e: e[0])
     h = hashlib.sha256()
-    for rel, data in entries:
+    for rel, data in ordered:
         h.update(rel.encode("utf-8"))
         h.update(b"\0")
         h.update(data)
@@ -80,35 +92,65 @@ def _fingerprint(pkg_root: Path, files: list[Path]) -> str:
     return h.hexdigest()
 
 
+def _package_py_files(pkg_root: Path) -> list[Path]:
+    """Every `.py` in the package, sorted, `__pycache__` excluded.
+
+    The whole package, not just `parser/` — see the module docstring on why the
+    glob widened and what it cost.
+    """
+    return [p for p in sorted(pkg_root.rglob("*.py"))
+            if "__pycache__" not in p.parts]
+
+
+def _fingerprint(pkg_root: Path, files: list[Path]) -> str:
+    """sha256 hex of `files`, keyed by POSIX relpath from `bin_crawler`."""
+    return _fold([(f.relative_to(pkg_root).as_posix(), f.read_bytes())
+                  for f in files])
+
+
 def parser_fingerprint(pkg_root: Path | None = None) -> str:
-    """sha256 of the powers-exporter source: parser/**/*.py + export_powers.py."""
+    """sha256 of the powers-exporter source: every .py in the package.
+
+    Equal to the other fingerprints by construction — see the module docstring.
+    """
     root = pkg_root or _PKG_ROOT
-    return _fingerprint(root, _parser_py_files(root) + [root / "export_powers.py"])
+    return _fingerprint(root, _package_py_files(root))
 
 
 def classes_fingerprint(pkg_root: Path | None = None) -> str:
-    """sha256 of the classes-exporter source: parser/**/*.py + export_classes.py."""
+    """sha256 of the classes-exporter source: every .py in the package.
+
+    Equal to the other fingerprints by construction — see the module docstring.
+    """
     root = pkg_root or _PKG_ROOT
-    return _fingerprint(root, _parser_py_files(root) + [root / "export_classes.py"])
+    return _fingerprint(root, _package_py_files(root))
 
 
 def entities_fingerprint(pkg_root: Path | None = None) -> str:
-    """sha256 of the entities-exporter source: parser/**/*.py + export_entities.py."""
+    """sha256 of the entities-exporter source: every .py in the package.
+
+    Equal to the other fingerprints by construction — see the module docstring.
+    """
     root = pkg_root or _PKG_ROOT
-    return _fingerprint(root, _parser_py_files(root) + [root / "export_entities.py"])
+    return _fingerprint(root, _package_py_files(root))
 
 
 def salvage_fingerprint(pkg_root: Path | None = None) -> str:
-    """sha256 of the salvage-exporter source: parser/**/*.py + export_salvage.py."""
+    """sha256 of the salvage-exporter source: every .py in the package.
+
+    Equal to the other fingerprints by construction — see the module docstring.
+    """
     root = pkg_root or _PKG_ROOT
-    return _fingerprint(root, _parser_py_files(root) + [root / "export_salvage.py"])
+    return _fingerprint(root, _package_py_files(root))
 
 
 def incarnate_recipes_fingerprint(pkg_root: Path | None = None) -> str:
-    """sha256 of the recipes-exporter source: parser/**/*.py + export_incarnate_recipes.py."""
+    """sha256 of the recipes-exporter source: every .py in the package.
+
+    Equal to the other fingerprints by construction — see the module docstring.
+    """
     root = pkg_root or _PKG_ROOT
-    return _fingerprint(
-        root, _parser_py_files(root) + [root / "export_incarnate_recipes.py"])
+    return _fingerprint(root, _package_py_files(root))
 
 
 if __name__ == "__main__":

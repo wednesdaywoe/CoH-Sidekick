@@ -1,7 +1,7 @@
 {
-  "schema": "bin-crawler-export-manifest/2",
-  "note": "salvage_fingerprint is the sha256 of the salvage exporter (bin_crawler/parser/**/*.py + export_salvage.py) at export time. If it disagrees with the current committed exporter source, THIS salvage.json is stale \u2014 re-run export_salvage and commit. Guarded by src/data/export-staleness.test.ts. `source` names the assets shard the bytes were read from; guarded by src/data/export-provenance.test.ts.",
-  "salvage_fingerprint": "ebb55fa1895c46e63df0cc2047d62792317eb480014358590d22eec6f5acf976",
+  "schema": "bin-crawler-export-manifest/3",
+  "note": "salvage_fingerprint is the sha256 of the salvage exporter (every .py in bin_crawler) at export time. If it disagrees with the current committed exporter source, THIS salvage.json is stale \u2014 re-run export_salvage and commit. Guarded by src/data/export-staleness.test.ts. `source` names the assets shard the bytes were read from; guarded by src/data/export-provenance.test.ts. `content_digest` is the sha256 of the bytes this export WROTE; guarded by src/data/export-contents.test.ts.",
+  "salvage_fingerprint": "ba36f352da70804568008d80f7e79897186bd3c7a4df2f048792108815606fd4",
   "source": {
     "assets_dir": "/home/jiiwii/.wine/drive_c/Games/Homecoming/assets/beta",
     "shard": "beta",
@@ -50,5 +50,7 @@
       }
     ]
   },
+  "content_digest": "1e7a0cce15edb6dd7b87df20dba21ce79b3907a6ad8e8178bc91a9f47ce07441",
+  "file_count": 1,
   "salvage_records": 361
 }

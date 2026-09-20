@@ -125,12 +125,22 @@ function detectChanceModSelectors(rawRoot, exclude = new Set()) {
   // the planner ships. Deliberately generous: powers that arrive by slotting or a
   // redirect (`Incarnate`, `Set_Bonus`, `Redirects`, `Pets`) count as holdable here, so
   // their clause-2 verdicts and the reasons recorded with them stay exactly as measured.
+  //
+  // The class tables live in `tables/`, and this read used to scan the export
+  // ROOT instead. That worked only by accident: three of the four trees carry
+  // fossil copies of `tables/` at their root, left there before the
+  // subdirectory existed. Brainstorm was exported after, has no fossils, and so
+  // built this set from nothing — 0 archetypes instead of 71, every power
+  // non-holdable, and the clause-2 verdicts it shipped were measured against an
+  // empty category set. Read the tree the classes exporter actually writes, as
+  // the sibling detector already does (detect-caster-meters.cjs).
   const atCategories = new Set();
-  for (const entry of fs.readdirSync(rawRoot, { withFileTypes: true })) {
+  const tablesDir = path.join(rawRoot, 'tables');
+  for (const entry of fs.readdirSync(tablesDir, { withFileTypes: true })) {
     if (!entry.isFile() || !entry.name.endsWith('.json')) continue;
     let archetype;
     try {
-      archetype = JSON.parse(fs.readFileSync(path.join(rawRoot, entry.name), 'utf-8'));
+      archetype = JSON.parse(fs.readFileSync(path.join(tablesDir, entry.name), 'utf-8'));
     } catch {
       continue;
     }

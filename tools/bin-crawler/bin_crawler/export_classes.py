@@ -30,6 +30,7 @@ from bin_crawler.assets_dir import add_source_arguments, resolve_export_source
 from bin_crawler.parser._classes import parse_classes
 from bin_crawler.parser._messages import load_messages
 from bin_crawler._export_fingerprint import classes_fingerprint
+from bin_crawler._export_digest import ExportTree
 
 
 def _normalize_class_name(name: str) -> str:
@@ -61,6 +62,9 @@ def main():
 
     msgs = load_messages(resolver.read("clientmessages-en.bin")) if resolver.has("clientmessages-en.bin") else None
 
+    # Every written file goes through the tree, which records it for
+    # `content_digest` (F78/PROV-1). See _export_digest.py.
+    tree = ExportTree(output_dir)
     written = 0
     # Guard the normalize-to-filename step against a silent last-write-wins drop.
     # The forks' villain_classes.bin ships two `Class_Minion_Henchman` records
@@ -143,7 +147,7 @@ def main():
                     f"source bin or the normalization before exporting."
                 )
             written_payloads[key] = payload
-            out_file.write_text(payload, encoding="utf-8")
+            tree.write_text(out_file, payload)
             written += 1
 
     # Stamp the export-staleness manifest, exactly as export_powers.py does for
@@ -153,22 +157,23 @@ def main():
     # classes exporter and not left stale after a parser edit (the WS3 gap).
     # Guarded by src/data/export-staleness.test.ts. See _export_fingerprint.py.
     manifest = {
-        'schema': 'bin-crawler-export-manifest/2',
+        'schema': 'bin-crawler-export-manifest/3',
         'note': ('classes_fingerprint is the sha256 of the classes exporter '
-                 '(bin_crawler/parser/**/*.py + export_classes.py) at export '
-                 'time. If it disagrees with the current committed exporter '
-                 'source, THIS tables/ tree is stale — re-run export_classes for '
-                 'this dataset and commit. Guarded by '
-                 'src/data/export-staleness.test.ts. `source` names the assets '
-                 'shard the bytes were read from; guarded by '
-                 'src/data/export-provenance.test.ts.'),
+                 '(every .py in bin_crawler) at export time. If it disagrees '
+                 'with the current committed exporter source, THIS tables/ tree '
+                 'is stale — re-run export_classes for this dataset and commit. '
+                 'Guarded by src/data/export-staleness.test.ts. `source` names '
+                 'the assets shard the bytes were read from; guarded by '
+                 'src/data/export-provenance.test.ts. `content_digest` is the '
+                 'sha256 of the bytes this export WROTE; guarded by '
+                 'src/data/export-contents.test.ts.'),
         'classes_fingerprint': classes_fingerprint(),
         'source': resolver.provenance(),
+        'content_digest': tree.digest(),
+        'file_count': tree.file_count,
         'class_files': written,
     }
-    with open(output_dir / '_export_manifest.json', 'w') as f:
-        json.dump(manifest, f, indent=2)
-        f.write('\n')
+    tree.write_manifest(output_dir / '_export_manifest.json', manifest)
 
     print(f"Wrote {written} class JSON files to {output_dir}")
     print(f"  Manifest: classes_fingerprint={manifest['classes_fingerprint'][:12]}…")

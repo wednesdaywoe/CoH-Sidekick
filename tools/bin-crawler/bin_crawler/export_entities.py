@@ -36,6 +36,7 @@ from bin_crawler.parser._entities import parse_entities, EntityRecord
 from bin_crawler.parser._powersets import parse_powersets
 from bin_crawler.parser._messages import load_messages
 from bin_crawler._export_fingerprint import entities_fingerprint
+from bin_crawler._export_digest import ExportTree
 # Reuse the powers exporter's source-aware Primalist gating so the two export
 # paths stay in lockstep. Importing is side-effect-free (export_powers guards
 # its CLI behind `if __name__ == '__main__'`).
@@ -195,6 +196,9 @@ def main():
     if drop_primalist:
         print("  No Primalist class in source — dropping orphan Primalist pet entities.")
 
+    # Every written file goes through the tree, which records it for
+    # `content_digest` (F78/PROV-1). See _export_digest.py.
+    tree = ExportTree(output_dir)
     written = 0
     skipped_no_powers = 0
     skipped_primalist = 0
@@ -211,7 +215,7 @@ def main():
             continue
         d = entity_to_dict(rec, ps_index, msgs=msgs)
         out_file = output_dir / f"{rec.name.lower()}.json"
-        out_file.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        tree.write_json(out_file, d, indent=2)
         written += 1
 
     print(f"\nWrote {written} pet entity files (skipped {skipped_no_powers} with "
@@ -225,22 +229,23 @@ def main():
     # (the INHERENT-3 residual after WS3 guarded `tables/`). Guarded by
     # src/data/export-staleness.test.ts. See _export_fingerprint.py.
     manifest = {
-        'schema': 'bin-crawler-export-manifest/2',
+        'schema': 'bin-crawler-export-manifest/3',
         'note': ('entities_fingerprint is the sha256 of the entities exporter '
-                 '(bin_crawler/parser/**/*.py + export_entities.py) at export '
-                 'time. If it disagrees with the current committed exporter '
-                 'source, THIS entities/ tree is stale — re-run export_entities '
-                 'for this dataset and commit. Guarded by '
-                 'src/data/export-staleness.test.ts. `source` names the assets '
-                 'shard the bytes were read from; guarded by '
-                 'src/data/export-provenance.test.ts.'),
+                 '(every .py in bin_crawler) at export time. If it disagrees '
+                 'with the current committed exporter source, THIS entities/ '
+                 'tree is stale — re-run export_entities for this dataset and '
+                 'commit. Guarded by src/data/export-staleness.test.ts. '
+                 '`source` names the assets shard the bytes were read from; '
+                 'guarded by src/data/export-provenance.test.ts. '
+                 '`content_digest` is the sha256 of the bytes this export '
+                 'WROTE; guarded by src/data/export-contents.test.ts.'),
         'entities_fingerprint': entities_fingerprint(),
         'source': resolver.provenance(),
+        'content_digest': tree.digest(),
+        'file_count': tree.file_count,
         'entity_files': written,
     }
-    with open(output_dir / '_export_manifest.json', 'w') as f:
-        json.dump(manifest, f, indent=2)
-        f.write('\n')
+    tree.write_manifest(output_dir / '_export_manifest.json', manifest)
 
     print(f"  Manifest: entities_fingerprint={manifest['entities_fingerprint'][:12]}…")
 

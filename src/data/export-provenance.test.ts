@@ -30,7 +30,14 @@ import {
  * here that record is held to the one shard users may see.
  */
 
-const SCHEMA = 'bin-crawler-export-manifest/2';
+// Bumped to /3 by F78's content-digest work: every manifest now also carries
+// `content_digest` and `file_count` (guarded by export-contents.test.ts). The
+// pin stays EXACT rather than becoming a >= 2 range — its job is to make a
+// manifest written by an older exporter fail distinctly from a wrong-shard
+// one, and a range would quietly readmit the shape this guard exists to
+// reject. Schema 2 carried `source`, so this bump is about what a CURRENT
+// manifest must look like, not about PROV-1's own floor.
+const SCHEMA = 'bin-crawler-export-manifest/3';
 
 interface SourceFile {
   name: string;
