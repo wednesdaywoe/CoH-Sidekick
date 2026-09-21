@@ -57,8 +57,15 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 330 entries.** STALE-3 closed 2026-09-19: a second machine now rebuilds the engine
-and compares the bytes, and the writer's own agreement with itself has stopped being the evidence.
+**1 open, of 332 entries.** PROV-8 opened 2026-09-20: nothing measures the export against the
+shard it copies, so a game patch reaches the planner only when someone re-exports — and this time
+a user got there first. The key runs the comparison by hand and all six manifests read `ok`; what
+is missing is something that runs it without being asked.
+
+**The three staleness gates all point inward.** Export-vs-exporter, surface-vs-surface,
+bytes-vs-digest. A tree can satisfy all three and describe a game build nobody is playing, which
+is the mandate's own argument one hop further upstream: the gates consume the export, so they
+cannot fail on it.
 
 **A gate's first run is a measurement, and this one failed three times before it passed.** The
 mac: cargo's `-C metadata` hashes rustc's verbose version, which names the host triple, so the
@@ -518,7 +525,13 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Sets, boosts, incarnates, inherents
 
-[Full detail](gaps/sets-boosts-incarnates.md) — 32 of 32 closed
+[Full detail](gaps/sets-boosts-incarnates.md) — 33 of 33 closed
+
+- [x] **BOOST-8** — BOOST-1 measured the beta's hand `COMMON_IO_TYPES` at 25 of the game's 26,
+  fixed the derived roster and deliberately kept the hand one frozen as an oracle — but wired no
+  comparison, so for six weeks the engine offered an Intangible common IO and the picker did not,
+  on 6 powers each on Rebirth and Thunderspy. An oracle nobody reads is a second list. Intangible
+  added, and the two rosters are now asserted set-equal on four datasets
 
 - [x] **IOUNIQUE-1** — the Thunderspy-only reconstruction path stamped `unique: false` on every
   piece it built rather than reading the `slot_requires` the main path reads, so the 12 Primalist
@@ -962,7 +975,26 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 116 of 116 closed
+[Full detail](gaps/pipeline-provenance.md) — 116 of 117 closed
+
+- [ ] **PROV-8** — nothing measures the export against the shard it is a copy of. `export-staleness`
+  compares the export to the EXPORTER, `export-provenance` compares a dataset's surfaces to each
+  other, `export-contents` compares the bytes to their own digest: three checks, all inside the
+  tree, and none of them can see that Homecoming has patched the game. On 2026-09-20 a user found
+  it instead — i28p4 RC3 gave Seeker Drones `Ranged AoE Damage` on Controller, Defender and
+  Corruptor, and the first thing that noticed was a bug report. The window between a shard patch
+  and someone re-exporting is unbounded and unmeasured, and the mandate says why it matters more
+  than it looks: every gate consumes the export, so a stale export is not a red gate, it is
+  authoritative data.
+  **Goal** — the repo notices that the game moved, rather than a user noticing for it.
+  **Done when** — something that runs without being remembered compares each dataset's recorded
+  `.pigg` sha256s against the installed client, and reports a dataset whose archives have moved.
+  The key below is that comparison run by hand; what is missing is a caller. CI cannot be it (the
+  runners have no client), so the candidates are a pre-`regen` step, a git hook, or a scheduled
+  local run — pick one and say why in the gaps entry.
+  **Check** — `node scripts/keys/prov8-shard-drift.cjs --gate`. Exit 1, and a `MOVED` line naming
+  the archives, BREAKS the claim that the committed export still describes the live shard. All six
+  manifests read `ok` on 2026-09-20 after the RC3 mirror landed.
 
 - [x] **POPMENU-1** — the popmenu spelled the Fly and Slow generic IOs `Crafted_Flight` and
   `Crafted_Slow`, where the game's records are `Crafted_Fly` and `Crafted_Snare`, so `boost`

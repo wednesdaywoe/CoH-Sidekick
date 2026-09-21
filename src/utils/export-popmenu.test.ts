@@ -110,13 +110,24 @@ describe.each(DATASET_IDS)('Popmenu boost records (%s)', (datasetId) => {
     expect(unknown).toEqual([]);
   });
 
-  it('offers no generic IO the game has no record for', () => {
-    // The picker's list is hand-written and the index's is read from the export.
-    // The hand one may be SHORTER — Intangible is a real crafted IO nobody has
-    // wired a tab for — but a stat on it that the export does not name is a
-    // slot the popmenu cannot grant and the planner is already costing.
-    const named = new Set(getBoostIndex().commonIoTypes);
-    expect(COMMON_IO_TYPES.filter((stat) => !named.has(stat))).toEqual([]);
+  it('offers exactly the generic IOs the game has a record for', () => {
+    // The two rosters are independent by design: the picker's is hand-written
+    // and the index's is derived from the crafted boost family, and BOOST-1 kept
+    // them that way on purpose so neither is checking itself. Set equality is
+    // what makes that pair an oracle rather than two lists.
+    //
+    // It ran one short for six weeks. BOOST-1 measured the hand list at 25 of
+    // the game's 26 and fixed the DERIVED side, so the engine offered Intangible
+    // and the picker did not; nothing compared them. Order is presentation and
+    // is deliberately not compared — the index's copy is sorted, the hand list
+    // is grouped for the tab strip.
+    //
+    // Set equality holds on all four datasets because the crafted Intangible
+    // family is on all four. Which POWERS accept one is a different question
+    // and a per-fork answer (6 each on Rebirth and Thunderspy, none on
+    // Homecoming or Brainstorm); that is `allowedEnhancements`' job, not this
+    // list's.
+    expect([...COMMON_IO_TYPES].sort()).toEqual([...getBoostIndex().commonIoTypes].sort());
   });
 
   it('spells the two the hand-written table got wrong', () => {

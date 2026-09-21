@@ -18,6 +18,28 @@ import type {
 // COMMON IO TYPES
 // ============================================
 
+/**
+ * The generic ("common") IO types the picker offers, in display order.
+ *
+ * Hand-written ON PURPOSE, and not to be replaced by a read of the boost index's
+ * `commonIoTypes`. BOOST-1 derived that one from the crafted boost family and
+ * deliberately left this list alone as the beta's oracle: two independent
+ * statements of the same roster, which only mean something while neither is
+ * computed from the other. `export-popmenu.test.ts` asserts they agree as sets
+ * on all four datasets, so a fork that adds a type reds here rather than
+ * quietly offering one list to the picker and another to the exporter.
+ *
+ * Order is presentation and is this list's alone — the index's copy is sorted.
+ *
+ * Intangible joined 2026-09-20. The hand list had named 25 of the game's 26
+ * since BOOST-1 measured it and fixed only the derived side, while the icon
+ * (`Intan.png`), the Schedule A curve and all ten `Crafted_Intangible_*` levels
+ * were already in place — the one missing piece was this line. It is visible on
+ * two forks: 6 powers each on Rebirth and Thunderspy accept Intangible in their
+ * `allowedEnhancements` (Black Hole on four sets, Fold Space, Singularity), and
+ * offered no common IO for it. Homecoming and Brainstorm ship the records but
+ * no power that takes one, so there the fix is the roster agreeing, not a slot.
+ */
 export const COMMON_IO_TYPES: EnhancementStatType[] = [
   'Damage',
   'Accuracy',
@@ -39,6 +61,7 @@ export const COMMON_IO_TYPES: EnhancementStatType[] = [
   'Sleep',
   'Confuse',
   'Fear',
+  'Intangible',
   'Knockback',
   'Run Speed',
   'Jump',

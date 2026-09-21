@@ -1726,6 +1726,14 @@ export function ExportImportModal({ isOpen, onClose }: ExportImportModalProps) {
                     <div className="text-xs text-emerald-300">
                       Generate a <span className="font-semibold">.mnu</span> popmenu file for the test server. Save to <span className="text-sk-magenta font-semibold">Homecoming/data/texts/English/Menus/</span> and use <span className="text-sk-magenta font-semibold">/popmenu {popmenuName || 'YourMenuName'}</span> in-game.
                     </div>
+                    {/* The game's `boost` command takes no combine count — it passes a literal 0 —
+                        so no popmenu can carry boosters, and an unboosted tray is not a bug in
+                        this file. Said here because the alternative is a bug report. */}
+                    <div className="text-xs text-gray-400">
+                      Enhancement boosters are not carried: the game&rsquo;s grant command has no way to
+                      state them, so boosted enhancements arrive at their base level. Origin
+                      enhancements (TO/DO/SO) are left out too &mdash; buy those in game.
+                    </div>
                     <div className="flex gap-2 items-end">
                       <div className="flex-1">
                         <label className="block text-xs font-medium text-gray-400 mb-1">
