@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 328 entries.** STALE-3 closed 2026-09-19: a second machine now rebuilds the engine
+**0 open, of 330 entries.** STALE-3 closed 2026-09-19: a second machine now rebuilds the engine
 and compares the bytes, and the writer's own agreement with itself has stopped being the evidence.
 
 **A gate's first run is a measurement, and this one failed three times before it passed.** The
@@ -962,7 +962,17 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 114 of 114 closed
+[Full detail](gaps/pipeline-provenance.md) — 116 of 116 closed
+
+- [x] **POPMENU-1** — the popmenu spelled the Fly and Slow generic IOs `Crafted_Flight` and
+  `Crafted_Slow`, where the game's records are `Crafted_Fly` and `Crafted_Snare`, so `boost`
+  granted nothing and said so only to the console; the same hand table named 62 of Homecoming's 78
+  specials, losing all 5 prestige ones. Both tables gone, the boost index read instead, every
+  emitted name swept against `exported_powers/*/boosts/` on four forks
+
+- [x] **POPMENU-2** — `src/utils/export-popmenu.ts` was byte-identical in both repos and in neither
+  the manifest nor `TRACKED_ROOTS`, so POPMENU-1 could have been fixed on one side and left on the
+  other with every gate green. Joined the tracked surface at zero drift
 
 - [x] **ICON-2** — `normalizeIconPath` read the client's own art extensions as filenames in both
   directions — `.dds` passed its "already has one" test untouched and `.texture` failed it and

@@ -32,6 +32,15 @@ export interface BoostIndexData {
   entries: Record<string, BoostIndexEntry>;
   /** The pickable common-IO types, one per boost type the crafted family carries. */
   commonIoTypes: string[];
+  /**
+   * Pickable common-IO type -> the level-scaling record the game names it by.
+   *
+   * The template, not one of its nine levelled siblings, because every caller
+   * carries the level on its own axis. `Fly` is `Crafted_Fly`, and `Slow` is
+   * `Crafted_Snare` — neither is the planner stat with a prefix stuck on it, which
+   * is what a hand-written table assumed twice.
+   */
+  commonIo: Record<string, string>;
 }
 
 export const BOOST_INDEX: BoostIndexData = {
@@ -2744,4 +2753,32 @@ export const BOOST_INDEX: BoostIndexData = {
     Yins_Technology_Endurance_Discount: { kind: 'unclassified' },
   },
   commonIoTypes: ['Accuracy', 'Confuse', 'Damage', 'Defense', 'Defense Debuff', 'EnduranceModification', 'EnduranceReduction', 'Fear', 'Fly', 'Healing', 'Hold', 'Immobilize', 'Intangible', 'Interrupt', 'Jump', 'Knockback', 'Range', 'Recharge', 'Resistance', 'Run Speed', 'Sleep', 'Slow', 'Stun', 'Taunt', 'ToHit', 'ToHit Debuff'],
+  commonIo: {
+    'Accuracy': 'Crafted_Accuracy',
+    'Confuse': 'Crafted_Confuse',
+    'Damage': 'Crafted_Damage',
+    'Defense': 'Crafted_Defense_Buff',
+    'Defense Debuff': 'Crafted_Defense_DeBuff',
+    'EnduranceModification': 'Crafted_Recovery',
+    'EnduranceReduction': 'Crafted_Endurance_Discount',
+    'Fear': 'Crafted_Fear',
+    'Fly': 'Crafted_Fly',
+    'Healing': 'Crafted_Heal',
+    'Hold': 'Crafted_Hold',
+    'Immobilize': 'Crafted_Immobilize',
+    'Intangible': 'Crafted_Intangible',
+    'Interrupt': 'Crafted_Interrupt',
+    'Jump': 'Crafted_Jump',
+    'Knockback': 'Crafted_Knockback',
+    'Range': 'Crafted_Range',
+    'Recharge': 'Crafted_Recharge',
+    'Resistance': 'Crafted_Res_Damage',
+    'Run Speed': 'Crafted_Run',
+    'Sleep': 'Crafted_Sleep',
+    'Slow': 'Crafted_Snare',
+    'Stun': 'Crafted_Stun',
+    'Taunt': 'Crafted_Taunt',
+    'ToHit': 'Crafted_ToHit_Buff',
+    'ToHit Debuff': 'Crafted_ToHit_DeBuff',
+  },
 };

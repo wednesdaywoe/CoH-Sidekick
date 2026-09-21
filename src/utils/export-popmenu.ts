@@ -9,137 +9,29 @@
 import type { Build, Enhancement } from '@/types';
 import type { IOSetEnhancement, GenericIOEnhancement, SpecialEnhancement } from '@/types/enhancement';
 import { getIOSet, isInherentlyAttuned } from '@/data';
+import { getCommonIOBoostUid, getIOSetBoostUid, getSpecialBoostUid } from '@/data/boost-index';
 
 // ============================================
-// STAT NAME MAPPING (app stat → popmenu name)
+// WARNINGS
 // ============================================
 
-const STAT_TO_POPMENU: Record<string, string> = {
-  'Damage': 'Damage',
-  'Accuracy': 'Accuracy',
-  'Recharge': 'Recharge',
-  'EnduranceReduction': 'Endurance_Discount',
-  'Range': 'Range',
-  'Defense': 'Defense_Buff',
-  'Defense Debuff': 'Defense_Debuff',
-  'Resistance': 'Res_Damage',
-  'Healing': 'Heal',
-  'ToHit': 'ToHit_Buff',
-  'ToHit Debuff': 'ToHit_Debuff',
-  'Hold': 'Hold',
-  'Stun': 'Stun',
-  'Immobilize': 'Immobilize',
-  'Sleep': 'Sleep',
-  'Confuse': 'Confuse',
-  'Fear': 'Fear',
-  'Knockback': 'Knockback',
-  'Run Speed': 'Run',
-  'Jump': 'Jump',
-  'Fly': 'Flight',
-  'Slow': 'Slow',
-  'Taunt': 'Taunt',
-  'EnduranceModification': 'Recovery',
-  'Interrupt': 'Interrupt',
-};
-
-// ============================================
-// HELPERS
-// ============================================
-
-/** Convert a set ID like "force_feedback" to PascalCase "Force_Feedback" */
-function toPascalUnderscore(setId: string): string {
-  return setId
-    .split('_')
-    .map((seg) =>
-      // Handle hyphens within segments: "fire-control" → "FireControl"
-      seg.split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    )
-    .join('_');
+/**
+ * One enhancement the popmenu could not grant, and why.
+ *
+ * Reported rather than dropped. A `boost` command naming a record the game does
+ * not have is answered with a console line the user never sees, so an
+ * unnameable enhancement is indistinguishable in game from one this file never
+ * wrote — which is exactly how `Crafted_Flight` survived eleven months of use
+ * (POPMENU-1). The exporter now says so here instead.
+ */
+export interface PopmenuWarning {
+  kind: 'unnameable' | 'not-grantable';
+  /** The power the slot belongs to, as the user sees it named. */
+  power: string;
+  /** 1-based slot within that power. */
+  slot: number;
+  detail: string;
 }
-
-/** Convert piece number (1-6) to letter (A-F) */
-function pieceToLetter(num: number): string {
-  return String.fromCharCode(64 + num); // 65='A', so 1→'A', 2→'B', etc.
-}
-
-// ============================================
-// SPECIAL ENHANCEMENT → BOOST UID MAPPING
-// ============================================
-
-/** Maps special enhancement id (e.g. "hamidon-nucleolus") to popmenu boost uid */
-const SPECIAL_BOOST_UID: Record<string, string> = {
-  // Hamidon
-  'hamidon-nucleolus': 'Hamidon_Damage_Accuracy',
-  'hamidon-centriole': 'Hamidon_Damage_Range',
-  'hamidon-enzyme': 'Hamidon_DeBuff_Endurance_Discount',
-  'hamidon-lysosome': 'Hamidon_DeBuff_Accuracy',
-  'hamidon-membrane': 'Hamidon_Buff_Recharge',
-  'hamidon-peroxisome': 'Hamidon_Damage_Mez',
-  'hamidon-ribosome': 'Hamidon_Res_Damage_Endurance_Discount',
-  'hamidon-golgi': 'Hamidon_Heal_Endurance_Discount',
-  'hamidon-endoplasm': 'Hamidon_Accuracy_Mez',
-  'hamidon-cytoskeleton': 'Hamidon_Buff_Endurance_Discount',
-  'hamidon-microfilament': 'Hamidon_Travel_Endurance_Discount',
-  'hamidon-vesicle': 'Hamidon_Endurance_Modification_Recharge',
-  'hamidon-stereocilia': 'Hamidon_Slow_Recharge_Endurance_Discount',
-  'hamidon-microtubule': 'Hamidon_Endurance_Modification_Accuracy',
-  'hamidon-karyoplasm': 'Hamidon_Damage_Endurance_Discount',
-  'hamidon-microvillus': 'Hamidon_Accuracy_Range',
-  'hamidon-chromatin': 'Hamidon_Damage_Recharge',
-  'hamidon-ectosome': 'Hamidon_Threat_Accuracy_Recharge',
-  'hamidon-amyloplast': 'Hamidon_Heal_Recharge',
-  'hamidon-chloroplast': 'Hamidon_Heal_Accuracy',
-
-  // Hydra
-  'hydra-antiproton': 'Hydra_DeBuff_Endurance_Discount',
-  'hydra-delta': 'Hydra_DeBuff_Accuracy',
-  'hydra-electron': 'Hydra_Res_Damage_Endurance_Discount',
-  'hydra-gluon': 'Hydra_Damage_Mez',
-  'hydra-graviton': 'Hydra_Accuracy_Mez',
-  'hydra-neutrino': 'Hydra_Damage_Accuracy',
-  'hydra-neutron': 'Hydra_Damage_Range',
-  'hydra-positron': 'Hydra_Heal_Endurance_Discount',
-  'hydra-proton': 'Hydra_Buff_Endurance_Discount',
-  'hydra-quark': 'Hydra_Buff_Recharge',
-  'hydra-theta': 'Hydra_Travel_Endurance_Discount',
-
-  // Titan
-  'titan-amethyst': 'Titan_Damage_Mez',
-  'titan-calcite': 'Titan_Accuracy_Mez',
-  'titan-citrine': 'Titan_Buff_Recharge',
-  'titan-diamond': 'Titan_Damage_Accuracy',
-  'titan-gypsum': 'Titan_DeBuff_Accuracy',
-  'titan-kyanite': 'Titan_Heal_Endurance_Discount',
-  'titan-peridont': 'Titan_Res_Damage_Endurance_Discount',
-  'titan-quartz': 'Titan_Damage_Range',
-  'titan-selenite': 'Titan_Travel_Endurance_Discount',
-  'titan-tanzanite': 'Titan_Buff_Endurance_Discount',
-  'titan-zeolite': 'Titan_DeBuff_Endurance_Discount',
-
-  // D-Sync
-  'd-sync-acceleration': 'DSync_Travel_Endurance_Discount',
-  'd-sync-binding': 'DSync_Accuracy_Mez',
-  'd-sync-conduit': 'DSync_Endurance_Modification_Recharge',
-  'd-sync-containment': 'DSync_Damage_Mez',
-  'd-sync-deceleration': 'DSync_Slow_Recharge_Endurance_Discount',
-  'd-sync-drain': 'DSync_Endurance_Modification_Accuracy',
-  'd-sync-efficiency': 'DSync_Damage_Endurance_Discount',
-  'd-sync-elusivity': 'DSync_Buff_Endurance_Discount',
-  'd-sync-empowerment': 'DSync_Damage_Accuracy',
-  'd-sync-extension': 'DSync_Damage_Range',
-  'd-sync-fortification': 'DSync_Res_Damage_Endurance_Discount',
-  'd-sync-guidance': 'DSync_Accuracy_Range',
-  'd-sync-marginalization': 'DSync_DeBuff_Endurance_Discount',
-  'd-sync-obfuscation': 'DSync_DeBuff_Accuracy',
-  'd-sync-optimization': 'DSync_Damage_Recharge',
-  'd-sync-provocation': 'DSync_Threat_Accuracy_Recharge',
-  'd-sync-reconstitution': 'DSync_Heal_Endurance_Discount',
-  'd-sync-reconstruction': 'DSync_Heal_Recharge',
-  'd-sync-shifting': 'DSync_Buff_Recharge',
-  'd-sync-siphon': 'DSync_Heal_Accuracy',
-};
 
 // Max boost commands per Option line (game has a command length limit)
 const MAX_BOOSTS_PER_OPTION = 70;
@@ -149,66 +41,69 @@ const MAX_BOOSTS_PER_OPTION = 70;
 // ============================================
 
 /**
- * Convert an Enhancement object to a boost command string.
- * Returns null for unsupported enhancement types.
+ * The record name the game knows this enhancement by, or why it has none.
+ *
+ * Every arm is a lookup into the dataset's boost index — the export's own
+ * roster, keyed by the spelling the game client prints. Nothing here assembles
+ * a name out of our ids: the two tables that used to (a planner-stat map and a
+ * prefix/PascalCase composition for set pieces) are what POPMENU-1 was.
  */
-function enhancementToBoostCmd(enh: Enhancement): string | null {
+function boostRecordFor(enh: Enhancement): { uid: string; level: number } | { reason: string } {
   switch (enh.type) {
     case 'io-set': {
       const ioSet = enh as IOSetEnhancement;
-      const letter = pieceToLetter(ioSet.pieceNum);
       const setDef = getIOSet(ioSet.setId);
-      const isAto = setDef?.category === 'ato';
-      const isSuperior = ioSet.setId.startsWith('superior_');
-      // Use the shared attunement source of truth (maxLevel <= 1) instead of
-      // re-deriving it from category, so this can't drift from the picker/calc.
-      // Covers ATO + Winter/Summer/Anniversary event sets uniformly.
-      const inherentlyAttuned = setDef ? isInherentlyAttuned(setDef) : false;
-
-      let prefix: string;
-      if (inherentlyAttuned) {
-        // ATOs and event sets don't have crafted versions — always attuned
-        prefix = isSuperior ? 'Superior_Attuned_' : 'Attuned_';
-      } else if (!ioSet.attuned) {
-        prefix = 'Crafted_';
-      } else if (setDef?.category === 'purple' || isSuperior) {
-        prefix = 'Superior_Attuned_';
-      } else {
-        prefix = 'Attuned_';
+      // The shared attunement source of truth, so this cannot drift from the
+      // picker or the calc. Covers ATO + Winter/Summer/Anniversary event sets,
+      // which ship attuned and have no crafted record at all.
+      const attuned = ioSet.attuned === true || (setDef ? isInherentlyAttuned(setDef) : false);
+      const uid = getIOSetBoostUid(ioSet.setId, ioSet.pieceNum, attuned);
+      if (!uid) {
+        const name = setDef?.name ?? ioSet.setId;
+        return {
+          reason: attuned
+            ? `this server's export names no attuned ${name} piece ${ioSet.pieceNum}`
+            : `this server's export names no ${name} piece ${ioSet.pieceNum}`,
+        };
       }
-
-      // Winter sets strip "superior_" (e.g., superior_avalanche → Superior_Attuned_Avalanche_F),
-      // but ATOs keep it (superior_blasters_wrath → Superior_Attuned_Superior_Blasters_Wrath_F).
-      const baseId = isSuperior && !isAto ? ioSet.setId.slice('superior_'.length) : ioSet.setId;
-      const pascal = toPascalUnderscore(baseId);
-
-      const uid = `${prefix}${pascal}_${letter}`;
-      const level = (ioSet.attuned || inherentlyAttuned) ? 50 : (ioSet.level || 50);
-      return `boost ${uid} ${uid} ${level}`;
+      // An attuned piece states no craft level; the game holds it at the
+      // character's, and 50 is what the command has to say to mean that.
+      return { uid, level: attuned ? 50 : ioSet.level || 50 };
     }
 
     case 'io-generic': {
       const generic = enh as GenericIOEnhancement;
-      const statName = STAT_TO_POPMENU[generic.stat];
-      // Skip stats with no popmenu boost UID — passing the raw stat through would
-      // emit a UID containing a space (e.g. "Crafted_Mez Duration"), which breaks
-      // the boost command's whitespace-delimited parsing.
-      if (!statName) return null;
-      const uid = `Crafted_${statName}`;
-      const level = generic.level || 50;
-      return `boost ${uid} ${uid} ${level}`;
+      const uid = getCommonIOBoostUid(generic.stat);
+      if (!uid) return { reason: `this server's export names no ${generic.stat} generic IO` };
+      return { uid, level: generic.level || 50 };
     }
 
     case 'special': {
       const special = enh as SpecialEnhancement;
-      const uid = SPECIAL_BOOST_UID[special.id];
-      if (!uid) return null;
-      return `boost ${uid} ${uid} 50`;
+      // A special's id is `${category}-${id}` (see createSpecialEnhancement) and
+      // the index is keyed on the same two parts — but the seam is not the first
+      // dash. `d-sync-optimization` has three, and splitting at the first one
+      // asks the index for family `d`. The category is carried on the
+      // enhancement, so take the boundary from it rather than from the string.
+      const prefix = `${special.category}-`;
+      const uid = special.id.startsWith(prefix)
+        ? getSpecialBoostUid(special.category, special.id.slice(prefix.length))
+        : null;
+      if (!uid) return { reason: `this server's export names no ${special.name} record` };
+      // Specials pin no craft level; the game holds them at 50.
+      return { uid, level: 50 };
     }
 
-    // Origin enhancements can't be granted via boost command
+    case 'origin':
+      // TO/DO/SO records exist and `boost` would grant them, but WHICH one is a
+      // question the slot does not answer: the game names a DO for each PAIR of
+      // origins, so a Magic character has two spellings and the planner stores
+      // neither. Left out deliberately rather than guessed at — they cost a few
+      // thousand influence in game, which is the cheapest thing in the build.
+      return { reason: 'origin enhancements are bought in game, not granted by popmenu' };
+
     default:
-      return null;
+      return { reason: `no boost record for a ${(enh as Enhancement).type} enhancement` };
   }
 }
 
@@ -216,46 +111,65 @@ function enhancementToBoostCmd(enh: Enhancement): string | null {
 // FULL POPMENU GENERATION
 // ============================================
 
-/**
- * Collect all non-null enhancements from a build
- */
-function collectEnhancements(build: Build): Enhancement[] {
-  const enhancements: Enhancement[] = [];
+/** One slotted enhancement, with the power and slot a warning has to name. */
+interface SlottedEnhancement {
+  power: string;
+  slot: number;
+  enh: Enhancement;
+}
 
-  const processSlots = (slots: (Enhancement | null)[]) => {
-    for (const slot of slots) {
-      if (slot) enhancements.push(slot);
-    }
+/** Every non-empty slot in the build, in the order the popmenu grants them. */
+function collectEnhancements(build: Build): SlottedEnhancement[] {
+  const slotted: SlottedEnhancement[] = [];
+
+  const processPower = (power: { name: string; slots: (Enhancement | null)[] }) => {
+    power.slots.forEach((slot, i) => {
+      if (slot) slotted.push({ power: power.name, slot: i + 1, enh: slot });
+    });
   };
 
-  for (const power of build.primary.powers) processSlots(power.slots);
-  for (const power of build.secondary.powers) processSlots(power.slots);
+  for (const power of build.primary.powers) processPower(power);
+  for (const power of build.secondary.powers) processPower(power);
   for (const pool of build.pools) {
-    for (const power of pool.powers) processSlots(power.slots);
+    for (const power of pool.powers) processPower(power);
   }
   if (build.epicPool) {
-    for (const power of build.epicPool.powers) processSlots(power.slots);
+    for (const power of build.epicPool.powers) processPower(power);
   }
-  for (const power of build.inherents) processSlots(power.slots);
+  for (const power of build.inherents) processPower(power);
 
-  return enhancements;
+  return slotted;
 }
 
 /**
- * Generate a .mnu popmenu file from a build.
+ * Generate a .mnu popmenu file from a build, with what it could not grant.
  *
  * @param build - The build to export
  * @param menuName - Name for the popmenu (used with /popmenu <name> in-game)
- * @returns The complete .mnu file content
  */
-export function generatePopmenu(build: Build, menuName: string): string {
-  const enhancements = collectEnhancements(build);
-  const boostCmds = enhancements
-    .map(enhancementToBoostCmd)
-    .filter((cmd): cmd is string => cmd !== null);
+export function generatePopmenuWithReport(
+  build: Build,
+  menuName: string,
+): { content: string; warnings: PopmenuWarning[] } {
+  const warnings: PopmenuWarning[] = [];
+  const boostCmds: string[] = [];
+
+  for (const { power, slot, enh } of collectEnhancements(build)) {
+    const record = boostRecordFor(enh);
+    if ('reason' in record) {
+      warnings.push({
+        kind: enh.type === 'origin' ? 'not-grantable' : 'unnameable',
+        power,
+        slot,
+        detail: record.reason,
+      });
+      continue;
+    }
+    boostCmds.push(`boost ${record.uid} ${record.uid} ${record.level}`);
+  }
 
   if (boostCmds.length === 0) {
-    return `// No exportable enhancements found in build\n`;
+    return { content: `// No exportable enhancements found in build\n`, warnings };
   }
 
   // Split into chunks for multiple Option lines
@@ -307,5 +221,5 @@ export function generatePopmenu(build: Build, menuName: string): string {
   lines.push('}');
   lines.push('');
 
-  return lines.join('\n');
+  return { content: lines.join('\n'), warnings };
 }

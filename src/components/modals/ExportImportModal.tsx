@@ -19,7 +19,7 @@ import type { SharedBuild } from '@/types/shared';
 import { getActiveDataset, getAllDatasetMetadata, type DatasetId } from '@/data/dataset';
 import type { HydrationNote } from '@/utils/build-serialization';
 import { crossDatasetChoice } from '@/utils/build-open-route';
-import { generatePopmenu } from '@/utils/export-popmenu';
+import { generatePopmenuWithReport, type PopmenuWarning } from '@/utils/export-popmenu';
 import { openPrintView } from '@/utils/export-print';
 import { exportToMidsWithReport, type MidsExportWarning } from '@/utils/mids-export';
 import { hasPackedSlotLevels } from '@/utils/slot-levels';
@@ -81,6 +81,7 @@ export function ExportImportModal({ isOpen, onClose }: ExportImportModalProps) {
   const [popmenuName, setPopmenuName] = useState('');
   const [popmenuStatus, setPopmenuStatus] = useState<string | null>(null);
   const [popmenuError, setPopmenuError] = useState<string | null>(null);
+  const [popmenuWarnings, setPopmenuWarnings] = useState<PopmenuWarning[]>([]);
 
   // Load/Import source toggle
   const [loadSource, setLoadSource] = useState<LoadSource>('local');
@@ -428,7 +429,8 @@ export function ExportImportModal({ isOpen, onClose }: ExportImportModalProps) {
 
   const handlePopmenuSave = async () => {
     const name = popmenuName || build.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'MyBuild';
-    const content = generatePopmenu(build, name);
+    const { content, warnings } = generatePopmenuWithReport(build, name);
+    setPopmenuWarnings(warnings);
 
     if ('showSaveFilePicker' in window) {
       try {
@@ -1747,6 +1749,24 @@ export function ExportImportModal({ isOpen, onClose }: ExportImportModalProps) {
                     )}
                     {popmenuError && (
                       <div className="text-xs text-red-300">{popmenuError}</div>
+                    )}
+                    {popmenuWarnings.length > 0 && (
+                      <div className="rounded border border-amber-600/50 bg-amber-950/30 p-3 text-xs">
+                        <p className="font-semibold text-amber-300">
+                          {popmenuWarnings.length} enhancement{popmenuWarnings.length === 1 ? '' : 's'} the menu will not grant
+                        </p>
+                        <p className="mt-1 text-amber-200/80">
+                          The game answers a name it does not know with a console line and grants nothing,
+                          so these would have arrived as empty slots with no explanation. Everything else is in the file.
+                        </p>
+                        <ul className="mt-2 space-y-0.5 text-amber-200/70">
+                          {popmenuWarnings.map((w, i) => (
+                            <li key={`${w.power}-${w.slot}-${i}`}>
+                              {w.power} slot {w.slot}: {w.detail}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                   </div>
                 )}

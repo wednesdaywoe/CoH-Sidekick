@@ -193,12 +193,57 @@ function specialMembership(records) {
   return claimed;
 }
 
+/**
+ * boost type token -> the crafted record that IS the pickable generic IO.
+ *
+ * A generic IO is named twice by the export: a level-scaling template
+ * (`Crafted_Fly`) and the nine records that pin a craft level
+ * (`Crafted_Fly_10` … `_50`). The template is the one a `boost` command wants,
+ * because the command carries the level as its own argument.
+ *
+ * "The `Crafted_` record that pins no level" is not enough to find it. Rebirth
+ * carries twelve records — Imperial Might and Liberty's Belt — that are set
+ * pieces the io-sets section does not carry, so they fall through to this
+ * bucket and pin no level either; picking by token alone hands `Knockback` to
+ * `Crafted_Imperial_Might_F`. What separates them is the levelled family: the
+ * real template has the nine siblings, an orphaned set piece has none.
+ *
+ * A token that resolves to anything but exactly one record throws. This is the
+ * map the popmenu writes `boost` commands from, and its failure mode is an
+ * enhancement that does not appear in game with no error anywhere — the whole
+ * reason the hand-written table it replaced spelled Fly `Crafted_Flight` for
+ * eleven months (POPMENU-1).
+ */
+function resolveCommonIoRecords(records, templatesByToken) {
+  const familied = new Set();
+  for (const name of records.keys()) {
+    const m = /^(.+)_\d+$/.exec(name);
+    if (m) familied.add(m[1]);
+  }
+
+  const commonIo = {};
+  for (const [token, names] of [...templatesByToken].sort()) {
+    const withFamily = names.filter((n) => familied.has(n));
+    if (withFamily.length !== 1) {
+      throw new Error(
+        `boost type "${token}" resolves to ${withFamily.length} level-scaling generic IO records ` +
+          `(${withFamily.join(', ') || 'none'}) out of candidates ${names.join(', ')} — ` +
+          'a generic IO is one template plus its levelled family, so this is export news',
+      );
+    }
+    // The token's FIRST mapped stat is the pickable one: `Heal` enhances Healing
+    // and Absorb through one record, and the picker offers that as a Healing IO.
+    commonIo[BOOST_TYPE_STATS[token][0]] = withFamily[0];
+  }
+  return commonIo;
+}
+
 function classify(records, byLower) {
   const { claimed: setPieces, emptySets, respelled } = setMembership(records, byLower);
   const specials = specialMembership(records);
   const entries = new Map();
   const unclassified = [];
-  const commonIoTokens = new Set();
+  const commonIoTemplates = new Map();
 
   for (const [name, power] of records) {
     const piece = setPieces.get(name);
@@ -233,10 +278,15 @@ function classify(records, byLower) {
       if (tokens.length !== 1) {
         throw new Error(`${name}: a common IO enhances one boost type, not ${tokens.length} (${tokens})`);
       }
-      commonIoTokens.add(tokens[0]);
+      const level = craftedLevelOf(name);
+      if (level === null) {
+        const candidates = commonIoTemplates.get(tokens[0]);
+        if (candidates) candidates.push(name);
+        else commonIoTemplates.set(tokens[0], [name]);
+      }
       entries.set(name, {
         kind: 'common-io',
-        level: craftedLevelOf(name),
+        level,
         stats: aspectStats(power.boosts_allowed, name),
       });
       continue;
@@ -245,11 +295,12 @@ function classify(records, byLower) {
   }
 
   for (const name of unclassified) entries.set(name, { kind: 'unclassified' });
-  // The pickable common-IO types: one per boost type the crafted family carries. A token's
-  // FIRST mapped stat is the pickable one — `Heal` enhances Healing and Absorb together, and
-  // the picker offers that as one Healing IO, not two.
-  const commonIoTypes = [...commonIoTokens].map((token) => BOOST_TYPE_STATS[token][0]).sort();
-  return { entries, unclassified, emptySets, respelled, commonIoTypes };
+  // The pickable common-IO types are the stats `commonIo` resolved a record for, rather than a
+  // second walk over the same tokens: the list and the records it describes cannot disagree if
+  // only one of them is derived.
+  const commonIo = resolveCommonIoRecords(records, commonIoTemplates);
+  const commonIoTypes = Object.keys(commonIo).sort();
+  return { entries, unclassified, emptySets, respelled, commonIo, commonIoTypes };
 }
 
 /** Every io-set entry must name a piece the contract's io-sets section carries. */
@@ -291,7 +342,7 @@ function literal(entry) {
 function main() {
   console.log(`Building boost index for ${datasetId}...`);
   const { records, byLower } = loadRecords();
-  const { entries, unclassified, emptySets, respelled, commonIoTypes } = classify(records, byLower);
+  const { entries, unclassified, emptySets, respelled, commonIo, commonIoTypes } = classify(records, byLower);
   assertSetsResolve(entries);
 
   const counts = {};
@@ -332,6 +383,15 @@ function main() {
   lines.push('  entries: Record<string, BoostIndexEntry>;');
   lines.push('  /** The pickable common-IO types, one per boost type the crafted family carries. */');
   lines.push('  commonIoTypes: string[];');
+  lines.push('  /**');
+  lines.push('   * Pickable common-IO type -> the level-scaling record the game names it by.');
+  lines.push('   *');
+  lines.push('   * The template, not one of its nine levelled siblings, because every caller');
+  lines.push('   * carries the level on its own axis. `Fly` is `Crafted_Fly`, and `Slow` is');
+  lines.push('   * `Crafted_Snare` — neither is the planner stat with a prefix stuck on it, which');
+  lines.push('   * is what a hand-written table assumed twice.');
+  lines.push('   */');
+  lines.push('  commonIo: Record<string, string>;');
   lines.push('}');
   lines.push('');
   lines.push('export const BOOST_INDEX: BoostIndexData = {');
@@ -342,6 +402,11 @@ function main() {
   }
   lines.push('  },');
   lines.push(`  commonIoTypes: [${commonIoTypes.map((s) => `'${s}'`).join(', ')}],`);
+  lines.push('  commonIo: {');
+  for (const stat of commonIoTypes) {
+    lines.push(`    '${stat}': '${commonIo[stat]}',`);
+  }
+  lines.push('  },');
   lines.push('};');
   lines.push('');
 

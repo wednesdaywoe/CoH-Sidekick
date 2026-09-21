@@ -90,3 +90,97 @@ export function craftedCommonIOLevel(level: number, levels = getCommonIOLevels()
   }
   return crafted;
 }
+
+// ============================================
+// THE GAME'S OWN NAME FOR AN ENHANCEMENT
+// ============================================
+
+/**
+ * The record name the `boost` slash command wants for one enhancement.
+ *
+ * The index is keyed by that name, so everything below is a reverse read of it
+ * rather than a spelling assembled from our ids. That direction is the point.
+ * The popmenu exporter used to assemble: a hand-written planner-stat -> name
+ * table, and a prefix/PascalCase composition for set pieces. The table spelled
+ * Fly `Crafted_Flight` and Slow `Crafted_Slow`; the game has `Crafted_Fly` and
+ * `Crafted_Snare`, `boost` answers an unknown record with a console line nobody
+ * reads, and the enhancement simply never appeared in the tray. It shipped that
+ * way for eleven months (POPMENU-1), and the same shape had already cost the
+ * `.mbd` exporter seven stats before it stopped assembling too (MBDEXPORT-9).
+ *
+ * `null` means this dataset's export names no such record. That is a real
+ * answer — a fork carries sets and specials the others do not — and every
+ * caller has to say so rather than emit a guess.
+ */
+
+interface ReverseIndex {
+  /** `${setId}/${piece}/${attuned}` -> record name. */
+  ioSet: Map<string, string>;
+  /** `${family}/${id}` -> record name. */
+  special: Map<string, string>;
+}
+
+const reverseCache = new WeakMap<BoostIndexData, ReverseIndex>();
+
+function reverseIndex(index: BoostIndexData): ReverseIndex {
+  const cached = reverseCache.get(index);
+  if (cached) return cached;
+
+  const ioSet = new Map<string, string>();
+  const special = new Map<string, string>();
+  for (const [name, entry] of Object.entries(index.entries)) {
+    let key: string | null = null;
+    let into: Map<string, string> | null = null;
+    if (entry.kind === 'io-set') {
+      key = `${entry.set}/${entry.piece}/${entry.attuned === true}`;
+      into = ioSet;
+    } else if (entry.kind === 'special') {
+      key = `${entry.family}/${entry.id}`;
+      into = special;
+    }
+    if (key === null || into === null) continue;
+    const prior = into.get(key);
+    if (prior) {
+      // Two records claiming one slot means the index no longer identifies an
+      // enhancement, and picking either would be a coin toss written into a
+      // file the game executes.
+      throw new Error(
+        `Boost index for "${index.dataset}" names ${prior} and ${name} for the same enhancement (${key})`,
+      );
+    }
+    into.set(key, name);
+  }
+
+  const built = { ioSet, special };
+  reverseCache.set(index, built);
+  return built;
+}
+
+/** The record name for one piece of an IO set, crafted or attuned. */
+export function getIOSetBoostUid(
+  setId: string,
+  pieceNum: number,
+  attuned: boolean,
+  index = getBoostIndex(),
+): string | null {
+  return reverseIndex(index).ioSet.get(`${setId}/${pieceNum}/${attuned}`) ?? null;
+}
+
+/**
+ * The record name for a generic ("common") IO of this planner stat.
+ *
+ * The level-scaling template rather than one of its levelled siblings: every
+ * caller states the level on its own axis, and the template is what takes one.
+ */
+export function getCommonIOBoostUid(stat: string, index = getBoostIndex()): string | null {
+  return index.commonIo[stat] ?? null;
+}
+
+/** The record name for a special (Hamidon / Titan / Hydra / D-Sync / prestige) piece. */
+export function getSpecialBoostUid(
+  family: string,
+  id: string,
+  index = getBoostIndex(),
+): string | null {
+  return reverseIndex(index).special.get(`${family}/${id}`) ?? null;
+}

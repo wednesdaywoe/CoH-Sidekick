@@ -141,6 +141,14 @@ const TRACKED_ROOTS = [
   // IS watched is that someone seeded its directory as a root above.
   'src/utils/mids-export.ts',
   'src/utils/slot-levels.ts',
+  // Joined 2026-09-20 under POPMENU-1, at zero drift — the two copies were already byte-identical,
+  // and that is the whole problem with how it got here. The other exporter of the game's own
+  // enhancement names sat one line up since 2026-09-09 and this one was watched by nothing, so a
+  // fix to either could have landed on one side alone with every gate green. It spelled the Fly
+  // generic IO `Crafted_Flight` for eleven months; the record is `Crafted_Fly`, `boost` answers an
+  // unknown one with a console line, and the slot just never appeared in game. FORK-6's shape, and
+  // MBDEXPORT-14's: an unwatched file whose copies agree until the day one of them moves.
+  'src/utils/export-popmenu.ts',
   // Joined 2026-09-10 under FORK-7, reconciled the same day. It holds
   // `isInherentlyAttuned`, a rule about what the game data MEANS that both
   // engines' slotting paths obey, and the two copies had disagreed since
