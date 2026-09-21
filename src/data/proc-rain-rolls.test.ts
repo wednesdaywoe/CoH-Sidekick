@@ -95,8 +95,8 @@ describe('patch proc rolls', () => {
       const schedule = resolveProcRollSchedule({ powerType: 'Click', baseRecharge: 12, castTime: 1.5 });
       expect(schedule).toEqual({ window: 12, castTime: 1.5, rolls: 1, fixedPeriod: false });
       // Byte-for-byte the old path, recharge terms and all.
-      expect(calculateScheduledProcChance(3.5, schedule, 0, 360, 0.95, 0.7))
-        .toBe(calculateProcChance(3.5, 12, 1.5, 0, 360, 0.95, 0.7));
+      expect(calculateScheduledProcChance(3.5, schedule, 0, 360, 0.95))
+        .toBe(calculateProcChance(3.5, 12, 1.5, 0, 360, 0.95));
     });
 
     it('counts rolls at patch ages 0, 10, 20 … and not one at expiry', () => {

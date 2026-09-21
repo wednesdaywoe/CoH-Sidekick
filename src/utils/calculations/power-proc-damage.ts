@@ -145,7 +145,7 @@ export function calculateSlottedProcDamagePerCast(input: SlottedProcDamageInput)
         site.procsOnlyOnMainTarget, site.radius, arcToDegrees(site.arc) || undefined)
       : shellGeometry;
     const procChance = calculateScheduledProcChance(
-      procData.ppm, schedule, areaRadius, areaArc, rechargeEnh, input.globalRechargeEnh ?? 0,
+      procData.ppm, schedule, areaRadius, areaArc, rechargeEnh,
     );
     total += procDmg * procChance * schedule.rolls;
   }

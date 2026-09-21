@@ -191,9 +191,9 @@ export interface IncarnateProcContribution {
  * @param castTime     Attack's raw cast time (not ArcanaTime).
  * @param radius       AoE radius in feet (0 for ST). PPM area factor.
  * @param arcDegrees   Cone arc in degrees (360 for sphere/ST).
- * @param enhancedRechargeBonus  This power's own slotted recharge as decimal.
- * @param globalRechargeBonus  Build-wide recharge as decimal — it dilutes the slotted
- *   penalty on the proc window rather than adding one (DATA-GAP-REGISTER PPM-2).
+ * @param enhancedRechargeBonus  This power's own slotted recharge as decimal. Build-wide
+ *   recharge is deliberately NOT a parameter: HC's PPM rule counts the power's own
+ *   enhancements and Alpha only (DATA-GAP-REGISTER PPM-5).
  * @param expectedTargets  Number of foes the proc damage gets applied to.
  *   Unlike slotted IO procs (which Mids treats as single-target per row),
  *   Mids multiplies Hybrid / Interface proc damage by the attack's
@@ -210,7 +210,6 @@ export function computeIncarnateProcContributions(
   radius: number,
   arcDegrees: number,
   enhancedRechargeBonus: number,
-  globalRechargeBonus: number = 0,
   expectedTargets: number = 1,
 ): IncarnateProcContribution[] {
   if (procs.length === 0) return [];
@@ -225,7 +224,7 @@ export function computeIncarnateProcContributions(
     const damagePerTick = Math.abs(tableValue) * p.scale;
     const damagePerActivation = damagePerTick * p.ticks * targets;
     const chance = p.trigger.kind === 'ppm'
-      ? calculateProcChance(p.trigger.ppm, baseRecharge, castTime, radius, arcDegrees, enhancedRechargeBonus, globalRechargeBonus)
+      ? calculateProcChance(p.trigger.ppm, baseRecharge, castTime, radius, arcDegrees, enhancedRechargeBonus)
       : p.trigger.chance;
     const avgDamage = chance * damagePerActivation;
     out.push({

@@ -35,6 +35,7 @@ import {
   calculateScheduledProcChance,
   powerFiresProcs,
   getPPMAreaDenominator,
+  procRechargeWindow,
   type ProcData,
   type ProcRollSchedule,
 } from '@/data';
@@ -154,9 +155,6 @@ interface GeneralStatsBlockProps {
     maxTargets?: number;
   };
   enhancementBonuses: Record<string, number | undefined>;
-  /** The build's global recharge as a decimal — the proc row's window needs it beside the
-   *  power's own slotting, and only the caller has the character totals. */
-  globalRechargeBonus: number;
   /** The engine's resolved values for this power (PROD6C) — Activation, Pwr Range and
    *  ArcanaTime read straight off it instead of re-deriving the three-tier here. Null while
    *  the dataset loads or for a power the dataset cannot resolve, which hides those rows
@@ -174,7 +172,6 @@ export function GeneralStatsBlock({
   power,
   effects,
   enhancementBonuses,
-  globalRechargeBonus,
   projection,
   damageType,
   useArcanaTime,
@@ -252,7 +249,6 @@ export function GeneralStatsBlock({
         radius={procAreaGeometry.radius}
         arcDegrees={procAreaGeometry.arcDegrees}
         slottedRechargeBonus={enhancementBonuses.recharge ?? 0}
-        globalRechargeBonus={globalRechargeBonus}
         // Propel & co.: every proc scores single-target — the AoE radius belongs
         // to a secondary knockback, not to what the procs roll against.
         procsOnlyOnMainTarget={power.procsOnlyOnMainTarget}
@@ -317,9 +313,6 @@ interface ProcChanceRowProps {
   radius: number;
   arcDegrees: number | undefined;
   slottedRechargeBonus: number;
-  /** The build's global recharge as a decimal. Only bites when the power carries slotted
-   *  recharge of its own, where it softens the penalty rather than adding one. */
-  globalRechargeBonus: number;
   /** The power's `ProcMainTargetOnly` flag — resolveProcRollGeometry scores its
    *  procs single-target despite the power's AoE radius. */
   procsOnlyOnMainTarget?: boolean;
@@ -380,7 +373,6 @@ function ProcChanceRow({
   radius,
   arcDegrees,
   slottedRechargeBonus,
-  globalRechargeBonus,
   procsOnlyOnMainTarget,
   procsAllowed,
   procRollSites,
@@ -424,11 +416,12 @@ function ProcChanceRow({
       geometry,
       window: {
         schedule,
-        // On a fixed-period schedule the recharge terms are inert.
+        // On a fixed-period schedule the recharge term is inert. Otherwise this is the shared
+        // helper, NOT a second copy of the formula: printing a window the engine didn't compute
+        // is how PPM-2's global term survived a year of being looked at.
         modifiedRecharge: schedule.fixedPeriod
           ? schedule.window
-          : (baseRecharge * (1 + globalRechargeBonus))
-            / (1 + globalRechargeBonus + slottedRechargeBonus),
+          : procRechargeWindow(baseRecharge, slottedRechargeBonus),
         castTime,
         baseRecharge,
         areaDenom: getPPMAreaDenominator(geometry.radius, geometry.arcDegrees),
@@ -483,7 +476,7 @@ function ProcChanceRow({
     const { window, geometry } = site ? buildWindow(site) : own;
     const chance = calculateScheduledProcChance(
       procData.ppm, window.schedule, geometry.radius, geometry.arcDegrees,
-      slottedRechargeBonus, globalRechargeBonus);
+      slottedRechargeBonus);
 
     entries.push({
       key,

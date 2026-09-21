@@ -2540,20 +2540,38 @@ function clampProcChance(rawChance: number, ppm: number): number {
 }
 
 /**
+ * The recharge a click power's procs roll against: `base / (1 + local)`, where `local` is the
+ * recharge slotted in THIS power, post-ED and Alpha included.
+ *
+ * Exported because the Power Info panel PRINTS this number next to the formula, and for a year it
+ * printed a second, independently written copy of it. That duplication is what let the engine and
+ * the displayed window disagree without any test noticing: one source now, used by both.
+ */
+export function procRechargeWindow(baseRecharge: number, enhancedRechargeBonus: number): number {
+  return baseRecharge / (1 + enhancedRechargeBonus);
+}
+
+/**
  * Calculate proc chance per activation using the PPM formula.
  *
  * Formula: Proc% = PPM × (ModifiedRecharge + CastTime) / (60 × AreaDenom)
- *   where ModifiedRecharge = BaseRecharge × (1 + Global) / (1 + Global + Local)
+ *   where ModifiedRecharge = BaseRecharge / (1 + Local)
  *   and AreaDenom = 0.25 + 0.75 × (1 + radius × (11 × arc + 540) / 30,000)
  *
  * Subject to clamps: min = 5% + PPM × 1.5%, max = 90%.
  *
- * Global recharge belongs in BOTH nets, where it cancels for an unslotted power and DILUTES the
- * penalty for a slotted one: at +65% global, 99% slotted recharge costs ~28% of the window, where
- * with no global it would cost ~50%. Measured in game 2026-08-02 — Smashing Blow + Mako's Bite,
- * 54/117 landed hits unslotted against 49/143 with three level-50 common Recharge IOs (46.2% →
- * 34.3%, where a local-only penalty predicts 27.5% and no penalty at all predicts 47.8%). See the
- * engine's `procs::proc_recharge_window` and DATA-GAP-REGISTER PPM-2 for the full write-up.
+ * `Local` is the recharge slotted in THIS power, post-ED, Alpha included. The build's global
+ * recharge is deliberately absent, per Homecoming's published PPM rule: *"'Enhanced Recharge Time'
+ * includes reductions from enhancements and Alpha slotting, but not from Luck of the Gambler
+ * bonuses, other enhancement set bonuses, Hasten, or other recharge buffs."*
+ *
+ * Global recharge still raises procs PER MINUTE, because the power fires more often — that is
+ * `calculateProcsPerMinute`, which is why it keeps a global term where this does not.
+ *
+ * This replaced a global-diluted window, `base × (1 + global) / (1 + global + local)`, which the
+ * engine and this file both carried from 2026-08-03. The two agree exactly whenever the power
+ * carries no slotting of its own, which is why the divergence went unreported until a user built
+ * a power that had both. See `procs::proc_recharge_window` and DATA-GAP-REGISTER PPM-2.
  *
  * @param ppm - Procs Per Minute value from the enhancement
  * @param baseRecharge - Base (unenhanced) recharge time in seconds
@@ -2562,8 +2580,6 @@ function clampProcChance(rawChance: number, ppm: number): number {
  * @param arcDegrees - cone arc in degrees (default 360 = sphere)
  * @param enhancedRechargeBonus - decimal recharge enhancement from *this power's* own slotting,
  *        post-ED and Alpha included. e.g. 0.95 for +95%. Default 0.
- * @param globalRechargeBonus - decimal build-wide recharge (set bonuses, Hasten, Ageless). Only
- *        matters when the power carries slotting of its own; 0 leaves the window at base. Default 0.
  */
 export function calculateProcChance(
   ppm: number,
@@ -2571,12 +2587,9 @@ export function calculateProcChance(
   castTime: number,
   radius: number = 0,
   arcDegrees: number = 360,
-  enhancedRechargeBonus: number = 0,
-  globalRechargeBonus: number = 0
+  enhancedRechargeBonus: number = 0
 ): number {
-  const modifiedRecharge =
-    (baseRecharge * (1 + globalRechargeBonus)) /
-    (1 + globalRechargeBonus + enhancedRechargeBonus);
+  const modifiedRecharge = procRechargeWindow(baseRecharge, enhancedRechargeBonus);
   const areaDenom = getPPMAreaDenominator(radius, arcDegrees);
   const raw = (ppm * (modifiedRecharge + castTime)) / (60 * areaDenom);
   return clampProcChance(raw, ppm);
@@ -2590,9 +2603,11 @@ export function calculateProcChance(
  * @param castTime - Cast time in seconds
  * @param radius - AoE radius (0 for single target)
  * @param enhancedRechargeBonus - This power's own slotted recharge as decimal (e.g. 0.95 for +95%)
- * @param globalRechargeBonus - Build-wide recharge as decimal. It enters here TWICE over, and
- *        differently: it dilutes the slotted penalty on the proc chance, and it shortens the
- *        cycle time outright, because a hasted power fires more often.
+ * @param globalRechargeBonus - Build-wide recharge as decimal. It enters the CYCLE TIME only —
+ *        a hasted power fires more often — and deliberately not the per-activation chance, which
+ *        HC's PPM rule scores off enhancements and Alpha alone (DATA-GAP-REGISTER PPM-2). That
+ *        split is the whole point of a per-minute rate: global recharge raises procs per minute
+ *        without touching the chance, slotted recharge lowers the chance and raises the rate.
  * @returns Expected number of procs per minute
  */
 export function calculateProcsPerMinute(
@@ -2611,10 +2626,12 @@ export function calculateProcsPerMinute(
     radius,
     arcDegrees,
     enhancedRechargeBonus,
-    globalRechargeBonus,
   );
 
-  // Actual cycle time: every source of recharge shortens it, slotted and global alike.
+  // Actual cycle time: every source of recharge shortens it, slotted and global alike. This is
+  // where global recharge legitimately enters PPM — it does not change the per-activation chance,
+  // it changes how often the power is activated. Both halves together are why slotting recharge
+  // leaves procs-per-minute roughly at the piece's PPM while global recharge raises it.
   const actualRecharge = baseRecharge / (1 + enhancedRechargeBonus + globalRechargeBonus);
   const cycleTime = actualRecharge + castTime;
 
@@ -3094,7 +3111,6 @@ export function calculateScheduledProcChance(
   radius: number = 0,
   arcDegrees: number = 360,
   enhancedRechargeBonus: number = 0,
-  globalRechargeBonus: number = 0,
 ): number {
   return calculateProcChance(
     ppm,
@@ -3103,7 +3119,6 @@ export function calculateScheduledProcChance(
     radius,
     arcDegrees,
     schedule.fixedPeriod ? 0 : enhancedRechargeBonus,
-    schedule.fixedPeriod ? 0 : globalRechargeBonus,
   );
 }
 
@@ -3191,7 +3206,6 @@ export function calculateProcStats(
       power.radius || 0,
       arcDegrees,
       enhancedRechargeBonus,
-      globalRechargeBonus,
     );
     procsPerMinute = calculateProcsPerMinute(
       procData.ppm,

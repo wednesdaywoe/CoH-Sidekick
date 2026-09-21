@@ -317,6 +317,7 @@ export {
   getPPMAreaFactor,
   getPPMAreaDenominator,
   arcToDegrees,
+  procRechargeWindow,
   calculateProcChance,
   calculateProcsPerMinute,
   calculateProcDPS,

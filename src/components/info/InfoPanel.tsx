@@ -630,16 +630,17 @@ function PowerInfo({ powerName, powerSet }: PowerInfoProps) {
       // Scourge) can multiply a proc's damage, and those are applied at
       // hit time by the game, not surfaced in the planner's averages.
       const avgDamage = interpolateProcDamage(effect.value, effect.valueMax, procData.levelRange, slotLevel);
-      // A slotted Recharge IO lowers the firing window, which lowers PPM chance; the build's
-      // global recharge dilutes that loss instead of deepening it. Neither applies on a patch,
-      // whose window is the proc's own fixed period — calculateScheduledProcChance drops them.
+      // A slotted Recharge IO lowers the firing window, which lowers PPM chance. The build's
+      // global recharge does NOT — HC's PPM rule counts enhancements and Alpha only, so Hasten,
+      // set bonuses and Ageless leave the per-activation chance alone (they raise procs per
+      // minute instead, by firing the power more often). Neither term applies on a patch, whose
+      // window is the proc's own fixed period — calculateScheduledProcChance drops it.
       const chance = calculateScheduledProcChance(
         procData.ppm,
         schedule,
         procRadius,
         procArc,
         enhancementBonuses.recharge || 0,
-        globalBonusesForCalc.recharge || 0,
       );
       const perActivation = chance * avgDamage * schedule.rolls;
       const dps = perActivation / cycleTime;
@@ -679,7 +680,6 @@ function PowerInfo({ powerName, powerSet }: PowerInfoProps) {
         radius,
         arcDegrees,
         enhancementBonuses.recharge || 0,
-        globalBonusesForCalc.recharge || 0,
         expectedTargets,
       );
       for (const c of incContribs) {
@@ -1331,7 +1331,6 @@ function PowerInfo({ powerName, powerSet }: PowerInfoProps) {
         power={effectivePower ?? power}
         effects={effects}
         enhancementBonuses={enhancementBonuses}
-        globalRechargeBonus={globalBonusesForCalc.recharge || 0}
         projection={projection}
         damageType={calculatedDamage?.type}
         useArcanaTime={useArcanaTimeToggle}

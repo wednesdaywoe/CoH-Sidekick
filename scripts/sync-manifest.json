@@ -251,7 +251,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "a34c7111e384580036c3fb8a5f235c6212a132f83f48a5f7c143d43b12050b57"
+      "sha256": "89cc72f468c247ac32f34dd7b0b08d7581a7a15fc825e3ae6905cdb517c70b22"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -722,14 +722,8 @@
     },
     {
       "path": "src/data/incarnate-procs.ts",
-      "status": "forked",
-      "sha256": {
-        "canonical": "46f04c3944412accabeb35396a0ff6bbe942888f3bda665c4a42dee279b2a8fd",
-        "beta": "747acde6e4da7cbdd848d67c8c1bc4864420e1e5a70d7d38560a02bbe2441f9d"
-      },
-      "reason": "The one of FORK-7's four rule forks with a live consumer. The beta threads `globalRechargeBonus` into the PPM window and canonical does not: global recharge dilutes the slotted-recharge penalty, so this copy under-reports Interface proc chance on any build carrying global recharge. Canonical's RUST has the rule — `crates/coh_math/src/procs.rs` computes `base × (1 + global) / (1 + global + local)`, which is PPM-2, closed — but `computeIncarnateProcContributions` has NO Rust port, so this file is still a port SOURCE rather than dead oracle. That is the whole difference between this row and the other three.",
-      "exit": "The Rust port of the incarnate damage-proc pass is taken from the BETA's six-argument `calculateProcChance` call, not from this copy — the same condition SLOT-3 records on `mids-export.ts`, and this row is where it is written down. Until then the fork stands; canonical's TS will not adopt it on its own, because canonical's `src/` is not tooling that adopts things.",
-      "gap": "FORK-7"
+      "status": "identical",
+      "sha256": "f4292ff16b703cb6e704435d6e455a182fa602d893bafa14f5f5e1a3f5ea386d"
     },
     {
       "path": "src/data/incarnates.ts",
@@ -747,7 +741,7 @@
       "status": "per-repo",
       "sha256": {
         "canonical": "f9629d7748c448bfd82524ab68b97018733cec475e0555300e730c10d9d2466f",
-        "beta": "450488786a1cdbc6df68b9411a50479fd3078195a1c4bea524c8d417193bb036"
+        "beta": "13acebdabd531ecdec5c36f05fbc7b3119fa8e98058dbbdd609a66c3ff0e3d8f"
       },
       "reason": "The barrel face of the four feature files above: the beta re-exports what they added (`toStancePowers`, `getMostCommonSetSize`, `getLevelShiftGrants`, the proc roll-site and roll-schedule surface, `DESCRIPTION_NOTES`). A barrel cannot converge while its members are declared apart, and it carries no rule of its own — every line is a re-export.",
       "exit": null,
@@ -788,10 +782,10 @@
       "status": "forked",
       "sha256": {
         "canonical": "10201bdf91da39aa7d274113c2bfb7c7ffec707b7d2d8cd14fcc3e9f9a46594a",
-        "beta": "04de31c14a55083610e2f233379e37d2e5a29616f216b4bb25e7ebed88e9046c"
+        "beta": "ed74431f5e04dd00d5ce377fd55bf5911ca78ed413c9c700afa429d1982e2932"
       },
-      "reason": "A contract input, and invisible to this guard until 2026-09-11: `emit-contract.cjs` loads it through `require(path.join(REPO, …))` and emits `PROC_DATABASE` as the `proc-data` section the Rust engine consumes, while the discovery walk read only the literal `require('../src/…')` spelling. The two copies' database ROWS agree. Canonical is ahead on the half the contract carries — it stamps `activatePeriod` from the generated table, which the beta has not taken — and the beta is ahead on code the contract does not carry: the `globalRechargeBonus` window term (see `incarnate-procs.ts`), the proc roll-site and roll-schedule pass, and `powerFiresProcs`.",
-      "exit": "Two halves, and the data half converges first because it is the half the contract emits: the beta takes `activatePeriod`. The code half converges when the incarnate proc pass is ported (see `incarnate-procs.ts`) or when the roll-schedule pass lands on both sides.",
+      "reason": "A contract input, and invisible to this guard until 2026-09-11: `emit-contract.cjs` loads it through `require(path.join(REPO, …))` and emits `PROC_DATABASE` as the `proc-data` section the Rust engine consumes, while the discovery walk read only the literal `require('../src/…')` spelling. The two copies' database ROWS agree. Canonical is ahead on the half the contract carries — it stamps `activatePeriod` from the generated table, which the beta has not taken — and the beta is ahead on code the contract does not carry: the proc roll-site and roll-schedule pass, `powerFiresProcs`, and the exported `procRechargeWindow` the Power Info panel prints through. The `globalRechargeBonus` window term used to head that list; PPM-5 deleted it as wrong, and canonical's copy — which never took it — was the correct one the whole time.",
+      "exit": "Two halves, and the data half converges first because it is the half the contract emits: the beta takes `activatePeriod`. The code half converges when the roll-schedule pass lands on both sides; `incarnate-procs.ts` already converged, because PPM-5 removed the only rule that separated the two copies.",
       "gap": "FORK-7"
     },
     {

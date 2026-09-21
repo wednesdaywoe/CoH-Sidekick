@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 332 entries.** PROV-8 opened 2026-09-20: nothing measures the export against the
+**1 open, of 333 entries.** PROV-8 opened 2026-09-20: nothing measures the export against the
 shard it copies, so a game patch reaches the planner only when someone re-exports — and this time
 a user got there first. The key runs the comparison by hand and all six manifests read `ok`; what
 is missing is something that runs it without being asked.
@@ -745,7 +745,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Procs + PPM
 
-[Full detail](gaps/procs-ppm.md) — 10 of 10 closed
+[Full detail](gaps/procs-ppm.md) — 11 of 11 closed
 
 - [x] **PROCCAT-1** — `proc-data.ts` gave each of 184 procs a hand-authored `setCategory` in front
   of the `type` each fork's registry owns, wrong in 52 and read by nothing; the field is deleted in
@@ -758,6 +758,7 @@ measurement went, and where a closure for the residual belongs too.
 - [x] **PPM-2** — the click proc window ignored recharge slotted in the power
 - [x] **PPM-3** — `procsOnlyOnMainTarget` reached the contract and no consumer read it
 - [x] **PPM-4** — `ProcAllowed kNone` was parsed, and the contract dropped it
+- [x] **PPM-5** — the click proc window folded in global recharge; HC's published PPM rule counts the power's own enhancements and Alpha only, and the beta printed a second copy of the formula that could not disagree out loud
 - [x] **HC-3** — `ProcMainTargetOnly` was never parsed, so those procs scored the wrong PPM area factor
 - [x] **PROC-PATCH-1** — a summoned patch owns its procs' clock and footprint; the engine read the parent's
 - [x] **PROC-PERCEPTION-1** — `+Perception` globals landed in the converter's junk-drawer category
