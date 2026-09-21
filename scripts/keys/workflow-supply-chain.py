@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Nothing that builds or publishes this project comes from an unpinned source.
 
-Four rules, one question: when CI produces an artifact, can somebody say where every byte of it
-came from? Three are about the inputs (F14, F43) and the fourth is about the output (F40).
+Seven rules, one question: when CI produces an artifact, can somebody say where every byte of
+it came from? Five are about the inputs (F14 twice, F43, F42, F15), one is about the output
+(F40), and one is about the permissions the whole thing runs under (F59).
 
 **Why this exists.** SECURITY_AUDIT.md F14. `rc-bundle.yml` cuts the Windows release, and it
 reached for `Swatinem/rust-cache@v2`. A tag is a mutable pointer: whoever can move `v2` in that
@@ -37,6 +38,23 @@ checksum is one nobody can tell apart from a different bundle, so every `upload-
 `rc-bundle.yml` must be preceded by `rc-checksums.py`. Scoped to that file by name: `ci.yml`
 uploads logs and reports, which nobody verifies against anything.
 
+**The sixth rule is the build tool itself (F42).** All three legs of `rc-bundle.yml` ran
+`command -v dx >/dev/null 2>&1 || cargo install dioxus-cli --locked --version 0.7.9`. That reads
+as a pin. It behaves as "use the pin unless the box already has a `dx`" — and two of the three
+legs run on persistent self-hosted machines that have had one since July, so on those two the
+pin never fired and no step recorded which binary had cut the release. A conditional pin is
+worse than no pin, because it passes review. The rule is therefore: no `command -v dx` anywhere
+in that file, every `cargo install dioxus-cli` names `--locked`, `--version` and
+`--features no-downloads`, and all of them name the SAME version — three legs that quietly drift
+apart is the failure a single grep would miss.
+
+**The seventh rule is the tool that tool runs (F15).** `dx bundle --package-types appimage` shells
+out to `linuxdeploy`, which dioxus-cli fetches from a mutable release tag with no hash and caches
+forever. `rc-linuxdeploy.py` seeds that cache by digest, and `--features no-downloads` above turns
+a missed seed into a refusal instead of a silent unverified download. So: every AppImage bundle in
+the release workflow must have a seed step before it — "before" for the same reason the checksum
+rule says "before".
+
 **How to grade this script**, since a passing run against a correct tree says nothing about
 whether the check works: `--self-test` re-runs every rule against text that deliberately breaks
 it and fails if any is let through.
@@ -70,6 +88,15 @@ UPLOAD = "uses: actions/upload-artifact"
 # An install that falls back off the lockfile. Matched on the fallback rather than on `npm ci`,
 # because `npm ci` alone is the thing we want.
 UNLOCKED_INSTALL = re.compile(r"npm\s+(?:ci|install)[^\n|&]*(?:\|\||&&|;)\s*npm\s+install\b")
+
+# The release workflow's own build tool. `command -v dx` is the conditional that made the pin
+# advisory; the flags are what each install must name; the seed is what must precede an AppImage.
+DX_PRESENCE_TEST = re.compile(r"command\s+-v\s+dx\b")
+DX_INSTALL = re.compile(r"cargo\s+install\s+dioxus-cli\b[^\n]*")
+DX_VERSION = re.compile(r"--version[= ]\s*([0-9][^\s]*)")
+DX_REQUIRED_FLAGS = ("--locked", "--version", "--features no-downloads")
+LINUXDEPLOY_SEED = "rc-linuxdeploy.py"
+APPIMAGE_BUNDLE = re.compile(r"\bdx\s+bundle\b[^\n]*\bappimage\b")
 
 
 def unpinned(text: str) -> list[tuple[int, str]]:
@@ -144,6 +171,61 @@ def unchecksummed_uploads(text: str) -> list[int]:
     return unguarded
 
 
+def build_tool_unpinned(text: str) -> list[tuple[int, str]]:
+    """Every way the release workflow's `dx` could be something other than the version it names.
+
+    Three shapes, because they fail differently. A `command -v dx` makes the pin conditional on
+    the machine. A missing flag makes it incomplete. Two legs naming two versions makes it
+    unanswerable which one cut the artifact, which is the same question this whole file asks.
+    """
+    found = []
+    versions: dict[str, int] = {}
+
+    for number, line in enumerate(text.splitlines(), start=1):
+        bare = without_comment(line)
+        if DX_PRESENCE_TEST.search(bare):
+            found.append(
+                (number, "`command -v dx` makes the pin conditional on what is on the box")
+            )
+        install = DX_INSTALL.search(bare)
+        if install is None:
+            continue
+        command = install.group(0)
+        for flag in DX_REQUIRED_FLAGS:
+            if flag not in command:
+                found.append((number, f"this `cargo install dioxus-cli` does not name `{flag}`"))
+        version = DX_VERSION.search(command)
+        if version is not None:
+            versions.setdefault(version.group(1), number)
+
+    if len(versions) > 1:
+        named = ", ".join(sorted(versions))
+        for version, number in sorted(versions.items(), key=lambda pair: pair[1]):
+            found.append(
+                (number, f"this leg installs dioxus-cli {version}; the file names {named}")
+            )
+    return found
+
+
+def unseeded_appimages(text: str) -> list[int]:
+    """Line numbers of AppImage bundles with no digest-verified linuxdeploy seeded before them.
+
+    "Before" for `unchecksummed_uploads`' reason: a seed step is a property of the job it runs
+    in, and one of them somewhere in the file does not cover a second job that has none.
+    """
+    unguarded = []
+    since_seed = None
+    for number, line in enumerate(text.splitlines(), start=1):
+        bare = without_comment(line)
+        if LINUXDEPLOY_SEED in bare:
+            since_seed = number
+        elif APPIMAGE_BUNDLE.search(bare):
+            if since_seed is None:
+                unguarded.append(number)
+            since_seed = None
+    return unguarded
+
+
 def declares_permissions(text: str) -> bool:
     """Whether the workflow states a top-level `permissions:` block — SECURITY_AUDIT.md F59.
 
@@ -212,6 +294,42 @@ def self_test() -> int:
     if len(unchecksummed_uploads(three)) != 1:
         failures.append("one checksum step was read as covering a later, separate upload")
 
+    good_install = (
+        "          cargo install dioxus-cli --locked --version 0.7.9 --features no-downloads\n"
+    )
+    if build_tool_unpinned(good_install):
+        failures.append("a fully pinned dioxus-cli install was reported")
+    if not build_tool_unpinned("      - run: command -v dx >/dev/null 2>&1 || " + good_install):
+        failures.append("a `command -v dx` short-circuit was not caught")
+    if not build_tool_unpinned("          cargo install dioxus-cli --version 0.7.9 --features no-downloads\n"):
+        failures.append("an install with no --locked was not caught")
+    if not build_tool_unpinned("          cargo install dioxus-cli --locked --features no-downloads\n"):
+        failures.append("an install with no --version was not caught")
+    if not build_tool_unpinned("          cargo install dioxus-cli --locked --version 0.7.9\n"):
+        failures.append("an install with no --features no-downloads was not caught")
+    # Two legs, two versions: the case a grep for `--version 0.7.9` passes and this must not.
+    drifted = good_install + good_install.replace("0.7.9", "0.7.8")
+    if len(build_tool_unpinned(drifted)) != 2:
+        failures.append("two legs installing two different dioxus-cli versions were not caught")
+    if build_tool_unpinned(good_install + good_install):
+        failures.append("two legs installing the SAME version were reported as drifted")
+    # The comment that explains the rule is not the rule, as F43's case above already found out.
+    if build_tool_unpinned("      # the `command -v dx ||` that was here is F42\n"):
+        failures.append("a comment describing the short-circuit was read as the short-circuit")
+
+    seeded = (
+        "        run: python3 scripts/keys/rc-linuxdeploy.py\n"
+        "      - run: dx bundle --platform linux --package-types appimage --release\n"
+    )
+    if unseeded_appimages(seeded):
+        failures.append("a seeded AppImage bundle was reported as unseeded")
+    if not unseeded_appimages("      - run: dx bundle --package-types appimage --release\n"):
+        failures.append("an AppImage bundle with no linuxdeploy seed before it was not caught")
+    if len(unseeded_appimages(seeded + "      - run: dx bundle --package-types appimage\n")) != 1:
+        failures.append("one seed step was read as covering a later, separate AppImage job")
+    if unseeded_appimages("      - run: dx bundle --platform macos --package-types macos\n"):
+        failures.append("a macOS bundle was reported; it runs no linuxdeploy")
+
     if declares_permissions("name: CI\non:\n  push:\n\njobs:\n  build:\n"):
         failures.append("a workflow with no permissions block was reported as having one")
     if not declares_permissions("name: CI\non:\n  push:\n\npermissions:\n  contents: read\n"):
@@ -226,7 +344,7 @@ def self_test() -> int:
         print(f"SELF-TEST FAILED: {failure}", file=sys.stderr)
     if failures:
         return 1
-    print("self-test: all five rules refuse what they are meant to refuse")
+    print("self-test: all seven rules refuse what they are meant to refuse")
     return 0
 
 
@@ -240,6 +358,7 @@ def main() -> int:
         print(f"no workflows under {WORKFLOWS}; this check proved nothing", file=sys.stderr)
         return 1
 
+    release_workflows = 0
     for path in files:
         text = path.read_text(encoding="utf-8")
         for number, spec in unpinned(text):
@@ -253,10 +372,22 @@ def main() -> int:
                 f"`npm ci` refuses; let it refuse"
             )
         if path.name == RELEASE_WORKFLOW:
+            release_workflows += 1
             for number in unchecksummed_uploads(text):
                 problems.append(
                     f"{path.relative_to(ROOT)}:{number}: an RC artifact is uploaded with no "
                     f"{CHECKSUMS} step before it, so nobody can tell this bundle from another"
+                )
+            for number, why in build_tool_unpinned(text):
+                problems.append(
+                    f"{path.relative_to(ROOT)}:{number}: {why}, so the CLI that cut the release "
+                    f"is not the one this file names"
+                )
+            for number in unseeded_appimages(text):
+                problems.append(
+                    f"{path.relative_to(ROOT)}:{number}: an AppImage is bundled with no "
+                    f"{LINUXDEPLOY_SEED} step before it, so dx fetches linuxdeploy from a "
+                    f"mutable tag with no hash and runs it"
                 )
         if not declares_permissions(text):
             problems.append(
@@ -274,11 +405,23 @@ def main() -> int:
         print(f"::error::{problem}", file=sys.stderr)
     if problems:
         return 1
-    print(
-        f"{len(files)} workflows: every third-party action names a commit, "
-        f"no cache holds a build tool, no install falls off the lockfile, "
-        f"every release artifact is checksummed, every workflow states its permissions"
+    # Three of the seven rules only have anything to say about `rc-bundle.yml`, and this script
+    # is mirrored into a repository that does not have one. Reporting them as satisfied there
+    # is a green that means nothing -- the shape that let F86's first patch pass while serving
+    # nothing -- so the summary says which half actually ran.
+    everywhere = (
+        f"{len(files)} workflows: every third-party action names a commit, no cache holds a "
+        f"build tool, no install falls off the lockfile, every workflow states its permissions"
     )
+    if release_workflows:
+        print(
+            f"{everywhere}. And in {RELEASE_WORKFLOW}: the CLI is pinned unconditionally, "
+            f"linuxdeploy is seeded by digest, every artifact is checksummed"
+        )
+    else:
+        print(
+            f"{everywhere}. No {RELEASE_WORKFLOW} here, so the three release rules ran on nothing"
+        )
     return 0
 
 
