@@ -251,7 +251,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "89cc72f468c247ac32f34dd7b0b08d7581a7a15fc825e3ae6905cdb517c70b22"
+      "sha256": "fe499ff9816643320c43fb9aeab7c175c9bbe5f6567fbe4f1b8795d0b91e536a"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -567,7 +567,7 @@
     {
       "path": "scripts/shared-test-surface.json",
       "status": "identical",
-      "sha256": "3d2b9eadb0fad3f06ee5d9523e66661cc95d8d1d181e6b7a6ea2f9030aa93a59"
+      "sha256": "bf27fdf02699d64a5d5eeb3682db35a8c43f9bcc3aec02ea9d7839729ce5311d"
     },
     {
       "path": "scripts/validate-converter-output.cjs",
@@ -781,8 +781,8 @@
       "path": "src/data/proc-data.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "10201bdf91da39aa7d274113c2bfb7c7ffec707b7d2d8cd14fcc3e9f9a46594a",
-        "beta": "ed74431f5e04dd00d5ce377fd55bf5911ca78ed413c9c700afa429d1982e2932"
+        "canonical": "db12c82f8d7a3ce6f25e608971b515c8cffdfda18e9df765564b82f6464a4bc2",
+        "beta": "f6800874bed541ba1893b31aaffedfcdace41fe8dcfe15242766c516836b97cf"
       },
       "reason": "A contract input, and invisible to this guard until 2026-09-11: `emit-contract.cjs` loads it through `require(path.join(REPO, …))` and emits `PROC_DATABASE` as the `proc-data` section the Rust engine consumes, while the discovery walk read only the literal `require('../src/…')` spelling. The two copies' database ROWS agree. Canonical is ahead on the half the contract carries — it stamps `activatePeriod` from the generated table, which the beta has not taken — and the beta is ahead on code the contract does not carry: the proc roll-site and roll-schedule pass, `powerFiresProcs`, and the exported `procRechargeWindow` the Power Info panel prints through. The `globalRechargeBonus` window term used to head that list; PPM-5 deleted it as wrong, and canonical's copy — which never took it — was the correct one the whole time.",
       "exit": "Two halves, and the data half converges first because it is the half the contract emits: the beta takes `activatePeriod`. The code half converges when the roll-schedule pass lands on both sides; `incarnate-procs.ts` already converged, because PPM-5 removed the only rule that separated the two copies.",

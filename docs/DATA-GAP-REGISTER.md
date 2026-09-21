@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 333 entries.** PROV-8 opened 2026-09-20: nothing measures the export against the
+**1 open, of 334 entries.** PROV-8 opened 2026-09-20: nothing measures the export against the
 shard it copies, so a game patch reaches the planner only when someone re-exports — and this time
 a user got there first. The key runs the comparison by hand and all six manifests read `ok`; what
 is missing is something that runs it without being asked.
@@ -745,7 +745,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Procs + PPM
 
-[Full detail](gaps/procs-ppm.md) — 11 of 11 closed
+[Full detail](gaps/procs-ppm.md) — 12 of 12 closed
 
 - [x] **PROCCAT-1** — `proc-data.ts` gave each of 184 procs a hand-authored `setCategory` in front
   of the `type` each fork's registry owns, wrong in 52 and read by nothing; the field is deleted in
@@ -764,6 +764,7 @@ measurement went, and where a closure for the residual belongs too.
 - [x] **PROC-PERCEPTION-1** — `+Perception` globals landed in the converter's junk-drawer category
 - [x] **PROCPET-1** — the pet-carried proc stamp keyed on the record's `Category`, blank on every purple set, so Soulbound Allegiance's pet Build Up leaked into the player's totals; moved onto `GroupName` (BOOST-3's field, on a site BOOST-3 named and didn't move)
 
+- [x] **PPM-6** — `proc-data.ts`'s hand-written `mechanics` prose named the wrong damage type on Bombardment's proc, so the tooltip printed "Chance for Fire Damage (Damage Energy 7-72) Dmg: Fire 71.75" — the row's own generated `effects[]` disagreeing with its prose, both in the contract; the parity guard that should have caught it read the numbers beside the type and never the type, and its seven-row allowlist held six more prose defects as exceptions
 ---
 
 ## Conditionals + gates
