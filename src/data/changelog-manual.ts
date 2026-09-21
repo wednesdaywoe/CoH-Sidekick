@@ -46,6 +46,20 @@ export interface ManualEntry {
 export const MANUAL_CHANGELOG_GROUPS: ManualChangelogGroup[] = [
   // ───────────────────────────────────────────────────────────────────────
   {
+    date: '2026-09-21',
+
+    items: [
+      { id: 'proc-chance-excludes-global-recharge', message: 'Fix to stop global recharge from touching proc calcs', type: 'fix' },
+      { id: 'incarnate-proc-aoe-single-target', message: 'Incarnate proc damage on AoE powers was calculated as if against a single target', type: 'fix' },
+      { id: 'proc-description-damage-types', message: 'Fix to remove hand-written proc dmg type labels that put the wrong type on some procs', type: 'fix' },
+      { id: 'popmenu-enhancement-names', message: 'The in-game popmenu export wrote the wrong internal name for a few enhancements. The exporter now reads the game\'s own names instead of assembling them.', type: 'fix' },
+      { id: 'intangible-io-missing-from-picker', message: 'The Intangible common IO was missing from the enhancement picker. This one only shows on Rebirth and Thunderspy', type: 'fix' },
+      { id: 'stale-shell-self-recovers', message: 'If you had a tab open across a deploy, coming back to it could leave the app stuck before it finished loading, and the only way out was a hard refresh (this triggers the "Taking a while to load?" hint). A tab running a version that has been replaced should now throw it away and reload itself.', type: 'fix' },
+      { id: 'crash-report-consent', message: 'Crash reporting: there is a switch in Settings and a note saying what a report contains: the error message, where in the code it happened, and the app version. It never contains:  builds, account name, or anything you typed', type: 'feat' },
+      { id: 'brainstorm-rc3', message: 'HC Brainstorm is updated to RC3 (September 18), up from the August 20 build. That includes in Light Affinity\'s Radiance rework, Sonic Aura, the Bane Spider and Mu changes, Force Field\'s Repulsion Field revert, and the ATO PPM text.', type: 'update' },
+    ]
+  },
+  {
     date: '2026-09-03',
 
     items: [
