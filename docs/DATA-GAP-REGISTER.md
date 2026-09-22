@@ -57,15 +57,16 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 334 entries.** PROV-8 opened 2026-09-20: nothing measures the export against the
-shard it copies, so a game patch reaches the planner only when someone re-exports — and this time
-a user got there first. The key runs the comparison by hand and all six manifests read `ok`; what
-is missing is something that runs it without being asked.
+**0 open, of 334 entries.** PROV-8 closed 2026-09-21, the day after it opened, and the frontier
+the mandate puts ahead of feature work is clear.
 
 **The three staleness gates all point inward.** Export-vs-exporter, surface-vs-surface,
-bytes-vs-digest. A tree can satisfy all three and describe a game build nobody is playing, which
-is the mandate's own argument one hop further upstream: the gates consume the export, so they
-cannot fail on it.
+bytes-vs-digest — a tree can satisfy all three and describe a build nobody is playing. PROV-8's
+answer is the first check here that is not a gate: only a machine with the client can run it.
+
+**The cheapest caller was the one that could not work.** A pre-`regen` check cannot fire in the
+window PROV-8 describes — reaching it means the re-export was already happening — and would have
+looked like a closure.
 
 **A gate's first run is a measurement, and this one failed three times before it passed.** The
 mac: cargo's `-C metadata` hashes rustc's verbose version, which names the host triple, so the
@@ -977,26 +978,12 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 116 of 117 closed
+[Full detail](gaps/pipeline-provenance.md) — 117 of 117 closed
 
-- [ ] **PROV-8** — nothing measures the export against the shard it is a copy of. `export-staleness`
-  compares the export to the EXPORTER, `export-provenance` compares a dataset's surfaces to each
-  other, `export-contents` compares the bytes to their own digest: three checks, all inside the
-  tree, and none of them can see that Homecoming has patched the game. On 2026-09-20 a user found
-  it instead — i28p4 RC3 gave Seeker Drones `Ranged AoE Damage` on Controller, Defender and
-  Corruptor, and the first thing that noticed was a bug report. The window between a shard patch
-  and someone re-exporting is unbounded and unmeasured, and the mandate says why it matters more
-  than it looks: every gate consumes the export, so a stale export is not a red gate, it is
-  authoritative data.
-  **Goal** — the repo notices that the game moved, rather than a user noticing for it.
-  **Done when** — something that runs without being remembered compares each dataset's recorded
-  `.pigg` sha256s against the installed client, and reports a dataset whose archives have moved.
-  The key below is that comparison run by hand; what is missing is a caller. CI cannot be it (the
-  runners have no client), so the candidates are a pre-`regen` step, a git hook, or a scheduled
-  local run — pick one and say why in the gaps entry.
-  **Check** — `node scripts/keys/prov8-shard-drift.cjs --gate`. Exit 1, and a `MOVED` line naming
-  the archives, BREAKS the claim that the committed export still describes the live shard. All six
-  manifests read `ok` on 2026-09-20 after the RC3 mirror landed.
+- [x] **PROV-8** — nothing measured the export against the shard it copies: three staleness gates,
+  all of them with the export on one side and none with the game, so a user found i28p4 RC3 before
+  the repo did. Closed by a caller rather than a gate — `coh-shard-watch.timer` re-hashes every
+  manifest's `.pigg` against the installed client every 12h
 
 - [x] **POPMENU-1** — the popmenu spelled the Fly and Slow generic IOs `Crafted_Flight` and
   `Crafted_Slow`, where the game's records are `Crafted_Fly` and `Crafted_Snare`, so `boost`
