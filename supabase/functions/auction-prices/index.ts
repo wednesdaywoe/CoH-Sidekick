@@ -13,6 +13,7 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { callerIp, gradeWindow, windowStart } from '../_shared/rate-window.ts';
 
 const CACHE_TTL_HOURS = 1;
 const HISTORY_LIMIT = 20;
@@ -25,6 +26,22 @@ const HC_BASE = 'https://hcvault.cityofheroes.dev/api/v1';
 const CONCURRENCY = 4;
 const BATCH_DELAY_MS = 250;
 const RETRY_BACKOFF_MS = 1500;
+
+// Per-IP allowance on the UPSTREAM work - SECURITY_AUDIT.md F38. This function
+// is `verify_jwt = false` and spends a server-held third-party key, so without
+// this it is an open proxy onto somebody else's API quota. Shares the
+// `rate_limits` table and the pg_cron sweep `share-build` and
+// `backfill-preview` already use, under its own `action` so the three
+// allowances never take from each other.
+//
+// Generous against a real page: one build asks for up to
+// MAX_IDENTIFIERS_PER_REQUEST at a time, the answers cache for
+// CACHE_TTL_HOURS, and a request that needs no upstream fetch spends nothing
+// at all (see below) - so browsing costs a slot only when it asks something
+// genuinely new.
+const AUCTION_RATE_LIMIT = 40;
+const RATE_WINDOW_HOURS = 1;
+const RATE_LIMIT_ACTION = 'auction';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -148,6 +165,68 @@ Deno.serve(async (req: Request) => {
       return !row || !isFresh(row.fetched_at);
     });
 
+    // ---- Metered HERE, after the cache read (F38) ----
+    // A request every one of whose identifiers is already fresh costs no
+    // upstream call and no API-key spend, so it spends no allowance either -
+    // the same reasoning `backfill-preview` meters on. What is bounded is the
+    // thing that actually costs, which is the fetch below.
+    if (stale.length > 0) {
+      const ip = callerIp(req.headers);
+      const since = windowStart(Date.now(), RATE_WINDOW_HOURS);
+
+      const { count } = await supabase
+        .from('rate_limits')
+        .select('*', { count: 'exact', head: true })
+        .eq('ip', ip)
+        .eq('action', RATE_LIMIT_ACTION)
+        .gte('created_at', since);
+
+      const used = count ?? 0;
+      if (used >= AUCTION_RATE_LIMIT) {
+        const { data: oldest } = await supabase
+          .from('rate_limits')
+          .select('created_at')
+          .eq('ip', ip)
+          .eq('action', RATE_LIMIT_ACTION)
+          .gte('created_at', since)
+          .order('created_at', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        const verdict = gradeWindow({
+          used,
+          limit: AUCTION_RATE_LIMIT,
+          oldest: oldest?.created_at as string | null | undefined,
+          now: Date.now(),
+          windowHours: RATE_WINDOW_HOURS,
+        });
+
+        return new Response(
+          JSON.stringify({
+            error: 'Too many price lookups from this address. Please try again later.',
+            code: 'rate_limited',
+            action: RATE_LIMIT_ACTION,
+            limit: AUCTION_RATE_LIMIT,
+            remaining: 0,
+            retryAfterSeconds: verdict.retryAfterSeconds,
+            resetAt: verdict.resetAt,
+          }),
+          {
+            status: 429,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+              'Retry-After': String(verdict.retryAfterSeconds),
+            },
+          },
+        );
+      }
+
+      // Spent before the fetch, not after: a slot recorded only on success is
+      // not a limit, because the way to exceed it would be to fail.
+      await supabase.from('rate_limits').insert({ ip, action: RATE_LIMIT_ACTION });
+    }
+
     // Fetch stale entries in throttled batches so we don't trip HC's rate limit.
     const newRows: PriceRow[] = [];
     for (let i = 0; i < stale.length; i += CONCURRENCY) {
@@ -179,8 +258,11 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ prices }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (err) {
+    // Logged, not returned (F38). `String(err)` handed the caller whatever an
+    // unexpected throw carried - upstream URLs and response text among them -
+    // from a function whose whole job is to hold a key the caller must not see.
     console.error('auction-prices error', err);
-    return new Response(JSON.stringify({ error: String(err) }),
+    return new Response(JSON.stringify({ error: 'Price lookup failed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });

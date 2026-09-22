@@ -61,6 +61,20 @@ drifts from the tracked one — F84's failure mode aimed at the file this direct
 | `q13` | — | Per-codepoint census of every leading run in both columns, so the next bypass does not need to be guessed |
 | `q14` | F34 | Whether `shared_builds_with_author` routes around a column REVOKE |
 
+Two more files live in `fixture/` and are **not** part of the `q*.sql` set — they are the opposite
+kind of thing. They WRITE, they run only against the throwaway container, and `run-all.sh`'s
+`q*.sql` glob does not reach them, so the read-only invariant below is unaffected.
+
+| File | Finding | Asks |
+|---|---|---|
+| `fixture/check-f82-seed.sql` | F82, F83 | Does an over-long or `@`-prefixed provider name still abort the signup |
+| `fixture/check-f33-f53-access.sql` | F33, F53 | Can a stranger count a private build's views, and does favoriting answer the same way for "not yours" and "not there" |
+
+These exist because the two findings are about BEHAVIOUR under a constraint and a trigger, which a
+`SELECT` cannot observe. Each carries its expected output in a comment; the CI half of the same
+guards is `supabase/schema-seed.test.ts` and `supabase/schema-access.test.ts`, which pin the shape
+these executed checks depend on for anyone without docker.
+
 ## Read this before trusting a number
 
 **The queries are read-only and that is checked, not asserted.** Every file is a single statement

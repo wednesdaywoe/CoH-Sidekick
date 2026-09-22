@@ -1140,3 +1140,156 @@ $$;
 --          "$URL/rest/v1/profiles?select=handle&discord_id=not.is.null&limit=1"
 --        # 42501. Filtering on a column needs SELECT on it, so the census
 --        # "how many accounts are Discord-linked" closes with the values.
+
+-- ============================================
+-- Migration: the signup seed must not be able to refuse the signup (F82, F83)
+-- ============================================
+--
+-- F82. `profiles.display_name` carries `CHECK (char_length(display_name) <= 30)`
+-- and `seed_profile_on_signup` wrote a provider-supplied name into it
+-- untruncated. A Discord global name of 31 characters therefore aborted the
+-- seed, and because the trigger is `AFTER INSERT` on `auth.users` in the same
+-- transaction, **the abort took the signup with it** — reproduced against a
+-- throwaway Postgres running this file, not reasoned about. The account could
+-- not be created, and the person was told nothing useful.
+--
+-- The measurement could not see its own victims, which is the part worth
+-- keeping: every row in `profiles` is an account that SUCCEEDED, so "0 rows
+-- would abort today" is the number of survivors, not the number of victims.
+-- The longest surviving provider name is exactly 30 — the cap itself — and the
+-- margin is one character wide.
+--
+-- F83, the same seam. `update-profile` now normalises `display_name` through
+-- `_shared/author-name.ts`, and the seed is the OTHER writer to that column:
+-- a Discord global name of `@savant` was seeded verbatim, so the sigil rule
+-- could be walked straight past by choosing a Discord name. The leading `@`
+-- is stripped here for that reason.
+--
+-- What this deliberately does NOT do is re-implement the whole TypeScript rule
+-- in plpgsql. The invisible-character classes (U+3164, the bidi and zero-width
+-- families, `\p{Zs}`) are not handled on this path. A second copy of a rule in
+-- a second language is the drift F10 and F85 were both filed for, and the
+-- exposure here is bounded differently: a seeded name is re-normalised the
+-- moment its owner edits it, and the client draws the proved `@handle` beside
+-- it either way. Named rather than duplicated.
+
+-- One copy of the seeding rule, so the trigger and the backfill below cannot
+-- disagree about it. `left()` counts characters rather than bytes, so this
+-- cannot halve an astral character the way a byte truncation would.
+CREATE OR REPLACE FUNCTION seeded_display_name(raw TEXT)
+RETURNS TEXT AS $$
+  SELECT left(regexp_replace(btrim(COALESCE(raw, '')), '^@+\s*', ''), 30);
+$$ LANGUAGE sql IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION seed_profile_on_signup()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO profiles (user_id, display_name, discord_id, discord_username, avatar_url)
+  VALUES (
+    NEW.id,
+    seeded_display_name(COALESCE(
+      NULLIF(NEW.raw_user_meta_data->'custom_claims'->>'global_name', ''),
+      NULLIF(NEW.raw_user_meta_data->>'full_name', ''),
+      NULLIF(NEW.raw_user_meta_data->>'name', ''),
+      NULLIF(split_part(NEW.email, '@', 1), ''),
+      ''
+    )),
+    NEW.raw_user_meta_data->>'provider_id',
+    NEW.raw_user_meta_data->>'full_name',
+    storable_avatar_url(NEW.raw_user_meta_data->>'avatar_url')
+  )
+  ON CONFLICT (user_id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- The trigger itself is unchanged and is not re-created here; CREATE OR
+-- REPLACE FUNCTION swaps the body under it.
+
+-- ============================================
+-- Migration: increment_views answers only for a build the caller could read (F33)
+-- ============================================
+--
+-- `increment_views` is SECURITY DEFINER, so it writes past RLS, and it is
+-- callable by `anon` through PostgREST for any id at all. Two clauses, and
+-- only one of them closes here.
+--
+-- **Any id.** The body was `WHERE id = build_id` and nothing else, so an
+-- anonymous caller could bump the counter on a PRIVATE build — a write to a
+-- row the caller cannot read, on a build it cannot know exists. It is bounded
+-- to the visibilities that already answer by id, which is the same line
+-- `preview-visibility.ts` draws for F08 and `get-build` draws for its own
+-- reads: public and unlisted yield the whole build to anyone holding the id,
+-- so counting a view of one discloses nothing further.
+--
+-- One behaviour changes and it is the intended one: an owner opening their own
+-- PRIVATE build no longer increments it. The client calls this straight after
+-- a successful read (`BuildDetailPage.tsx`), and for a private build the only
+-- successful read is the owner's, so what stops being counted is an owner
+-- counting themselves.
+--
+-- **Unbounded.** NOT closed. Anyone who can view a public build can call this
+-- as many times as they like, and no amount of SQL fixes that without
+-- per-caller state — the honest options are a metering table keyed on the
+-- `request.headers` GUC, which puts a write on every page view, or accepting
+-- that a public vanity counter is inflatable. F33's row stays open on this
+-- clause and says so.
+CREATE OR REPLACE FUNCTION increment_views(build_id TEXT)
+RETURNS void AS $$
+BEGIN
+  UPDATE shared_builds
+     SET views = views + 1
+   WHERE id = build_id
+     AND visibility IN ('public', 'unlisted');
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- ============================================
+-- Migration: favoriting answers the same way for "not yours" and "not there" (F53)
+-- ============================================
+--
+-- `favorites.build_id` carries `REFERENCES shared_builds(id)`, and a foreign
+-- key is checked by a system trigger that runs as the constraint's owner, past
+-- RLS. So inserting a favourite told the caller which ids exist: a real
+-- private build inserted cleanly, and a made-up one came back
+-- `23503 foreign_key_violation`. Two different answers about a row the caller
+-- is not allowed to see.
+--
+-- Closed with a BEFORE INSERT trigger, which fires before the FK's own AFTER
+-- ROW check, so the FK's error never reaches the caller. Both cases now raise
+-- the same message.
+--
+-- **The predicate is `get-build`'s, not the RLS policy's, and that distinction
+-- is the trap here.** RLS on `shared_builds` grants `visibility = 'public'`
+-- plus an owner's own rows; UNLISTED is deliberately not in it, because an
+-- unlisted build is read through the `get-build` edge function on a point
+-- lookup rather than through a policy that would make it listable. A trigger
+-- that asked RLS would therefore have refused to favourite an unlisted build,
+-- which is a thing people can do today and the whole point of unlisted. So
+-- this is SECURITY DEFINER and states the readable set directly: the two
+-- visibilities that answer by id, plus the caller's own rows at any
+-- visibility.
+--
+-- The FK stays. It is what makes `ON DELETE CASCADE` clean up favourites when
+-- a build is deleted, and the trigger is a gate in front of it, not a
+-- replacement for it.
+CREATE OR REPLACE FUNCTION favorites_build_must_be_reachable()
+RETURNS trigger AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM shared_builds b
+     WHERE b.id = NEW.build_id
+       AND (b.visibility IN ('public', 'unlisted') OR b.user_id = auth.uid())
+  ) THEN
+    -- Deliberately the same refusal for "no such build" and "not yours": that
+    -- sameness IS the fix, and a message naming which one would undo it.
+    RAISE EXCEPTION 'Build not found' USING ERRCODE = 'no_data_found';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+DROP TRIGGER IF EXISTS favorites_reachable_build ON favorites;
+CREATE TRIGGER favorites_reachable_build
+  BEFORE INSERT ON favorites
+  FOR EACH ROW EXECUTE FUNCTION favorites_build_must_be_reachable();

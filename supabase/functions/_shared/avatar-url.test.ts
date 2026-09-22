@@ -138,10 +138,14 @@ describe('every writer and every renderer applies it', () => {
   it('the signup trigger and its backfill both apply the SQL twin', () => {
     const schema = read('../../schema.sql');
     expect(schema).toContain('CREATE OR REPLACE FUNCTION storable_avatar_url(raw TEXT)');
-    // Two writers: the AFTER INSERT trigger, and the one-off backfill beside it.
+    // Two writers to begin with - the AFTER INSERT trigger and the one-off
+    // backfill beside it - and a third occurrence since F82 replaced the
+    // trigger body at the end of the file. The count is a floor rather than an
+    // exact number for that reason; the equality below is the actual property,
+    // and it is what goes red if a writer reads the raw value unwrapped.
     const raw = schema.match(/raw_user_meta_data->>'avatar_url'/g) ?? [];
     const wrapped = schema.match(/storable_avatar_url\((?:NEW\.)?raw_user_meta_data->>'avatar_url'\)/g) ?? [];
-    expect(wrapped.length).toBe(2);
+    expect(wrapped.length).toBeGreaterThanOrEqual(2);
     expect(raw.length).toBe(wrapped.length);
   });
 

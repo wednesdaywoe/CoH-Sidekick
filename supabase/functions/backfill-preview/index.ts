@@ -37,21 +37,17 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { callerIp, gradeWindow, windowStart } from '../_shared/rate-window.ts';
 import { previewMayExist, previewObjectPath } from '../_shared/preview-visibility.ts';
+import {
+  CURRENT_PREVIEW_TEMPLATE_VERSION,
+  PREVIEW_CARD_HEIGHT,
+  PREVIEW_CARD_WIDTH,
+  gradePreviewImage,
+} from '../_shared/preview-image.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-// Mirrors src/components/export-image/BuildPreviewCard.tsx's
-// CURRENT_PREVIEW_TEMPLATE_VERSION / PREVIEW_CARD_WIDTH / PREVIEW_CARD_HEIGHT
-// and share-build/index.ts's MAX_PREVIEW_IMAGE_BYTES — Deno functions can't
-// import frontend TS, so these are hand-kept duplicates. Bump every copy
-// together whenever BuildPreviewCard's visual template changes.
-const CURRENT_PREVIEW_TEMPLATE_VERSION = 6;
-const PREVIEW_CARD_WIDTH = 1200;
-const PREVIEW_CARD_HEIGHT = 880;
-const MAX_PREVIEW_IMAGE_BYTES = 2 * 1024 * 1024;
 
 // Per-IP write allowance (F11). Generous against a human browsing build pages
 // - a backfill only fires for a build whose image is missing or stale, and a
@@ -62,20 +58,6 @@ const MAX_PREVIEW_IMAGE_BYTES = 2 * 1024 * 1024;
 const BACKFILL_RATE_LIMIT = 30;
 const RATE_WINDOW_HOURS = 1;
 const RATE_LIMIT_ACTION = 'preview';
-
-const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
-
-/** Read width/height from a PNG's IHDR chunk without decoding pixel data.
- *  `null` for anything that isn't a well-formed PNG with IHDR first (true of
- *  every encoder in practice, including the client's `html-to-image`). */
-function readPngDimensions(bytes: Uint8Array): { width: number; height: number } | null {
-  if (bytes.byteLength < 24) return null;
-  for (let i = 0; i < 8; i++) if (bytes[i] !== PNG_SIGNATURE[i]) return null;
-  const chunkType = String.fromCharCode(bytes[12], bytes[13], bytes[14], bytes[15]);
-  if (chunkType !== 'IHDR') return null;
-  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  return { width: view.getUint32(16, false), height: view.getUint32(20, false) };
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -100,11 +82,15 @@ Deno.serve(async (req: Request) => {
     } catch {
       return fail(400, 'preview_image_base64 is not valid base64');
     }
-    if (bytes.byteLength === 0 || bytes.byteLength > MAX_PREVIEW_IMAGE_BYTES) {
+    // The same grading `share-build` does, from `_shared/preview-image.ts`
+    // (F85). The refusal is returned rather than thrown because the two
+    // callers answer differently: this one is a 400, and a bad share drops
+    // the preview and lets the share succeed.
+    const refusal = gradePreviewImage(bytes);
+    if (refusal === 'empty' || refusal === 'too-large') {
       return fail(400, 'Image is empty or too large');
     }
-    const dimensions = readPngDimensions(bytes);
-    if (!dimensions || dimensions.width !== PREVIEW_CARD_WIDTH || dimensions.height !== PREVIEW_CARD_HEIGHT) {
+    if (refusal) {
       return fail(400, `Image must be a ${PREVIEW_CARD_WIDTH}x${PREVIEW_CARD_HEIGHT} PNG`);
     }
 

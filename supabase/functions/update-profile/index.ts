@@ -18,6 +18,8 @@
 
 import { createClient, type User } from 'https://esm.sh/@supabase/supabase-js@2';
 import { storableAvatarUrl } from '../_shared/avatar-url.ts';
+import { MAX_DISPLAY_NAME, handleCandidate, normalizeIdentityName } from '../_shared/author-name.ts';
+import { identityClaimRefusal, type HandleLookup } from '../_shared/identity-claim.ts';
 
 const HANDLE_REGEX = /^[a-z0-9][a-z0-9_-]{2,29}$/;
 const HANDLE_COOLDOWN_DAYS = 30;
@@ -94,11 +96,48 @@ Deno.serve(async (req: Request) => {
     const updates: Record<string, unknown> = {};
 
     // ---- display_name ----
+    // F83. This was `.trim()` and a length check, while `author_name` - the
+    // other free-text identity string, rendered in the same author surfaces -
+    // carried F69's whole rule. A rule scoped to a column rather than to the
+    // concept is a rule with a second column waiting behind it, and this was
+    // that column: measured 2026-09-18, one profile's display name was the
+    // handle of a different account.
     if (body.display_name !== undefined) {
-      const dn = String(body.display_name).trim();
-      if (dn.length > 30) {
-        return jsonError('Display name must be 30 characters or fewer', 400);
+      const dn = normalizeIdentityName(body.display_name);
+      // Refused rather than truncated, unlike `author_name`: this is a form
+      // field with the person looking at it, and a name silently shortened
+      // there is something you find out about later. Measured on the code
+      // points the column stores, not on UTF-16 units.
+      if (Array.from(dn).length > MAX_DISPLAY_NAME) {
+        return jsonError(`Display name must be ${MAX_DISPLAY_NAME} characters or fewer`, 400);
       }
+      const claim = await identityClaimRefusal(
+        dn,
+        user.id,
+        handleCandidate,
+        async (candidate): Promise<HandleLookup> => {
+          // Both columns are CITEXT, so `eq` is already case-insensitive.
+          const [reserved, claimed] = await Promise.all([
+            supabase
+              .from('reserved_handles')
+              .select('handle')
+              .eq('handle', candidate)
+              .eq('reason', 'system')
+              .maybeSingle(),
+            supabase
+              .from('profiles')
+              .select('user_id')
+              .eq('handle', candidate)
+              .maybeSingle(),
+          ]);
+          return {
+            reserved: !!reserved.data,
+            claimedBy: (claimed.data?.user_id as string | undefined) ?? null,
+          };
+        },
+        'display name',
+      );
+      if (claim) return jsonError(claim, 400);
       updates.display_name = dn;
     }
 

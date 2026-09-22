@@ -13,9 +13,14 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { nanoid } from 'https://esm.sh/nanoid@5';
 import { handleCandidate, sanitizeAuthorName } from '../_shared/author-name.ts';
+import { identityClaimRefusal, type HandleLookup } from '../_shared/identity-claim.ts';
 import { mayWriteBuild } from '../_shared/build-ownership.ts';
 import { classifyCaller, type Caller, type Verdict } from '../_shared/caller-identity.ts';
 import { previewMayExist, previewObjectPath } from '../_shared/preview-visibility.ts';
+import {
+  CURRENT_PREVIEW_TEMPLATE_VERSION,
+  gradePreviewImage,
+} from '../_shared/preview-image.ts';
 import { callerIp, gradeWindow, windowStart } from '../_shared/rate-window.ts';
 
 const SHARE_RATE_LIMIT = 10;  // max public shares per hour
@@ -71,32 +76,33 @@ async function impersonatedIdentity(
   authorName: string,
   authUserId: string | null,
 ): Promise<string | null> {
-  const candidate = handleCandidate(authorName);
-  if (candidate === null) return null;
-
-  // Both columns are CITEXT, so `eq` is already case-insensitive at the
-  // database — "SAVANT" and "savant" are the same key.
-  const [reserved, claimed] = await Promise.all([
-    supabase
-      .from('reserved_handles')
-      .select('handle')
-      .eq('handle', candidate)
-      .eq('reason', 'system')
-      .maybeSingle(),
-    supabase
-      .from('profiles')
-      .select('user_id')
-      .eq('handle', candidate)
-      .maybeSingle(),
-  ]);
-
-  if (reserved.data) {
-    return `"${authorName}" is a reserved name. Please use a different author name.`;
-  }
-  if (claimed.data && claimed.data.user_id !== authUserId) {
-    return `"${authorName}" is the handle of a registered account. Please use a different author name.`;
-  }
-  return null;
+  return await identityClaimRefusal(
+    authorName,
+    authUserId,
+    handleCandidate,
+    async (candidate): Promise<HandleLookup> => {
+      // Both columns are CITEXT, so `eq` is already case-insensitive at the
+      // database - "SAVANT" and "savant" are the same key.
+      const [reserved, claimed] = await Promise.all([
+        supabase
+          .from('reserved_handles')
+          .select('handle')
+          .eq('handle', candidate)
+          .eq('reason', 'system')
+          .maybeSingle(),
+        supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('handle', candidate)
+          .maybeSingle(),
+      ]);
+      return {
+        reserved: !!reserved.data,
+        claimedBy: (claimed.data?.user_id as string | undefined) ?? null,
+      };
+    },
+    'author name',
+  );
 }
 
 /** SHA-256 hash a string, returning hex digest */
@@ -105,17 +111,6 @@ async function sha256(input: string): Promise<string> {
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
-
-// Generous headroom over the compact 1200×800 share-preview PNG this is meant
-// for (typically well under 300KB) — just enough to reject an abusive payload
-// without rejecting a legitimate one.
-const MAX_PREVIEW_IMAGE_BYTES = 2 * 1024 * 1024;
-
-// Mirrors src/components/export-image/BuildPreviewCard.tsx's
-// CURRENT_PREVIEW_TEMPLATE_VERSION — Deno functions can't import frontend TS,
-// so this is a hand-kept duplicate. Bump both together whenever that file's
-// visual template changes. See streams/BUILD_PREVIEW_BACKFILL_PLAN.md (PREVBF1).
-const CURRENT_PREVIEW_TEMPLATE_VERSION = 6;
 
 /**
  * Best-effort: upload a base64-encoded PNG (from the client's off-screen
@@ -132,7 +127,15 @@ async function uploadPreviewImage(
   if (typeof base64 !== 'string' || base64.length === 0) return null;
   try {
     const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-    if (bytes.byteLength === 0 || bytes.byteLength > MAX_PREVIEW_IMAGE_BYTES) return null;
+    // F85: the same grading `backfill-preview` does, from the same file. This
+    // was a `byteLength` check alone, on the path that writes most of the
+    // bucket - so "unvalidated caller bytes in a public bucket" was true of
+    // the owner's own share and not of the anonymous backfill.
+    const refusal = gradePreviewImage(bytes);
+    if (refusal) {
+      console.error('Preview image refused:', refusal);
+      return null;
+    }
     const path = previewObjectPath(buildId);
     const { error } = await supabase.storage
       .from('build-previews')

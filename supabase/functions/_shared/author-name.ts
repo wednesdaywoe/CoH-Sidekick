@@ -30,6 +30,12 @@
 export const MAX_AUTHOR_NAME = 50;
 
 /**
+ * Longest stored `profiles.display_name` — the column's `CHECK`, which
+ * `update-profile` enforces by refusing rather than by truncating (F83).
+ */
+export const MAX_DISPLAY_NAME = 30;
+
+/**
  * The invisibles that are also SEPARATORS — a tab, the control newlines, and
  * the U+2028/U+2029 line and paragraph separators. These become a space rather
  * than vanishing, and that distinction is the whole reason this constant is
@@ -187,9 +193,29 @@ function stripClaimedPrefix(name: string): string {
  *      hiding, not a hypothetical one. `Array.from` iterates code points.
  */
 export function sanitizeAuthorName(raw: unknown): string {
+  return truncateByCodePoint(normalizeIdentityName(raw), MAX_AUTHOR_NAME);
+}
+
+/**
+ * Steps 1-3 of the rule above, without the truncation — SECURITY_AUDIT.md F83.
+ *
+ * `profiles.display_name` is the second free-text identity string, rendered in
+ * the same author surfaces, and it had no rule at all: a `.trim()` and a
+ * length check. F69's rule was scoped to a *column* rather than to the
+ * concept, which is the whole of F83.
+ *
+ * Split here rather than given a `max` parameter because the two columns
+ * answer over-length differently, and that difference is deliberate.
+ * `author_name` rides along with a build and is truncated, because refusing
+ * the share over a long name would be a worse trade. `display_name` is typed
+ * into a profile form with the field in front of the person, so
+ * `update-profile` refuses it and says so — a name silently shortened in a
+ * form you are looking at is the kind of thing you find out about later.
+ */
+export function normalizeIdentityName(raw: unknown): string {
   if (typeof raw !== 'string') return '';
 
-  const cleaned = stripClaimedPrefix(
+  return stripClaimedPrefix(
     raw
       .normalize('NFC')
       .replace(SEPARATORS, ' ')
@@ -197,11 +223,12 @@ export function sanitizeAuthorName(raw: unknown): string {
       .replace(WHITESPACE, ' ')
       .trim(),
   ).trim();
+}
 
-  const points = Array.from(cleaned);
-  return points.length <= MAX_AUTHOR_NAME
-    ? cleaned
-    : points.slice(0, MAX_AUTHOR_NAME).join('').trim();
+/** Truncate by code point, never by UTF-16 unit — see step 4 above. */
+function truncateByCodePoint(name: string, max: number): string {
+  const points = Array.from(name);
+  return points.length <= max ? name : points.slice(0, max).join('').trim();
 }
 
 /**

@@ -115,6 +115,10 @@ describe('backfill-preview meters the write', () => {
     expect(source).toContain("import { callerIp, gradeWindow, windowStart }");
     expect(source).toContain('status: 429');
     expect(source).toMatch(/const BACKFILL_RATE_LIMIT = \d+;/);
+    // Added 2026-09-22 with F38's twin, which is where the hole was found:
+    // without this line the block passes with the comparison mutated away,
+    // because the 429 it guards is still in the file.
+    expect(source).toContain('if (used >= BACKFILL_RATE_LIMIT) {');
   });
 
   it('meters after the version gate, so a finished page costs nothing to reload', () => {
@@ -136,7 +140,9 @@ describe('backfill-preview meters the write', () => {
   it('still refuses a private build and a non-PNG before any of that', () => {
     // The two checks the 2026-09-03 decision actually bought. A rate limit that
     // arrived by loosening them would be a worse trade than the finding.
-    const shape = source.indexOf('readPngDimensions(bytes)');
+    // The shape check moved to `_shared/preview-image.ts` for F85 - same
+    // check, now the one both writers make.
+    const shape = source.indexOf('gradePreviewImage(bytes)');
     // The visibility gate moved to `_shared/preview-visibility.ts` for F08 —
     // same gate, one copy. What this case is about is unchanged: it runs
     // before the meter.
@@ -191,5 +197,51 @@ describe('share-build keys its window through the same helper (F10)', () => {
     );
     expect(block).toContain('.maybeSingle();');
     expect(block).not.toContain('.single();');
+  });
+});
+
+describe('auction-prices meters the upstream spend (F38)', () => {
+  const source = readFileSync(
+    new URL('../auction-prices/index.ts', import.meta.url),
+    'utf8',
+  );
+
+  // F38: `verify_jwt = false` and a server-held third-party key, so without a
+  // limit this is an open proxy onto somebody else's API quota.
+  it('has a per-IP window at all, through the shared helper', () => {
+    expect(source).toContain("import { callerIp, gradeWindow, windowStart }");
+    expect(source).toContain('status: 429');
+    expect(source).toMatch(/const AUCTION_RATE_LIMIT = \d+;/);
+    // The comparison itself, not just the refusal it guards. A first version
+    // of this block asserted the constant and the 429 and passed happily with
+    // the check mutated to `if (false)` - the refusal is still IN the source,
+    // it just never runs. Found by mutating, not by reading.
+    expect(source).toContain('if (used >= AUCTION_RATE_LIMIT) {');
+  });
+
+  it('takes its own action, so it cannot eat another function\'s allowance', () => {
+    expect(source).toContain("const RATE_LIMIT_ACTION = 'auction';");
+  });
+
+  it('meters after the cache read, so a fully-cached page costs nothing', () => {
+    const cached = source.indexOf("from('auction_prices')");
+    const metered = source.indexOf("from('rate_limits')");
+    expect(cached).toBeGreaterThan(-1);
+    expect(metered).toBeGreaterThan(cached);
+    expect(source).toContain('if (stale.length > 0) {');
+  });
+
+  it('spends the slot before the upstream fetch, not after', () => {
+    const spent = source.indexOf("from('rate_limits').insert(");
+    const fetched = source.indexOf('fetchPrice(id, apiKey)');
+    expect(spent).toBeGreaterThan(-1);
+    expect(fetched).toBeGreaterThan(spent);
+  });
+
+  it('does not hand the caller the exception text', () => {
+    // A function whose job is holding a key the caller must not see should not
+    // return whatever an unexpected throw was carrying.
+    expect(source).not.toContain('error: String(err)');
+    expect(source).toContain("error: 'Price lookup failed'");
   });
 });
