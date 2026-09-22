@@ -11,6 +11,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 import { mayWriteBuild } from '../_shared/build-ownership.ts';
+import { previewObjectPath } from '../_shared/preview-visibility.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -113,7 +114,7 @@ Deno.serve(async (req: Request) => {
     // read preview_image_path first; removing a nonexistent object is a no-op.
     const { error: storageError } = await supabase.storage
       .from('build-previews')
-      .remove([`previews/${id}.png`]);
+      .remove([previewObjectPath(id)]);
     if (storageError) console.error('Preview image cleanup failed:', storageError);
 
     return new Response(

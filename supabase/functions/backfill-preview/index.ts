@@ -36,6 +36,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { callerIp, gradeWindow, windowStart } from '../_shared/rate-window.ts';
+import { previewMayExist, previewObjectPath } from '../_shared/preview-visibility.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -117,7 +118,11 @@ Deno.serve(async (req: Request) => {
       .eq('id', id)
       .maybeSingle();
     if (rowError || !row) return fail(404, 'Build not found');
-    if (row.visibility === 'private') return fail(403, 'Build is private');
+    // The same rule the two writers use (F08). This gate was already right
+    // about `private`; stating it through the shared predicate is what stops
+    // it being a fourth opinion, and it closes over an unknown visibility by
+    // refusing rather than allowing.
+    if (!previewMayExist(row.visibility)) return fail(403, 'Build is private');
 
     const storedVersion = row.preview_template_version as number | null;
     if (storedVersion !== null && storedVersion >= CURRENT_PREVIEW_TEMPLATE_VERSION) {
@@ -190,7 +195,7 @@ Deno.serve(async (req: Request) => {
     // success is not a limit, because the way to exceed it is to fail.
     await supabase.from('rate_limits').insert({ ip, action: RATE_LIMIT_ACTION });
 
-    const path = `previews/${id}.png`;
+    const path = previewObjectPath(id);
     const { error: uploadError } = await supabase.storage
       .from('build-previews')
       .upload(path, bytes, { contentType: 'image/png', upsert: true });

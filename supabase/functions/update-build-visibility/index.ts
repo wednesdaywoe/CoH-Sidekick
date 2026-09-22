@@ -14,6 +14,7 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { previewMayExist, previewObjectPath } from '../_shared/preview-visibility.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -105,9 +106,20 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // F08: flipping a build private must take its preview with it. The
+    // `build-previews` bucket is public and the object path is the build id,
+    // so a preview left behind keeps answering for an id this call has just
+    // made `get-build` refuse. The column is nulled in the same update as the
+    // visibility - a row pointing at an object we are about to remove is the
+    // other half of the same lie.
+    const keepsPreview = previewMayExist(visibility);
     const { error: updateError } = await supabase
       .from('shared_builds')
-      .update({ visibility, updated_at: new Date().toISOString() })
+      .update({
+        visibility,
+        updated_at: new Date().toISOString(),
+        ...(keepsPreview ? {} : { preview_image_path: null, preview_template_version: null }),
+      })
       .eq('id', id);
 
     if (updateError) {
@@ -116,6 +128,16 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: 'Failed to update build visibility' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
+    }
+
+    // Best-effort and after the row, matching `delete-build`: the column no
+    // longer points at it either way, so a failed removal is an orphan rather
+    // than a live exposure, and it must not fail the visibility change.
+    if (!keepsPreview) {
+      const { error: previewError } = await supabase.storage
+        .from('build-previews')
+        .remove([previewObjectPath(id)]);
+      if (previewError) console.error('Preview image removal failed:', previewError);
     }
 
     return new Response(

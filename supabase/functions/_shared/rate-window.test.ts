@@ -137,11 +137,59 @@ describe('backfill-preview meters the write', () => {
     // The two checks the 2026-09-03 decision actually bought. A rate limit that
     // arrived by loosening them would be a worse trade than the finding.
     const shape = source.indexOf('readPngDimensions(bytes)');
-    const priv = source.indexOf("row.visibility === 'private'");
+    // The visibility gate moved to `_shared/preview-visibility.ts` for F08 —
+    // same gate, one copy. What this case is about is unchanged: it runs
+    // before the meter.
+    const priv = source.indexOf('previewMayExist(row.visibility)');
     const metered = source.indexOf("from('rate_limits')");
     expect(shape).toBeGreaterThan(-1);
     expect(priv).toBeGreaterThan(-1);
     expect(shape).toBeLessThan(metered);
     expect(priv).toBeLessThan(metered);
+  });
+});
+
+describe('share-build keys its window through the same helper (F10)', () => {
+  const source = readFileSync(
+    new URL('../share-build/index.ts', import.meta.url),
+    'utf8',
+  );
+
+  // F10 was filed as "rate limit keyed on client-supplied first X-Forwarded-For
+  // entry". Measured against production 2026-09-22 and the premise is false:
+  // a forged `X-Forwarded-For`, repeated or not, and a forged `X-Real-IP` are
+  // all discarded before the function sees them, and forging `CF-Connecting-IP`
+  // is refused by Cloudflare itself with a 403. The first entry is the edge's
+  // own value. What the measurement DID find is below: share-build is the
+  // function `rate-window.ts` was extracted from, and the copy left behind had
+  // drifted from it.
+  it('reads no forwarding header of its own', () => {
+    expect(source).toContain("import { callerIp, gradeWindow, windowStart }");
+    expect(source).not.toMatch(/headers\.get\(\s*'x-forwarded-for'/);
+    expect(source).not.toMatch(/headers\.get\(\s*'cf-connecting-ip'/);
+  });
+
+  it('keeps no second copy of the window arithmetic', () => {
+    // The `??` this replaced handed back `''` for an empty forwarded-for,
+    // which is not nullish — so every such caller got a private allowance.
+    // One copy of the rule is the guard; `callerIp`'s own empty-header test
+    // above is what that copy is now held to.
+    expect(source).toContain('const clientIp = callerIp(req.headers);');
+    expect(source).toContain('windowStart(Date.now(), RATE_WINDOW_HOURS)');
+    expect(source).toContain('gradeWindow({');
+    expect(source).not.toMatch(/RATE_WINDOW_HOURS \* 60 \* 60 \* 1000/);
+  });
+
+  it('asks for the oldest row in a way that tolerates there being none', () => {
+    // `.single()` errors on zero rows where `.maybeSingle()` does not; the
+    // error was swallowed, so this was latent rather than live. Scoped to the
+    // window block on purpose — the lookup at the update path has the same
+    // shape and is not this finding's to change.
+    const block = source.slice(
+      source.indexOf('---- Rate limiting ----'),
+      source.indexOf("from('rate_limits').insert("),
+    );
+    expect(block).toContain('.maybeSingle();');
+    expect(block).not.toContain('.single();');
   });
 });

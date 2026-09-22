@@ -15,6 +15,8 @@ import { nanoid } from 'https://esm.sh/nanoid@5';
 import { handleCandidate, sanitizeAuthorName } from '../_shared/author-name.ts';
 import { mayWriteBuild } from '../_shared/build-ownership.ts';
 import { classifyCaller, type Caller, type Verdict } from '../_shared/caller-identity.ts';
+import { previewMayExist, previewObjectPath } from '../_shared/preview-visibility.ts';
+import { callerIp, gradeWindow, windowStart } from '../_shared/rate-window.ts';
 
 const SHARE_RATE_LIMIT = 10;  // max public shares per hour
 const VAULT_RATE_LIMIT = 50;  // max vault saves per hour (private library — more generous)
@@ -131,7 +133,7 @@ async function uploadPreviewImage(
   try {
     const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
     if (bytes.byteLength === 0 || bytes.byteLength > MAX_PREVIEW_IMAGE_BYTES) return null;
-    const path = `previews/${buildId}.png`;
+    const path = previewObjectPath(buildId);
     const { error } = await supabase.storage
       .from('build-previews')
       .upload(path, bytes, { contentType: 'image/png', upsert: true });
@@ -282,11 +284,14 @@ Deno.serve(async (req: Request) => {
     }
 
     // ---- Rate limiting ----
-    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-      ?? req.headers.get('cf-connecting-ip')
-      ?? 'unknown';
-
-    const windowStart = new Date(Date.now() - RATE_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+    // The IP key and the window arithmetic are `_shared/rate-window.ts` (F10),
+    // not a third hand-rolled copy. This function is the one the helper was
+    // extracted FROM, and the copy left behind had drifted from it in the one
+    // place that helper's docstring calls load-bearing: `??` where it uses
+    // `||`, so an empty `x-forwarded-for` trimmed to `''` and was handed back
+    // as an IP, giving every such caller their own private allowance.
+    const clientIp = callerIp(req.headers);
+    const since = windowStart(Date.now(), RATE_WINDOW_HOURS);
 
     // Vault saves ('private' and 'unlisted' — personal link-sharing gets the
     // same generosity as the private vault) and public shares use separate
@@ -301,7 +306,7 @@ Deno.serve(async (req: Request) => {
       .select('*', { count: 'exact', head: true })
       .eq('ip', clientIp)
       .eq('action', rateLimitAction)
-      .gte('created_at', windowStart);
+      .gte('created_at', since);
 
     const used = count ?? 0;
     if (used >= rateLimit) {
@@ -313,15 +318,19 @@ Deno.serve(async (req: Request) => {
         .select('created_at')
         .eq('ip', clientIp)
         .eq('action', rateLimitAction)
-        .gte('created_at', windowStart)
+        .gte('created_at', since)
         .order('created_at', { ascending: true })
         .limit(1)
-        .single();
-      const resetAt = new Date(
-        (oldest?.created_at ? new Date(oldest.created_at).getTime() : Date.now())
-          + RATE_WINDOW_HOURS * 60 * 60 * 1000,
-      );
-      const retryAfterSeconds = Math.max(0, Math.ceil((resetAt.getTime() - Date.now()) / 1000));
+        .maybeSingle();
+
+      const verdict = gradeWindow({
+        used,
+        limit: rateLimit,
+        oldest: oldest?.created_at as string | null | undefined,
+        now: Date.now(),
+        windowHours: RATE_WINDOW_HOURS,
+      });
+
       return new Response(
         JSON.stringify({
           error: 'Rate limit exceeded. Please try again later.',
@@ -329,15 +338,15 @@ Deno.serve(async (req: Request) => {
           action: rateLimitAction,        // 'share' (public) | 'vault' (saved)
           limit: rateLimit,
           remaining: 0,
-          retryAfterSeconds,
-          resetAt: resetAt.toISOString(),
+          retryAfterSeconds: verdict.retryAfterSeconds,
+          resetAt: verdict.resetAt,
         }),
         {
           status: 429,
           headers: {
             ...corsHeaders,
             'Content-Type': 'application/json',
-            'Retry-After': String(retryAfterSeconds),
+            'Retry-After': String(verdict.retryAfterSeconds),
           },
         }
       );
@@ -387,7 +396,7 @@ Deno.serve(async (req: Request) => {
       // public.
       const { data: existing } = await supabase
         .from('shared_builds')
-        .select('id, user_id, owner_token_hash')
+        .select('id, user_id, owner_token_hash, visibility')
         .eq('id', body.existing_id)
         .single();
 
@@ -414,10 +423,26 @@ Deno.serve(async (req: Request) => {
       // A build's stats/powers can change between shares, so re-render on every
       // update too. Left out entirely (not nulled) when capture failed, so a
       // stale-but-present image beats no image rather than being wiped.
-      const previewPath = await uploadPreviewImage(supabase, body.existing_id, body.preview_image_base64);
-      if (previewPath) {
-        updateFields.preview_image_path = previewPath;
-        updateFields.preview_template_version = CURRENT_PREVIEW_TEMPLATE_VERSION;
+      // F08, and the reason the select above reads `visibility`: an update may
+      // preserve the current visibility rather than state one, so the effective
+      // visibility is the caller's when they gave it and the row's when they
+      // did not. A build that ends this request private must not end it with a
+      // readable preview either - including the case where it was public a
+      // moment ago and the object is already sitting in the bucket.
+      const effectiveVisibility = visibilityProvided ? visibility : existing.visibility;
+      if (previewMayExist(effectiveVisibility)) {
+        const previewPath = await uploadPreviewImage(supabase, body.existing_id, body.preview_image_base64);
+        if (previewPath) {
+          updateFields.preview_image_path = previewPath;
+          updateFields.preview_template_version = CURRENT_PREVIEW_TEMPLATE_VERSION;
+        }
+      } else {
+        const { error: previewError } = await supabase.storage
+          .from('build-previews')
+          .remove([previewObjectPath(body.existing_id)]);
+        if (previewError) console.error('Preview image removal failed:', previewError);
+        updateFields.preview_image_path = null;
+        updateFields.preview_template_version = null;
       }
 
       const { error: updateError } = await supabase
@@ -443,7 +468,12 @@ Deno.serve(async (req: Request) => {
     const id = nanoid(10);
     const ownerToken = crypto.randomUUID();
     const ownerTokenHash = await sha256(ownerToken);
-    const previewPath = await uploadPreviewImage(supabase, id, body.preview_image_base64);
+    // A private build gets no preview object (F08): the bucket is public and
+    // the path is the build id, so the PNG would answer for an id that
+    // `get-build` refuses. Public and unlisted both already answer by id.
+    const previewPath = previewMayExist(visibility)
+      ? await uploadPreviewImage(supabase, id, body.preview_image_base64)
+      : null;
 
     const { error: insertError } = await supabase.from('shared_builds').insert({
       id,
