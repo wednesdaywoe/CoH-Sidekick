@@ -57,8 +57,15 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 334 entries.** PROV-8 closed 2026-09-21, the day after it opened, and the frontier
-the mandate puts ahead of feature work is clear.
+**1 open, of 335 entries.** FORK-9, opened 2026-09-21. It is not a parse gap: the shared-test
+digest rests on a commit, and nothing checks that the commit still exists.
+
+**A stamp names a sha, and a sha is not a promise.** The beta's read `623d9129ab`, which GitHub
+still has and the repo does not — same message, different parent, `diverged`. Main is rebased to
+stay linear, so orphaning a stamp is the workflow working as intended.
+
+**Two shas that differ do not say why.** Moved-forward and rewritten-away print the same
+sentence, and the remedy for the first erases the evidence of the second.
 
 **The three staleness gates all point inward.** Export-vs-exporter, surface-vs-surface,
 bytes-vs-digest — a tree can satisfy all three and describe a build nobody is playing. PROV-8's
@@ -978,7 +985,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 117 of 117 closed
+[Full detail](gaps/pipeline-provenance.md) — 117 of 118 closed
 
 - [x] **PROV-8** — nothing measured the export against the shard it copies: three staleness gates,
   all of them with the export on one side and none with the game, so a user found i28p4 RC3 before
@@ -1501,6 +1508,25 @@ measurement went, and where a closure for the residual belongs too.
   pair commits together and the unexcluded manifest made the stamp commit its own graded head —
   `eec21e98eb` recorded parent `50dab95dec` and graded as itself. Both paths excluded now, on both
   legs; the beta mirrors them and had no exclusion at all
+
+- [ ] **FORK-9** — a measurement can name a commit that no longer exists, and the gate cannot tell
+  that from ordinary drift. `verify-shared-tests` compares `measurements.<role>.head` against
+  `gradedHead` and prints "taken at X, <role> is now at Y" for both the repo moving FORWARD and
+  the recorded head being rewritten out of history. The first is routine; the second is a claim
+  going quietly unfalsifiable, and the routine remedy — re-run and re-stamp — writes over the only
+  evidence it happened. Measured 2026-09-21 on 1 of the 2 legs: the beta's stamp named
+  `623d9129ab`, which GitHub still has and this repo does not — rebased away, same message,
+  different parent, `diverged`. Main is kept linear on purpose, so orphaning a stamp is the
+  workflow, not a mishap.
+  **Goal** — a measurement whose head is gone says so, in a different voice from one whose repo has
+  merely moved on.
+  **Done when** — `verify-shared-tests` separates the two cases: a recorded head that is absent
+  from the repo it names is its own error, worded so the remedy reads as re-running that suite
+  rather than re-stamping over it; and both legs are checked, the beta's being the one that rotted.
+  **Check** — `node scripts/keys/fork9-stamp-head-resolvable.cjs --sibling ../CoH-Sidekick --gate`.
+  A `GONE` line, and exit 1, BREAKS the claim that the digest rests on measurements anybody can
+  re-check. Both legs read `ok` on 2026-09-21 after the re-stamp, and the key was graded by
+  putting `623d9129ab` back, which reports GONE.
 
 - [x] **STALE-1** — the staleness gate never hashed the three `contract/*.json` its crates
   `include_str!` into the wasm, so a commit touching only one shipped a changed engine that
