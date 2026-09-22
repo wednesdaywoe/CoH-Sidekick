@@ -16,6 +16,12 @@ interface Env {
    * the header existed — see `isDesktopClient`.
    */
   DESKTOP_CLIENT_TOKEN?: string;
+  /**
+   * Cloudflare's simple rate-limit binding, declared in `wrangler.toml` - F12.
+   * Optional on the type only so a misconfiguration is a value this code can
+   * see; it is refused rather than skipped. See `fetch`.
+   */
+  FEEDBACK_RATE_LIMIT?: { limit(options: { key: string }): Promise<{ success: boolean }> };
 }
 
 interface BuildContext {
@@ -61,6 +67,32 @@ const ALLOWED_ORIGINS = [
   'http://localhost:3000',
 ];
 
+/**
+ * Is this `Origin` one of ours - F12.
+ *
+ * Exact match, and the exactness is the fix. This was `ALLOWED_ORIGINS.some(o
+ * => origin.startsWith(o))`, and an `Origin` header is a scheme, host and port
+ * with no path, so a prefix match is a suffix wildcard on the host:
+ * `https://coh-sidekick.com.evil.test` passed, and `getCorsHeaders` then
+ * echoed it back as `Access-Control-Allow-Origin`. That is the one thing this
+ * list exists to stop - a page the attacker controls, posting from a real
+ * browser - so the list was defeated in exactly its own subject.
+ *
+ * This is browser hygiene and not authentication; nothing stops a native
+ * client sending any `Origin` it likes. The bound on that is the rate limit,
+ * and the shared secret on the desktop arm.
+ */
+export function isOriginAllowed(origin: string | null): boolean {
+  return origin !== null && ALLOWED_ORIGINS.includes(origin);
+}
+
+/**
+ * The most a submission may weigh - F12. `request.json()` on an unbounded body
+ * is an allocation the sender chooses, and `buildSnapshot` rides out again as
+ * a base64 attachment, so an accepted body is spent twice.
+ */
+export const MAX_BODY_BYTES = 1024 * 1024;
+
 /** The header the desktop build carries in place of an `Origin` the browser would have set. */
 const DESKTOP_CLIENT_HEADER = 'X-Sidekick-Desktop';
 
@@ -101,7 +133,7 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowed = origin && ALLOWED_ORIGINS.some(o => origin.startsWith(o));
+  const allowed = isOriginAllowed(origin);
   return {
     'Access-Control-Allow-Origin': allowed ? origin! : ALLOWED_ORIGINS[0],
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -298,8 +330,7 @@ export default {
     }
 
     // Validate origin in production — or accept the desktop build, which has no origin to send
-    const isAllowed =
-      (origin && ALLOWED_ORIGINS.some(o => origin.startsWith(o))) || isDesktopClient(request, env);
+    const isAllowed = isOriginAllowed(origin) || isDesktopClient(request, env);
     if (!isAllowed) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403,
@@ -307,9 +338,55 @@ export default {
       });
     }
 
+    // ---- What it costs to be admitted (F12) ----
+    // The allow-list above is a check on who is asking, not on how often, and
+    // this worker spends Resend mail on everything it admits. Keyed on
+    // `cf-connecting-ip`: the account id on the payload is the client's own
+    // claim, unverified, so keying on it would let the sender pick their
+    // bucket - the defect F10 was filed for and did not have.
+    if (!env.FEEDBACK_RATE_LIMIT) {
+      // Fails closed, like the desktop arm above and for the same reason: a
+      // binding that did not deploy must not read as "no limit configured".
+      console.error('FEEDBACK_RATE_LIMIT binding is missing; refusing rather than relaying');
+      return new Response(JSON.stringify({ error: 'Feedback is temporarily unavailable' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { success } = await env.FEEDBACK_RATE_LIMIT.limit({
+      key: request.headers.get('CF-Connecting-IP') ?? 'unknown',
+    });
+    if (!success) {
+      return new Response(
+        JSON.stringify({ error: 'Too many submissions. Please try again in a minute.' }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' },
+        },
+      );
+    }
+
+    // Declared length first, so an oversized body is refused before it is
+    // read. A sender who omits `Content-Length` is caught by the second check
+    // below, which measures what actually arrived.
+    const declaredLength = Number(request.headers.get('Content-Length') ?? '0');
+    if (declaredLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: 'Feedback is too large' }), {
+        status: 413,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     let payload: FeedbackPayload;
     try {
-      payload = await request.json();
+      const raw = await request.text();
+      if (raw.length > MAX_BODY_BYTES) {
+        return new Response(JSON.stringify({ error: 'Feedback is too large' }), {
+          status: 413,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      payload = JSON.parse(raw);
     } catch {
       return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
         status: 400,

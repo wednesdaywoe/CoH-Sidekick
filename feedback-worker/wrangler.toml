@@ -6,3 +6,18 @@ compatibility_date = "2024-01-01"
 # - RESEND_API_KEY
 # - FEEDBACK_EMAIL
 # - DESKTOP_CLIENT_TOKEN  (the desktop build's X-Sidekick-Desktop value; unset closes that arm)
+
+# SECURITY_AUDIT.md F12. Config-only: the simple rate-limit binding needs no KV
+# namespace, no Durable Object and nothing created in the dashboard, so it
+# deploys with the worker. Keyed on `cf-connecting-ip`, which is the one
+# address header a caller cannot choose - Cloudflare refuses a request that
+# forges it outright (measured 2026-09-22 against the Supabase edge, HTTP 403
+# `error code: 1000`, and the same proxy sets this one).
+#
+# `period` accepts 10 or 60 seconds and nothing else, so this bounds a burst
+# and not a day. A single address can still spend 60 x 24 x 3 submissions in
+# one, which is why F12 stays PARTIAL: the daily cap wants KV or Turnstile.
+[[ratelimits]]
+name = "FEEDBACK_RATE_LIMIT"
+namespace_id = "1001"
+simple = { limit = 3, period = 60 }
