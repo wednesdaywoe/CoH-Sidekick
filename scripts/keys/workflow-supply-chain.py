@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Nothing that builds or publishes this project comes from an unpinned source.
 
-Seven rules, one question: when CI produces an artifact, can somebody say where every byte of
+Eight rules, one question: when CI produces an artifact, can somebody say where every byte of
 it came from? Five are about the inputs (F14 twice, F43, F42, F15), one is about the output
-(F40), and one is about the permissions the whole thing runs under (F59).
+(F40), one is about the permissions the whole thing runs under (F59), and one is about a
+setting that silently is not applied at all (F13).
 
 **Why this exists.** SECURITY_AUDIT.md F14. `rc-bundle.yml` cuts the Windows release, and it
 reached for `Swatinem/rust-cache@v2`. A tag is a mutable pointer: whoever can move `v2` in that
@@ -54,6 +55,15 @@ forever. `rc-linuxdeploy.py` seeds that cache by digest, and `--features no-down
 a missed seed into a refusal instead of a silent unverified download. So: every AppImage bundle in
 the release workflow must have a seed step before it — "before" for the same reason the checksum
 rule says "before".
+
+**The eighth rule is a value that is not there (F13).** A job-level `env:` entry reading
+`${{ runner.temp }}` does not fail -- GitHub does not resolve the `runner` context at that
+level, so it expands to the EMPTY STRING and the variable ships with a hole in it. F13's
+`CARGO_TARGET_DIR: ${{ runner.temp }}/rc-target` was written that way and would have pointed
+the release build at `/rc-target`, at the filesystem root, with no error anywhere. The same
+holds for `job`, `steps` and `env`. Caught by reading GitHub's context-availability table
+rather than by running the workflow, which is a thing this repository cannot do -- so the
+rule is here precisely because the ordinary way of finding it is closed.
 
 **How to grade this script**, since a passing run against a correct tree says nothing about
 whether the check works: `--self-test` re-runs every rule against text that deliberately breaks
@@ -243,9 +253,97 @@ def declares_permissions(text: str) -> bool:
     return any(line.startswith("permissions:") for line in text.splitlines())
 
 
+# Contexts GitHub does NOT resolve inside a job-level `env:` block. Its context-availability
+# table allows `github`, `needs`, `strategy`, `matrix`, `vars`, `secrets` and `inputs` there;
+# everything below is admitted only from `jobs.<id>.steps.env` downwards.
+STEP_ONLY_CONTEXTS = ("runner", "job", "steps", "env")
+JOB_ENV_EXPR = re.compile(r"\$\{\{\s*(" + "|".join(STEP_ONLY_CONTEXTS) + r")\." )
+
+
+def job_env_uses_step_context(text: str) -> list[tuple[int, str]]:
+    """Job-level `env:` entries referencing a context that only exists further down.
+
+    SECURITY_AUDIT.md F13 nearly shipped on this. `CARGO_TARGET_DIR: ${{ runner.temp }}/rc-target`
+    in a job-level `env:` block does not fail -- **it expands to the empty string**, so the
+    release build would have been pointed at `/rc-target`, an absolute path at the filesystem
+    root. There is no error, no warning and no log line saying a context was dropped; the only
+    symptom is a value with a hole in it, which is the same class as F36's `beforeSend` and
+    F40's truncated digest -- a thing that looks configured and is not.
+
+    Scoped by INDENTATION rather than by parsing, because the distinction the rule needs is
+    exactly a structural one and a regex over the whole file cannot make it: a job's `env:` sits
+    at four spaces under `jobs: <id>:`, a step's at eight or more under `- name:`. Four spaces is
+    the job level and is refused; deeper is a step and is fine. `$RUNNER_TEMP` -- the shell's own
+    copy -- is the fix, and it is not matched here because it is not an expression.
+    """
+    found = []
+    in_job_env = False
+    for number, line in enumerate(text.splitlines(), 1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip())
+        if indent == 4 and stripped == "env:":
+            in_job_env = True
+            continue
+        # Any line back at or above the job-key level closes the block.
+        if in_job_env and indent <= 4:
+            in_job_env = False
+        if in_job_env and (match := JOB_ENV_EXPR.search(line)):
+            found.append((number, match.group(1)))
+    return found
+
+
 def self_test() -> int:
     """Grade every rule against text that breaks it. A check nobody has seen fail is a wish."""
     failures = []
+
+    # The F13 near-miss, in the shape it was actually written in.
+    job_env = (
+        "jobs:\n"
+        "  macos:\n"
+        "    runs-on: [self-hosted, macmini]\n"
+        "    env:\n"
+        "      CARGO_TARGET_DIR: ${{ runner.temp }}/rc-target\n"
+        "    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+    )
+    if not job_env_uses_step_context(job_env):
+        failures.append("`runner` in a job-level env: was not caught; it expands to empty")
+
+    # The same context one level down, where GitHub does resolve it. Refusing this would send
+    # somebody to break a step that works.
+    step_env = (
+        "jobs:\n"
+        "  macos:\n"
+        "    steps:\n"
+        "      - name: build\n"
+        "        env:\n"
+        "          CARGO_TARGET_DIR: ${{ runner.temp }}/rc-target\n"
+    )
+    if job_env_uses_step_context(step_env):
+        failures.append("a step-level env: using `runner` was refused; that spelling is legal")
+
+    # The fix, which must not read as the defect: `$RUNNER_TEMP` is a shell variable, not an
+    # expression, and never passes through the expression evaluator at all.
+    shell_var = (
+        "jobs:\n"
+        "  macos:\n"
+        "    env:\n"
+        "      CARGO_TARGET_DIR: $RUNNER_TEMP/rc-target\n"
+    )
+    if job_env_uses_step_context(shell_var):
+        failures.append("`$RUNNER_TEMP` was reported as an unavailable context; it is a shell var")
+
+    # A context that IS available at job level. Flagging it would be a false refusal.
+    allowed = (
+        "jobs:\n"
+        "  macos:\n"
+        "    env:\n"
+        "      LABEL: ${{ github.ref_name }}\n"
+    )
+    if job_env_uses_step_context(allowed):
+        failures.append("`github` in a job-level env: was refused; that context is available")
 
     tagged = "      - uses: Swatinem/rust-cache@v2\n"
     if not unpinned(tagged):
@@ -344,7 +442,7 @@ def self_test() -> int:
         print(f"SELF-TEST FAILED: {failure}", file=sys.stderr)
     if failures:
         return 1
-    print("self-test: all seven rules refuse what they are meant to refuse")
+    print("self-test: all eight rules refuse what they are meant to refuse")
     return 0
 
 
@@ -400,6 +498,13 @@ def main() -> int:
                 f"{path.relative_to(ROOT)}: a rust-cache step does not set `cache-bin: false`, "
                 f"so $CARGO_HOME/bin is cached and a restored `dx` can cut the release"
             )
+        for number, context in job_env_uses_step_context(text):
+            problems.append(
+                f"{path.relative_to(ROOT)}:{number}: a job-level `env:` reads `{context}.`, "
+                f"which GitHub does not resolve there — it expands to the empty string and the "
+                f"variable ships with a hole in it. Use the shell's copy in a `run:` "
+                f"(`$RUNNER_TEMP`) or move the `env:` onto the step"
+            )
 
     for problem in problems:
         print(f"::error::{problem}", file=sys.stderr)
@@ -411,7 +516,8 @@ def main() -> int:
     # nothing -- so the summary says which half actually ran.
     everywhere = (
         f"{len(files)} workflows: every third-party action names a commit, no cache holds a "
-        f"build tool, no install falls off the lockfile, every workflow states its permissions"
+        f"build tool, no install falls off the lockfile, no job-level env: reads a context "
+        f"that is not there, every workflow states its permissions"
     )
     if release_workflows:
         print(
