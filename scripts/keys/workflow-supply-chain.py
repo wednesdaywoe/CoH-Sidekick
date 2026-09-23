@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Nothing that builds or publishes this project comes from an unpinned source.
 
-Eight rules, one question: when CI produces an artifact, can somebody say where every byte of
-it came from? Five are about the inputs (F14 twice, F43, F42, F15), one is about the output
+Nine rules, one question: when CI produces an artifact, can somebody say where every byte of
+it came from? Six are about the inputs (F14 twice, F43, F42, F15, F13), one is about the output
 (F40), one is about the permissions the whole thing runs under (F59), and one is about a
-setting that silently is not applied at all (F13).
+setting that silently is not applied at all (F13 again).
 
 **Why this exists.** SECURITY_AUDIT.md F14. `rc-bundle.yml` cuts the Windows release, and it
 reached for `Swatinem/rust-cache@v2`. A tag is a mutable pointer: whoever can move `v2` in that
@@ -64,6 +64,20 @@ the release build at `/rc-target`, at the filesystem root, with no error anywher
 holds for `job`, `steps` and `env`. Caught by reading GitHub's context-availability table
 rather than by running the workflow, which is a thing this repository cannot do -- so the
 rule is here precisely because the ordinary way of finding it is closed.
+
+**The ninth rule is the machine's own crate registry (F13).** The two release legs that run on
+persistent boxes shared their `$CARGO_HOME` with `ci.yml`, and F13 said for months that nothing
+below the target directory was closable by editing this file. Measured on cargo 1.96.1, that was
+wrong. An extracted registry source tree is trusted forever -- modern cargo writes no
+`.cargo-checksum.json`, only `.cargo-ok` holding `{"v":1}` -- so source edited in place compiled
+with a clean exit and reached the output binary, and the job-local `CARGO_TARGET_DIR` the row had
+already landed did nothing about it, because the poison sits upstream of the target directory.
+Nor does the lockfile help a cache: a `.crate` repackaged with tampered source, whose sha256 does
+not match `Cargo.lock`, extracted and compiled `--offline` without a word. **Verification is
+download-time only.** An empty `$CARGO_HOME` therefore refuses what a populated one accepts, so
+the rule is that every self-hosted leg sets `CARGO_HOME` under `$RUNNER_TEMP` -- which moves the
+trust root off the box and onto `Cargo.lock`, a file in this repository. Scoped per job rather
+than per file, because one leg carrying the line would otherwise vouch for a leg that does not.
 
 **How to grade this script**, since a passing run against a correct tree says nothing about
 whether the check works: `--self-test` re-runs every rule against text that deliberately breaks
@@ -294,6 +308,76 @@ def job_env_uses_step_context(text: str) -> list[tuple[int, str]]:
     return found
 
 
+# A job's `runs-on:` naming a persistent box, and the isolation that box's legs must declare.
+# Matched on the assignment written into `$GITHUB_ENV`, which is the only spelling that works:
+# rule 8 above is why the `${{ runner.temp }}` form is not an alternative.
+SELF_HOSTED = re.compile(r"^\s*runs-on:.*\bself-hosted\b")
+CARGO_HOME_ISOLATED = re.compile(r"CARGO_HOME=\$(?:RUNNER_TEMP|\{RUNNER_TEMP\})/")
+
+
+def release_jobs(text: str) -> list[tuple[str, int, str]]:
+    """Split a workflow into `(job id, line number, body)`, by the indentation of the job key.
+
+    Same structural reason as rule 8: a job is a two-space key under `jobs:`, and the rule below
+    is about what a PARTICULAR job does, so a regex over the whole file cannot answer it -- one
+    leg carrying the line would vouch for the two that do not.
+    """
+    jobs, current, start, body = [], None, 0, []
+    in_jobs = False
+    for number, line in enumerate(text.splitlines(), 1):
+        if line.rstrip() == "jobs:":
+            in_jobs = True
+            continue
+        if not in_jobs:
+            continue
+        stripped = line.strip()
+        indent = len(line) - len(line.lstrip())
+        if stripped and not stripped.startswith("#") and indent == 2 and stripped.endswith(":"):
+            if current:
+                jobs.append((current, start, "\n".join(body)))
+            current, start, body = stripped[:-1], number, []
+            continue
+        if current:
+            body.append(line)
+    if current:
+        jobs.append((current, start, "\n".join(body)))
+    return jobs
+
+
+def unisolated_cargo_home(text: str) -> list[tuple[int, str]]:
+    """Release legs on persistent boxes that build out of the machine's shared `$CARGO_HOME`.
+
+    SECURITY_AUDIT.md F13. The row said for months that nothing below the target directory was
+    closable by editing this file. Measured on cargo 1.96.1, that was wrong, and the shared
+    registry was the sharpest thing in the list:
+
+      * an extracted source tree is trusted forever -- modern cargo writes no
+        `.cargo-checksum.json`, only `.cargo-ok` holding `{"v":1}`, so there is not even a
+        per-file hash to disagree with. Source edited under `registry/src/` compiled clean and
+        reached the output binary, and a job-local `CARGO_TARGET_DIR` did nothing about it
+        because the poison sits upstream of the target directory;
+      * verification is DOWNLOAD-time only -- a `.crate` repackaged with tampered source, whose
+        sha256 does not match `Cargo.lock`, extracted and compiled `--offline` without a word;
+      * an EMPTY `$CARGO_HOME` refuses a crate the lockfile disagrees with.
+
+    So the isolation is what makes `Cargo.lock` load-bearing, and `Cargo.lock` is in the
+    repository rather than on the box. That is the whole value: the trust root moves from
+    "whoever can write this machine's home directory" to "whoever can push". It also takes
+    `$CARGO_HOME/config.toml` out of the build, which is not a lesser door -- `rustflags` and
+    `linker` set there reach the compiler, measured the same day.
+
+    Scoped to jobs whose `runs-on` names `self-hosted`, so a future persistent leg is covered the
+    day it is added and the ephemeral Windows leg is not asked for something it does not need.
+    """
+    found = []
+    for name, number, body in release_jobs(text):
+        if not any(SELF_HOSTED.match(line) for line in body.splitlines()):
+            continue
+        if not CARGO_HOME_ISOLATED.search(body):
+            found.append((number, name))
+    return found
+
+
 def self_test() -> int:
     """Grade every rule against text that breaks it. A check nobody has seen fail is a wish."""
     failures = []
@@ -438,11 +522,66 @@ def self_test() -> int:
             "leaves the rest on the repository default"
         )
 
+    # Rule 9 (F13). One persistent leg isolated, one not: the case a grep over the whole file
+    # passes, because the isolated leg's line vouches for the leg that has none.
+    isolated_leg = (
+        "  linux:\n"
+        "    runs-on: [self-hosted, jpc]\n"
+        "    steps:\n"
+        "      - name: build from a job-local cargo home\n"
+        "        run: |\n"
+        '          echo "CARGO_HOME=$RUNNER_TEMP/rc-cargo" >> "$GITHUB_ENV"\n'
+    )
+    bare_leg = (
+        "  macos:\n"
+        "    runs-on: [self-hosted, macmini]\n"
+        "    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+    )
+    ephemeral_leg = (
+        "  windows:\n"
+        "    runs-on: windows-latest\n"
+        "    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+    )
+    if unisolated_cargo_home("jobs:\n" + isolated_leg):
+        failures.append("an isolated self-hosted leg was reported as building out of the box")
+    if not unisolated_cargo_home("jobs:\n" + bare_leg):
+        failures.append(
+            "a self-hosted leg with no CARGO_HOME isolation was not caught; it cuts the "
+            "release out of a registry ordinary CI can write"
+        )
+    if unisolated_cargo_home("jobs:\n" + ephemeral_leg):
+        failures.append("the ephemeral Windows leg was asked to isolate a home it does not share")
+    # The case the whole-file grep gets wrong, and the reason this rule splits by job at all.
+    both = "jobs:\n" + isolated_leg + bare_leg
+    caught = unisolated_cargo_home(both)
+    if len(caught) != 1 or caught[0][1] != "macos":
+        failures.append(
+            "one leg's isolation was read as covering a second leg that has none; this rule "
+            "exists to tell two jobs apart"
+        )
+    # `${{ runner.temp }}` is the spelling rule 8 refuses, so it must not satisfy this one
+    # either -- it expands to the empty string and the home lands at /rc-cargo.
+    hollow = (
+        "  linux:\n"
+        "    runs-on: [self-hosted, jpc]\n"
+        "    env:\n"
+        "      CARGO_HOME: ${{ runner.temp }}/rc-cargo\n"
+        "    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+    )
+    if not unisolated_cargo_home("jobs:\n" + hollow):
+        failures.append(
+            "the hollow `${{ runner.temp }}` spelling satisfied the isolation rule; it expands "
+            "to the empty string and rule 8 refuses it"
+        )
+
     for failure in failures:
         print(f"SELF-TEST FAILED: {failure}", file=sys.stderr)
     if failures:
         return 1
-    print("self-test: all eight rules refuse what they are meant to refuse")
+    print("self-test: all nine rules refuse what they are meant to refuse")
     return 0
 
 
@@ -487,6 +626,13 @@ def main() -> int:
                     f"{LINUXDEPLOY_SEED} step before it, so dx fetches linuxdeploy from a "
                     f"mutable tag with no hash and runs it"
                 )
+            for number, name in unisolated_cargo_home(text):
+                problems.append(
+                    f"{path.relative_to(ROOT)}:{number}: job `{name}` runs on a persistent box "
+                    f"and never sets CARGO_HOME under $RUNNER_TEMP, so the release is built out "
+                    f"of a registry every ordinary CI run can write — and cargo verifies a crate "
+                    f"against Cargo.lock on DOWNLOAD only, never on the way out of the cache"
+                )
         if not declares_permissions(text):
             problems.append(
                 f"{path.relative_to(ROOT)}: no top-level `permissions:` block, so every job in "
@@ -510,7 +656,7 @@ def main() -> int:
         print(f"::error::{problem}", file=sys.stderr)
     if problems:
         return 1
-    # Three of the seven rules only have anything to say about `rc-bundle.yml`, and this script
+    # Four of the nine rules only have anything to say about `rc-bundle.yml`, and this script
     # is mirrored into a repository that does not have one. Reporting them as satisfied there
     # is a green that means nothing -- the shape that let F86's first patch pass while serving
     # nothing -- so the summary says which half actually ran.
@@ -522,11 +668,12 @@ def main() -> int:
     if release_workflows:
         print(
             f"{everywhere}. And in {RELEASE_WORKFLOW}: the CLI is pinned unconditionally, "
-            f"linuxdeploy is seeded by digest, every artifact is checksummed"
+            f"linuxdeploy is seeded by digest, every artifact is checksummed, every "
+            f"self-hosted leg builds from its own cargo home"
         )
     else:
         print(
-            f"{everywhere}. No {RELEASE_WORKFLOW} here, so the three release rules ran on nothing"
+            f"{everywhere}. No {RELEASE_WORKFLOW} here, so the four release rules ran on nothing"
         )
     return 0
 
