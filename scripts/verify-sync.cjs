@@ -201,6 +201,54 @@ const TRACKED_ROOTS = [
   'src/data/set-bonus-groups.ts',
   'src/data/set-bonus-index.ts',
   'src/data/stance-groups.ts',
+  // Joined 2026-09-23 under F84, and what got them here is a deletion rather than an argument.
+  // This repo tracked a second copy of the beta's whole React client -- 162 files across
+  // `components/`, `pages/`, `stores/`, `services/`, `lib/` and `hooks/`, none of it adjudicated by
+  // anything. 296 paths were shared with the beta, 135 already differed, and a bare
+  // `src/lib/supabase.ts` in SECURITY_AUDIT.md resolved to two files in two repos, which is how
+  // F01 went unread for a month: ten reviewers and four verification passes read the copy that
+  // ships nothing. Canonical's `src/` has no `index.html`, no vite config, no `dev`/`build` script
+  // and no `react-dom`, so 123 of those files were read by nothing here and cited by nothing but
+  // prose. They are gone. A file that is not there cannot be read by mistake, which is the whole
+  // of the fix; guarding a stale copy would have kept the trap and added a gate to it.
+  //
+  // These 27 are what stayed and therefore what has to be watched. Three reasons to stay, and the
+  // rule was applied rather than argued case by case: reachable from a test this repo runs, named
+  // in `crates/app/**` as the source a Rust port was taken from, or pulled in by one of those two
+  // -- the kept tree is closed under its own imports, so nothing left behind imports something
+  // that is not there. `ui/` is here entirely for that third reason: `ConfirmModal.tsx` is the
+  // port reference for `crates/app/src/confirm.rs` and it barrels through `ui/index.ts`.
+  //
+  // The 12 `.test.ts` twins among the 39 survivors are NOT listed here -- they are already
+  // adjudicated in `shared-test-surface.json` under FORK-4, and a path in two manifests is two
+  // places for one verdict, which is the drift this pair of files exists to stop.
+  'src/components/enhancements/EnhancementIcon.tsx',
+  'src/components/incarnate/craft-tree.ts',
+  'src/components/info/powerDisplayUtils.ts',
+  'src/components/modals/ConfirmModal.tsx',
+  'src/components/modals/Modal.tsx',
+  'src/components/powers/power-row-utils.ts',
+  'src/components/ui/Badge.tsx',
+  'src/components/ui/Button.tsx',
+  'src/components/ui/CollapsibleSection.tsx',
+  'src/components/ui/FloatingWindow.tsx',
+  'src/components/ui/Input.tsx',
+  'src/components/ui/LevelSpinner.tsx',
+  'src/components/ui/Select.tsx',
+  'src/components/ui/Slider.tsx',
+  'src/components/ui/Toggle.tsx',
+  'src/components/ui/Tooltip.tsx',
+  'src/components/ui/index.ts',
+  'src/hooks/useCalculatedStats.ts',
+  'src/lib/links.ts',
+  'src/lib/supabase.ts',
+  'src/services/auth.ts',
+  'src/services/sharedBuilds.ts',
+  'src/stores/authStore.ts',
+  'src/stores/buildStore.ts',
+  'src/stores/historyStore.ts',
+  'src/stores/index.ts',
+  'src/stores/uiStore.ts',
   'docs',
 ];
 

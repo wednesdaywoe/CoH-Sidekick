@@ -57,7 +57,7 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 335 entries.** FORK-9 closed 2026-09-22, the day after it was filed. It was not a
+**0 open, of 336 entries.** FORK-9 closed 2026-09-22, the day after it was filed. It was not a
 parse gap: the shared-test digest rested on a commit, and nothing checked the commit still existed.
 
 **A stamp names a sha, and a sha is not a promise.** The beta's read `623d9129ab`, which GitHub
@@ -989,7 +989,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 118 of 118 closed
+[Full detail](gaps/pipeline-provenance.md) — 119 of 119 closed
 
 - [x] **PROV-8** — nothing measured the export against the shard it copies: three staleness gates,
   all of them with the export on one side and none with the game, so a user found i28p4 RC3 before
@@ -1512,6 +1512,13 @@ measurement went, and where a closure for the residual belongs too.
   pair commits together and the unexcluded manifest made the stamp commit its own graded head —
   `eec21e98eb` recorded parent `50dab95dec` and graded as itself. Both paths excluded now, on both
   legs; the beta mirrors them and had no exclusion at all
+
+- [x] **FORK-10** — this repo tracked a second copy of the beta's whole React client, 162 files
+  adjudicated by nothing: 296 paths shared, 135 already differing, and a bare `src/lib/supabase.ts`
+  in the audit resolving to two files in two repos, which is how F01 went unread for a month.
+  Closed 2026-09-23: 123 files read by nothing here are deleted, 27 joined `TRACKED_ROOTS` with
+  nine forks named and given exits, and the 12 test twins stay where FORK-4 already holds them.
+  story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
 - [x] **FORK-9** — one sentence for both ways a recorded head stops matching: the repo moved
   FORWARD, where the run is still re-checkable where it was taken, and the head rewritten OUT of

@@ -251,7 +251,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "077634f55c625c045adc8d8f91790e00158b62a285cf6d39de122fcd43eb08a9"
+      "sha256": "afc37fa6652a5436d176fe5aba424f31545794e0a8577c7657e889ef2c305fa8"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -577,7 +577,110 @@
     {
       "path": "scripts/verify-sync.cjs",
       "status": "identical",
-      "sha256": "3428bb40554bb67b6816afaaf211012fa0fb7990959dbc0afb5796111e629467"
+      "sha256": "929243b4dadfe65dcaf79de6153b84e3ad3a0bf45c58223852387f9fe64134b8"
+    },
+    {
+      "path": "src/components/enhancements/EnhancementIcon.tsx",
+      "status": "identical",
+      "sha256": "c1547064aded3c8f69b10dd11cb1b0cfcd8d4145152185ff2a5a86354096ea3c"
+    },
+    {
+      "path": "src/components/incarnate/craft-tree.ts",
+      "status": "identical",
+      "sha256": "87fba5a5ed8d844db7b4d769dbc1fa1f6a62720c0483d001dc75fc8226493d11"
+    },
+    {
+      "path": "src/components/info/powerDisplayUtils.ts",
+      "status": "identical",
+      "sha256": "2c563e1ee5f315588b988ba4b1e37ac6cc6c8a8e62f5d21c62bcd55986b58e78"
+    },
+    {
+      "path": "src/components/modals/ConfirmModal.tsx",
+      "status": "identical",
+      "sha256": "c5cf60524e2821a7868c9218af3417f9ff1e381ce77703cca32b56884de33de8"
+    },
+    {
+      "path": "src/components/modals/Modal.tsx",
+      "status": "identical",
+      "sha256": "a7c889060111a0fe9a51e4412e1165b89dc8179c1307573d5c97212b407a7844"
+    },
+    {
+      "path": "src/components/powers/power-row-utils.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "84720ff5d2325bdfc94914d6694c5dd12a4f4fc0c62e7046f7f571b3a022d2be",
+        "beta": "82e29f4af930d2ef0293615cd6cb60fabadf49f53760bdc99b6b71c3d31cbfb2"
+      },
+      "reason": "Canonical's copy is the frozen source `crates/app/src/panels/powers.rs` was ported from, and it names this path in as many words. The beta's has moved 95 lines since; nothing here took them, because nothing here runs a React power row. Converging by re-syncing would re-point the port's reference at code the Rust panel has not implemented, which is worse than a lag that is written down.",
+      "exit": "`crates/app/src/panels/powers.rs` stops citing this path -- either because the port is complete and the citation is retired, or because the panel is re-derived from the export rather than from a TypeScript sibling. This file is then deleted here, not converged.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/components/ui/Badge.tsx",
+      "status": "identical",
+      "sha256": "50b61fe007e904ba829d17573398920955a385f0c630ec310ea6c8fdc27f106a"
+    },
+    {
+      "path": "src/components/ui/Button.tsx",
+      "status": "identical",
+      "sha256": "d6adfa35ef2e2de3b0c95f540f14458ea3e1f378fa886a00545f2355eff4e821"
+    },
+    {
+      "path": "src/components/ui/CollapsibleSection.tsx",
+      "status": "identical",
+      "sha256": "410724f2ad72db1f51da8c9a921f282d37437c73f31df3b9bbcce19729c73051"
+    },
+    {
+      "path": "src/components/ui/FloatingWindow.tsx",
+      "status": "identical",
+      "sha256": "75094207da734e9b7445dc206156fcd47703fa075104560b867a241626002b47"
+    },
+    {
+      "path": "src/components/ui/Input.tsx",
+      "status": "identical",
+      "sha256": "8ce7af64e3b3260eeef9bda6c3fcc129eb841517fefe7c4758c9cb09e25a4e66"
+    },
+    {
+      "path": "src/components/ui/LevelSpinner.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "ac9eea760c70c0e5afc9f9a02db6e8af786ee9310de0c18bf52cdcdd6c552fa5",
+        "beta": "c4ec2bd685b718f93ad1f7137cea6ccda43a610c295cca67fe9d04a895582e73"
+      },
+      "reason": "Here only because `ConfirmModal.tsx` -- the port reference for `crates/app/src/confirm.rs` -- imports the `ui/index.ts` barrel, and the barrel re-exports this. The beta added `formatSignedOffset` and 26 lines of exemplar-offset formatting that no consumer in this repo calls. Kept for import coherence, not for its contents: the rule that decided the surviving mirror is that nothing left behind may import something that is not there.",
+      "exit": "`ConfirmModal.tsx` stops being cited by `crates/app/src/confirm.rs`, at which point the whole `ui/` barrel leaves with it. Nothing else here reaches this file.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/components/ui/Select.tsx",
+      "status": "identical",
+      "sha256": "587af430c745aa7dd1d04af45fa374db879fb4402d1ae32f86657d7dda280aae"
+    },
+    {
+      "path": "src/components/ui/Slider.tsx",
+      "status": "identical",
+      "sha256": "b2cdfaf6dd39482ab12c42282825ff1a9ea80e453267758e6c3333ec3c334e4c"
+    },
+    {
+      "path": "src/components/ui/Toggle.tsx",
+      "status": "identical",
+      "sha256": "c7403596003d9434f24b2c62ac302463ecaa9339d6851c0e732b9ee0ecfb256f"
+    },
+    {
+      "path": "src/components/ui/Tooltip.tsx",
+      "status": "identical",
+      "sha256": "b0476a17d0bf6103bbdbeb2d849d9bac336eb733df3c96eeecd1d09b6fa8a1d2"
+    },
+    {
+      "path": "src/components/ui/index.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "7744e318322f36d5f9d663a90e6d86d4372d479ebb2be5e6471ef64e191666b0",
+        "beta": "bf94c3c846bc7ad238d5825d2c3b7b758dc862fe47cbe27b93d99fa8d46a39bf"
+      },
+      "reason": "The barrel `ConfirmModal.tsx` imports, one line apart from the beta's: the beta re-exports `formatSignedOffset` beside `LevelSpinner` and this copy does not, because the function does not exist on this side. A barrel diverges exactly when the module under it does, so this entry is the sibling of the `LevelSpinner.tsx` one and moves with it.",
+      "exit": "Retires with `LevelSpinner.tsx` and the rest of `ui/`, when `crates/app/src/confirm.rs` stops citing `ConfirmModal.tsx`.",
+      "gap": "FORK-10"
     },
     {
       "path": "src/data/README.md",
@@ -830,6 +933,92 @@
       "reason": "The beta added a `mechanicType` tie-break for picking a stance group's parent when several candidates match, plus `toStancePowers`. Canonical's engine needs no stance-group option table at all — `coh_math::gather` expands stances from the data (the identity/def split) and `coh_data::power` already reads the wire's `mechanicType` vocabulary, including `parentMechanic` and `hiddenPassive`, as an exhaustive enum. So this is TS-side option-table glue with no Rust counterpart to owe, and the table is what the Rust side deliberately does not have.",
       "exit": null,
       "gap": "FORK-7"
+    },
+    {
+      "path": "src/hooks/useCalculatedStats.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "21a13104168f0c94a7cbdff732d35f5814a316ca8f7def324a09de26d816a2f1",
+        "beta": "abfb1c1f84652e86ad5ef61adacc04c5c7ae9045d68e8482a84f991a1cf8bbf0"
+      },
+      "reason": "Read here by one consumer, `src/hooks/shared-calc-cache.test.ts`, which grades the memoisation contract the Rust engine's cache mirrors. The beta's copy is 161 lines longer and carries the what-if and engine-error surfaces this repo has no components for. The test pins the cache behaviour, not the hook's feature set, so the lag does not weaken what it checks -- but it does mean this file is a fixture rather than a mirror, and saying so is the point of the row.",
+      "exit": "`shared-calc-cache.test.ts` retires, or its subject moves to `crates/coh_math`'s own cache guard, at which point this copy is deleted rather than converged.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/lib/links.ts",
+      "status": "identical",
+      "sha256": "a8086465cd82b87f457b27dde5b838ae8cb50d36e25cb16f1da423883c60e18d"
+    },
+    {
+      "path": "src/lib/supabase.ts",
+      "status": "identical",
+      "sha256": "f4a6ac1193566445f3659f50f2351808f4942cbe2c82947fa16d80a49a8e0403"
+    },
+    {
+      "path": "src/services/auth.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "b940ee2bca07e8633497a5af68d467b9af9796c9dfeedde83ff052e5bcd5e4b3",
+        "beta": "52e8d7671f63e8ba63c9c692c0ba051cbe3680abce7c4b9f964322818e59883a"
+      },
+      "reason": "The beta is ahead by one behavioural fix: it swallows a same-user `TOKEN_REFRESHED`, because a rotation hands back a fresh `User` object that retriggers every effect keyed on it, and a visibility toggle used to remount the whole My Builds grid. Canonical's copy has no grid to remount. It is here for `src/stores/authStore.ts`, which `src/lib/supabase-auth-flow.test.ts` reaches -- F01's guard.",
+      "exit": "F01's web arm is verified end to end on a live sign-in (the last step that finding names as unprovable from either tree) and canonical's client-side auth mirror is deleted, or the fix is ported here because a Rust consumer needs the same debounce.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/services/sharedBuilds.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "9a232f02b4fcde0f5181d9a3e32acfc8591e585b9cbe01fef210eeac2a72b081",
+        "beta": "826be9362211ee52199f4e00bff7d6283e8d7751d0f9ac5d7bd3e3b386a2f85e"
+      },
+      "reason": "Cited by name in `crates/app/src/cloud/shared_builds.rs` as the source that port was taken from, and read here by `src/services/sharedBuilds.test.ts`. The beta is 52 lines ahead. This is the one pair on this list where both halves have a live consumer, which is why it stays watched rather than being deleted with the other 123.",
+      "exit": "`crates/app/src/cloud/shared_builds.rs` stops citing this path and `sharedBuilds.test.ts`'s subject moves to the Rust side, at which point both copies of the TypeScript go.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/stores/authStore.ts",
+      "status": "identical",
+      "sha256": "2b706da46cbfa09800cd1b05acc7cbf373d3f64b5a43995f77792040b453c925"
+    },
+    {
+      "path": "src/stores/buildStore.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "ab388a55a5d871b10cfef111ac29eaf05589cffcf0ccaa6b0ba45b353cd6cad1",
+        "beta": "7274c076f9cd04e1db4bd49082f483127b24d5e8fceb9da724af9427babd4210"
+      },
+      "reason": "The largest lag on the list -- 1,006 changed lines, the beta 570 longer -- and the one with the most consumers here: `per-server-persist`, `pool-dedup-self-heal`, `cross-dataset-import` and `src/data/pool-collisions.test.ts` all read it. Those tests grade rules about the game data that the Rust build state obeys too, which is why they were kept; they do not grade the beta's newer store features, which is why the lag is tolerable and why it is not silently tolerable.",
+      "exit": "The four tests that read it are re-pointed at `crates/coh_data`'s own state, or retire with the beta at RB4i's cut-over. This copy is then deleted; it is not a file this repo should ever re-sync, because re-syncing it would change what those four tests are grading without anyone deciding to.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/stores/historyStore.ts",
+      "status": "identical",
+      "sha256": "852c672f3ea67882861eef8ea84864b5f1932d4a4e15f765f95a4fb97623aa51"
+    },
+    {
+      "path": "src/stores/index.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "505449a8b34451721c95fba20d14454e6fa3fc41520d727ffa70f03b99fc8d4f",
+        "beta": "9c3bd4a1a8638d21dbae1a345c6e7ad8319798ad9a473523a3ac4b1c53d167b2"
+      },
+      "reason": "One line apart: the beta re-exports a `ComparisonCopy` type this side's `uiStore.ts` does not define. A barrel diverges exactly when the module under it does, so this is the sibling of the `uiStore.ts` entry and moves with it.",
+      "exit": "Retires with `uiStore.ts` and `buildStore.ts`, when the store tests that read them are re-pointed or retire.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/stores/uiStore.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "98ed2b929b9defb7f81d09f93497310ea6d26f7eb4bd078c236ba76ea2d9b009",
+        "beta": "bfaf5248dab9147fac7264f9179e1b125ca909efec8e6b971648b59820d6a864"
+      },
+      "reason": "238 changed lines, the beta 208 longer, carrying the comparison-copy and what-if surfaces this repo has no components for. Read here by `unreachable-active-flag.test.ts` and reached from `useCalculatedStats.ts`. Same shape as `buildStore.ts`: a frozen fixture the guards are written against, not a mirror anybody maintains.",
+      "exit": "Retires with `buildStore.ts`, when the store tests that read it are re-pointed at the Rust state or retire with the beta.",
+      "gap": "FORK-10"
     },
     {
       "path": "src/types/archetype.ts",
