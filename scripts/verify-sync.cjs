@@ -249,6 +249,54 @@ const TRACKED_ROOTS = [
   'src/stores/historyStore.ts',
   'src/stores/index.ts',
   'src/stores/uiStore.ts',
+  // Joined 2026-09-23 under FORK-10, and the number that got them here is smaller than the one
+  // the row had costed. F84's exit priced the adjudicate-everything path at 118 watched files and
+  // 49 verdicts, by taking the beta census's roster and closing it under imports the way
+  // `pipelineSources` closes the converters. That closure is the wrong obligation, and the
+  // difference is what the consumer DOES: a converter EXECUTES what it imports, so a fork two
+  // imports down changes the file it writes, and the walk has to follow the edge. The beta's
+  // `beta-bag-reader-census.cjs` executes nothing. Every one of its five sibling touches --
+  // `partition`, `seamsIn`, `atomArmGap`, `siblingRosterVerdict`, `assertCounterpartsLive` -- is
+  // one `readFileSync` of one counterpart path followed by a regex, and none of them resolves an
+  // import. So the cross-repo consumer binds exactly the paths it OPENS: the 39 of its
+  // `fileSweep()`, not the 106 those files reach. 10 were adjudicated already, five are absent
+  // here and are the census's own `betaOnly`/`renamed` buckets, and these 23 are the remainder.
+  //
+  // The rule is therefore the census's own sweep, and it is a rule and not a list: `fileSweep()`
+  // is recomputed from the beta's tree on every run, so a beta file that grows a `.effects`
+  // mention starts opening canonical's counterpart that day. `scripts/keys/f84-census-counterparts.cjs`
+  // re-derives the sweep and fails when a counterpart it opens is not watched here, which is the
+  // half a hardcoded list cannot do.
+  //
+  // What the drift costs is not a wrong number on this side -- canonical's `src/` still ships
+  // nothing, no `index.html`, no vite config, no `react-dom`. It is the census's own verdicts:
+  // `bothRead`, `migrated`, `reads-too` and `atomArmGap` are all read off canonical's copy, so a
+  // stale copy here answers BPORT's denominator with a file nobody maintains. That already
+  // happened once in the other direction -- the F84 deletion moved `bothRead` from 25 to 14
+  // before anything noticed.
+  'src/components/enhancements/SetBonusDisplay.tsx',
+  'src/components/enhancements/SetBonusList.tsx',
+  'src/components/export-image/BuildImageCard.tsx',
+  'src/components/info/DamageBlock.tsx',
+  'src/components/info/EnhancementInfoContent.tsx',
+  'src/components/info/InfoPanel.tsx',
+  'src/components/info/MechanicAdjusters.tsx',
+  'src/components/info/PowerInfoBlocks.tsx',
+  'src/components/info/PowerInfoTooltip.tsx',
+  'src/components/layout/StatsDashboard.tsx',
+  'src/components/modals/PowersetCompareModal.tsx',
+  'src/components/powers/PowerSlot.tsx',
+  'src/data/datasets/homecoming/levels.ts',
+  'src/utils/calculations/attack-chain-powers.ts',
+  'src/utils/calculations/buff-pet-auras.ts',
+  'src/utils/calculations/character-totals.ts',
+  'src/utils/calculations/damage.ts',
+  'src/utils/calculations/inherents.ts',
+  'src/utils/calculations/perma.ts',
+  'src/utils/calculations/pet-damage.ts',
+  'src/utils/calculations/set-bonuses.ts',
+  'src/utils/forum-export.ts',
+  'src/utils/quick-snipe.ts',
   'docs',
 ];
 

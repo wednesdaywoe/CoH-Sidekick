@@ -58,12 +58,21 @@ because it reads data trees the beta does not carry.
 ## Current frontier
 
 **1 open, of 336 entries.** FORK-10, filed 2026-09-23: this repo holds a second copy of the
-beta's React client, 296 shared paths with 135 already differing, and 27 of them are now watched.
+beta's React client, 296 shared paths with 135 already differing, and 50 of them are now watched.
+
+**An obligation is set by what a consumer DOES, not by what it names.** This row's cost was
+priced by closing the census's roster under imports — `pipelineSources`' rule, where a converter
+executes what it imports. The census only greps, so it binds the 39 files it opens, not the 106
+they reach.
 
 **A deletion's blast radius is not in the diff that proposes it.** 123 files read by nothing here
-were deleted and restored the same day: 119 had been edited here since July, and the beta's BPORT4
-census opens canonical's copies through `--sibling`. "Nothing reads it" is three claims, and an
-import sweep of one tree answers one.
+were deleted and restored the same day, because the beta's BPORT4 census opens canonical's copies
+through `--sibling`. "Nothing reads it" is three claims, and an import sweep of one tree answers
+one.
+
+**"Edited since July" counted the commit that created them.** The transplant landed 2026-07-16, so
+the restore's headline number held for 119 of 123 and the honest one is 27 — 96 have had no edit
+here at all. The restore stands on the cross-repo reader, which never depended on it.
 
 **A digest that rests on a commit rests on nothing.** The shared-test stamp named a sha the repo
 had rebased away, and main is linear on purpose, so any stamp can be orphaned.
@@ -1521,12 +1530,13 @@ measurement went, and where a closure for the residual belongs too.
   `eec21e98eb` recorded parent `50dab95dec` and graded as itself. Both paths excluded now, on both
   legs; the beta mirrors them and had no exclusion at all
 
-- [ ] **FORK-10** — this repo tracks a second copy of the beta's whole React client, 162 files
-  adjudicated by nothing: 296 paths shared and 135 already differing. 27 joined `TRACKED_ROOTS`
-  2026-09-23 with nine forks named and given exits; the other 135 are still watched by nothing.
-  Deleting the unreferenced ones was tried and reverted the same day — 119 of 123 had been edited
-  here since July, and the beta's BPORT4 census reads canonical's copies through `--sibling`.
-  story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
+- [ ] **FORK-10** — this repo tracks a second copy of the beta's React client, 296 paths shared
+  and 135 differing. 50 now carry verdicts: 27 roots 2026-09-23, then the 23 the beta's census
+  actually opens. Its costed 118/49 closed the roster under imports; the census executes nothing,
+  so it binds the 39 it reads. 22 forks named, four of them Rule 0 (a dropped discriminator, a
+  dropped sign, dropped sub-types, a transcribed contract table). 96 of the restored 123 have no
+  canonical edit since the transplant. Check:
+  `scripts/keys/f84-census-counterparts.cjs`. story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
 - [x] **FORK-9** — one sentence for both ways a recorded head stops matching: the repo moved
   FORWARD, where the run is still re-checkable where it was taken, and the head rewritten OUT of

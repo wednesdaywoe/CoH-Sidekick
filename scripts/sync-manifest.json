@@ -45,6 +45,11 @@
       ]
     },
     {
+      "path": "scripts/keys/f84-census-counterparts.cjs",
+      "reason": "Turns FORK-10's claim that every file the beta's census OPENS in canonical carries a verdict here. Canonical-only for the reason every key is, and for one more: it runs the BETA's `beta-bag-reader-census.cjs --json --sibling <canonical>` and then reads canonical's `scripts/sync-manifest.json`, so it needs both trees with canonical as the cwd. A copy in the beta would be the sibling grading itself -- the same failure `fork4-test-surface-direction.py` exists to avoid one manifest over.",
+      "gap": "FORK-10"
+    },
+    {
       "path": "scripts/keys/fork4-test-surface-direction.py",
       "reason": "Turns DATA-GAP-REGISTER FORK-4's \"keep sync:shared off the shared test surface\". Reads BOTH repos' whole git history for each shared test path, so it can only run where the private canonical tree is the cwd and the beta is the sibling — the beta cannot see canonical at all, and a copy there would grade one repo against itself and always find the surface one-way. That is the failure mode the key exists to prevent, so a mirrored copy would be worse than none. Same docs/-reference reasoning as the sibling keys.",
       "gap": "FORK-4",
@@ -136,8 +141,11 @@
     },
     {
       "path": "scripts/beta-bag-reader-census.cjs",
-      "reason": "BPORT4's measurement, and the same argument as its BPORT1 sibling: it scans the beta's own bag readers and grades them against the beta's supply census, which walks the four generated dataset trees canonical no longer carries. Canonical stripped its bag on 2026-09-01, so a copy there would census reads with nothing behind them. Retires with the port alongside beta-bag-supply-census.cjs.",
-      "gap": "STRIP-1"
+      "reason": "BPORT4's measurement, and the same argument as its BPORT1 sibling: it scans the beta's own bag readers and grades them against the beta's supply census, which walks the four generated dataset trees canonical no longer carries. Canonical stripped its bag on 2026-09-01, so a copy there would census reads with nothing behind them. Retires with the port alongside beta-bag-supply-census.cjs. Canonical INVOKES this script -- `scripts/keys/f84-census-counterparts.cjs` runs it out of the beta's tree with `--sibling <canonical>` to re-derive the sweep FORK-10 watches. That is a third case the check has no slot for and the reason it asks here: running a script is normally wiring, and wiring is normally shared surface. It is not shared surface, because canonical runs the beta's copy IN PLACE and needs none of its own -- the census reads the four generated dataset trees canonical stripped on 2026-09-01, so a copy here would still census reads with nothing behind them. A canonical copy appearing is the error, not the invocation.",
+      "gap": "STRIP-1",
+      "mentions": [
+        "scripts/keys/f84-census-counterparts.cjs"
+      ]
     },
     {
       "path": "scripts/delete-user-shared-builds.ts",
@@ -251,7 +259,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "8fb8b955e27b794640526095573c44634d08251c5c357ed06dc6e3ac01fcf8a9"
+      "sha256": "3eb4344e7aa8d6a82c280e909e7d79dca6934ad2b93154009762aa83ca335303"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -577,7 +585,7 @@
     {
       "path": "scripts/verify-sync.cjs",
       "status": "identical",
-      "sha256": "929243b4dadfe65dcaf79de6153b84e3ad3a0bf45c58223852387f9fe64134b8"
+      "sha256": "f8922dc568469b103bfd1ce5f2554d60c6f2aac024484eb50109e51b6be5c738"
     },
     {
       "path": "src/components/enhancements/EnhancementIcon.tsx",
@@ -585,14 +593,118 @@
       "sha256": "c1547064aded3c8f69b10dd11cb1b0cfcd8d4145152185ff2a5a86354096ea3c"
     },
     {
+      "path": "src/components/enhancements/SetBonusDisplay.tsx",
+      "status": "identical",
+      "sha256": "1dd490b4dde9c41f4741b5cb15cbfb70b1d75b7b919cb0e80f957fb19f3e1455"
+    },
+    {
+      "path": "src/components/enhancements/SetBonusList.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "2bd77114f689915e21f2f0a0599637db4dbb59ece18e0e00546b3a13df86cfd0",
+        "beta": "10f7a371f67df96e96d4d996128fb96e477861a2b05582f28c76f5b9567d42c4"
+      },
+      "reason": "In the sweep for `partition`'s file-level verdict rather than a seam. Canonical is behind by one substitution the beta made deliberately: `getPairedStat` off `utils/calculations/set-bonuses` became `buildTrackedStatTargets` off `data/set-bonus-index`, because the dashboard's `breakdownKey` vocabulary and the normalized bonus vocabulary differ by case, by rename (maxHP/maxhp) and by granularity. Canonical's copy still pairs on the old vocabulary.",
+      "exit": "Canonical takes `buildTrackedStatTargets`. `data/set-bonus-index.ts` is already adjudicated here as `per-repo`, so this is a one-import change with its dependency already declared.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/components/export-image/BuildImageCard.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "d5fb112314c6d5c62820156e7105b8077ffeaf70a9b458ed3668ba015cf51717",
+        "beta": "4251aa6ce9994de7a9ce9846ba6b0c8fdeefbf18d519cb9d33b8243b9c3fd275"
+      },
+      "reason": "File-level sweep member. The beta's copy takes `StatCap` as an object with a `capDescription`, where canonical's still passes a bare number -- so canonical's poster cannot say WHY a bar is capped, and reads a softcap and a hard ceiling the same way.",
+      "exit": "Canonical takes `@/data/core/stat-caps`. It is the same change `StatsDashboard.tsx` needs and should land with it; separately listed because the export card is reachable when the dashboard is not.",
+      "gap": "FORK-10"
+    },
+    {
       "path": "src/components/incarnate/craft-tree.ts",
       "status": "identical",
       "sha256": "87fba5a5ed8d844db7b4d769dbc1fa1f6a62720c0483d001dc75fc8226493d11"
     },
     {
+      "path": "src/components/info/DamageBlock.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "7e5171954bd574b3c56beb9233bcc72d019cd5de163690fec48369d0a0702389",
+        "beta": "80380f7833838336263bcff34f314dde6302fd077c910a16132e729c1606202d"
+      },
+      "reason": "18 seams over 6 slots, `reads-too`. The beta's copy carries `excludeFromAtMechanic` -- the Gravity Control Impact slice an archetype's hit-time multiplier must step around -- and canonical's does not. That is a discriminator, not a formatting difference: a Controller's Propel reads `(final - exempt) x mult + exempt` in the beta and `final x mult` here, and the second is a wrong number wherever this copy is read as the port source.",
+      "exit": "Canonical takes the beta's `excludeFromAtMechanic` handling, here and in `utils/calculations/damage.ts`, or the Rust damage path lands it and both TS copies stop being the reference. This one converges rather than dying, because the rule it is missing is about what the data MEANS.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/components/info/EnhancementInfoContent.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "9be287e871a8e0d7a1508027eb82783d94b2238250bdf58c80d2bd4cde0e88cf",
+        "beta": "76bb6f60cd20294860f47b64360a03ae443e39b93c91f6f57ed56778ce4d97b2"
+      },
+      "reason": "22 seams over 4 slots, `reads-too`. Canonical is behind by six commits' worth of beta proc work (`procRollsInPatch`, `powerFiresProcs`, `resolveProcPatchDuration`) and ahead by FORK-2's IO-dilution resolution, which was decided here against a corpus. The IO-dilution half is the part with a claim on staying.",
+      "exit": "FORK-2's dilution rule reaches the engine crate and stops needing a TS home; the file then carries only beta-forward lag and is deleted here when the strip drops its four slots.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/components/info/InfoPanel.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "dfb455b16adaa992ff78bd18725e6852284dfa3f3a659be86549d749abc09c2b",
+        "beta": "461120493f1c3d5feda36da4acf5f6662c0a742d4abc1d082c29ed9f4cd9e80e"
+      },
+      "reason": "The census finds 18 bag seams over 8 slots here and grades canonical's copy `reads-too`, so this file is a term in BPORT's denominator that nothing here imports. The fork is one-way and large: the beta moved the panel onto the engine projection (`usePowerProjection`, `useCharacterCalculation`, `buildDisplayEffects`, `recastVerdict`) and canonical's copy is the pre-projection TS it was migrated from, 7 commits of ENT-22 pet-parameter work later. Both facts matter and they point opposite ways -- the beta is ahead on the read path, canonical is ahead on the pet parameters -- which is why this is a fork and not a lag.",
+      "exit": "The beta's BPORT7 strip lands and this file stops matching `fileSweep()`'s `/\\.effects\\b/`. At that point no cross-repo consumer opens canonical's copy and it is deleted here, not reconciled: the ENT-22 work it carries belongs in `crates/` by then or it was never a port source.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/components/info/MechanicAdjusters.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "adf07d89a0a68c3442e86e10ce032884d803e5e38a7705718b2faa5c6fa0705d",
+        "beta": "a0963d966cd1789939c9bf7f0b167dea9ee82aa24d8587c8acd427be1d2297bf"
+      },
+      "reason": "File-level sweep member, and the fork canonical can least afford to keep. The beta's copy routes stance powers through `toStancePowers` so `mechanicType` rides along -- it is the discriminator `findStanceParent` uses to tell Bio Armor's stance switcher (internal \"Evolution\") from the unrelated \"Evolving Armor\" toggle (internal \"Adaptation\"), both of which match the group's `parents`. Canonical's copy projects the field away and falls back to `candidates[0]`, first in PICK order, which desyncs the picker from the calc (beta report 2026-07-26). Canonical has never edited this file since the transplant created it.",
+      "exit": "Canonical takes `toStancePowers`. This is Rule 0 ground -- a discriminator dropped by a local projection -- so it converges rather than waiting for a strip, and it should not wait on the rest of this batch.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/components/info/PowerInfoBlocks.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "c1cd6acc92990d157e15a253f78c72168adce3df2b8cd14538ab5fbd80b829f3",
+        "beta": "d6795ddcf331274d37490a59e9a1e85c408c76ea4e4ac324a6580f5e2f833a18"
+      },
+      "reason": "16 seams over 6 slots, `reads-too`. The beta's copy reads `PowerProjection` from `@/engine/engineTotalsMap` and canonical's still computes `calcThreeTier` locally, so the two files answer the same question from different sources -- and the census reads canonical's answer as evidence about the migration's progress.",
+      "exit": "Leaves the sweep when the beta's strip retires `radius`/`arc`/`recharge`/`castTime`/`maxTargets`/`range`, at which point canonical's copy has no cross-repo reader and is deleted.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/components/info/PowerInfoTooltip.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "c5df5cf1b453e64af22a2ba9447a5ab3a85416207667e7bbd018b0eedc7995b2",
+        "beta": "eb43f8f14fccf8d6a257f7936cef3e37af20a06f8c996bbeb873c5b992c684cf"
+      },
+      "reason": "22 seams over 4 slots (`damage`, `summon`, `buffDuration`, `dot`), graded `reads-too` against canonical's copy, two of them already `dead-today`. Canonical's copy predates the beta's split of this file into `buildDisplayEffects.ts`, `petEffectDisplay.ts` and `magnitudesFromProjection.ts` -- three of the five paths the census reports ABSENT here are exactly those, so the census is grading a file that has been refactored out from under it on one side only.",
+      "exit": "The same BPORT7 strip that retires the four slots, or the beta's three extracted modules arriving here as part of taking the projection read path. Whichever comes first, this file stops carrying a seam and leaves the sweep; it is deleted here rather than merged, because a 2,951-line component is not a port source for anything in `crates/`.",
+      "gap": "FORK-10"
+    },
+    {
       "path": "src/components/info/powerDisplayUtils.ts",
       "status": "identical",
       "sha256": "2c563e1ee5f315588b988ba4b1e37ac6cc6c8a8e62f5d21c62bcd55986b58e78"
+    },
+    {
+      "path": "src/components/layout/StatsDashboard.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "69e749a282d34f489630bae1c6acbb99f3646566688edbb6a00e34a95c5700d2",
+        "beta": "427617cecee36be231a76e9c55042a1c3cf5d1703decbd0c7d71852e4e1a6525"
+      },
+      "reason": "Two seams on `movementCapBump`, both `dead-today`, and this is the file the F84 deletion was caught by: its census answer moved from `reads-too` to `absent` and took `bothRead` from 25 to 14. The fork is wide -- the beta has `stat-caps`, `WhatIfBuffsModal`, `HybridTargetsSlider` and `SharePreviewCapture`; canonical has MBDIMPORT-1/2/3's importer work -- so neither copy is a subset of the other.",
+      "exit": "The MBDIMPORT importer work lands in `crates/app` and canonical's copy stops being a port source; it is then deleted, and the census's `movementCapBump` seams are already `dead-today` so nothing it grades is lost.",
+      "gap": "FORK-10"
     },
     {
       "path": "src/components/modals/ConfirmModal.tsx",
@@ -603,6 +715,28 @@
       "path": "src/components/modals/Modal.tsx",
       "status": "identical",
       "sha256": "a7c889060111a0fe9a51e4412e1165b89dc8179c1307573d5c97212b407a7844"
+    },
+    {
+      "path": "src/components/modals/PowersetCompareModal.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "08245fca80963a6ff718353efe86f46c6a8a754ac19b0643a3277a08f6f22de4",
+        "beta": "9776a423155f7a82a151f260f1afa64285530b18217805baec47ff0c60bf4291"
+      },
+      "reason": "Nine seams, one per mez and defence slot, and the whole fork is one line: canonical reads `e?.summon` off the bag where the beta reads `power.summon`. The census grades canonical `reads-too` on that line and is right -- this copy is genuinely a surviving bag reader, which is the only reason the difference is worth a verdict.",
+      "exit": "Canonical takes the beta's `power.summon` read. One line, and it moves the census's count of surviving bag readers by one, which is the number BPORT is scoped against.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/components/powers/PowerSlot.tsx",
+      "status": "forked",
+      "sha256": {
+        "canonical": "9fa4e9e6627e4a3483c69c6d1d544882ebf7829b675cfa309cc05ab98b1446f1",
+        "beta": "e9f24d723941aedbe292e9b798313ddd1577447fcf9e2bfbae07f1dcf4232a98"
+      },
+      "reason": "File-level sweep member. The beta renders a negative `boost` as \"Under Level\" in red; canonical's copy tests `boost > 0` and shows nothing, so an under-levelled enhancement is invisible in this copy. Untouched here since the transplant.",
+      "exit": "Canonical takes the signed-boost branch. Small, and it pairs with BOOST-6's three levels the game has no recipe for -- the same signedness question one display over.",
+      "gap": "FORK-10"
     },
     {
       "path": "src/components/powers/power-row-utils.ts",
@@ -776,6 +910,17 @@
       "path": "src/data/datasets/homecoming/generated/mids-name-map.ts",
       "status": "identical",
       "sha256": "34ec23e45a14dfc2fb441395245dd90fb0529a0e9c44f5b0d3be51c43b3e32fe"
+    },
+    {
+      "path": "src/data/datasets/homecoming/levels.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "3be7243b924123592f0783453b7b57fc3af62bf109ac88beb1232e6274dad884",
+        "beta": "8d83b9ed94d3a3b5ffeda3dea50330b3ad6edc4781dd695ef0d55fbf52b35dce"
+      },
+      "reason": "File-level sweep member, and a two-way fork rather than lag. The beta dropped the `effects` key from the Fitness pool payload under STRIP-1, having found the read was resolving to `undefined` through an `as unknown as` cast; canonical still carries it. Canonical in turn has the archetype-inherent read (`getArchetypeInherentPower`) and the PARTSTAT-2 note bounding it, which the beta's copy does not.",
+      "exit": "Canonical drops the dead `effects` key -- it is `undefined` at runtime here too -- and the archetype-inherent read lands in `coh_data`. Two independent halves; the first is free and should not wait for the second.",
+      "gap": "FORK-10"
     },
     {
       "path": "src/data/datasets/rebirth/generated/mids-name-map.ts",
@@ -1077,9 +1222,86 @@
       "sha256": "22d3d36b0125f6d17c17030320e45d3134c5c5fd5501ac729fb4ace98befa4b5"
     },
     {
+      "path": "src/utils/calculations/attack-chain-powers.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "89f71ecebd20de5da4cb7a20bc67a2688fad7c4795a21b0a508f7f0e6cdebe0b",
+        "beta": "854bc9e00da8d01f8d92a386a1b7c3a1b3297096e77318e6c07f13c944e09e7f"
+      },
+      "reason": "16 seams over 12 slots, the widest slot spread in the sweep, graded `reads-too`. The beta's copy has since grown the stance and form-switch machinery (`buildFormModes`, `applyModeRedirect`, `selectActiveConditionals`) that canonical's has not, so the chain this file models diverges from the beta's before any seam is considered.",
+      "exit": "The attack-chain calc lands in `coh_math` and both TS copies become oracles rather than sources, or the strip retires the 12 slots. Until one of those, a change to either copy changes a census verdict about the other.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/utils/calculations/buff-pet-auras.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "e40c725ef5a0add7d3a6c3d401830bbb70db81b360b06e0edb76797826dd54e2",
+        "beta": "b97dc0feb23056eb12d7b2ba314998703a89fa0e0c3d6bdf8c4a555b3562ec30"
+      },
+      "reason": "File-level sweep member, and canonical is the side that is ahead. ENT-3 step 4 walks the whole in-place summon chain here (`getSummonedEntityChain`) where the beta still reads the root entity (`getPetEntity`); no in-place child carries an aura on any fork today, so the two produce the same answer and will stop doing so the day one does.",
+      "exit": "The beta takes the chain walk, or `coh_data`'s summon resolution lands and both TS copies stop being consulted. Named as a fork and not a per-repo because the two copies agreeing TODAY is the whole hazard -- this is FORK-6's shape, and it is the direction canonical has to push.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/utils/calculations/character-totals.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "c710364fc59a0ff21f65e3a25916a23e938a7ad84b77a26c2e3b7e1064a71c45",
+        "beta": "e4a29725ab76cd4b14df11eb3adfaafde1589edef20f53e12247bea7189bd461"
+      },
+      "reason": "This one file is the counterpart for TWO beta paths, and that is the verdict. The beta's PROD7 quarantined its legacy calc into `legacy-totals.oracle.ts` and left canonical's copy in place, so the census's `RENAMED_COUNTERPART` map points the frozen oracle here -- while the beta's own `character-totals.ts` is in the sweep too. Canonical's single file is graded as both the live calc and the frozen oracle, 14 seams over 14 slots, with a four-symbol `atomArmGap` (`SPECIAL_BUFF_STACK`, `atomsOf`, `isDebuffAtom`, `specialBuffValue`) naming exactly what canonical grew here and the beta's oracle did not.",
+      "exit": "The beta's rename map stops pointing here -- either because canonical performs the same split, or because the oracle is retired. `assertCounterpartsLive` already refuses a mapping whose target has stopped being the same file, so this exit is one the beta's own guard will announce.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/utils/calculations/damage.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "e513abc5fa3158b0c47da9681436bbcc2c3d477d7bb7e0feeaa50dceb04fba1e",
+        "beta": "486e57183f04ab28049916aa5cc7b8b43f8575252f52ce33e73d2a44a5233a88"
+      },
+      "reason": "Nine seams over 4 slots, `reads-too`. The beta's copy carries `atMechanicExemptDamage` and the `excludeFromAtMechanic` entry flag; canonical's does not, so the exempt slice does not exist in this copy at all. Paired with `components/info/DamageBlock.tsx` above -- same rule, two files, and a port taken from either of canonical's copies inherits the same wrong multiplication.",
+      "exit": "Canonical takes the `excludeFromAtMechanic` handling, or `coh_math`'s damage path lands it and this copy stops being read as the reference. Converges; the missing piece is a rule about the data, not a display choice.",
+      "gap": "FORK-10"
+    },
+    {
       "path": "src/utils/calculations/enhancement-values.ts",
       "status": "identical",
       "sha256": "5f3fd03fef25bee179565c94e505ee1f4780fcbeaab5879f115ee2b8635b32d2"
+    },
+    {
+      "path": "src/utils/calculations/inherents.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "e4e9618b872ac2c6b5c6ee0b8d618bc04d6324e1533826fba1c8aae5832bfa92",
+        "beta": "1a99283aee181ab13380386c39b678756e6490084861fdf29cfe86d611da888f"
+      },
+      "reason": "11 seams over 11 slots, and the only file in the sweep whose seams grade BOTH `reads-too` and `migrated-there` -- canonical has migrated some of them and not others, which is a state only readable from this copy. Its `atomArmGap` names `atomsOf` and `reachesCaster`: canonical grew the atom-native arm here and the beta's copy has not.",
+      "exit": "The remaining `reads-too` seams migrate here and the file grades `migrated-there` throughout; the beta then has nothing left to learn from canonical's copy and the entry becomes an identical-or-deleted question rather than a fork.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/utils/calculations/perma.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "d8452a1b6d2c0f3751293b2a58f7ffaeb75bc0956a222502addcf9113966bef6",
+        "beta": "05fb963af06cb85b8364f1bf3ed38e589a46c3c17b742525fb983e377610d606"
+      },
+      "reason": "Six seams over `recharge` and `buffDuration`, graded `migrated-there` -- the census reports canonical as the side that has already moved. It is also the one place that reading is checkable, and it is currently wrong in the other direction: the beta's copy has `recastVerdict` and `reachesCaster` that canonical's lacks, so `migrated-there` is true of the seams and false of the file.",
+      "exit": "Canonical takes `recastVerdict` and the `reachesCaster` read, which is the whole of the difference; the entry then goes identical. This is the one fork in the sweep with no argument on either side for staying two files.",
+      "gap": "FORK-10"
+    },
+    {
+      "path": "src/utils/calculations/pet-damage.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "c971eb47bee1801734c0069c52e08dc80f4f46a9d3576120f8242f6782ef07be",
+        "beta": "395771c90ef1c600f3cdeba20db2d32f689ebf06549554e0f7053075b63ccd9d"
+      },
+      "reason": "File-level sweep member. The beta's copy carries `SIGNED_PET_EFFECTS` and the sub-type arrays (`defenseTypes`, `resistanceTypes`, `mezTypes`, `debuffTypes`); canonical's has neither. Both are discriminators in the skill's sense -- a Dark Servant's -20% Energy resistance renders as +20% without the sign, and \"21%\" is not a stat without the sub-types -- and ~55 Homecoming entities carry a negative `SelfResistance`.",
+      "exit": "Canonical takes the signs and the sub-type arrays. Rule 0 ground again: the sign is in the export and this copy drops it, so this converges and does not wait on a strip.",
+      "gap": "FORK-10"
     },
     {
       "path": "src/utils/calculations/repel-protection.ts",
@@ -1087,9 +1309,31 @@
       "sha256": "cab2ab8fe2e1521e846cebd3a2ae6241e1ae5c266564e530441769bb7b9f911c"
     },
     {
+      "path": "src/utils/calculations/set-bonuses.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "0324cdfb371bb042b46f26c1f2e414ce3e34f207abc38472e917bbca619119c7",
+        "beta": "9de508fee81c75819ca03c2218002e807c73cbceb33f0cb15136771d7e039ebb"
+      },
+      "reason": "File-level sweep member. The beta's copy now reads `SET_BONUS_STAT_NAME_MAP` and `SET_BONUS_PAIRED_STATS` from a generated module emitted out of `contract/set-bonus-stat-vocab.json` -- the same file `coh_math`'s `set_bonuses.rs` `include_str!`s -- so the vocabulary cannot drift from the engine. Canonical's copy still holds the hand-written `PAIRED_STATS` table that change was made to retire, which is a hardcoded copy of something the contract owns.",
+      "exit": "Canonical reads the generated vocabulary. This is a Rule 0 violation sitting in the tree -- a table the export owns, transcribed -- and it converges by deletion of the local table.",
+      "gap": "FORK-10"
+    },
+    {
       "path": "src/utils/export-popmenu.ts",
       "status": "identical",
       "sha256": "94e744bb59ca50fa775843c10508696d5bdfd5710b37175fde8ff969368b64f2"
+    },
+    {
+      "path": "src/utils/forum-export.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "70850d31af0ab35d2a9c98899b4389583cb73dc3cc3e0b563c5864908892e1e5",
+        "beta": "57fb81d0e284515db1f92f4cfbc53ffa94ef439bfc8860ba902782e808b5bcbe"
+      },
+      "reason": "File-level sweep member. The beta's copy carries SLOT-1 (category travels with the power, so slot levels stop being looked up by display name and missing on every power) and SLOT-3 (`computeExportSlotLevels` with the level-up-mode flag). Canonical's copy has neither, so every slot it prints carries its power's pick level.",
+      "exit": "Canonical takes both. `src/utils/slot-levels.ts` is already watched here under SLOT-3 and is where the fork actually lives, so this file converges when that one does.",
+      "gap": "FORK-10"
     },
     {
       "path": "src/utils/mids-export.ts",
@@ -1157,6 +1401,17 @@
       "path": "src/utils/mids-import/types.ts",
       "status": "identical",
       "sha256": "de6cff3a22cb93d2c38458948ad2ae6c19bf6db90121844bbd779fe3d21503ec"
+    },
+    {
+      "path": "src/utils/quick-snipe.ts",
+      "status": "forked",
+      "sha256": {
+        "canonical": "f4bf77029c5a0f98812e983bee6196d001cd5511e064bdef8873beaa236574f6",
+        "beta": "05846d31fcec9fe29ffb849f199b5030259dbddb343fb523eb83ef724ef05a97"
+      },
+      "reason": "File-level sweep member. The beta rewrote the gate's contract -- `fastFormActive` is now the caller's decision, with `resolveEffectivePower` evaluating `power.quickSnipe.condition` for real (SNIPE-2: Homecoming gates on combat engagement, Rebirth and Thunderspy on ToHit >= 97%) -- where canonical's copy still takes a `combatMode` boolean and encodes the Homecoming rule in its own signature. A per-fork condition read as one flag is the trap this repo's mandate is about.",
+      "exit": "Canonical takes the caller-decides signature and the `quickSnipe.condition` read. SNIPE-2 is already a register row; this entry closes when that row does.",
+      "gap": "FORK-10"
     },
     {
       "path": "src/utils/slot-levels.ts",
