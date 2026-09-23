@@ -201,46 +201,35 @@ const TRACKED_ROOTS = [
   'src/data/set-bonus-groups.ts',
   'src/data/set-bonus-index.ts',
   'src/data/stance-groups.ts',
-  // Joined 2026-09-23 under F84, and what got them here is a deletion rather than an argument.
-  // This repo tracked a second copy of the beta's whole React client -- 162 files across
-  // `components/`, `pages/`, `stores/`, `services/`, `lib/` and `hooks/`, none of it adjudicated by
-  // anything. 296 paths were shared with the beta, 135 already differed, and a bare
-  // `src/lib/supabase.ts` in SECURITY_AUDIT.md resolved to two files in two repos, which is how
-  // F01 went unread for a month: ten reviewers and four verification passes read the copy that
-  // ships nothing. Canonical's `src/` has no `index.html`, no vite config, no `dev`/`build` script
-  // and no `react-dom`, so 123 of those files were read by nothing here and cited by nothing but
-  // prose. They are gone. A file that is not there cannot be read by mistake, which is the whole
-  // of the fix; guarding a stale copy would have kept the trap and added a gate to it.
+  // Joined 2026-09-23 under F84 and re-cut the same day by DEC8, and the second cut is the one
+  // that holds. This repo tracked a second copy of the beta's whole React client -- 162 files
+  // across `components/`, `pages/`, `stores/`, `services/`, `lib/` and `hooks/`, none of it
+  // adjudicated by anything. 296 paths were shared with the beta, 135 already differed, and a
+  // bare `src/lib/supabase.ts` in SECURITY_AUDIT.md resolved to two files in two repos, which is
+  // how F01 went unread for a month: ten reviewers and four verification passes read the copy
+  // that ships nothing. F84's first deletion took 123 files on an import sweep, was wrong because
+  // the beta's census opens canonical's copies, and was reverted within the hour; 27 paths then
+  // joined this list as the watched survivors.
   //
-  // These 27 are what stayed and therefore what has to be watched. Three reasons to stay, and the
-  // rule was applied rather than argued case by case: reachable from a test this repo runs, named
-  // in `crates/app/**` as the source a Rust port was taken from, or pulled in by one of those two
-  // -- the kept tree is closed under its own imports, so nothing left behind imports something
-  // that is not there. `ui/` is here entirely for that third reason: `ConfirmModal.tsx` is the
-  // port reference for `crates/app/src/confirm.rs` and it barrels through `ui/index.ts`.
+  // DEC8 deleted the mirror for real: 141 files, and the survivors are the ones a consumer INSIDE
+  // this repo forces. That is one rule, not the three F84 used -- reachable from a test `vitest`
+  // runs here, plus the closure of their imports. The other two reasons F84 kept files have both
+  // been answered rather than dropped. A `crates/app` port citation now names the beta's path, so
+  // it cites the tree that is maintained instead of a local copy that is not; `ConfirmModal.tsx`,
+  // `Modal.tsx`, `EnhancementIcon.tsx`, `links.ts` and the eleven `ui/` files left with it. And
+  // the beta census's counterparts left too: DEC7 measured what that costs before it was taken,
+  // and the answer is 109 seams flipping `reads-too` -> `absent` with every `verdict`, `supply`,
+  // `postStrip`, `display` and `guardedBy` byte-identical, and not one `atomArmGap` finding among
+  // them -- all 25 of those live in `inherents.ts` and `legacy-totals.oracle.ts`, which are not in
+  // this tree and did not move.
   //
-  // The 12 `.test.ts` twins among the 39 survivors are NOT listed here -- they are already
-  // adjudicated in `shared-test-surface.json` under FORK-4, and a path in two manifests is two
-  // places for one verdict, which is the drift this pair of files exists to stop.
-  'src/components/enhancements/EnhancementIcon.tsx',
+  // These 12 are what stayed. The 12 `.test.ts` twins that force them are NOT listed here -- they
+  // are already adjudicated in `shared-test-surface.json` under FORK-4, and a path in two
+  // manifests is two places for one verdict, which is the drift this pair of files exists to stop.
   'src/components/incarnate/craft-tree.ts',
   'src/components/info/powerDisplayUtils.ts',
-  'src/components/modals/ConfirmModal.tsx',
-  'src/components/modals/Modal.tsx',
   'src/components/powers/power-row-utils.ts',
-  'src/components/ui/Badge.tsx',
-  'src/components/ui/Button.tsx',
-  'src/components/ui/CollapsibleSection.tsx',
-  'src/components/ui/FloatingWindow.tsx',
-  'src/components/ui/Input.tsx',
-  'src/components/ui/LevelSpinner.tsx',
-  'src/components/ui/Select.tsx',
-  'src/components/ui/Slider.tsx',
-  'src/components/ui/Toggle.tsx',
-  'src/components/ui/Tooltip.tsx',
-  'src/components/ui/index.ts',
   'src/hooks/useCalculatedStats.ts',
-  'src/lib/links.ts',
   'src/lib/supabase.ts',
   'src/services/auth.ts',
   'src/services/sharedBuilds.ts',
@@ -268,24 +257,21 @@ const TRACKED_ROOTS = [
   // re-derives the sweep and fails when a counterpart it opens is not watched here, which is the
   // half a hardcoded list cannot do.
   //
-  // What the drift costs is not a wrong number on this side -- canonical's `src/` still ships
-  // nothing, no `index.html`, no vite config, no `react-dom`. It is the census's own verdicts:
+  // What the drift cost was never a wrong number on this side -- canonical's `src/` ships
+  // nothing, no `index.html`, no vite config, no `react-dom`. It was the census's own verdicts:
   // `bothRead`, `migrated`, `reads-too` and `atomArmGap` are all read off canonical's copy, so a
-  // stale copy here answers BPORT's denominator with a file nobody maintains. That already
-  // happened once in the other direction -- the F84 deletion moved `bothRead` from 25 to 14
-  // before anything noticed.
-  'src/components/enhancements/SetBonusDisplay.tsx',
-  'src/components/enhancements/SetBonusList.tsx',
-  'src/components/export-image/BuildImageCard.tsx',
-  'src/components/info/DamageBlock.tsx',
-  'src/components/info/EnhancementInfoContent.tsx',
-  'src/components/info/InfoPanel.tsx',
-  'src/components/info/MechanicAdjusters.tsx',
-  'src/components/info/PowerInfoBlocks.tsx',
-  'src/components/info/PowerInfoTooltip.tsx',
-  'src/components/layout/StatsDashboard.tsx',
-  'src/components/modals/PowersetCompareModal.tsx',
-  'src/components/powers/PowerSlot.tsx',
+  // stale copy here answered BPORT's denominator with a file nobody maintains.
+  //
+  // DEC8 removed twelve of these 23, and it is the same answer rather than a reversal. The census
+  // reads canonical's copy to decide whether a seam has a counterpart; a copy nobody edits
+  // answers that question with a lie that ages. Deleting it makes the seam answer `absent`, which
+  // is TRUE and stays true, where `reads-too` off an unmaintained file was true on the day it was
+  // written. DEC7 measured the whole cost first -- 109 seams, one field each, zero findings lost
+  // -- because the F84 deletion had moved `bothRead` from 25 to 14 with nothing noticing, and the
+  // rule now is that a cross-repo verdict is re-measured before it is moved, not after.
+  //
+  // What is left of this block is the paths the census opens that this repo keeps for its OWN
+  // reasons, and every one of them is outside the client tree.
   'src/data/datasets/homecoming/levels.ts',
   'src/utils/calculations/attack-chain-powers.ts',
   'src/utils/calculations/buff-pet-auras.ts',

@@ -227,7 +227,13 @@ describe('BPORT4 census — what the strip costs, per seam', () => {
     // bag to fold over the build's picked powers, and deleting it for `CalcResult.damageCeiling`
     // took the last reader in that hook with it. A bucket that SHRINKS is the direction this
     // census exists to measure, so the pin moves down with it.
-    expect(b.bothRead).toHaveLength(25);
+    // 25 until DEC8 deleted canonical's copy of this repo's React client. Eleven of the twelve
+    // files that left this bucket are `src/components/**` and they departed together; the
+    // bucket is not measuring a bag reader disappearing, it is measuring a COUNTERPART
+    // disappearing, which is why `betaOnly` gains exactly what this loses. The two that stayed
+    // stayed for a canonical reason: `power-row-utils.ts` and `buildStore.ts` are reachable
+    // from tests canonical's own `vitest` runs, which is the one rule that kept anything.
+    expect(b.bothRead).toHaveLength(14);
     expect(b.bothRead).toContain('src/utils/calculations/character-totals.ts');
     expect(bagSeams('src/utils/calculations/character-totals.ts')).toHaveLength(0);
     // 6 until BPORT5. The sixth was the oracle, and it was never beta-only — canonical kept
@@ -238,7 +244,11 @@ describe('BPORT4 census — what the strip costs, per seam', () => {
     // sweep-sees-a-read / finder-sees-no-slot asymmetry `character-totals.ts` carries above, and
     // pinned the same way, as a pair. A REAL reader entering this bucket has seams and still
     // trips the count.
-    expect(b.betaOnly).toHaveLength(5);
+    // 5 until DEC8. The twelve arrivals are the `src/components/**` counterparts canonical
+    // deleted — eleven out of `bothRead`, one (`SetBonusDisplay.tsx`) out of `identical`. They
+    // are beta-only in the literal sense the bucket names and in no other: the beta still reads
+    // its bag exactly as it did, and nothing about the strip moved.
+    expect(b.betaOnly).toHaveLength(17);
     expect(b.betaOnly).toContain('src/engine/powerProjectionFillPin.ts');
     expect(bagSeams('src/engine/powerProjectionFillPin.ts')).toHaveLength(0);
     expect(b.renamed).toEqual([ORACLE]);
@@ -265,12 +275,18 @@ describe('BPORT4 census — what the strip costs, per seam', () => {
       .filter((s) => (s.atomArmGap ?? []).length > 0)
       .map((s) => s.file))].sort();
     expect(behind).toEqual([...ATOM_ARM_BEHIND].sort());
-    // The one that made the point, now from the other side: `StatsDashboard` still names
-    // `effects.movementCapBump` in both repos — so the per-slot comparison still calls it
-    // "reads-too" — and the arm gap it reported is closed. A gap re-appearing here is
-    // canonical growing a reader this fork has not taken.
+    // The one that made the point, three times now. `StatsDashboard` named
+    // `effects.movementCapBump` in both repos, so the per-slot comparison called it "reads-too"
+    // while the arm gap it reported was already closed; F84's deletion flipped it to "absent"
+    // with nothing noticing, and the revert put it back. DEC8 flipped it to "absent" on
+    // purpose, having measured first: canonical's copy of this file is gone for good, and an
+    // "absent" that is TRUE is worth more than a "reads-too" read off a file nobody maintained.
+    // What is pinned here is therefore the arm gap, which is the only thing this seam ever said
+    // that was about the atom migration — it stays empty, and a gap re-appearing is canonical
+    // growing a reader this fork has not taken. The `sibling` field is pinned alongside it so
+    // the counterpart cannot come BACK unadjudicated.
     const dash = census.seams.find((s) => s.file === 'src/components/layout/StatsDashboard.tsx')!;
-    expect(dash.sibling).toBe('reads-too');
+    expect(dash.sibling).toBe('absent');
     expect(dash.atomArmGap).toEqual([]);
   });
 

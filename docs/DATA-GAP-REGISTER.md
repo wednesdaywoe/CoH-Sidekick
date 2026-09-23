@@ -57,13 +57,13 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**1 open, of 336 entries.** FORK-10, filed 2026-09-23: this repo holds a second copy of the
-beta's React client, 296 shared paths with 135 already differing, and 50 of them are now watched.
+**0 open, of 336 entries.** FORK-10 closed 2026-09-23; nothing is open. What follows is carried
+because it outlived the rows that taught it, not because it is waiting on anybody.
 
-**An obligation is set by what a consumer DOES, not by what it names.** This row's cost was
-priced by closing the census's roster under imports — `pipelineSources`' rule, where a converter
-executes what it imports. The census only greps, so it binds the 39 files it opens, not the 106
-they reach.
+**A deletion's blast radius is not in the diff that proposes it.** FORK-10's first cut took 123
+files an import sweep called dead, and was reverted within the hour: the beta's census opens
+canonical's copies. "Nothing reads it" is three claims, and one tree's import graph answers one.
+The second cut measured first, and 109 seams moved as DEC7 said.
 
 **A fork between two TypeScript copies is two thirds of a question.** Four of FORK-10's verdicts
 called a TS drift Rule 0 and said a port would inherit it. The engine declines all four on
@@ -71,12 +71,7 @@ purpose. The third party to any such fork is the Rust side, and it is the only o
 
 **A converter-emitted flag no crate reads.** `excludeFromAtMechanic` reaches the contract 16 times
 (Lift, Propel, Gravity Control, four datasets) and is dropped at deserialization. Dead weight or
-unmodelled rule — undetermined.
-
-**A deletion's blast radius is not in the diff that proposes it.** 123 files read by nothing here
-were deleted and restored the same day, because the beta's BPORT4 census opens canonical's copies
-through `--sibling`. "Nothing reads it" is three claims, and an import sweep of one tree answers
-one.
+unmodelled rule — undetermined, and unfiled: it is an engine question, not a gap in the read.
 
 **"Edited since July" counted the commit that created them.** The transplant landed 2026-07-16, so
 the restore's headline number held for 119 of 123 and the honest one is 27 — 96 have had no edit
@@ -1014,7 +1009,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 118 of 119 closed
+[Full detail](gaps/pipeline-provenance.md) — 119 of 119 closed
 
 - [x] **PROV-8** — nothing measured the export against the shard it copies: three staleness gates,
   all of them with the export on one side and none with the game, so a user found i28p4 RC3 before
@@ -1538,13 +1533,9 @@ measurement went, and where a closure for the residual belongs too.
   `eec21e98eb` recorded parent `50dab95dec` and graded as itself. Both paths excluded now, on both
   legs; the beta mirrors them and had no exclusion at all
 
-- [ ] **FORK-10** — this repo tracks a second copy of the beta's React client, 296 paths shared
-  and 135 differing. 50 now carry verdicts: 27 roots 2026-09-23, then the 23 the beta's census
-  actually opens. Its costed 118/49 closed the roster under imports; the census executes nothing,
-  so it binds the 39 it reads. Four of the 22 forks were written up as Rule 0 and none is — the
-  engine models each differently on purpose or not at all, which was read off the TS alone. 96 of
-  the restored 123 have no canonical edit since the transplant. Check:
-  `scripts/keys/f84-census-counterparts.cjs`. story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
+- [x] **FORK-10** — this repo held a second copy of the beta's React client, 296 paths shared and
+  135 differing, most of it adjudicated by nothing. Closed 2026-09-23 by DEC8 deleting it: 141
+  files, the 24 survivors all forced by a canonical test and all already carrying a verdict.
 
 - [x] **FORK-9** — one sentence for both ways a recorded head stops matching: the repo moved
   FORWARD, where the run is still re-checkable where it was taken, and the head rewritten OUT of

@@ -275,7 +275,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "30ec6ab4a703fa53f43face84d80c9341fa3cfaa2242205fe92726cc48040e8a"
+      "sha256": "c58f104a4861f9452195f67d0d46e644c344ca51b9883947cd10cebb4490acc8"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -601,39 +601,7 @@
     {
       "path": "scripts/verify-sync.cjs",
       "status": "identical",
-      "sha256": "f8922dc568469b103bfd1ce5f2554d60c6f2aac024484eb50109e51b6be5c738"
-    },
-    {
-      "path": "src/components/enhancements/EnhancementIcon.tsx",
-      "status": "identical",
-      "sha256": "c1547064aded3c8f69b10dd11cb1b0cfcd8d4145152185ff2a5a86354096ea3c"
-    },
-    {
-      "path": "src/components/enhancements/SetBonusDisplay.tsx",
-      "status": "identical",
-      "sha256": "1dd490b4dde9c41f4741b5cb15cbfb70b1d75b7b919cb0e80f957fb19f3e1455"
-    },
-    {
-      "path": "src/components/enhancements/SetBonusList.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "2bd77114f689915e21f2f0a0599637db4dbb59ece18e0e00546b3a13df86cfd0",
-        "beta": "10f7a371f67df96e96d4d996128fb96e477861a2b05582f28c76f5b9567d42c4"
-      },
-      "reason": "In the sweep for `partition`'s file-level verdict rather than a seam. Canonical is behind by one substitution the beta made deliberately: `getPairedStat` off `utils/calculations/set-bonuses` became `buildTrackedStatTargets` off `data/set-bonus-index`, because the dashboard's `breakdownKey` vocabulary and the normalized bonus vocabulary differ by case, by rename (maxHP/maxhp) and by granularity. Canonical's copy still pairs on the old vocabulary.",
-      "exit": "Canonical takes `buildTrackedStatTargets`. `data/set-bonus-index.ts` is already adjudicated here as `per-repo`, so this is a one-import change with its dependency already declared.",
-      "gap": "FORK-10"
-    },
-    {
-      "path": "src/components/export-image/BuildImageCard.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "d5fb112314c6d5c62820156e7105b8077ffeaf70a9b458ed3668ba015cf51717",
-        "beta": "4251aa6ce9994de7a9ce9846ba6b0c8fdeefbf18d519cb9d33b8243b9c3fd275"
-      },
-      "reason": "File-level sweep member. The beta's copy takes `StatCap` as an object with a `capDescription`, where canonical's still passes a bare number -- so canonical's poster cannot say WHY a bar is capped, and reads a softcap and a hard ceiling the same way.",
-      "exit": "Canonical takes `@/data/core/stat-caps`. It is the same change `StatsDashboard.tsx` needs and should land with it; separately listed because the export card is reachable when the dashboard is not.",
-      "gap": "FORK-10"
+      "sha256": "ac4c7e24d76f9e0101432a9b59ebc2358da70e1a92c9702c640ca4f3adb83aa6"
     },
     {
       "path": "src/components/incarnate/craft-tree.ts",
@@ -641,118 +609,9 @@
       "sha256": "87fba5a5ed8d844db7b4d769dbc1fa1f6a62720c0483d001dc75fc8226493d11"
     },
     {
-      "path": "src/components/info/DamageBlock.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "7e5171954bd574b3c56beb9233bcc72d019cd5de163690fec48369d0a0702389",
-        "beta": "80380f7833838336263bcff34f314dde6302fd077c910a16132e729c1606202d"
-      },
-      "reason": "18 seams over 6 slots, `reads-too`. The beta's copy threads an `exempt` argument through `applyBonus` for the Gravity Impact slice and reads `foldProcsIntoFinalDamage` off the store; canonical's does neither. Same rule as `utils/calculations/damage.ts` above and the same correction: the flag behind it reaches the contract and no crate reads it, so this copy is not where the engine would inherit anything.",
-      "exit": "Deleted with the unread tree, alongside `utils/calculations/damage.ts`. They are one rule in two files and neither is a port source for it.",
-      "gap": "FORK-10"
-    },
-    {
-      "path": "src/components/info/EnhancementInfoContent.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "9be287e871a8e0d7a1508027eb82783d94b2238250bdf58c80d2bd4cde0e88cf",
-        "beta": "76bb6f60cd20294860f47b64360a03ae443e39b93c91f6f57ed56778ce4d97b2"
-      },
-      "reason": "22 seams over 4 slots, `reads-too`. Canonical is behind by six commits' worth of beta proc work (`procRollsInPatch`, `powerFiresProcs`, `resolveProcPatchDuration`) and ahead by FORK-2's IO-dilution resolution, which was decided here against a corpus. The IO-dilution half is the part with a claim on staying.",
-      "exit": "FORK-2's dilution rule reaches the engine crate and stops needing a TS home; the file then carries only beta-forward lag and is deleted here when the strip drops its four slots.",
-      "gap": "FORK-10"
-    },
-    {
-      "path": "src/components/info/InfoPanel.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "dfb455b16adaa992ff78bd18725e6852284dfa3f3a659be86549d749abc09c2b",
-        "beta": "461120493f1c3d5feda36da4acf5f6662c0a742d4abc1d082c29ed9f4cd9e80e"
-      },
-      "reason": "The census finds 18 bag seams over 8 slots here and grades canonical's copy `reads-too`, so this file is a term in BPORT's denominator that nothing here imports. The fork is one-way and large: the beta moved the panel onto the engine projection (`usePowerProjection`, `useCharacterCalculation`, `buildDisplayEffects`, `recastVerdict`) and canonical's copy is the pre-projection TS it was migrated from, 7 commits of ENT-22 pet-parameter work later. Both facts matter and they point opposite ways -- the beta is ahead on the read path, canonical is ahead on the pet parameters -- which is why this is a fork and not a lag.",
-      "exit": "The beta's BPORT7 strip lands and this file stops matching `fileSweep()`'s `/\\.effects\\b/`. At that point no cross-repo consumer opens canonical's copy and it is deleted here, not reconciled: the ENT-22 work it carries belongs in `crates/` by then or it was never a port source.",
-      "gap": "FORK-10"
-    },
-    {
-      "path": "src/components/info/MechanicAdjusters.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "adf07d89a0a68c3442e86e10ce032884d803e5e38a7705718b2faa5c6fa0705d",
-        "beta": "a0963d966cd1789939c9bf7f0b167dea9ee82aa24d8587c8acd427be1d2297bf"
-      },
-      "reason": "File-level sweep member. The beta's copy routes stance powers through `toStancePowers` so `mechanicType` rides along, and its `findStanceParent` breaks a tie with `isStanceSwitcher`; canonical's projects the field away and its `findStanceParent` takes the first match in PICK order, so Bio Armor's switcher (internal \"Evolution\") and the unrelated \"Evolving Armor\" toggle (internal \"Adaptation\") are indistinguishable here and the picker desyncs from the calc (beta report 2026-07-26). Read as Rule 0 first and it is not: `src/data/stance-groups.ts` next door is already declared `per-repo` because canonical's engine expands stances from the data and `coh_data::power` reads the wire's `mechanicType` exhaustively, so there is no option table to port and nothing downstream of this file consumes the answer.",
-      "exit": "Deleted with the rest of the unread client tree, or canonical takes BOTH `toStancePowers` and the `isStanceSwitcher` tie-break -- and the second edits a file already declared per-repo under FORK-7, so it is a decision about that declaration and not a free copy. Named this way because the first reading of it -- a dropped discriminator, therefore Rule 0, therefore take the copy -- is the one a later session will reach for.",
-      "gap": "FORK-10"
-    },
-    {
-      "path": "src/components/info/PowerInfoBlocks.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "c1cd6acc92990d157e15a253f78c72168adce3df2b8cd14538ab5fbd80b829f3",
-        "beta": "d6795ddcf331274d37490a59e9a1e85c408c76ea4e4ac324a6580f5e2f833a18"
-      },
-      "reason": "16 seams over 6 slots, `reads-too`. The beta's copy reads `PowerProjection` from `@/engine/engineTotalsMap` and canonical's still computes `calcThreeTier` locally, so the two files answer the same question from different sources -- and the census reads canonical's answer as evidence about the migration's progress.",
-      "exit": "Leaves the sweep when the beta's strip retires `radius`/`arc`/`recharge`/`castTime`/`maxTargets`/`range`, at which point canonical's copy has no cross-repo reader and is deleted.",
-      "gap": "FORK-10"
-    },
-    {
-      "path": "src/components/info/PowerInfoTooltip.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "c5df5cf1b453e64af22a2ba9447a5ab3a85416207667e7bbd018b0eedc7995b2",
-        "beta": "eb43f8f14fccf8d6a257f7936cef3e37af20a06f8c996bbeb873c5b992c684cf"
-      },
-      "reason": "22 seams over 4 slots (`damage`, `summon`, `buffDuration`, `dot`), graded `reads-too` against canonical's copy, two of them already `dead-today`. Canonical's copy predates the beta's split of this file into `buildDisplayEffects.ts`, `petEffectDisplay.ts` and `magnitudesFromProjection.ts` -- three of the five paths the census reports ABSENT here are exactly those, so the census is grading a file that has been refactored out from under it on one side only.",
-      "exit": "The same BPORT7 strip that retires the four slots, or the beta's three extracted modules arriving here as part of taking the projection read path. Whichever comes first, this file stops carrying a seam and leaves the sweep; it is deleted here rather than merged, because a 2,951-line component is not a port source for anything in `crates/`.",
-      "gap": "FORK-10"
-    },
-    {
       "path": "src/components/info/powerDisplayUtils.ts",
       "status": "identical",
       "sha256": "2c563e1ee5f315588b988ba4b1e37ac6cc6c8a8e62f5d21c62bcd55986b58e78"
-    },
-    {
-      "path": "src/components/layout/StatsDashboard.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "69e749a282d34f489630bae1c6acbb99f3646566688edbb6a00e34a95c5700d2",
-        "beta": "427617cecee36be231a76e9c55042a1c3cf5d1703decbd0c7d71852e4e1a6525"
-      },
-      "reason": "Two seams on `movementCapBump`, both `dead-today`, and this is the file the F84 deletion was caught by: its census answer moved from `reads-too` to `absent` and took `bothRead` from 25 to 14. The fork is wide -- the beta has `stat-caps`, `WhatIfBuffsModal`, `HybridTargetsSlider` and `SharePreviewCapture`; canonical has MBDIMPORT-1/2/3's importer work -- so neither copy is a subset of the other.",
-      "exit": "The MBDIMPORT importer work lands in `crates/app` and canonical's copy stops being a port source; it is then deleted, and the census's `movementCapBump` seams are already `dead-today` so nothing it grades is lost.",
-      "gap": "FORK-10"
-    },
-    {
-      "path": "src/components/modals/ConfirmModal.tsx",
-      "status": "identical",
-      "sha256": "c5cf60524e2821a7868c9218af3417f9ff1e381ce77703cca32b56884de33de8"
-    },
-    {
-      "path": "src/components/modals/Modal.tsx",
-      "status": "identical",
-      "sha256": "a7c889060111a0fe9a51e4412e1165b89dc8179c1307573d5c97212b407a7844"
-    },
-    {
-      "path": "src/components/modals/PowersetCompareModal.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "08245fca80963a6ff718353efe86f46c6a8a754ac19b0643a3277a08f6f22de4",
-        "beta": "9776a423155f7a82a151f260f1afa64285530b18217805baec47ff0c60bf4291"
-      },
-      "reason": "Nine seams, one per mez and defence slot, and the whole fork is one line: canonical reads `e?.summon` off the bag where the beta reads `power.summon`. The census grades canonical `reads-too` on that line and is right -- this copy is genuinely a surviving bag reader, which is the only reason the difference is worth a verdict.",
-      "exit": "Canonical takes the beta's `power.summon` read. One line, and it moves the census's count of surviving bag readers by one, which is the number BPORT is scoped against.",
-      "gap": "FORK-10"
-    },
-    {
-      "path": "src/components/powers/PowerSlot.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "9fa4e9e6627e4a3483c69c6d1d544882ebf7829b675cfa309cc05ab98b1446f1",
-        "beta": "e9f24d723941aedbe292e9b798313ddd1577447fcf9e2bfbae07f1dcf4232a98"
-      },
-      "reason": "File-level sweep member. The beta renders a negative `boost` as \"Under Level\" in red; canonical's copy tests `boost > 0` and shows nothing, so an under-levelled enhancement is invisible in this copy. Untouched here since the transplant.",
-      "exit": "Canonical takes the signed-boost branch. Small, and it pairs with BOOST-6's three levels the game has no recipe for -- the same signedness question one display over.",
-      "gap": "FORK-10"
     },
     {
       "path": "src/components/powers/power-row-utils.ts",
@@ -763,73 +622,6 @@
       },
       "reason": "Canonical's copy is the frozen source `crates/app/src/panels/powers.rs` was ported from, and it names this path in as many words. The beta's has moved 95 lines since; nothing here took them, because nothing here runs a React power row. Converging by re-syncing would re-point the port's reference at code the Rust panel has not implemented, which is worse than a lag that is written down.",
       "exit": "`crates/app/src/panels/powers.rs` stops citing this path -- either because the port is complete and the citation is retired, or because the panel is re-derived from the export rather than from a TypeScript sibling. This file is then deleted here, not converged.",
-      "gap": "FORK-10"
-    },
-    {
-      "path": "src/components/ui/Badge.tsx",
-      "status": "identical",
-      "sha256": "50b61fe007e904ba829d17573398920955a385f0c630ec310ea6c8fdc27f106a"
-    },
-    {
-      "path": "src/components/ui/Button.tsx",
-      "status": "identical",
-      "sha256": "d6adfa35ef2e2de3b0c95f540f14458ea3e1f378fa886a00545f2355eff4e821"
-    },
-    {
-      "path": "src/components/ui/CollapsibleSection.tsx",
-      "status": "identical",
-      "sha256": "410724f2ad72db1f51da8c9a921f282d37437c73f31df3b9bbcce19729c73051"
-    },
-    {
-      "path": "src/components/ui/FloatingWindow.tsx",
-      "status": "identical",
-      "sha256": "75094207da734e9b7445dc206156fcd47703fa075104560b867a241626002b47"
-    },
-    {
-      "path": "src/components/ui/Input.tsx",
-      "status": "identical",
-      "sha256": "8ce7af64e3b3260eeef9bda6c3fcc129eb841517fefe7c4758c9cb09e25a4e66"
-    },
-    {
-      "path": "src/components/ui/LevelSpinner.tsx",
-      "status": "forked",
-      "sha256": {
-        "canonical": "ac9eea760c70c0e5afc9f9a02db6e8af786ee9310de0c18bf52cdcdd6c552fa5",
-        "beta": "c4ec2bd685b718f93ad1f7137cea6ccda43a610c295cca67fe9d04a895582e73"
-      },
-      "reason": "Here only because `ConfirmModal.tsx` -- the port reference for `crates/app/src/confirm.rs` -- imports the `ui/index.ts` barrel, and the barrel re-exports this. The beta added `formatSignedOffset` and 26 lines of exemplar-offset formatting that no consumer in this repo calls. Kept for import coherence, not for its contents: the rule that decided the surviving mirror is that nothing left behind may import something that is not there.",
-      "exit": "`ConfirmModal.tsx` stops being cited by `crates/app/src/confirm.rs`, at which point the whole `ui/` barrel leaves with it. Nothing else here reaches this file.",
-      "gap": "FORK-10"
-    },
-    {
-      "path": "src/components/ui/Select.tsx",
-      "status": "identical",
-      "sha256": "587af430c745aa7dd1d04af45fa374db879fb4402d1ae32f86657d7dda280aae"
-    },
-    {
-      "path": "src/components/ui/Slider.tsx",
-      "status": "identical",
-      "sha256": "b2cdfaf6dd39482ab12c42282825ff1a9ea80e453267758e6c3333ec3c334e4c"
-    },
-    {
-      "path": "src/components/ui/Toggle.tsx",
-      "status": "identical",
-      "sha256": "c7403596003d9434f24b2c62ac302463ecaa9339d6851c0e732b9ee0ecfb256f"
-    },
-    {
-      "path": "src/components/ui/Tooltip.tsx",
-      "status": "identical",
-      "sha256": "b0476a17d0bf6103bbdbeb2d849d9bac336eb733df3c96eeecd1d09b6fa8a1d2"
-    },
-    {
-      "path": "src/components/ui/index.ts",
-      "status": "forked",
-      "sha256": {
-        "canonical": "7744e318322f36d5f9d663a90e6d86d4372d479ebb2be5e6471ef64e191666b0",
-        "beta": "bf94c3c846bc7ad238d5825d2c3b7b758dc862fe47cbe27b93d99fa8d46a39bf"
-      },
-      "reason": "The barrel `ConfirmModal.tsx` imports, one line apart from the beta's: the beta re-exports `formatSignedOffset` beside `LevelSpinner` and this copy does not, because the function does not exist on this side. A barrel diverges exactly when the module under it does, so this entry is the sibling of the `LevelSpinner.tsx` one and moves with it.",
-      "exit": "Retires with `LevelSpinner.tsx` and the rest of `ui/`, when `crates/app/src/confirm.rs` stops citing `ConfirmModal.tsx`.",
       "gap": "FORK-10"
     },
     {
@@ -1105,11 +897,6 @@
       "reason": "Read here by one consumer, `src/hooks/shared-calc-cache.test.ts`, which grades the memoisation contract the Rust engine's cache mirrors. The beta's copy is 161 lines longer and carries the what-if and engine-error surfaces this repo has no components for. The test pins the cache behaviour, not the hook's feature set, so the lag does not weaken what it checks -- but it does mean this file is a fixture rather than a mirror, and saying so is the point of the row.",
       "exit": "`shared-calc-cache.test.ts` retires, or its subject moves to `crates/coh_math`'s own cache guard, at which point this copy is deleted rather than converged.",
       "gap": "FORK-10"
-    },
-    {
-      "path": "src/lib/links.ts",
-      "status": "identical",
-      "sha256": "a8086465cd82b87f457b27dde5b838ae8cb50d36e25cb16f1da423883c60e18d"
     },
     {
       "path": "src/lib/supabase.ts",
