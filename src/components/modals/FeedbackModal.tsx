@@ -10,6 +10,8 @@ import { Button } from '../ui/Button';
 import { useBuildStore } from '@/stores/buildStore';
 import { useAuthStore } from '@/stores/authStore';
 import { getDiagnosticsSnapshot } from '@/utils/diagnostics';
+import { DISCLOSED, feedbackReport } from './feedbackReport';
+import type { FeedbackType } from './feedbackReport';
 
 // Worker endpoint URL - update this after deploying the Cloudflare Worker
 const FEEDBACK_API_URL = 'https://coh-planner-feedback.wedswoe.workers.dev';
@@ -19,7 +21,6 @@ interface FeedbackModalProps {
   onClose: () => void;
 }
 
-type FeedbackType = 'bug' | 'suggestion' | 'other';
 type SubmitStatus = 'idle' | 'sending' | 'success' | 'error';
 
 const TYPE_CONFIG = {
@@ -100,25 +101,29 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
     setStatus('sending');
     setErrorMessage('');
 
-    const payload = {
+    // Assembled by `feedbackReport` rather than inline, so the disclosure guard can grade
+    // DISCLOSED against a payload this function actually builds. Signed-in account identity is
+    // auto-attached; the display-name derivation is the app's usual one (Discord OAuth metadata).
+    const payload = feedbackReport({
       type: feedbackType,
-      description: description.trim(),
-      globalName: globalName.trim() || undefined,
-      // Signed-in account identity, auto-attached when logged in. Uses the same
-      // display-name derivation as the rest of the app (Discord OAuth metadata).
-      userId: user?.id,
-      userName: user
-        ? ((user.user_metadata?.full_name as string | undefined) ||
-           (user.user_metadata?.name as string | undefined) ||
-           user.email ||
-           undefined)
-        : undefined,
+      description,
+      globalName,
+      user: user
+        ? {
+            id: user.id,
+            displayName:
+              (user.user_metadata?.full_name as string | undefined) ||
+              (user.user_metadata?.name as string | undefined) ||
+              user.email ||
+              undefined,
+          }
+        : null,
       buildContext: getBuildContext(),
       buildSnapshot: includeSnapshot ? exportBuild() : undefined,
       diagnostics: includeSnapshot ? getDiagnosticsSnapshot() : undefined,
       userAgent: navigator.userAgent,
       timestamp: new Date().toISOString(),
-    };
+    });
 
     try {
       const response = await fetch(FEEDBACK_API_URL, {
@@ -345,7 +350,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
               <p className="text-xs text-gray-500">
                 {includeSnapshot
                   ? 'Your full build (powers, slots, enhancements) will be attached to help reproduce issues.'
-                  : 'Only basic build info (archetype, powersets) will be included.'}
+                  : 'Of the build, only the basic info below (archetype, powersets) is included.'}
               </p>
               <div className="text-xs text-gray-400 space-y-0.5">
                 <p>
@@ -368,6 +373,23 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 )}
               </div>
             </div>
+
+            {/* F88. Below the snapshot box and above Send: a reader who has just decided whether
+                to attach their build is the reader asking what else goes with it. Folded, with the
+                categories in the summary line, so an unexpanded fold still names the account and
+                the browser rather than hiding them behind a neutral title. The list is DISCLOSED
+                rather than written here -- a second copy is the one that goes stale, and the guard
+                grades the table, so a copy would keep passing while the form understated again. */}
+            <details className="bg-gray-800/50 border border-gray-700 rounded p-3">
+              <summary className="text-xs text-gray-400 cursor-pointer select-none">
+                What this report includes &mdash; your account, your build, and app and browser details
+              </summary>
+              <ul className="mt-2 space-y-1 text-xs text-gray-500 list-disc list-inside">
+                {DISCLOSED.map(({ line }) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </details>
 
             {/* Error message */}
             {status === 'error' && errorMessage && (
