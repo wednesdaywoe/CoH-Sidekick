@@ -259,7 +259,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "3eb4344e7aa8d6a82c280e909e7d79dca6934ad2b93154009762aa83ca335303"
+      "sha256": "30ec6ab4a703fa53f43face84d80c9341fa3cfaa2242205fe92726cc48040e8a"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -631,8 +631,8 @@
         "canonical": "7e5171954bd574b3c56beb9233bcc72d019cd5de163690fec48369d0a0702389",
         "beta": "80380f7833838336263bcff34f314dde6302fd077c910a16132e729c1606202d"
       },
-      "reason": "18 seams over 6 slots, `reads-too`. The beta's copy carries `excludeFromAtMechanic` -- the Gravity Control Impact slice an archetype's hit-time multiplier must step around -- and canonical's does not. That is a discriminator, not a formatting difference: a Controller's Propel reads `(final - exempt) x mult + exempt` in the beta and `final x mult` here, and the second is a wrong number wherever this copy is read as the port source.",
-      "exit": "Canonical takes the beta's `excludeFromAtMechanic` handling, here and in `utils/calculations/damage.ts`, or the Rust damage path lands it and both TS copies stop being the reference. This one converges rather than dying, because the rule it is missing is about what the data MEANS.",
+      "reason": "18 seams over 6 slots, `reads-too`. The beta's copy threads an `exempt` argument through `applyBonus` for the Gravity Impact slice and reads `foldProcsIntoFinalDamage` off the store; canonical's does neither. Same rule as `utils/calculations/damage.ts` above and the same correction: the flag behind it reaches the contract and no crate reads it, so this copy is not where the engine would inherit anything.",
+      "exit": "Deleted with the unread tree, alongside `utils/calculations/damage.ts`. They are one rule in two files and neither is a port source for it.",
       "gap": "FORK-10"
     },
     {
@@ -664,8 +664,8 @@
         "canonical": "adf07d89a0a68c3442e86e10ce032884d803e5e38a7705718b2faa5c6fa0705d",
         "beta": "a0963d966cd1789939c9bf7f0b167dea9ee82aa24d8587c8acd427be1d2297bf"
       },
-      "reason": "File-level sweep member, and the fork canonical can least afford to keep. The beta's copy routes stance powers through `toStancePowers` so `mechanicType` rides along -- it is the discriminator `findStanceParent` uses to tell Bio Armor's stance switcher (internal \"Evolution\") from the unrelated \"Evolving Armor\" toggle (internal \"Adaptation\"), both of which match the group's `parents`. Canonical's copy projects the field away and falls back to `candidates[0]`, first in PICK order, which desyncs the picker from the calc (beta report 2026-07-26). Canonical has never edited this file since the transplant created it.",
-      "exit": "Canonical takes `toStancePowers`. This is Rule 0 ground -- a discriminator dropped by a local projection -- so it converges rather than waiting for a strip, and it should not wait on the rest of this batch.",
+      "reason": "File-level sweep member. The beta's copy routes stance powers through `toStancePowers` so `mechanicType` rides along, and its `findStanceParent` breaks a tie with `isStanceSwitcher`; canonical's projects the field away and its `findStanceParent` takes the first match in PICK order, so Bio Armor's switcher (internal \"Evolution\") and the unrelated \"Evolving Armor\" toggle (internal \"Adaptation\") are indistinguishable here and the picker desyncs from the calc (beta report 2026-07-26). Read as Rule 0 first and it is not: `src/data/stance-groups.ts` next door is already declared `per-repo` because canonical's engine expands stances from the data and `coh_data::power` reads the wire's `mechanicType` exhaustively, so there is no option table to port and nothing downstream of this file consumes the answer.",
+      "exit": "Deleted with the rest of the unread client tree, or canonical takes BOTH `toStancePowers` and the `isStanceSwitcher` tie-break -- and the second edits a file already declared per-repo under FORK-7, so it is a decision about that declaration and not a free copy. Named this way because the first reading of it -- a dropped discriminator, therefore Rule 0, therefore take the copy -- is the one a later session will reach for.",
       "gap": "FORK-10"
     },
     {
@@ -1261,8 +1261,8 @@
         "canonical": "e513abc5fa3158b0c47da9681436bbcc2c3d477d7bb7e0feeaa50dceb04fba1e",
         "beta": "486e57183f04ab28049916aa5cc7b8b43f8575252f52ce33e73d2a44a5233a88"
       },
-      "reason": "Nine seams over 4 slots, `reads-too`. The beta's copy carries `atMechanicExemptDamage` and the `excludeFromAtMechanic` entry flag; canonical's does not, so the exempt slice does not exist in this copy at all. Paired with `components/info/DamageBlock.tsx` above -- same rule, two files, and a port taken from either of canonical's copies inherits the same wrong multiplication.",
-      "exit": "Canonical takes the `excludeFromAtMechanic` handling, or `coh_math`'s damage path lands it and this copy stops being read as the reference. Converges; the missing piece is a rule about the data, not a display choice.",
+      "reason": "Nine seams over 4 slots, `reads-too`. The beta's copy carries `atMechanicExemptDamage` and the `excludeFromAtMechanic` entry flag -- the Gravity Control Impact slice an archetype's hit-time multiplier must step around -- and canonical's does not. What the check turned up is that the interesting half is not this fork: the flag IS emitted into the contract (16 occurrences, Lift and Propel, Controller and Dominator Gravity Control, all four datasets) and NO crate reads it. It does not appear in `coh_data` at all, so it is dropped at deserialization, and `coh_math::damage` models Containment as a gate on target mez state rather than a blanket multiplier. Whether that gate happens to spare the Impact rows has not been determined.",
+      "exit": "Deleted with the unread tree. The engine-side question it exposed -- a converter-emitted flag no crate reads -- is not this entry's to close and is recorded in the F84 narrative rather than left in a manifest reason.",
       "gap": "FORK-10"
     },
     {
@@ -1299,8 +1299,8 @@
         "canonical": "c971eb47bee1801734c0069c52e08dc80f4f46a9d3576120f8242f6782ef07be",
         "beta": "395771c90ef1c600f3cdeba20db2d32f689ebf06549554e0f7053075b63ccd9d"
       },
-      "reason": "File-level sweep member. The beta's copy carries `SIGNED_PET_EFFECTS` and the sub-type arrays (`defenseTypes`, `resistanceTypes`, `mezTypes`, `debuffTypes`); canonical's has neither. Both are discriminators in the skill's sense -- a Dark Servant's -20% Energy resistance renders as +20% without the sign, and \"21%\" is not a stat without the sub-types -- and ~55 Homecoming entities carry a negative `SelfResistance`.",
-      "exit": "Canonical takes the signs and the sub-type arrays. Rule 0 ground again: the sign is in the export and this copy drops it, so this converges and does not wait on a strip.",
+      "reason": "File-level sweep member. The beta's copy carries `SIGNED_PET_EFFECTS` and the sub-type arrays (`defenseTypes`, `resistanceTypes`, `mezTypes`, `debuffTypes`); canonical's has neither, so a Dark Servant's -20% Energy resistance renders as +20% and \"21%\" prints where \"21% Smashing/Lethal resistance\" is the stat. Display-side only, and checked rather than assumed: `coh_math::granted` routes `SelfResistance` and its four siblings to `PetEffectRoute::OwnStat`, which resolves to `None` on purpose -- a pet's own resistance is a fact about the pet and writing it into the summoner's totals is the leak that route names. So no engine number depends on the sign, and this copy is not the port source for one.",
+      "exit": "Deleted with the unread tree, or the beta's signs and sub-type arrays are taken here if this file is ever made a port reference. It is not one today, which is the honest reason it is a fork rather than a Rule 0 defect.",
       "gap": "FORK-10"
     },
     {
@@ -1315,8 +1315,8 @@
         "canonical": "0324cdfb371bb042b46f26c1f2e414ce3e34f207abc38472e917bbca619119c7",
         "beta": "9de508fee81c75819ca03c2218002e807c73cbceb33f0cb15136771d7e039ebb"
       },
-      "reason": "File-level sweep member. The beta's copy now reads `SET_BONUS_STAT_NAME_MAP` and `SET_BONUS_PAIRED_STATS` from a generated module emitted out of `contract/set-bonus-stat-vocab.json` -- the same file `coh_math`'s `set_bonuses.rs` `include_str!`s -- so the vocabulary cannot drift from the engine. Canonical's copy still holds the hand-written `PAIRED_STATS` table that change was made to retire, which is a hardcoded copy of something the contract owns.",
-      "exit": "Canonical reads the generated vocabulary. This is a Rule 0 violation sitting in the tree -- a table the export owns, transcribed -- and it converges by deletion of the local table.",
+      "reason": "File-level sweep member. The beta reads `SET_BONUS_STAT_NAME_MAP` and `SET_BONUS_PAIRED_STATS` from a module generated out of `contract/set-bonus-stat-vocab.json`; canonical's copy still holds the hand-written `PAIRED_STATS` table that change was made to retire. It looks like a Rule 0 violation and it is a dead one: `coh_math/src/set_bonuses.rs` already `include_str!`s that same contract file, so the engine is single-sourced and this table feeds nothing here.",
+      "exit": "Deleted with the unread tree. Listed rather than waved through because a hand-written copy of a contract-owned table is exactly what a later reader will find and take as precedent, and the reason it is harmless is a fact about the Rust side that is not visible from this file.",
       "gap": "FORK-10"
     },
     {

@@ -65,6 +65,14 @@ priced by closing the census's roster under imports — `pipelineSources`' rule,
 executes what it imports. The census only greps, so it binds the 39 files it opens, not the 106
 they reach.
 
+**A fork between two TypeScript copies is two thirds of a question.** Four of FORK-10's verdicts
+called a TS drift Rule 0 and said a port would inherit it. The engine declines all four on
+purpose. The third party to any such fork is the Rust side, and it is the only one that ships.
+
+**A converter-emitted flag no crate reads.** `excludeFromAtMechanic` reaches the contract 16 times
+(Lift, Propel, Gravity Control, four datasets) and is dropped at deserialization. Dead weight or
+unmodelled rule — undetermined.
+
 **A deletion's blast radius is not in the diff that proposes it.** 123 files read by nothing here
 were deleted and restored the same day, because the beta's BPORT4 census opens canonical's copies
 through `--sibling`. "Nothing reads it" is three claims, and an import sweep of one tree answers
@@ -1533,9 +1541,9 @@ measurement went, and where a closure for the residual belongs too.
 - [ ] **FORK-10** — this repo tracks a second copy of the beta's React client, 296 paths shared
   and 135 differing. 50 now carry verdicts: 27 roots 2026-09-23, then the 23 the beta's census
   actually opens. Its costed 118/49 closed the roster under imports; the census executes nothing,
-  so it binds the 39 it reads. 22 forks named, four of them Rule 0 (a dropped discriminator, a
-  dropped sign, dropped sub-types, a transcribed contract table). 96 of the restored 123 have no
-  canonical edit since the transplant. Check:
+  so it binds the 39 it reads. Four of the 22 forks were written up as Rule 0 and none is — the
+  engine models each differently on purpose or not at all, which was read off the TS alone. 96 of
+  the restored 123 have no canonical edit since the transplant. Check:
   `scripts/keys/f84-census-counterparts.cjs`. story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
 - [x] **FORK-9** — one sentence for both ways a recorded head stops matching: the repo moved
