@@ -141,8 +141,19 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
   };
 }
 
-function escapeHtml(str: string): string {
-  return str
+/**
+ * F12/R78. Takes `unknown`, not `string`, and that is the fix rather than a
+ * convenience. Nothing validates the payload at runtime — it is `JSON.parse`
+ * cast to an interface — so a field TypeScript calls a `number` is whatever the
+ * sender put there. Typed as `string` this function was simply not called on
+ * the three numeric build-context fields, and `ctx.level` went into the email
+ * raw; typed as `unknown` there is no field it cannot be called on, so the
+ * table below cannot grow a hole by gaining a row. It also stops throwing:
+ * `str.replace` on a `null` the sender chose would have taken the whole
+ * request out with it.
+ */
+function escapeHtml(value: unknown): string {
+  return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -252,12 +263,12 @@ function buildEmailHtml(payload: FeedbackPayload): string {
       <h3 style="color: #94a3b8; margin-top: 16px;">Build Context</h3>
       <table style="width: 100%; border-collapse: collapse;">
         <tr><td style="color: #64748b; padding: 4px 8px;">Archetype</td><td style="color: #e2e8f0; padding: 4px 8px;">${escapeHtml(ctx.archetype)}</td></tr>
-        <tr><td style="color: #64748b; padding: 4px 8px;">Level</td><td style="color: #e2e8f0; padding: 4px 8px;">${ctx.level}</td></tr>
+        <tr><td style="color: #64748b; padding: 4px 8px;">Level</td><td style="color: #e2e8f0; padding: 4px 8px;">${escapeHtml(ctx.level)}</td></tr>
         <tr><td style="color: #64748b; padding: 4px 8px;">Primary</td><td style="color: #e2e8f0; padding: 4px 8px;">${escapeHtml(ctx.primary)}</td></tr>
         <tr><td style="color: #64748b; padding: 4px 8px;">Secondary</td><td style="color: #e2e8f0; padding: 4px 8px;">${escapeHtml(ctx.secondary)}</td></tr>
-        <tr><td style="color: #64748b; padding: 4px 8px;">Pools</td><td style="color: #e2e8f0; padding: 4px 8px;">${ctx.pools.length > 0 ? ctx.pools.map(escapeHtml).join(', ') : 'None'}</td></tr>
+        <tr><td style="color: #64748b; padding: 4px 8px;">Pools</td><td style="color: #e2e8f0; padding: 4px 8px;">${Array.isArray(ctx.pools) && ctx.pools.length > 0 ? ctx.pools.map(escapeHtml).join(', ') : 'None'}</td></tr>
         <tr><td style="color: #64748b; padding: 4px 8px;">Epic Pool</td><td style="color: #e2e8f0; padding: 4px 8px;">${ctx.epicPool ? escapeHtml(ctx.epicPool) : 'None'}</td></tr>
-        <tr><td style="color: #64748b; padding: 4px 8px;">Powers / Slots</td><td style="color: #e2e8f0; padding: 4px 8px;">${ctx.powerCount} / ${ctx.slotCount}</td></tr>
+        <tr><td style="color: #64748b; padding: 4px 8px;">Powers / Slots</td><td style="color: #e2e8f0; padding: 4px 8px;">${escapeHtml(ctx.powerCount)} / ${escapeHtml(ctx.slotCount)}</td></tr>
       </table>`;
   }
 

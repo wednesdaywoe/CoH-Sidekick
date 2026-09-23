@@ -132,3 +132,58 @@ describe('the feedback worker refuses before it spends mail (F12)', () => {
     expect(vi.mocked(globalThis.fetch).mock.calls[0][0]).toBe('https://api.resend.com/emails');
   });
 });
+
+/**
+ * R78, which F12's 2026-09-22 pass closed by reading `buildEmailHtml` and
+ * seeing `escapeHtml` on the string fields. Re-measured 2026-09-23 by driving
+ * the real handler and reading what reached Resend: the three build-context
+ * numbers went out raw, which is the exact field class R78 was filed on. The
+ * hole was in the signature, not in the table — `escapeHtml(str: string)` is
+ * not something you call on a field typed `number`, so nobody did. Grading the
+ * rendered HTML rather than the source is the point of these three.
+ */
+describe('nothing the sender chose reaches the email unescaped (R78)', () => {
+  /** Drives the handler with a hostile payload and hands back the email HTML. */
+  async function render(buildContext: unknown): Promise<string> {
+    let html = '';
+    vi.stubGlobal('fetch', vi.fn(async (_url: unknown, init: RequestInit) => {
+      html = JSON.parse(String(init.body)).html;
+      return new Response('{}', { status: 200 });
+    }));
+    const res = await worker.fetch(
+      post({ body: JSON.stringify({ type: 'bug', description: 'it broke', userAgent: 'x', timestamp: 'now', buildContext }) }),
+      envWith(limiter().binding),
+    );
+    expect(res.status).toBe(200);
+    return html;
+  }
+
+  const ctx = (over: Record<string, unknown>) => ({
+    archetype: 'Blaster', primary: 'Fire', secondary: 'Devices',
+    pools: [], epicPool: null, level: 50, powerCount: 24, slotCount: 67, ...over,
+  });
+
+  it('escapes the build-context numbers, which are strings if the sender says so', async () => {
+    const html = await render(ctx({
+      level: '<img src=x onerror=alert(1)>',
+      powerCount: '<script>PWN</script>',
+      slotCount: '"><b>SLOT</b>',
+    }));
+    expect(html).not.toContain('<img src=x');
+    expect(html).not.toContain('<script>PWN');
+    expect(html).not.toContain('<b>SLOT</b>');
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+  });
+
+  it('escapes a pool name, and survives `pools` not being an array', async () => {
+    expect(await render(ctx({ pools: ['<u>POOL</u>'] }))).toContain('&lt;u&gt;POOL&lt;/u&gt;');
+    // `.length` on a string is a number and `.map` is not a function: this threw
+    // before, taking out a request the limiter had already been charged for.
+    expect(await render(ctx({ pools: 'Flight' }))).toContain('None');
+  });
+
+  it('renders rather than throws when a field the interface calls a string is null', async () => {
+    const html = await render(ctx({ archetype: null, epicPool: undefined }));
+    expect(html).toContain('Build Context');
+  });
+});

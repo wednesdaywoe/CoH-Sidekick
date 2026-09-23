@@ -6,6 +6,11 @@ compatibility_date = "2024-01-01"
 # - RESEND_API_KEY
 # - FEEDBACK_EMAIL
 # - DESKTOP_CLIENT_TOKEN  (the desktop build's X-Sidekick-Desktop value; unset closes that arm)
+#
+# This list is the deployed list, and keeping it so is F89: a fourth secret,
+# `CODE`, sat on production from 2026-02-03 until 2026-09-23 because it was set
+# by hand and no version of this worker ever read it. `wrangler secret list` is
+# the only thing that can catch that - it does not appear in the source.
 
 # SECURITY_AUDIT.md F12. Config-only: the simple rate-limit binding needs no KV
 # namespace, no Durable Object and nothing created in the dashboard, so it
@@ -14,9 +19,17 @@ compatibility_date = "2024-01-01"
 # forges it outright (measured 2026-09-22 against the Supabase edge, HTTP 403
 # `error code: 1000`, and the same proxy sets this one).
 #
-# `period` accepts 10 or 60 seconds and nothing else, so this bounds a burst
-# and not a day. A single address can still spend 60 x 24 x 3 submissions in
-# one, which is why F12 stays PARTIAL: the daily cap wants KV or Turnstile.
+# `period` accepts 10 or 60 seconds and nothing else - measured, not read:
+# wrangler 4.61 refuses 300/3600/86400 at config-processing time. So this
+# bounds a burst and not a day, which is why F12 stays PARTIAL and the daily
+# cap wants KV or Turnstile.
+#
+# DO NOT cite `limit = 3` as a bound. Measured against the deployed worker
+# 2026-09-23, from a drained window: 30 requests in 2.75s were admitted 19 and
+# refused 11, with the first 14 straight through. Cloudflare's counters are
+# per-location and approximate, so the real burst ceiling is ~6x this number.
+# It buys something - 19 of 30 is not 30 of 30 - but any argument that needs
+# an actual limit needs different infrastructure, not a smaller number here.
 [[ratelimits]]
 name = "FEEDBACK_RATE_LIMIT"
 namespace_id = "1001"
