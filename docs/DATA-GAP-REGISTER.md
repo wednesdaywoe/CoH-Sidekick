@@ -57,8 +57,16 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 336 entries.** FORK-9 closed 2026-09-22, the day after it was filed. It was not a
-parse gap: the shared-test digest rested on a commit, and nothing checked the commit still existed.
+**1 open, of 336 entries.** FORK-10, filed 2026-09-23: this repo holds a second copy of the
+beta's React client, 296 shared paths with 135 already differing, and 27 of them are now watched.
+
+**A deletion's blast radius is not in the diff that proposes it.** 123 files read by nothing here
+were deleted and restored the same day: 119 had been edited here since July, and the beta's BPORT4
+census opens canonical's copies through `--sibling`. "Nothing reads it" is three claims, and an
+import sweep of one tree answers one.
+
+**A digest that rests on a commit rests on nothing.** The shared-test stamp named a sha the repo
+had rebased away, and main is linear on purpose, so any stamp can be orphaned.
 
 **A stamp names a sha, and a sha is not a promise.** The beta's read `623d9129ab`, which GitHub
 still has and the repo does not — same message, different parent, `diverged`. Main is rebased to
@@ -989,7 +997,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 119 of 119 closed
+[Full detail](gaps/pipeline-provenance.md) — 118 of 119 closed
 
 - [x] **PROV-8** — nothing measured the export against the shard it copies: three staleness gates,
   all of them with the export on one side and none with the game, so a user found i28p4 RC3 before
@@ -1513,11 +1521,11 @@ measurement went, and where a closure for the residual belongs too.
   `eec21e98eb` recorded parent `50dab95dec` and graded as itself. Both paths excluded now, on both
   legs; the beta mirrors them and had no exclusion at all
 
-- [x] **FORK-10** — this repo tracked a second copy of the beta's whole React client, 162 files
-  adjudicated by nothing: 296 paths shared, 135 already differing, and a bare `src/lib/supabase.ts`
-  in the audit resolving to two files in two repos, which is how F01 went unread for a month.
-  Closed 2026-09-23: 123 files read by nothing here are deleted, 27 joined `TRACKED_ROOTS` with
-  nine forks named and given exits, and the 12 test twins stay where FORK-4 already holds them.
+- [ ] **FORK-10** — this repo tracks a second copy of the beta's whole React client, 162 files
+  adjudicated by nothing: 296 paths shared and 135 already differing. 27 joined `TRACKED_ROOTS`
+  2026-09-23 with nine forks named and given exits; the other 135 are still watched by nothing.
+  Deleting the unreferenced ones was tried and reverted the same day — 119 of 123 had been edited
+  here since July, and the beta's BPORT4 census reads canonical's copies through `--sibling`.
   story: [pipeline-provenance.md](gaps/pipeline-provenance.md)
 
 - [x] **FORK-9** — one sentence for both ways a recorded head stops matching: the repo moved
