@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """Nothing that builds or publishes this project comes from an unpinned source.
 
-Nine rules, one question: when CI produces an artifact, can somebody say where every byte of
-it came from? Six are about the inputs (F14 twice, F43, F42, F15, F13), one is about the output
-(F40), one is about the permissions the whole thing runs under (F59), and one is about a
+Ten rules, one question: when CI produces an artifact, can somebody say where every byte of
+it came from? Seven are about the inputs (F14 twice, F43, F42, F15, F13, F03), one is about the
+output (F40), one is about the permissions the whole thing runs under (F59), and one is about a
 setting that silently is not applied at all (F13 again).
+
+Two of them are about the same tool and the difference is worth stating once: `rc-bundle.yml`
+BUILDS `dx` from a pinned source, because what it cuts is the artifact users install;
+`ci.yml`'s `web` job DOWNLOADS the prebuilt one and checks it against a digest, because
+building it cost 17m15s of a 21m25s job and kept that job on a personal machine. Different
+acquisitions, same requirement: a name is not a pin.
 
 **Why this exists.** SECURITY_AUDIT.md F14. `rc-bundle.yml` cuts the Windows release, and it
 reached for `Swatinem/rust-cache@v2`. A tag is a mutable pointer: whoever can move `v2` in that
@@ -44,10 +50,19 @@ uploads logs and reports, which nobody verifies against anything.
 as a pin. It behaves as "use the pin unless the box already has a `dx`" — and two of the three
 legs run on persistent self-hosted machines that have had one since July, so on those two the
 pin never fired and no step recorded which binary had cut the release. A conditional pin is
-worse than no pin, because it passes review. The rule is therefore: no `command -v dx` anywhere
-in that file, every `cargo install dioxus-cli` names `--locked`, `--version` and
-`--features no-downloads`, and all of them name the SAME version — three legs that quietly drift
-apart is the failure a single grep would miss.
+worse than no pin, because it passes review. The rule is therefore: no `command -v dx` anywhere,
+every `cargo install dioxus-cli` names `--locked`, `--version` and `--features no-downloads`,
+and all of them name the SAME version — three legs that quietly drift apart is the failure a
+single grep would miss.
+
+**"Anywhere" is new, and it is F42's scope corrected rather than widened on principle.** This
+rule named `rc-bundle.yml` by filename because `ci.yml`'s `web` job was argued exempt: "what
+this job produces is a wasm test build nobody installs." That is true of the consequence and
+false of the mechanism, and the measurement is what settled it — jpc carried
+`dioxus 0.7.9 (bfcc111)` while the released 0.7.9 is `(3e43ffa)`. Two different binaries
+answering to the version this repository pins, with no step recording which one graded a pull
+request. F14's own closing note had started to say this about `ci.yml` and the sentence was
+never finished.
 
 **The seventh rule is the tool that tool runs (F15).** `dx bundle --package-types appimage` shells
 out to `linuxdeploy`, which dioxus-cli fetches from a mutable release tag with no hash and caches
@@ -78,6 +93,17 @@ download-time only.** An empty `$CARGO_HOME` therefore refuses what a populated 
 the rule is that every self-hosted leg sets `CARGO_HOME` under `$RUNNER_TEMP` -- which moves the
 trust root off the box and onto `Cargo.lock`, a file in this repository. Scoped per job rather
 than per file, because one leg carrying the line would otherwise vouch for a leg that does not.
+
+**The tenth rule is a tool that arrives already built (F03).** `ci.yml`'s `web` job fetches the
+prebuilt `dx` upstream publishes for the version this repository pins. That is not the cache
+shape F14 forbids -- a cache has no lockfile, no version and no provenance, and a release asset
+at an immutable tag has all three -- but it IS a download, and F15 measured what a download is
+worth without a hash: a fixed linuxdeploy URL whose asset was replaced two years after the
+release was published. So the rule is that a step fetching a dioxus release asset names a
+64-character digest and checks it in that same step. Scoped to the step because the `env:`
+carrying the URL and the `run:` doing the verify are two halves of one, and a verify one step
+later guards nothing. Sixty-four characters exactly: F40's own guard passed a thirteen-mutation
+sweep while truncating every digest to eight.
 
 **How to grade this script**, since a passing run against a correct tree says nothing about
 whether the check works: `--self-test` re-runs every rule against text that deliberately breaks
@@ -121,6 +147,18 @@ DX_VERSION = re.compile(r"--version[= ]\s*([0-9][^\s]*)")
 DX_REQUIRED_FLAGS = ("--locked", "--version", "--features no-downloads")
 LINUXDEPLOY_SEED = "rc-linuxdeploy.py"
 APPIMAGE_BUNDLE = re.compile(r"\bdx\s+bundle\b[^\n]*\bappimage\b")
+
+# A `dx` that arrives PREBUILT rather than built, which `ci.yml`'s `web` job does because
+# building it cost 17m15s of a 21m25s job. 64 hex characters exactly: a digest truncated to
+# eight is the trap F40's own guard fell into, and `sha256sum -c` refuses a short line anyway,
+# so the rule wants the full one written down where review can see it.
+DX_ASSET = re.compile(r"https://github\.com/DioxusLabs/dioxus/releases/download/\S+")
+SHA256_LITERAL = re.compile(r"\b[0-9a-f]{64}\b")
+SHA256_CHECK = re.compile(r"\bsha256sum\s+(?:-c\b|--check\b)")
+
+# Step boundaries. Six spaces is where `jobs.<id>.steps` sits in both trees' workflows; matched
+# by indentation rather than parsed, for `job_env_uses_step_context`'s reason one rule down.
+STEP_START = re.compile(r"^ {6}-\s+\S")
 
 
 def unpinned(text: str) -> list[tuple[int, str]]:
@@ -195,22 +233,37 @@ def unchecksummed_uploads(text: str) -> list[int]:
     return unguarded
 
 
+def dx_presence_tests(text: str) -> list[tuple[int, str]]:
+    """Every `command -v dx`, in any workflow.
+
+    F42 scoped this rule to `rc-bundle.yml` on an argument that has since been measured false.
+    `ci.yml`'s `web` job was exempted because "what this job produces is a wasm test build
+    nobody installs" — true of the consequence, and not of the mechanism. jpc carried
+    `dioxus 0.7.9 (bfcc111)` while the released 0.7.9 is `(3e43ffa)`: two different binaries
+    answering to the pinned version, and which one graded a pull request was whichever the box
+    happened to have. A tool nothing records is the state the rule exists to end, whether or not
+    its output ships, so the scope is now every workflow.
+    """
+    return [
+        (number, "`command -v dx` makes the pin conditional on what is on the box")
+        for number, line in enumerate(text.splitlines(), start=1)
+        if DX_PRESENCE_TEST.search(without_comment(line))
+    ]
+
+
 def build_tool_unpinned(text: str) -> list[tuple[int, str]]:
     """Every way the release workflow's `dx` could be something other than the version it names.
 
-    Three shapes, because they fail differently. A `command -v dx` makes the pin conditional on
-    the machine. A missing flag makes it incomplete. Two legs naming two versions makes it
-    unanswerable which one cut the artifact, which is the same question this whole file asks.
+    Two shapes, because they fail differently. A missing flag makes the pin incomplete. Two legs
+    naming two versions makes it unanswerable which one cut the artifact, which is the same
+    question this whole file asks. The third shape, `command -v dx`, moved to
+    `dx_presence_tests` when it stopped being a rule about this file alone.
     """
     found = []
     versions: dict[str, int] = {}
 
     for number, line in enumerate(text.splitlines(), start=1):
         bare = without_comment(line)
-        if DX_PRESENCE_TEST.search(bare):
-            found.append(
-                (number, "`command -v dx` makes the pin conditional on what is on the box")
-            )
         install = DX_INSTALL.search(bare)
         if install is None:
             continue
@@ -228,6 +281,38 @@ def build_tool_unpinned(text: str) -> list[tuple[int, str]]:
             found.append(
                 (number, f"this leg installs dioxus-cli {version}; the file names {named}")
             )
+    return found
+
+
+def dx_downloads_unverified(text: str) -> list[tuple[int, str]]:
+    """Steps that fetch a prebuilt `dx` without pinning it to a digest and checking it.
+
+    A release-asset URL names a version. Only a hash says the bytes behind that name did not
+    change, and F15 MEASURED that substitution one workflow over: a fixed linuxdeploy URL whose
+    asset was replaced two years after the release was published. So an unhashed fetch is a
+    mutable input wearing a version number, and this rule is what keeps `ci.yml`'s `web` job
+    from drifting back into one.
+
+    Scoped to the STEP. A digest three steps away does not guard this download, and the `env:`
+    that carries the URL and the `run:` that verifies it are two halves of one step -- which is
+    also why this cannot be a per-line rule.
+    """
+    steps: list[list[tuple[int, str]]] = [[]]
+    for number, line in enumerate(text.splitlines(), start=1):
+        if STEP_START.match(line):
+            steps.append([])
+        steps[-1].append((number, without_comment(line)))
+
+    found = []
+    for step in steps:
+        hits = [number for number, line in step if DX_ASSET.search(line)]
+        if not hits:
+            continue
+        body = "\n".join(line for _, line in step)
+        if not SHA256_LITERAL.search(body):
+            found.append((hits[0], "fetches a prebuilt `dx` and names no 64-character digest"))
+        elif not SHA256_CHECK.search(body):
+            found.append((hits[0], "names a digest for the `dx` it fetches and never checks it"))
     return found
 
 
@@ -481,8 +566,10 @@ def self_test() -> int:
     )
     if build_tool_unpinned(good_install):
         failures.append("a fully pinned dioxus-cli install was reported")
-    if not build_tool_unpinned("      - run: command -v dx >/dev/null 2>&1 || " + good_install):
+    if not dx_presence_tests("      - run: command -v dx >/dev/null 2>&1 || " + good_install):
         failures.append("a `command -v dx` short-circuit was not caught")
+    if build_tool_unpinned("      - run: command -v dx >/dev/null 2>&1 || " + good_install):
+        failures.append("the presence test was still reported by the rule it moved out of")
     if not build_tool_unpinned("          cargo install dioxus-cli --version 0.7.9 --features no-downloads\n"):
         failures.append("an install with no --locked was not caught")
     if not build_tool_unpinned("          cargo install dioxus-cli --locked --features no-downloads\n"):
@@ -496,8 +583,43 @@ def self_test() -> int:
     if build_tool_unpinned(good_install + good_install):
         failures.append("two legs installing the SAME version were reported as drifted")
     # The comment that explains the rule is not the rule, as F43's case above already found out.
-    if build_tool_unpinned("      # the `command -v dx ||` that was here is F42\n"):
+    if dx_presence_tests("      # the `command -v dx ||` that was here is F42\n"):
         failures.append("a comment describing the short-circuit was read as the short-circuit")
+
+    # The tenth rule: a prebuilt `dx`, and the digest that is the actual pin.
+    dx_url = (
+        "https://github.com/DioxusLabs/dioxus/releases/download/v0.7.9/"
+        "dx-x86_64-unknown-linux-gnu.tar.gz"
+    )
+    digest = "3b132551b480bc96f938f9f0d37936ee1190f994977539dcc347eaf38540d005"
+    pinned = (
+        "      - name: dioxus-cli 0.7.9, pinned by digest\n"
+        "        env:\n"
+        f"          DX_URL: {dx_url}\n"
+        f"          DX_SHA256: {digest}\n"
+        "        run: |\n"
+        '          curl -sSfL -o "$staging/dx.tar.gz" "$DX_URL"\n'
+        '          printf \'%s  %s\\n\' "$DX_SHA256" "$staging/dx.tar.gz" | sha256sum -c -\n'
+    )
+    if dx_downloads_unverified(pinned):
+        failures.append("a digest-pinned prebuilt dx fetch was reported")
+    if not dx_downloads_unverified(pinned.replace(f"          DX_SHA256: {digest}\n", "")):
+        failures.append("a prebuilt dx fetch naming no digest was not caught")
+    # F40's own guard passed thirteen mutations while truncating every digest to eight
+    # characters, so the short digest is a case rather than a footnote.
+    if not dx_downloads_unverified(pinned.replace(digest, digest[:8])):
+        failures.append("a dx digest truncated to eight characters was read as a digest")
+    if not dx_downloads_unverified(pinned.replace(" | sha256sum -c -", "")):
+        failures.append("a dx digest that is named and never checked was not caught")
+    # The step is the unit: a verify in the NEXT step does not guard this download.
+    split = pinned.replace(
+        '          printf \'%s  %s\\n\' "$DX_SHA256" "$staging/dx.tar.gz" | sha256sum -c -\n',
+        '      - run: printf \'%s\\n\' "$DX_SHA256" | sha256sum -c -\n',
+    )
+    if not dx_downloads_unverified(split):
+        failures.append("a verify one step later was read as guarding the fetch before it")
+    if dx_downloads_unverified("      - run: cargo install dioxus-cli --locked\n"):
+        failures.append("an install-from-source was reported by the prebuilt-download rule")
 
     seeded = (
         "        run: python3 scripts/keys/rc-linuxdeploy.py\n"
@@ -581,7 +703,7 @@ def self_test() -> int:
         print(f"SELF-TEST FAILED: {failure}", file=sys.stderr)
     if failures:
         return 1
-    print("self-test: all nine rules refuse what they are meant to refuse")
+    print("self-test: all ten rules refuse what they are meant to refuse")
     return 0
 
 
@@ -607,6 +729,15 @@ def main() -> int:
             problems.append(
                 f"{path.relative_to(ROOT)}:{number}: `{line}` installs off the lockfile when "
                 f"`npm ci` refuses; let it refuse"
+            )
+        for number, why in dx_presence_tests(text):
+            problems.append(
+                f"{path.relative_to(ROOT)}:{number}: {why}, so no step records which `dx` ran"
+            )
+        for number, why in dx_downloads_unverified(text):
+            problems.append(
+                f"{path.relative_to(ROOT)}:{number}: this step {why}, so the version in the URL "
+                f"is a name and nothing says the bytes behind it did not change"
             )
         if path.name == RELEASE_WORKFLOW:
             release_workflows += 1
@@ -662,8 +793,9 @@ def main() -> int:
     # nothing -- so the summary says which half actually ran.
     everywhere = (
         f"{len(files)} workflows: every third-party action names a commit, no cache holds a "
-        f"build tool, no install falls off the lockfile, no job-level env: reads a context "
-        f"that is not there, every workflow states its permissions"
+        f"build tool, no `dx` comes off the box or off an unhashed download, no install "
+        f"falls off the lockfile, no job-level env: reads a context that is not there, "
+        f"every workflow states its permissions"
     )
     if release_workflows:
         print(
