@@ -21,6 +21,12 @@
       "gap": "BRAIN-2"
     },
     {
+      "path": "scripts/convert-incarnate-slot-indices.cjs",
+      "reason": "Canonical-only converter: it vendors the seven per-slot incarnate picker indices out of the export into datasets/<id>/generated/incarnate-slot-indices.ts. It has no consumer in the beta because src/data/incarnates.ts is declared forked on exactly this axis (FORK-7) -- canonical is the copy that moved to per-dataset generated modules behind a fail-loud dataset guard, and the beta still imports seven static JSONs. Found by DEC1: the converter and its four outputs were the only part of that fork nothing adjudicated, because the manifest discovers entries from paths both repos hold and neither the script nor its output exists there. The beta names it nowhere.",
+      "gap": "FORK-7",
+      "mentions": []
+    },
+    {
       "path": "scripts/convert-inherents.cjs",
       "reason": "Canonical-only converter for the archetype inherents tree, wired into regen-all.cjs. The beta has never carried the file, so the manifest's present-in-both check never fired on it and its absence was undeclared rather than adjudicated — found while routing every display_help emitter through helpText. Both names of it in the beta are prose in comments (the convert-side twin, the family it omits), not a require.",
       "gap": "HELPTEXT-1",
@@ -145,6 +151,16 @@
       "gap": "STRIP-1",
       "mentions": [
         "scripts/keys/f84-census-counterparts.cjs"
+      ]
+    },
+    {
+      "path": "scripts/convert-archetype-inherents.cjs",
+      "reason": "Beta-only converter: it derives the archetype inherents a server auto-issues from Inherent.Inherent -- Thunderspy's Stalker Hide and Placate, which that fork moved out of the powersets and whose name slots it then reused -- into datasets/<id>/generated/archetype-inherents.ts. The two repos reach those names at different layers, and src/data/dataset.ts already records the split: the beta populates archetypeInherents from this generated map, canonical leaves it absent and reads the same name off the whole export. Canonical's mirror is convert-inherents.cjs, declared canonical-only above, which already lists this file among its own mentions. Found by DEC1 from the four generated outputs; all three canonical names of it are prose.",
+      "gap": "FORK-1",
+      "mentions": [
+        "scripts/keys/dec1-dataset-parity.cjs",
+        "src/data/dataset.ts",
+        "src/data/levels.ts"
       ]
     },
     {
