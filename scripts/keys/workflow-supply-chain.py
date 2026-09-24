@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Nothing that builds or publishes this project comes from an unpinned source.
 
-Ten rules, one question: when CI produces an artifact, can somebody say where every byte of
-it came from? Seven are about the inputs (F14 twice, F43, F42, F15, F13, F03), one is about the
-output (F40), one is about the permissions the whole thing runs under (F59), and one is about a
-setting that silently is not applied at all (F13 again).
+Eleven rules, one question: when CI produces an artifact, can somebody say where every byte
+of it came from? Seven are about the inputs (F14 twice, F43, F42, F15, F13, F03), one is about
+the output (F40), one is about the permissions the whole thing runs under (F59), one is about a
+setting that silently is not applied at all (F13 again), and the eleventh is about WHO can start
+a job at all (F03 again) -- the one rule here that is not about an artifact's bytes, kept in this
+file because it reads the same four workflows and answers with them.
 
 Two of them are about the same tool and the difference is worth stating once: `rc-bundle.yml`
 BUILDS `dx` from a pinned source, because what it cuts is the artifact users install;
@@ -112,6 +114,7 @@ it and fails if any is let through.
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -463,6 +466,63 @@ def unisolated_cargo_home(text: str) -> list[tuple[int, str]]:
     return found
 
 
+FORK_GUARD = re.compile(
+    r"github\.event\.pull_request\.head\.repo\.full_name\s*==\s*github\.repository"
+)
+PULL_REQUEST_REACHABLE = re.compile(r"\bpull_request\b")
+
+
+def fork_reachable_self_hosted(text: str, repo_is_private: bool) -> list[tuple[int, str, str]]:
+    """Self-hosted jobs a stranger's pull request can start.
+
+    SECURITY_AUDIT.md F03, and the reason that row can be ACCEPTED rather than left open. The
+    filed finding is closed -- `pull_request` carries no branch filter, so a public repository
+    would have let any GitHub user run arbitrary code on the mac mini, jpc and espresso, and all
+    but one PR-reachable job is hosted now. The residual is `rust`, which stays on the mac
+    because it is core-bound: 9m32s on 12 cores is 114 core-minutes, and a 2-core hosted runner
+    measured 60.3 minutes before being cancelled.
+
+    The row's exit condition is "`rust` moves to `ubuntu-latest` when this repository goes
+    public". **A condition nobody can fire is not an exit condition**, which is the trap
+    `road-to-1.0.md` records against F58: its first one triggered on a signal that would have
+    stayed true forever. So this is the firing mechanism rather than a sentence.
+
+    Two rules, and which one applies is the repository's own visibility:
+
+      * **private** -- a PR-reachable self-hosted job must carry the fork guard in its `if:`, so
+        a fork's pull request skips it and the only caller left is somebody who can already
+        push here.
+      * **public** -- there is no guard that makes this acceptable, because `pull_request` from
+        a fork is then any GitHub account. The job must be hosted. This is the clause that
+        fires: the day the repository's visibility flips, CI goes red naming `rust`, and F03
+        stops being accepted without anybody having to remember it was.
+
+    Visibility comes from the caller, because a file in the repository cannot know it. CI passes
+    `github.event.repository.private`; a bare local run has no event and assumes private, which
+    is the reading that checks MORE (a missing guard is still reported) rather than less.
+    """
+    if not PULL_REQUEST_REACHABLE.search(text.split("jobs:", 1)[0]):
+        return []
+    found = []
+    for name, number, body in release_jobs(text):
+        if not any(SELF_HOSTED.match(line) for line in body.splitlines()):
+            continue
+        # A job with no `pull_request` arm at all cannot be reached by one. `mutants-diff` is
+        # the standing example -- `schedule` and `workflow_dispatch` only, both of which need
+        # write access or are the repository's own.
+        if not PULL_REQUEST_REACHABLE.search(body):
+            continue
+        if not repo_is_private:
+            found.append((number, name, "runs on a self-hosted box and this repository is "
+                                        "PUBLIC, so any GitHub account can start it from a fork "
+                                        "-- no `if:` guard fixes that; move it to a hosted "
+                                        "runner (SECURITY_AUDIT.md F03's exit condition)"))
+        elif not FORK_GUARD.search(body):
+            found.append((number, name, "runs on a self-hosted box on `pull_request` with no "
+                                        "fork guard, so a fork's PR executes on it"))
+    return found
+
+
 def self_test() -> int:
     """Grade every rule against text that breaks it. A check nobody has seen fail is a wish."""
     failures = []
@@ -634,6 +694,49 @@ def self_test() -> int:
     if unseeded_appimages("      - run: dx bundle --platform macos --package-types macos\n"):
         failures.append("a macOS bundle was reported; it runs no linuxdeploy")
 
+    # Rule 11 (F03). Four cases, because the rule has two arms and each has a way of being
+    # wrong in the direction that reads as green.
+    pr_workflow = "on:\n  push:\n  pull_request:\n\njobs:\n"
+    guarded = (
+        "  rust:\n"
+        "    if: >-\n"
+        "      github.event_name == 'push' ||\n"
+        "      (github.event_name == 'pull_request' &&\n"
+        "      github.event.pull_request.head.repo.full_name == github.repository)\n"
+        "    runs-on: [self-hosted, macmini]\n"
+        "    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+    )
+    unguarded = (
+        "  rust:\n"
+        "    if: github.event_name == 'push' || github.event_name == 'pull_request'\n"
+        "    runs-on: [self-hosted, macmini]\n"
+        "    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+    )
+    # Reachable only by triggers that need write access. `mutants-diff` is this shape, and
+    # reporting it would send somebody to fix a job no fork can start.
+    dispatch_only = (
+        "  mutants-diff:\n"
+        "    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'\n"
+        "    runs-on: [self-hosted, mutants]\n"
+        "    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+    )
+    if fork_reachable_self_hosted(pr_workflow + guarded, repo_is_private=True):
+        failures.append("a fork-guarded self-hosted job was reported while the repo is private")
+    if not fork_reachable_self_hosted(pr_workflow + unguarded, repo_is_private=True):
+        failures.append("an unguarded self-hosted job on `pull_request` was not caught")
+    # The clause that makes F03's exit condition fire. The guard is present and is NOT enough.
+    if not fork_reachable_self_hosted(pr_workflow + guarded, repo_is_private=False):
+        failures.append(
+            "a self-hosted job survived the public-repository arm because it carries a fork "
+            "guard -- that guard is what stops a FORK, and on a public repository a fork is "
+            "any GitHub account, which is F03 as filed"
+        )
+    if fork_reachable_self_hosted(pr_workflow + dispatch_only, repo_is_private=False):
+        failures.append("a job with no pull_request arm was reported as fork-reachable")
+
     if declares_permissions("name: CI\non:\n  push:\n\njobs:\n  build:\n"):
         failures.append("a workflow with no permissions block was reported as having one")
     if not declares_permissions("name: CI\non:\n  push:\n\npermissions:\n  contents: read\n"):
@@ -703,8 +806,21 @@ def self_test() -> int:
         print(f"SELF-TEST FAILED: {failure}", file=sys.stderr)
     if failures:
         return 1
-    print("self-test: all ten rules refuse what they are meant to refuse")
+    print("self-test: all eleven rules refuse what they are meant to refuse")
     return 0
+
+
+def repo_is_private() -> bool:
+    """Is this repository private, as the caller sees it?
+
+    `REPO_IS_PRIVATE` is set by CI from `github.event.repository.private`. Absent -- a local run,
+    where there is no event to read -- it assumes private, because that is the reading under
+    which the OTHER clause still applies: a missing fork guard is reported either way, and only
+    the stricter public rule needs the fact to be known. Assuming public locally would red the
+    tree on every developer's machine for a condition that is not true yet.
+    """
+    raw = os.environ.get("REPO_IS_PRIVATE")
+    return raw is None or raw.strip().lower() not in ("false", "0", "no")
 
 
 def main() -> int:
@@ -764,6 +880,8 @@ def main() -> int:
                     f"of a registry every ordinary CI run can write — and cargo verifies a crate "
                     f"against Cargo.lock on DOWNLOAD only, never on the way out of the cache"
                 )
+        for number, name, why in fork_reachable_self_hosted(text, repo_is_private()):
+            problems.append(f"{path.relative_to(ROOT)}:{number}: job `{name}` {why}")
         if not declares_permissions(text):
             problems.append(
                 f"{path.relative_to(ROOT)}: no top-level `permissions:` block, so every job in "
