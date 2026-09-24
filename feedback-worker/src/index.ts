@@ -7,6 +7,13 @@
  * plus `wrangler secret put DESKTOP_CLIENT_TOKEN` for the desktop arm below.
  */
 
+import { capsFrom, type Verdict } from './budget';
+
+// Re-exported because `wrangler.toml` names it as the Durable Object's
+// `class_name` and the runtime looks for it on the worker's entrypoint module,
+// not on the file that happens to define it.
+export { FeedbackBudget } from './budget';
+
 interface Env {
   RESEND_API_KEY: string;
   FEEDBACK_EMAIL: string;
@@ -22,6 +29,23 @@ interface Env {
    * see; it is refused rather than skipped. See `fetch`.
    */
   FEEDBACK_RATE_LIMIT?: { limit(options: { key: string }): Promise<{ success: boolean }> };
+  /**
+   * The daily budget - F12. The binding above bounds a burst, approximately;
+   * this one is the bound on a day's mail and is exact. Optional on the type
+   * for the same reason as the limiter: a binding that did not deploy is a
+   * value this code can see and refuse on, rather than a hole it falls through.
+   * See `src/budget.ts`.
+   */
+  FEEDBACK_BUDGET?: DurableObjectNamespace;
+  /**
+   * The two caps, from `[vars]` in `wrangler.toml` - F12. Read HERE, per
+   * request, rather than inside the Durable Object: a running object keeps the
+   * env it was constructed with, so a cap read in there answers with whatever
+   * was deployed when it last woke up. Measured, not assumed - see
+   * `FeedbackBudget`.
+   */
+  FEEDBACK_DAILY_BUDGET?: string;
+  FEEDBACK_DAILY_PER_IP?: string;
 }
 
 interface BuildContext {
@@ -323,6 +347,32 @@ function buildEmailHtml(payload: FeedbackPayload): string {
     </div>`;
 }
 
+/**
+ * Charge one submission against the daily budget - F12.
+ *
+ * `idFromName('budget')` is a constant, so there is exactly one instance and
+ * the global counter is a real total rather than a per-location estimate. That
+ * single instance is the whole point and also the whole cost: every admitted
+ * submission serialises through it. At a feedback form's volume that is a
+ * round trip; at a hot path it would be a bottleneck, and this is not one.
+ *
+ * Not wrapped in a try/catch. An object that cannot be reached is not a
+ * submission that should be relayed, and the handler's outer catch already
+ * answers 500 — which is the failing-closed direction.
+ */
+async function spend(env: Env, ip: string): Promise<Verdict> {
+  const namespace = env.FEEDBACK_BUDGET!;
+  const stub = namespace.get(namespace.idFromName('budget'));
+  // The caps ride along with the request. See `FeedbackBudget`'s comment: a
+  // running Durable Object keeps the env it was constructed with, so a cap
+  // read inside the object answers with whatever was deployed when it woke up.
+  const caps = capsFrom(env);
+  const response = await stub.fetch(
+    `https://budget/spend?ip=${encodeURIComponent(ip)}&global=${caps.global}&perIp=${caps.perIp}`,
+  );
+  return response.json();
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const origin = request.headers.get('Origin');
@@ -417,6 +467,45 @@ export default {
       return new Response(JSON.stringify({ error: 'Invalid feedback type' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ---- What a day of being admitted costs (F12) ----
+    // The limiter above bounds a burst and is approximate while doing it; this
+    // is the bound on the day's mail, and it is exact because every admitted
+    // submission serialises through one Durable Object. It is charged HERE
+    // rather than beside the limiter on purpose: everything above this line
+    // can be refused for free, and a budget charged before validation is
+    // drainable with bodies that 400 — which would convert a bound on spend
+    // into an outage for everybody else. Below this line the submission is
+    // valid and is going to become mail.
+    if (!env.FEEDBACK_BUDGET) {
+      // Fails closed, like the limiter and the desktop arm. Same reasoning:
+      // a binding that did not deploy must not read as "no budget configured".
+      console.error('FEEDBACK_BUDGET binding is missing; refusing rather than relaying');
+      return new Response(JSON.stringify({ error: 'Feedback is temporarily unavailable' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const verdict = await spend(env, request.headers.get('CF-Connecting-IP') ?? 'unknown');
+    if (!verdict.ok) {
+      // Both refusals are 429 rather than one of them being a 503: this is
+      // rate limiting in both cases, and 503 already means "the binding is
+      // missing", which is a different thing a log should be able to tell
+      // apart. The two messages differ because the remedies do — one is the
+      // caller's own doing and the other is not.
+      const error = verdict.refused === 'per-ip'
+        ? 'You have sent a lot of feedback today. Please try again tomorrow.'
+        : 'Feedback has hit its daily limit. Please try again tomorrow.';
+      console.warn(`feedback refused by the ${verdict.refused} daily cap`);
+      return new Response(JSON.stringify({ error }), {
+        status: 429,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+          'Retry-After': String(verdict.resetIn),
+        },
       });
     }
 

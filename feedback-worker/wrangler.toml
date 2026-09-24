@@ -34,3 +34,29 @@ compatibility_date = "2024-01-01"
 name = "FEEDBACK_RATE_LIMIT"
 namespace_id = "1001"
 simple = { limit = 3, period = 60 }
+
+# SECURITY_AUDIT.md F12, the half the binding above cannot do. A rate-limit
+# binding bounds a burst approximately; a day's mail spend needs one place
+# doing the counting, and this is it. One object, one instance, two counters -
+# see `src/budget.ts` for why both are charged at the send rather than at the
+# door.
+#
+# SQLite-backed (`new_sqlite_classes`), which is what the Workers free plan
+# offers and is the right storage for this regardless: one small row, read and
+# written once per admitted submission.
+[[durable_objects.bindings]]
+name = "FEEDBACK_BUDGET"
+class_name = "FeedbackBudget"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["FeedbackBudget"]
+
+# The caps, here rather than in the code so that moving them is a config edit
+# and a deploy. `DEFAULT_CAPS` in `src/budget.ts` carries the same numbers and
+# the reasoning: 80 sits under Resend's free 100-a-day so the bound is ours and
+# not the provider's, and 10 per address fixes the cost of draining the day at
+# eight distinct addresses.
+[vars]
+FEEDBACK_DAILY_BUDGET = "80"
+FEEDBACK_DAILY_PER_IP = "10"
