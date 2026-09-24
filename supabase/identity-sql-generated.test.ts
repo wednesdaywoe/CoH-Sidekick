@@ -17,21 +17,29 @@
  * that runs in CI.
  */
 import { describe, it, expect } from 'vitest';
-import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+// The generator's own verdict, imported rather than shelled out to. It was a
+// child `node --experimental-strip-types scripts/gen-identity-sql.mjs --check`
+// first, and that guard could not run on CI: the flag is not a flag on Node 20,
+// which is what `setup-node` pins, while the machine it was written on runs 24
+// and accepted it. A drift gate that only goes green where its author sits is
+// not one. Imported, vitest transpiles the `.ts` the generator reads and the
+// Node version stops mattering.
+import { check } from '../scripts/gen-identity-sql.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const schema = readFileSync(`${ROOT}supabase/schema.sql`, 'utf8');
 
 describe('the generated identity SQL is in sync with author-name.ts (F83)', () => {
   it('regenerates to exactly what is committed', () => {
-    // Runs the generator's own --check rather than re-deriving the comparison
-    // here, so there is one definition of "in sync" and not two.
-    const run = () => execFileSync('node',
-      ['--experimental-strip-types', 'scripts/gen-identity-sql.mjs', '--check'],
-      { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-    expect(run).not.toThrow();
+    // Asks the generator whether it is in sync rather than re-deriving the
+    // comparison here, so there is one definition of "in sync" and not two.
+    const { inSync, generated, committed } = check();
+    // Compared as strings when it fails, so the report names the line that
+    // moved instead of saying `false !== true`.
+    if (!inSync) expect(committed).toBe(generated);
+    expect(inSync).toBe(true);
   });
 
   it('is marked as generated, so nobody edits it by hand', () => {
