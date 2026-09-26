@@ -447,6 +447,53 @@ function tierDelta(label: string, engine: ThreeTierValues | null, beta: ThreeTie
   return out;
 }
 
+/**
+ * Rows where the ENGINE is right and the beta's generated tree cannot be yet — REDIRSTAT-1, whose
+ * converter is declared forked in `scripts/sync-manifest.json` (`scripts/convert-powerset.cjs`).
+ *
+ * That converter stamps a modal redirect branch's OWN recharge and endurance onto the
+ * `conditionalEffects` entry that selects it, so an ammunition mode shows the branch's 8s / 8.53
+ * rather than falling back to the redirect shell's 20s / 10.192. The rebuild's contract carries the
+ * stamp and the engine reads it; the beta's own data tree does not, because the beta's
+ * `ConditionalEffect` type has no `stats` field and the eight regenerated files fail `tsc` with 24
+ * TS2353s — which `npm run build` runs before vite. The fork entry's exit is the beta taking that
+ * field and a reader for it, at which point these rows converge and this adjudication is deleted.
+ *
+ * Scoped to the two keys the stamp writes and the one power that carries it, so the engine reading
+ * a DIFFERENT number on a different row is still a hard delta. The population is Dual Pistols'
+ * Suppressive Fire across four archetypes on Homecoming and Brainstorm; Rebirth and Thunderspy
+ * state no such branch stats and reach this list not at all.
+ */
+const REDIRSTAT_ENGINE_SUPERSEDES: readonly string[] = ['Suppressive_Fire'];
+const REDIRSTAT_KEYS: readonly string[] = ['recharge', 'enduranceCost'];
+
+/**
+ * Split `tierDelta` rows on the list above. A row is adjudicated only when its power AND its stat
+ * key are both named; everything else stays a real delta.
+ */
+function splitRedirStatRows(
+  internalName: string,
+  rows: readonly string[],
+): { real: string[]; adjudicated: string[] } {
+  if (!REDIRSTAT_ENGINE_SUPERSEDES.includes(internalName)) return { real: [...rows], adjudicated: [] };
+  const real: string[] = [];
+  const adjudicated: string[] = [];
+  for (const row of rows) {
+    // The LABEL only: a row's text is `<label>: engine <n> vs beta <n>`, and the numbers carry
+    // decimal points of their own, so splitting the whole row on '.' reads a digit as the key.
+    // Any segment of the label may be the stat — the two channels spell it
+    // `<power>@<state>.<stat>` and `<power>@<state>.<stat>.<tier>` — and the power is already
+    // pinned above, so matching a segment cannot reach another power's row.
+    const segments = row.split(':')[0].split('.');
+    if (segments.some((segment) => REDIRSTAT_KEYS.includes(segment))) {
+      adjudicated.push(`${row} — the engine reads the redirect branch's own stat and the beta's tree has no field to hold it (REDIRSTAT-1, converter declared forked)`);
+    } else {
+      real.push(row);
+    }
+  }
+  return { real, adjudicated };
+}
+
 // A perma delta split into real disagreements and adjudicated engine-supersedes-beta ones. The
 // engine computes perma ONLY from a real exported recharge + duration, so "engine set, beta null"
 // always means the engine read a buff/heal/summon duration the fork's beta converter dropped (the
@@ -2610,15 +2657,25 @@ suite('PROD6B-1 — engine per-power projection vs beta calculators, per server'
               filled: Number(row.filled.toFixed(2)),
             };
           }
-          deltas.push(...mags.real);
-          adjudicated.push(...mags.adjudicated.map((d) => `${atId}/${power.internalName}@${tag}.${d}`));
-          deltas.push(
+          // A branch stat reaches BOTH channels here: the display bag's own `recharge` /
+          // `enduranceCost` rows and the projection's tiers. Only the combat-state sites are
+          // split — the shell's plain projection agrees on both sides, because the stamp lands on
+          // the `conditionalEffects` entry a mode selects rather than on the power's own stats.
+          const magRows = splitRedirStatRows(power.internalName, mags.real);
+          deltas.push(...magRows.real);
+          adjudicated.push(
+            ...magRows.adjudicated,
+            ...mags.adjudicated.map((d) => `${atId}/${power.internalName}@${tag}.${d}`),
+          );
+          const tiers = splitRedirStatRows(power.internalName, [
             ...tierDelta(`${power.internalName}@${tag}.recharge`, engine.recharge, beta.recharge),
             ...tierDelta(`${power.internalName}@${tag}.enduranceCost`, engine.enduranceCost, beta.enduranceCost),
             ...tierDelta(`${power.internalName}@${tag}.accuracy`, engine.accuracy, beta.accuracy),
             ...tierDelta(`${power.internalName}@${tag}.castTime`, engine.castTime, beta.castTime),
             ...tierDelta(`${power.internalName}@${tag}.range`, engine.range, beta.range),
-          );
+          ]);
+          deltas.push(...tiers.real);
+          adjudicated.push(...tiers.adjudicated);
           if (engine.arcanaTime !== null && beta.arcanaTime !== null && Math.abs(engine.arcanaTime - beta.arcanaTime) > TOLERANCE) {
             deltas.push(`${power.internalName}@${tag}.arcanaTime: engine ${engine.arcanaTime} vs beta ${beta.arcanaTime}`);
           }
@@ -2750,15 +2807,21 @@ suite('PROD6B-1 — engine per-power projection vs beta calculators, per server'
 
           const { projection: beta, magnitudes, bag } = betaReference(power, build, atId, rawGlobal);
           const mags = countWitness(witness, magnitudeDeltas(`${atId}/${power.internalName}@${mode}`, engine.grantedMagnitudes, magnitudes, bag));
-          deltas.push(...mags.real);
-          adjudicated.push(...mags.adjudicated.map((d) => `${atId}/${power.internalName}@${mode}.${d}`));
-          deltas.push(
+          const modeMagRows = splitRedirStatRows(power.internalName, mags.real);
+          deltas.push(...modeMagRows.real);
+          adjudicated.push(
+            ...modeMagRows.adjudicated,
+            ...mags.adjudicated.map((d) => `${atId}/${power.internalName}@${mode}.${d}`),
+          );
+          const modeTiers = splitRedirStatRows(power.internalName, [
             ...tierDelta(`${power.internalName}@${mode}.recharge`, engine.recharge, beta.recharge),
             ...tierDelta(`${power.internalName}@${mode}.enduranceCost`, engine.enduranceCost, beta.enduranceCost),
             ...tierDelta(`${power.internalName}@${mode}.accuracy`, engine.accuracy, beta.accuracy),
             ...tierDelta(`${power.internalName}@${mode}.castTime`, engine.castTime, beta.castTime),
             ...tierDelta(`${power.internalName}@${mode}.range`, engine.range, beta.range),
-          );
+          ]);
+          deltas.push(...modeTiers.real);
+          adjudicated.push(...modeTiers.adjudicated);
 
           // Reach: what the mode actually MOVED against the no-mode run. A redirect that changes
           // nothing is ungraded however green the parity goes (the PROD6C-3f method).

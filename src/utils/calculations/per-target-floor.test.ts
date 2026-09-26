@@ -7,6 +7,15 @@
  * reaches zero — and reading the untouched slider as "no foes" deleted the 5% melee/ranged/AoE
  * defence the game hands out with no ally in sight (PERFOE-3, filed from a beta bug report).
  *
+ * Guarded Spin is the second shape, and it is a CLICK rather than an always-on power (PERFOE-4,
+ * filed from a Thunderspy report: "does not show in the dashboard when toggled on. I checked every
+ * AT it's available for"). Its `EntsAffected` is `kFoe` alone, so the seat above says nothing about
+ * it, and its +Def(Melee, Lethal) is one `kStackType_Stack` mod aimed at the caster which the game
+ * applies once per foe the cone lands on — the per-foe growth is real. The empty count is not:
+ * `character_tick.c` refuses a queued power outright when the target entity is null or of the wrong
+ * type, and a cone range-checks that same entity before firing. So a foe-aimed power that fired had
+ * a foe in front of it, and the one count it could not be at is the one an untouched slider meant.
+ *
  * The engine is where the shipped number comes from and `coh_math::stacking` is graded there
  * (`per_target_floor.rs`, plus the two `Per-target floor` totals fixtures). This is the TS half:
  * the oracle's arithmetic, and the slider control that has to agree with it about where its axis
@@ -14,7 +23,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { adjustForStackCap, casterOccupiesATargetSlot } from './character-totals';
+import {
+  adjustForStackCap,
+  aimGuaranteesATarget,
+  casterOccupiesATargetSlot,
+  perTargetCountCannotBeZero,
+} from './character-totals';
 import { getStackingInfo } from '@/components/info/buildDisplayEffects';
 import { encodeAtom, type AtomicEffect } from '@/data/core/atomic-effect';
 import type { Power } from '@/types/power';
@@ -76,6 +90,30 @@ const reactiveRegeneration = {
   effects: { regenBuff: { scale: 0.25, table: 'Melee_Ones', perTarget: 0.25 } },
 };
 
+/** Guarded Spin's shape: a foe-AIMED cone whose defence lands on the caster. The recipient list
+ *  names nobody but the foe, so the seat predicate declines it and only the aim floors it. */
+const guardedSpin = {
+  name: 'Guarded Spin',
+  internalName: 'Guarded_Spin',
+  powerType: 'Click',
+  targetType: 'Foe',
+  targetsAffected: ['Foe'],
+  effectArea: 'Cone',
+  stats: { maxTargets: 5 },
+  atoms: perFoeAtoms(1.5),
+  effects: { defenseBuff: { melee: { scale: 1.5, table: 'Melee_Buff_Def', perTarget: 1.5 } } },
+};
+
+/** The trap on the other side of the aim floor: foe-aimed, but its count is not an entity count.
+ *  `perTarget` reaches a SingleTarget power from the `Execute_Power` redirect branch, and flooring
+ *  there would assert a combat state rather than a foe in front of you. */
+const foeAimedSingleTarget = {
+  ...guardedSpin,
+  internalName: 'Foe_Aimed_Single_Target',
+  effectArea: 'SingleTarget',
+  stats: {},
+};
+
 const defenseValue = { scale: 0.5, table: 'Melee_Buff_Def', perTarget: 0.3 };
 
 describe('casterOccupiesATargetSlot', () => {
@@ -119,7 +157,62 @@ describe('adjustForStackCap — the per-target floor', () => {
   });
 });
 
+describe('aimGuaranteesATarget', () => {
+  it('needs the aim to name an entity AND the count to be an entity count', () => {
+    expect(aimGuaranteesATarget(guardedSpin as never)).toBe(true);
+    // Aimed at a foe, but nothing in a sphere is being counted.
+    expect(aimGuaranteesATarget(foeAimedSingleTarget as never)).toBe(false);
+    // Aimed at the caster, who is always there — this floor has nothing to say, and Invincibility
+    // must stay at zero because a foe aura reaches its caster only through a foe.
+    expect(aimGuaranteesATarget(invincibility as never)).toBe(false);
+    expect(aimGuaranteesATarget(phalanx as never)).toBe(false);
+    // A point on the ground is not an entity the game insists on.
+    expect(aimGuaranteesATarget({ ...guardedSpin, targetType: 'Location' } as never)).toBe(false);
+    expect(aimGuaranteesATarget({ ...guardedSpin, targetType: undefined } as never)).toBe(false);
+  });
+
+  it('is a separate reason from the seat, and the union is what the calc asks', () => {
+    // Neither power satisfies both terms, so each proves one arm of the union on its own.
+    expect(casterOccupiesATargetSlot(guardedSpin as never)).toBe(false);
+    expect(perTargetCountCannotBeZero(guardedSpin as never)).toBe(true);
+    expect(aimGuaranteesATarget(phalanx as never)).toBe(false);
+    expect(perTargetCountCannotBeZero(phalanx as never)).toBe(true);
+    expect(perTargetCountCannotBeZero(invincibility as never)).toBe(false);
+    expect(perTargetCountCannotBeZero(reactiveRegeneration as never)).toBe(false);
+  });
+});
+
+describe('adjustForStackCap — the aim floor', () => {
+  const spinValue = { scale: 1.5, table: 'Melee_Buff_Def', perTarget: 1.5 };
+
+  it('reads an untouched slider as one foe on a power the game will not fire at nobody', () => {
+    for (const n of [undefined, 0, 1]) {
+      expect(adjustForStackCap(spinValue, n, undefined, guardedSpin as never)).toMatchObject({
+        scale: 1.5,
+      });
+    }
+  });
+
+  it('still grows with the foes hit', () => {
+    expect(adjustForStackCap(spinValue, 2, undefined, guardedSpin as never)).toMatchObject({ scale: 3 });
+    expect(adjustForStackCap(spinValue, 5, undefined, guardedSpin as never)).toMatchObject({ scale: 7.5 });
+  });
+
+  it('leaves the foe-aimed single target at zero — its N is not counting foes', () => {
+    expect(adjustForStackCap(spinValue, undefined, undefined, foeAimedSingleTarget as never))
+      .toMatchObject({ scale: 0 });
+  });
+});
+
 describe('getStackingInfo — where the slider starts', () => {
+  it('starts the targets axis at one foe on a power the game aims at one', () => {
+    expect(getStackingInfo(guardedSpin as unknown as Power)).toEqual({
+      maxStacks: 5,
+      minStacks: 1,
+      label: 'Targets Hit',
+    });
+  });
+
   it('starts the targets axis at one seat when the caster holds one', () => {
     expect(getStackingInfo(phalanx as unknown as Power)).toEqual({
       maxStacks: 3,

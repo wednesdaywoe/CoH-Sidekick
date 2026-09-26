@@ -366,17 +366,81 @@ const UNBOUNDED_MAX_TARGETS = 255;
  * not the resolved one. Naming the reads is what lets one predicate answer both callers instead
  * of the pair drifting the way the hand-spelled `targetsAffected` half already had.
  */
-export function casterOccupiesATargetSlot(
-  power: {
-    targetsAffected?: readonly string[];
-    effectArea?: string;
-    stats?: { maxTargets?: number } | Record<string, unknown>;
-  },
-): boolean {
-  if (!power.targetsAffected?.includes('Self')) return false;
+export function casterOccupiesATargetSlot(power: PerTargetFloorFields): boolean {
+  return power.targetsAffected?.includes('Self') === true && boundedAoeEntityCount(power);
+}
+
+/** The three fields the floor reads, named rather than taken as a whole power: the display's own
+ *  slider asks the same question of a plain `Power` whose `effects` is the WIRE shape. */
+type PerTargetFloorFields = {
+  targetsAffected?: readonly string[];
+  targetType?: string;
+  effectArea?: string;
+  stats?: { maxTargets?: number } | Record<string, unknown>;
+};
+
+/**
+ * The geometry half of both floors: a sphere or cone with a bounded `maxTargets` —
+ * `computeAoePerTargetPatches`' own `isAoEWithTargets` gate, read back. It is what makes N an
+ * entity count rather than something else wearing the same field, and without it the floor would
+ * assert a combat state (Reactive Regeneration counts how recently you were hit).
+ */
+function boundedAoeEntityCount(power: PerTargetFloorFields): boolean {
   if (power.effectArea !== 'AoE' && power.effectArea !== 'Cone') return false;
   const maxTargets = power.stats?.maxTargets;
   return typeof maxTargets === 'number' && maxTargets > 1 && maxTargets !== UNBOUNDED_MAX_TARGETS;
+}
+
+/**
+ * The `targetType` spellings that name an entity the game must have in the caster's sights before
+ * it will let the power be used. `Self` needs nobody, and `Location` / `Teleport` name a point on
+ * the ground no entity has to occupy.
+ *
+ * Declared rather than derived, and it is the whole of what the four forks' contracts carry —
+ * `TARGET_TYPE_VOCABULARY` in the rebuild's `per_target_floor.rs` pins that, so a fork adding a
+ * spelling reds a test instead of quietly taking the `false` arm.
+ */
+const AIM_NEEDS_AN_ENTITY: readonly string[] = [
+  'Foe',
+  'DeadFoe',
+  'Ally (Alive)',
+  'Teammate',
+  'Dead Teammate',
+  'Own Pet (Alive)',
+  'Any',
+];
+
+/**
+ * Could this power have been used and reached nobody — or does its own aim rule the empty count
+ * out before the geometry is consulted?
+ *
+ * `targetType` is the AIMING field, and this is the one question it answers better than
+ * `targetsAffected` does. The two are different facts: a PBAoE that teleports foes is aimed at
+ * `Self` while its effects land on `Foe`. Here the aim is the point. The game refuses a queued
+ * power outright when the target entity is null or of the wrong type (`character_tick.c`,
+ * `PowerTargetNotAffected`), and a cone range-checks that same entity before firing — so a
+ * foe-aimed power that fired had a foe in front of it.
+ *
+ * Guarded Spin is the reported case: a Staff Fighting cone whose +Def(Melee, Lethal) is one
+ * `kStackType_Stack` mod aimed at the caster, which the game applies once per foe the cone lands
+ * on. The per-foe growth is real; zero was the one count the power could not be at, and it moved
+ * no defence on the dashboard whatever its owner did with the toggle (PERFOE-4).
+ */
+export function aimGuaranteesATarget(power: PerTargetFloorFields): boolean {
+  return (
+    typeof power.targetType === 'string' &&
+    AIM_NEEDS_AN_ENTITY.includes(power.targetType) &&
+    boundedAoeEntityCount(power)
+  );
+}
+
+/**
+ * Is zero a count this power can be at? The union of the two reasons it cannot be, and the one
+ * predicate the calc and the slider both ask — the caster holding a seat in his own sphere
+ * (PERFOE-3) and the aim refusing to fire at nobody (PERFOE-4).
+ */
+export function perTargetCountCannotBeZero(power: PerTargetFloorFields): boolean {
+  return casterOccupiesATargetSlot(power) || aimGuaranteesATarget(power);
 }
 
 /**
@@ -394,7 +458,7 @@ export function casterOccupiesATargetSlot(
  * Effects without `perTarget` metadata (always-on buffs) are unaffected
  * by the slider regardless of N.
  *
- * `casterIsCounted` ({@link casterOccupiesATargetSlot}) decides whether N = 0 is a state the
+ * `countCannotBeZero` ({@link perTargetCountCannotBeZero}) decides whether N = 0 is a state the
  * power can be in at all. A foe aura reaches its caster only through a target, so with nobody in
  * radius no block runs and zero is honest. A power that lists the caster among the entities its
  * own sphere lands on is the other shape: he fills the first of its `maxTargets` slots for as
@@ -404,7 +468,7 @@ export function casterOccupiesATargetSlot(
 function adjustForPerTarget(
   value: ScalarOrScaled,
   targetsHit: number | undefined,
-  casterIsCounted: boolean,
+  countCannotBeZero: boolean,
 ): ScalarOrScaled {
   if (typeof value !== 'object' || value === null) return value;
   const obj = value as Record<string, unknown>;
@@ -420,8 +484,8 @@ function adjustForPerTarget(
   // An untouched slider must read as whatever the CONTROL shows, or the power computes one number
   // while the UI states another (the "defaults to 1-target values despite showing Off" bug). Both
   // sides now start the axis at the same place: `getStackingInfo` gives the slider its
-  // `minStacks`, and `casterOccupiesATargetSlot` gives the calc the same floor.
-  const n = Math.max(targetsHit ?? 0, casterIsCounted ? 1 : 0);
+  // `minStacks`, and `perTargetCountCannotBeZero` gives the calc the same floor.
+  const n = Math.max(targetsHit ?? 0, countCannotBeZero ? 1 : 0);
   if (n <= 0) return { ...value, [magnitudeKey]: 0 } as ScalarOrScaled;
   if (n === 1) return value;
   return { ...value, [magnitudeKey]: magnitude + increment * (n - 1) } as ScalarOrScaled;
@@ -541,7 +605,7 @@ export interface PowerWithToggle {
   targetType?: string;
   /** `EntsAffected` — who this power's effects land on, which `targetType` (where it is AIMED)
    *  does not answer. Read by the atom-native appliers through `reachesCaster`, and by
-   *  {@link casterOccupiesATargetSlot} for the AoE target count. */
+   *  {@link perTargetCountCannotBeZero} for the AoE target count's floor. */
   targetsAffected?: string[];
   effectArea?: string;
   isActive?: boolean;
@@ -630,7 +694,7 @@ const STRENGTH_MEZ_KEYS = new Set([
  * is a shape the corpus does not hold, not a value being rounded away.
  *
  * `power` is here for the per-target arm alone: whether an absent count means zero targets or one
- * is a question about the power, not about the value ({@link casterOccupiesATargetSlot}).
+ * is a question about the power, not about the value ({@link perTargetCountCannotBeZero}).
  */
 export function adjustForStackCap(
   value: ScalarOrScaled,
@@ -641,7 +705,7 @@ export function adjustForStackCap(
   const hasPerTarget = typeof value === 'object' && value !== null
     && (!!(value as { perTarget?: number }).perTarget
       || !!(value as { maxHPFractionPerTarget?: number }).maxHPFractionPerTarget);
-  if (hasPerTarget) return adjustForPerTarget(value, targetsHit, casterOccupiesATargetSlot(power));
+  if (hasPerTarget) return adjustForPerTarget(value, targetsHit, perTargetCountCannotBeZero(power));
   // The floor reaches the AoE path alone. N on a stacking self-buff counts casts, and a click
   // the build has not fired is at zero stacks however the power addresses its caster.
   if (targetsHit === 0 && stackCap !== undefined) {

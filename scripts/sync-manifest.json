@@ -275,7 +275,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "bf4294d5ffb88d15a206235a697a6892f6606188adb55fb392985f29259fd717"
+      "sha256": "b4ce4da659cfc2f3cf2fbe11162cc7a7fd4f4ff48875e23399a53a45bef557da"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -479,7 +479,7 @@
         "canonical": "cbec0bb64c51b8792ced8b4debe469297741b8bcbadff7fbf43f1c034e953d0b",
         "beta": "89e2fea73df30a86f94328ae23128019ea394855c984b0b71cbe2712d19b5194"
       },
-      "reason": "REDIRSTAT-1 (2026-09-25) taught this converter to stamp a modal redirect branch's own recharge and endurance onto the `conditionalEffects` entry that selects it, and the beta cannot hold the output: its `ConditionalEffect` has no `stats` field, so the eight regenerated Suppressive Fire files fail `tsc` with 24 TS2353s and `npm run build` runs `tsc` before vite. Measured rather than assumed — the copy was taken, `npm run regen:generated` run (467s, 8 files, all dual-pistols Suppressive Fire across 4 archetypes x HC and brainstorm), and the type check read before reverting. The whole diff is additive `stats: { recharge: 8, endurance: 8.53 }` on three ammo branches, so the beta loses an improvement rather than gaining a defect: without it those branches fall back to the shell's own 20s, which is REDIRSTAT-1's original symptom and the state the beta is already in.",
+      "reason": "REDIRSTAT-1 (2026-09-25) taught this converter to stamp a modal redirect branch's own recharge and endurance onto the `conditionalEffects` entry that selects it, and the beta cannot hold the output: its `ConditionalEffect` has no `stats` field, so the eight regenerated Suppressive Fire files fail `tsc` with 24 TS2353s and `npm run build` runs `tsc` before vite. Measured rather than assumed — the copy was taken, `npm run regen:generated` run (467s, 8 files, all dual-pistols Suppressive Fire across 4 archetypes x HC and brainstorm), and the type check read before reverting. The whole diff is additive `stats: { recharge: 8, endurance: 8.53 }` on three ammo branches, so carrying the converter alone would cost the beta a build rather than gain it a defect. Superseded in part on 2026-09-26: the beta re-vendored the engine for PERFOE-4, and `npm run build:engine` copies the rebuild's CONTRACT with the wasm, so the beta's engine now reads the stamp and its dashboard shows the branch's 8s / 8.53 while its own generated tree still says 20s / 10.192. That divergence is declared in the beta's `powerProjectionParity.test.ts` (`REDIRSTAT_ENGINE_SUPERSEDES`, engine-supersedes-beta, 80 rows on Homecoming and Brainstorm), so this entry now holds the converter and the TS tree back from a fix the shipped engine already has.",
       "exit": "The beta takes a `stats` field on `ConditionalEffect` and a reader that uses it, at which point `npm run sync:shared` converges this file and a regen commits the eight generated ones with it. Carrying the converter alone is what this entry forbids: it reds the beta's build and its regen-diff workflow at once, since that workflow reruns these converters on any `scripts/**` change and demands a byte match.",
       "gap": "REDIRSTAT-1"
     },
@@ -1056,8 +1056,8 @@
       "path": "src/utils/calculations/character-totals.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "c710364fc59a0ff21f65e3a25916a23e938a7ad84b77a26c2e3b7e1064a71c45",
-        "beta": "e4a29725ab76cd4b14df11eb3adfaafde1589edef20f53e12247bea7189bd461"
+        "canonical": "a30a72831a8146f27e33f20bae2d3639cf26e237688bf002da9af9da114de1b7",
+        "beta": "fa5615f9220925fa419fbfe04bb7b3f24c2f9c2bc6ad57b06ac8ad069b56eade"
       },
       "reason": "This one file is the counterpart for TWO beta paths, and that is the verdict. The beta's PROD7 quarantined its legacy calc into `legacy-totals.oracle.ts` and left canonical's copy in place, so the census's `RENAMED_COUNTERPART` map points the frozen oracle here -- while the beta's own `character-totals.ts` is in the sweep too. Canonical's single file is graded as both the live calc and the frozen oracle, 14 seams over 14 slots, with a four-symbol `atomArmGap` (`SPECIAL_BUFF_STACK`, `atomsOf`, `isDebuffAtom`, `specialBuffValue`) naming exactly what canonical grew here and the beta's oracle did not.",
       "exit": "The beta's rename map stops pointing here -- either because canonical performs the same split, or because the oracle is retired. `assertCounterpartsLive` already refuses a mapping whose target has stopped being the same file, so this exit is one the beta's own guard will announce.",

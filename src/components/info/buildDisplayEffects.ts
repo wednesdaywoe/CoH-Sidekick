@@ -44,7 +44,7 @@ import { arcToDegrees } from '@/data/proc-data';
 import { extractHealingFromDamage } from '@/utils/calculations/healing';
 import { synthesizePseudoPetEffects } from '@/utils/calculations/pet-damage';
 import { carriesPerTarget, maxStackCap } from '@/data/core/atom-query';
-import { casterOccupiesATargetSlot } from '@/utils/calculations/character-totals';
+import { perTargetCountCannotBeZero } from '@/utils/calculations/character-totals';
 
 /** Toggle tick interval when the data omits one — end/s = endurance / activatePeriod. */
 const DEFAULT_ACTIVATE_PERIOD = 0.5;
@@ -172,13 +172,19 @@ export function hasPerTargetField(value: unknown): boolean {
  * never doubles, and the `Stacks (every Xs)` label that described their cadence went with them:
  * its `stackInterval` came from the same writer, and no other power ever had one.
  *
- * `minStacks` is where the axis STARTS, and it is 0 for every case but one. A power whose
- * effects land on the caster as well as on whoever else is in radius fills the first of its
- * `maxTargets` seats for as long as it is running, so the count cannot be zero — Phalanx Fighting
- * gives its 5% melee/ranged/AoE defence solo, and a slider reading "Off" there described a state
- * the power is never in (PERFOE-3). The floor is {@link casterOccupiesATargetSlot}, the same two
- * terms the engine and the totals path floor the count with, rather than the `targetsAffected`
- * half of it this function used to spell by hand.
+ * `minStacks` is where the axis STARTS, and two shapes cannot start it at zero. The floor is
+ * {@link perTargetCountCannotBeZero}, the same predicate the engine and the totals path floor the
+ * count with, rather than a term this function spells by hand:
+ *
+ *  - A power whose effects land on the caster as well as on whoever else is in radius fills the
+ *    first of its `maxTargets` seats for as long as it is running. Phalanx Fighting gives its 5%
+ *    melee/ranged/AoE defence solo, and a slider reading "Off" there described a state the power
+ *    is never in (PERFOE-3).
+ *  - A power the game refuses to fire without an entity in its sights reached at least one of
+ *    them if it was used at all. Guarded Spin is the reported case: a Staff Fighting cone whose
+ *    +Def(Melee, Lethal) the game stacks once per foe it lands on, so its growth is real — but the
+ *    slider it needed opened at "Off", and toggling the power on moved no defence on the dashboard
+ *    for anyone who did not know to look for it (PERFOE-4).
  *
  * The stacks arm keeps 0: N there counts casts, and a click the build has not fired is off.
  */
@@ -191,7 +197,7 @@ export function getStackingInfo(
   if (carriesPerTarget(power)) {
     const maxTargets = power.stats?.maxTargets;
     if (maxTargets && maxTargets > 1 && maxTargets !== UNBOUNDED_MAX_TARGETS) {
-      const minStacks = casterOccupiesATargetSlot(power) ? 1 : 0;
+      const minStacks = perTargetCountCannotBeZero(power) ? 1 : 0;
       return { maxStacks: maxTargets, minStacks, label: 'Targets Hit' };
     }
   }

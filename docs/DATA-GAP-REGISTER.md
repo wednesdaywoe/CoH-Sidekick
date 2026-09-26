@@ -57,8 +57,13 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 340 entries.** CATSKIP-1 closed 2026-09-26; nothing is open. What follows is carried
+**0 open, of 341 entries.** PERFOE-4 closed 2026-09-26; nothing is open. What follows is carried
 because it outlived the rows that taught it, not because it is waiting on anybody.
+
+**A floor needs every reason the count cannot be zero, not the first one found.** PERFOE-4's
+per-foe growth was correct and its arithmetic untouched; what was wrong was that an untouched
+slider meant "hit nobody" on a power the game refuses to fire at nobody. One predicate now holds
+both reasons, so a site cannot ask half the question.
 
 **One field two readers interpret differently is two fields.** CATSKIP-1's `inherentCategory` chose
 a panel section for the display and meant "skip this power" to the engine, so eleven granted powers
@@ -1045,7 +1050,7 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Pipeline + provenance
 
-[Full detail](gaps/pipeline-provenance.md) — 119 of 119 closed
+[Full detail](gaps/pipeline-provenance.md) — 120 of 120 closed
 
 - [x] **PROV-8** — nothing measured the export against the shard it copies: three staleness gates,
   all of them with the export on one side and none with the game, so a user found i28p4 RC3 before
@@ -1498,6 +1503,11 @@ measurement went, and where a closure for the residual belongs too.
   for a foe aura and wrong where the caster holds one of his own sphere's seats: Phalanx Fighting's
   unconditional +5% defence was deleted by a slider nobody had touched, 22 powers over four forks;
   the count now floors on `firstTargetExcluded`'s own two terms
+- [x] **PERFOE-4** — PERFOE-3 floored the empty count on the caster's own seat and missed the other
+  reason it is impossible: the game refuses a foe-AIMED power with no target, so a build using one
+  reached a foe. Guarded Spin read +0% defence on 4 archetypes × 4 forks whatever its toggle said;
+  14 powers reach a field, 25 floored over 74 placements. The per-foe growth was right — the game
+  stacks a caster-aimed mod once per foe hit — so only the absent reading moved. Closed 2026-09-26
 - [x] **OVERRIDE-3** — 30 hand-written override files restated their generated `effects` slot: 21 keys verbatim and 27 minus a mark the converter now writes, plus Entropy Shield's taunt, a hand pick between two real colliding rows; all retired and the gate's exclusion list with them
 - [x] **OVERRIDE-4** — the override layer stated identity and placement fields the export owns:
   92 `targetType` restatements, 22 re-cased `internalName` entries, and the Widow pair's swapped
