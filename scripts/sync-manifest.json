@@ -275,7 +275,7 @@
     {
       "path": "docs/DATA-GAP-REGISTER.md",
       "status": "identical",
-      "sha256": "c58f104a4861f9452195f67d0d46e644c344ca51b9883947cd10cebb4490acc8"
+      "sha256": "bf4294d5ffb88d15a206235a697a6892f6606188adb55fb392985f29259fd717"
     },
     {
       "path": "scripts/README-bulk-import-mids.md",
@@ -474,8 +474,14 @@
     },
     {
       "path": "scripts/convert-powerset.cjs",
-      "status": "identical",
-      "sha256": "89e2fea73df30a86f94328ae23128019ea394855c984b0b71cbe2712d19b5194"
+      "status": "forked",
+      "sha256": {
+        "canonical": "cbec0bb64c51b8792ced8b4debe469297741b8bcbadff7fbf43f1c034e953d0b",
+        "beta": "89e2fea73df30a86f94328ae23128019ea394855c984b0b71cbe2712d19b5194"
+      },
+      "reason": "REDIRSTAT-1 (2026-09-25) taught this converter to stamp a modal redirect branch's own recharge and endurance onto the `conditionalEffects` entry that selects it, and the beta cannot hold the output: its `ConditionalEffect` has no `stats` field, so the eight regenerated Suppressive Fire files fail `tsc` with 24 TS2353s and `npm run build` runs `tsc` before vite. Measured rather than assumed — the copy was taken, `npm run regen:generated` run (467s, 8 files, all dual-pistols Suppressive Fire across 4 archetypes x HC and brainstorm), and the type check read before reverting. The whole diff is additive `stats: { recharge: 8, endurance: 8.53 }` on three ammo branches, so the beta loses an improvement rather than gaining a defect: without it those branches fall back to the shell's own 20s, which is REDIRSTAT-1's original symptom and the state the beta is already in.",
+      "exit": "The beta takes a `stats` field on `ConditionalEffect` and a reader that uses it, at which point `npm run sync:shared` converges this file and a regen commits the eight generated ones with it. Carrying the converter alone is what this entry forbids: it reds the beta's build and its regen-diff workflow at once, since that workflow reruns these converters on any `scripts/**` change and demands a byte match.",
+      "gap": "REDIRSTAT-1"
     },
     {
       "path": "scripts/convert-salvage.cjs",
@@ -723,10 +729,10 @@
       "path": "src/data/datasets/homecoming/levels.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "3be7243b924123592f0783453b7b57fc3af62bf109ac88beb1232e6274dad884",
-        "beta": "8d83b9ed94d3a3b5ffeda3dea50330b3ad6edc4781dd695ef0d55fbf52b35dce"
+        "canonical": "a1785c41d8d11e4f5c91ad30f2a4985446198aa0e7e27f5289c6b552bfdf32a0",
+        "beta": "8fa6c53197c252b748457415134753f7926fb2963a5ad38e1ad97cbdfa63236d"
       },
-      "reason": "File-level sweep member, and a two-way fork rather than lag. The beta dropped the `effects` key from the Fitness pool payload under STRIP-1, having found the read was resolving to `undefined` through an `as unknown as` cast; canonical still carries it. Canonical in turn has the archetype-inherent read (`getArchetypeInherentPower`) and the PARTSTAT-2 note bounding it, which the beta's copy does not.",
+      "reason": "File-level sweep member, and a two-way fork rather than lag. The beta dropped the `effects` key from the Fitness pool payload under STRIP-1, having found the read was resolving to `undefined` through an `as unknown as` cast; canonical still carries it. Canonical in turn has the archetype-inherent read (`getArchetypeInherentPower`) and the PARTSTAT-2 note bounding it, which the beta's copy does not. Both copies now also carry `derivedMechanic` and stamp it in `createArchetypeInherentPower` (2026-09-26): the display group `category: 'archetype'` was doubling as the engine's skip-this-power instruction, so eleven granted powers reached no total. The marker landed on both sides of the fork deliberately — the beta's adapter reads it, and keeping canonical's copy in step is what lets `kheldian-travel-inherents` grade the same rule here.",
       "exit": "Canonical drops the dead `effects` key -- it is `undefined` at runtime here too -- and the archetype-inherent read lands in `coh_data`. Two independent halves; the first is free and should not wait for the second.",
       "gap": "FORK-10"
     },
@@ -934,10 +940,10 @@
       "path": "src/stores/buildStore.ts",
       "status": "forked",
       "sha256": {
-        "canonical": "ab388a55a5d871b10cfef111ac29eaf05589cffcf0ccaa6b0ba45b353cd6cad1",
-        "beta": "7274c076f9cd04e1db4bd49082f483127b24d5e8fceb9da724af9427babd4210"
+        "canonical": "3d6b6ece48bd1cf84ea2d0870cca4aa40d2a998422cb3acec733480158c09b62",
+        "beta": "d0745e0420b2127f6e2cae41fca2567be5f5ba1a61b4f3f1f218f1b69acb0252"
       },
-      "reason": "The largest lag on the list -- 1,006 changed lines, the beta 570 longer -- and the one with the most consumers here: `per-server-persist`, `pool-dedup-self-heal`, `cross-dataset-import` and `src/data/pool-collisions.test.ts` all read it. Those tests grade rules about the game data that the Rust build state obeys too, which is why they were kept; they do not grade the beta's newer store features, which is why the lag is tolerable and why it is not silently tolerable.",
+      "reason": "The largest lag on the list -- 1,006 changed lines, the beta 570 longer -- and the one with the most consumers here: `per-server-persist`, `pool-dedup-self-heal`, `cross-dataset-import` and `src/data/pool-collisions.test.ts` all read it. Those tests grade rules about the game data that the Rust build state obeys too, which is why they were kept; they do not grade the beta's newer store features, which is why the lag is tolerable and why it is not silently tolerable. Both copies now also scope `togglePowerActive`'s write to the category `findPower` resolved (2026-09-26, via `applyToCategory`): `internalName` is not unique, and a build-wide write by name flipped Thunderspy's Stalker Hide and Radiation Armor's Beta Decay together. Applied to both sides rather than the beta alone, so the four tests that read this copy grade the fixed rule rather than the broken one.",
       "exit": "The four tests that read it are re-pointed at `crates/coh_data`'s own state, or retire with the beta at RB4i's cut-over. This copy is then deleted; it is not a file this repo should ever re-sync, because re-syncing it would change what those four tests are grading without anyone deciding to.",
       "gap": "FORK-10"
     },
@@ -1001,7 +1007,7 @@
     {
       "path": "src/types/power.ts",
       "status": "identical",
-      "sha256": "87b6f8fdd53afea9703ab7a19e181f199f25514d3355160173052ce7d81ff79c"
+      "sha256": "0d5f5c4833658b600967076a58a43c70e917b526630ca687013833c4beb0baad"
     },
     {
       "path": "src/types/shared.ts",

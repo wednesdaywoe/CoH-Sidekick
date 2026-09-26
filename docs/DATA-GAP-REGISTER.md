@@ -57,8 +57,28 @@ because it reads data trees the beta does not carry.
 
 ## Current frontier
 
-**0 open, of 336 entries.** FORK-10 closed 2026-09-23; nothing is open. What follows is carried
+**0 open, of 340 entries.** CATSKIP-1 closed 2026-09-26; nothing is open. What follows is carried
 because it outlived the rows that taught it, not because it is waiting on anybody.
+
+**One field two readers interpret differently is two fields.** CATSKIP-1's `inherentCategory` chose
+a panel section for the display and meant "skip this power" to the engine, so eleven granted powers
+rendered correctly and counted for nothing. Neither reader was wrong about its own meaning.
+
+**A field the reader drops on purpose is only derived if something actually re-derives it.** The
+reader in GRANTLOCK-1 dropped two flags and named the load reconciles as their source; both passes
+skipped the entry they were meant to stamp, so a grant came back a pick and stayed one.
+
+**A save filter is build state's definition, so it has to name all of it.** That finding's writer
+read "the user authored this" off an inherent's SLOTTING; a toggle is authored too, so every
+inherent switched on and never slotted saved as off.
+
+**A label beside a number is part of that number, and must be read off it.** CHIPTYPE-1 drew the
+damage chips from a power-level classification while the figure beside them came from the build's
+own components, so the two answered for different build states and only one of them was on screen.
+
+**"Already modelled elsewhere" is a claim about a model's FIELDS, not its scope.** REDIRSTAT-1
+declined a table to the model that owned the mechanic and had no field for the only thing that table
+stated. Owning a mechanic obliges carrying every axis of it.
 
 **A deletion's blast radius is not in the diff that proposes it.** FORK-10's first cut took 123
 files an import sweep called dead, and was reverted within the hour: the beta's census opens
@@ -557,7 +577,21 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Sets, boosts, incarnates, inherents
 
-[Full detail](gaps/sets-boosts-incarnates.md) — 33 of 33 closed
+[Full detail](gaps/sets-boosts-incarnates.md) — 35 of 35 closed
+
+- [x] **CATSKIP-1** — the TS tree's `inherentCategory: 'archetype'` is a DISPLAY group, and the
+  beta's adapter forwarded it as the engine's skip-this-power instruction, so eleven granted powers
+  reached NO total on the live site — Peacebringer and Warshade travel on every fork, Thunderspy's
+  Stalker Hide and Placate among the rest. Two siblings found with it: a build-wide toggle write by
+  non-unique `internalName`, and an inherent save reading "authored" off slotting alone. Closed
+  2026-09-26 — 12 legs, 8 mutations, both repos
+
+- [x] **GRANTLOCK-1** — a granted power did not survive its own file. `.skif` stores neither
+  `is_locked` nor `inherent_category`, naming the load reconciles as what re-derives them; both
+  skipped the entry they were meant to stamp. A pool grant came back a pick and spent a power pick
+  (28 pool/fork pairs, four forks); an inherent grant lost its toggle and enhancements (11 powers,
+  4 Thunderspy archetypes, Hide included); an inherent switched on but never slotted was never
+  written. Closed 2026-09-26 — 4 legs, 5 mutations
 
 - [x] **BOOST-8** — BOOST-1 measured the beta's hand `COMMON_IO_TYPES` at 25 of the game's 26,
   fixed the derived roster and deliberately kept the hand one frozen as an oracle — but wired no
@@ -831,8 +865,10 @@ measurement went, and where a closure for the residual belongs too.
 
 ## Damage + power variants
 
-[Full detail](gaps/damage-variants.md) — 9 of 9 closed
+[Full detail](gaps/damage-variants.md) — 11 of 11 closed
 
+- [x] **CHIPTYPE-1** — the damage-type chips came from a power-level classification off the UNGATED atoms while the headline beside them came from the build's live components, so a Dual Pistols attack with special ammo loaded read "Lethal 68.4" over a hit that was entirely Cold, its Lethal row having gone dormant; chips now derive from the same components every other figure in the block does (5/1/95/5 powers per fork disagreed at rest, 168 power/stance pairs move with a caster mode)
+- [x] **REDIRSTAT-1** — a modal redirect table declined as "already modelled as `conditionalEffects`" had no stats channel to be modelled in, so Suppressive Fire's two branches — identical but for recharge 20/8 and endurance 10.192/8.53 — reached the planner as the shell's 20s under every ammo; the selected branch's stats now ride on the toggle that selects it
 - [x] **ASFORM-1** — the meter-selected redirect pair (Assassin's Strike Quick/Stealth) was every form detector's orphan, so a hidden opener's Assassination damage reached no atom and projected zero; the pair now ships as `formVariants` with union atoms
 - [x] **SNIPE-1** — a damage template's `magnitude_expression` values it, and `extractDamage` read only `scale`
 - [x] **SNIPE-2** — the fast-snipe detector knew only Homecoming's gate, so two forks had no quick snipe
