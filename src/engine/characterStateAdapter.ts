@@ -237,6 +237,33 @@ function mapEnhancement(e: Enhancement): CharacterStateEnhancement {
   }
 }
 
+/**
+ * What `inherent_category` MEANS to the engine, which is not what it means to the planner's
+ * inherents panel.
+ *
+ * The engine reads `'archetype'` as "this power's contribution is derived by its own
+ * combat-context pass; skip it in the ordinary gather" (`coh_math::gather`, the Vigilance/Fury
+ * skip) — a statement about the calculation. The planner's `inherentCategory` is a DISPLAY group,
+ * and eleven powers claim `'archetype'` to land in the expanded "<AT> Inherent" section instead of
+ * the collapsed Basic one.
+ *
+ * Forwarding one as the other made the engine skip all eleven, so they reached no total at all:
+ * Peacebringer Energy/Combat Flight and Warshade Shadow Step/Recall on every fork, and on
+ * Thunderspy the Stalker's Hide and Placate, the Mastermind's Hold Ground, Group Energy Flight,
+ * Quantum Acceleration, Starless Step and Shadow Slip. Hide's toggle moved no defense whatever the
+ * user did with it, which is the report that found this.
+ *
+ * So the engine is told `'archetype'` only for the power that actually is one — the archetype's own
+ * declared mechanic, marked `derivedMechanic` where it is built. Everything else in that display
+ * group travels as the ordinary granted power it is. `null` rather than a substitute category:
+ * the engine uses this field for nothing but the skip, and inventing a group would be claiming
+ * something about a power the planner has not been told.
+ */
+function engineInherentCategory(p: SelectedPower): NonNullable<SelectedPower['inherentCategory']> | null {
+  if (p.derivedMechanic) return 'archetype';
+  return p.inherentCategory === 'archetype' ? null : p.inherentCategory ?? null;
+}
+
 function mapPower(p: SelectedPower, targetsHitValues: Record<string, number>): CharacterStateSelectedPower {
   return {
     internal_name: p.internalName,
@@ -247,7 +274,7 @@ function mapPower(p: SelectedPower, targetsHitValues: Record<string, number>): C
     active_sub_power: p.activeSubPower ?? null,
     inherent_slot_count: p.inherentSlotCount ?? 0,
     is_locked: p.isLocked ?? false,
-    inherent_category: p.inherentCategory ?? null,
+    inherent_category: engineInherentCategory(p),
     // targetsHitValues is keyed by internalName (NOT unique across the build); a value
     // distributes to every pick with that name, inheriting the beta's own limitation.
     targets_hit: p.internalName in targetsHitValues ? targetsHitValues[p.internalName] : null,

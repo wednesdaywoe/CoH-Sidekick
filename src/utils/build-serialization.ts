@@ -209,13 +209,28 @@ function slimEnhancement(enh: Enhancement): SlimEnhancement {
 }
 
 /**
- * Include inherents that have been modified from their default state:
- * either they have a slotted enhancement, or they have extra slots placed
- * (even if empty — the user has allocated slot picks to them).
+ * Include inherents the user has AUTHORED something on. The roster itself is the dataset's, so
+ * writing an untouched inherent would store a fact the load re-derives anyway.
+ *
+ * Four things count, and every one of them is the user's input rather than the dataset's answer:
+ * a slotted enhancement, extra slots placed (even empty — those are spent slot picks), the
+ * TOGGLE, and a selected stance.
+ *
+ * The toggle and the stance were missing, and the omission cost state on SAVE: an inherent
+ * switched on and never slotted was left out of the file entirely and came back off. Sprint is
+ * the everyday case — a build running with it on saved as a build with it off. Thunderspy's
+ * Stalker Placate and Mastermind Hold Ground could never be saved on at all, because their defs
+ * give them no slots and so neither slot term could ever fire for them.
  */
 function slimInherents(inherents: SelectedPower[]): SlimPower[] {
   return inherents
-    .filter((p) => p.slots.some((s) => s !== null) || p.slots.length > 1)
+    .filter(
+      (p) =>
+        p.slots.some((s) => s !== null) ||
+        p.slots.length > 1 ||
+        p.isActive ||
+        p.activeSubPower !== undefined,
+    )
     .map(slimPower);
 }
 
@@ -404,6 +419,17 @@ export function hydrateBuild(slim: Record<string, any>, notes?: HydrationNote[])
     }
     if (match && slimInh.inherentSlotCount) {
       match.inherentSlotCount = slimInh.inherentSlotCount;
+    }
+    // The toggle and the stance, which this merge used to walk straight past. `slimPower` has
+    // always WRITTEN both, so the file carried them and the read threw them away: a Stalker's
+    // Hide saved on came back off, and so did every other inherent toggle and every inherent
+    // stance. Restored only when the file states them, so an older file that carries neither
+    // keeps the dataset's default rather than being switched off by an absent field.
+    if (match && slimInh.isActive !== undefined) {
+      match.isActive = slimInh.isActive;
+    }
+    if (match && slimInh.activeSubPower !== undefined) {
+      match.activeSubPower = slimInh.activeSubPower;
     }
   }
 

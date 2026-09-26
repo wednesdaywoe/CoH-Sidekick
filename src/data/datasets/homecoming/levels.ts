@@ -396,8 +396,29 @@ export const INCARNATE_SLOTS = {
 export interface InherentPowerDef extends Power {
   /** If true, this power cannot be removed by the user */
   isLocked?: boolean;
-  /** Category for grouping (fitness, basic, prestige, archetype) */
+  /**
+   * DISPLAY group only (fitness, basic, prestige, archetype). `archetype` puts a power in the
+   * expanded "<AT> Inherent" section rather than the collapsed Basic one, which is why the
+   * Kheldian travel powers and Thunderspy's archetype-gated grants all claim it.
+   */
   category?: 'fitness' | 'basic' | 'prestige' | 'archetype';
+  /**
+   * True for THE archetype mechanic — the one power the engine derives in a separate
+   * combat-context pass (Fury, Scourge, Containment, Domination …) and therefore skips in the
+   * ordinary gather, so it is never counted twice.
+   *
+   * Separate from `category` because that field is a display group, and eleven powers claimed
+   * `archetype` for the section they wanted to appear in. The adapter fed the same value to the
+   * engine, which read it as "skip this", so every one of them contributed NOTHING to any total:
+   * Peacebringer Energy/Combat Flight and Warshade Shadow Step/Recall on all four forks, plus
+   * Thunderspy's Stalker Hide and Placate, Mastermind Hold Ground, Group Energy Flight, Quantum
+   * Acceleration, Starless Step and Shadow Slip. A Stalker's Hide toggle moved no defense at all,
+   * which is the bug report that found this.
+   *
+   * Those powers are ordinary granted powers: the engine must gather them like any toggle. Only
+   * the archetype's own declared mechanic sets this, in `createArchetypeInherentPower`.
+   */
+  derivedMechanic?: boolean;
   /**
    * 1-based level the game hands this power over at, straight from the fork's
    * own export (`available_level` + 1). Distinct from `available`, which the
@@ -788,6 +809,11 @@ export function createArchetypeInherentPower(
     allowedSetCategories: [],
     isLocked: true,
     category: 'archetype',
+    // THE archetype mechanic — Fury, Scourge, Containment, Gauntlet. The engine derives its
+    // contribution in its own combat-context pass and skips it in the ordinary gather, so this
+    // marker is what tells the adapter to hand `inherent_category: 'archetype'` over. See the
+    // field's own doc comment for why it is not read off `category`.
+    derivedMechanic: true,
     ...(inherent.effects ? { effects: inherent.effects } : {}),
   };
 }

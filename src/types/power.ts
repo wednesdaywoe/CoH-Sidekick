@@ -1505,8 +1505,19 @@ export interface SelectedPower extends Power {
   slots: (Enhancement | null)[];
   /** If true, this power cannot be removed by the user (inherent powers) */
   isLocked?: boolean;
-  /** Category for inherent powers (fitness, basic, prestige, archetype) */
+  /**
+   * DISPLAY group for inherent powers (fitness, basic, prestige, archetype). `archetype` is the
+   * expanded "<AT> Inherent" section; it says nothing about how the power is calculated — see
+   * `derivedMechanic` for that, and `InherentPowerDef.derivedMechanic` for why they are separate.
+   */
   inherentCategory?: 'fitness' | 'basic' | 'prestige' | 'archetype';
+  /**
+   * True for THE archetype mechanic, whose contribution the engine derives in its own pass and
+   * therefore skips in the ordinary gather. Set only by `createArchetypeInherentPower`, read only
+   * by the engine adapter. An ordinary granted power leaves it absent and is gathered normally,
+   * even when it shares the `archetype` display group.
+   */
+  derivedMechanic?: boolean;
   /** If true, the power is toggled on and its effects apply to stats (for toggle/buff powers) */
   isActive?: boolean;
   /** For powers that grant mutually exclusive sub-powers (e.g., Adaptation), tracks which one is active */

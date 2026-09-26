@@ -411,7 +411,7 @@ function syncBuildDefinitions(build: Build): void {
     | 'name' | 'internalName' | 'effects' | 'icon' | 'powerType' | 'targetType' | 'effectArea'
     | 'damage' | 'shortHelp' | 'available' | 'atoms' | 'targetsAffected'
     | 'setsModes' | 'modesRequired' | 'modesDisallowed' | 'modesSuspended' | 'modeVariants'
-    | 'allowedEnhancements' | 'allowedSetCategories'
+    | 'allowedEnhancements' | 'allowedSetCategories' | 'derivedMechanic'
   >;
   /**
    * The five mode-gating fields, lifted off a definition as one unit.
@@ -517,12 +517,21 @@ function syncBuildDefinitions(build: Build): void {
       // enhancement while the picker — a fresh def lookup — happily lists the sets
       // (the Rebirth Psionic Tornado / Ragnarok report, 2026-08-13). Both
       // directions, like the gates: a list the game data dropped must clear too.
+      // The archetype-mechanic marker: the slim serializer drops it like every other piece of
+      // static metadata, and the engine adapter reads it to decide whether a power is gathered at
+      // all. A stored build that lost it would have its archetype inherent gathered TWICE — once
+      // in the ordinary pass and once in the derived one — so this repair is what keeps the skip
+      // working across a load. Presence-based, both directions: a fork that stops calling a power
+      // the archetype mechanic must clear it rather than leave it set.
+      const needsDerivedMechanic =
+        (currentDef.derivedMechanic ?? false) !== (power.derivedMechanic ?? false);
       const needsAllowLists =
         JSON.stringify([currentDef.allowedEnhancements, currentDef.allowedSetCategories])
           !== JSON.stringify([power.allowedEnhancements, power.allowedSetCategories]);
       const metadataChanged = needsInternalName || needsEffects || needsIcon || needsPowerType
         || needsTargetType || needsEffectArea || needsShortHelp || needsAvailable || needsDamage
-        || needsModeGates || needsAllowLists || needsAtoms || needsTargetsAffected;
+        || needsModeGates || needsAllowLists || needsAtoms || needsTargetsAffected
+        || needsDerivedMechanic;
       // Judge the toggle on the REPAIRED power, not the stored one — the whole point
       // of the metadata sync above is that the stored copy may be missing the fields
       // `shouldShowToggle` reads.
@@ -541,6 +550,11 @@ function syncBuildDefinitions(build: Build): void {
             ...(needsAtoms ? { atoms: currentDef.atoms } : {}),
             ...(needsTargetsAffected ? { targetsAffected: currentDef.targetsAffected } : {}),
             ...(needsModeGates ? modeGates(currentDef) : {}),
+            ...(needsDerivedMechanic
+              ? currentDef.derivedMechanic
+                ? { derivedMechanic: true }
+                : { derivedMechanic: undefined }
+              : {}),
             ...(needsAllowLists
               ? {
                   allowedEnhancements: currentDef.allowedEnhancements,
@@ -1333,6 +1347,41 @@ function applyToAllPowers(
     // still win; they just override our pass-through with their own.
     inherents: updater(build.inherents),
   };
+}
+
+/**
+ * Apply a power array updater to ONE category only.
+ *
+ * `internalName` is not unique across a build, so an updater that keys on it cannot be handed
+ * every bucket when the intent is one pick. `findPower` already resolves a name plus a category
+ * to exactly one power; this is the write that matches that read.
+ *
+ * The case that made it necessary: Thunderspy moved the Stalker's Hide and Placate out of the
+ * armour sets into `Inherent.Inherent` and left the vacated internal names on OTHER powers, so a
+ * Stalker holds two powers called `Hide` — the inherent, and Radiation Armor's Beta Decay. A
+ * build-wide write by name flipped both, and toggling Hide visibly switched Beta Decay off.
+ */
+function applyToCategory(
+  build: Build,
+  category: PowerCategory,
+  updater: (powers: SelectedPower[]) => SelectedPower[]
+): Build {
+  switch (category) {
+    case 'primary':
+      return { ...build, primary: { ...build.primary, powers: updater(build.primary.powers) } };
+    case 'secondary':
+      return { ...build, secondary: { ...build.secondary, powers: updater(build.secondary.powers) } };
+    case 'pool':
+      return { ...build, pools: build.pools.map((pool) => ({ ...pool, powers: updater(pool.powers) })) };
+    case 'epic':
+      return build.epicPool
+        ? { ...build, epicPool: { ...build.epicPool, powers: updater(build.epicPool.powers) } }
+        : build;
+    case 'inherent':
+      return { ...build, inherents: updater(build.inherents) };
+    default:
+      return build;
+  }
 }
 
 /**
@@ -3040,11 +3089,19 @@ export const useBuildStore = create<BuildStore>()(
         const wasActive = found.power.isActive ?? false;
         const willBeActive = !wasActive;
 
+        // The power the user clicked, written to ONE category — the one `findPower` resolved it
+        // in. `internalName` is not unique across a build, and writing by name alone flipped
+        // every power that shares the name: on Thunderspy a Stalker holds two called `Hide` (the
+        // inherent, and Radiation Armor's Beta Decay wearing the vacated name), so switching Hide
+        // switched Beta Decay with it.
+        const setClickedPower = (powers: SelectedPower[]) =>
+          powers.map((p) => (p.internalName === powerName ? { ...p, isActive: willBeActive } : p));
+
+        // The mutual-exclusion sweep stays BUILD-WIDE on purpose: it keys on explicit name sets
+        // that name one power each, so there is no ambiguity to scope away, and the form pair it
+        // switches off need not sit in the bucket the clicked power came from.
         const transformPowers = (powers: SelectedPower[]) =>
           powers.map((p) => {
-            if (p.internalName === powerName) {
-              return { ...p, isActive: willBeActive };
-            }
             // If turning on a Kheldian form toggle, deactivate the other
             // form (Bright Nova ↔ White Dwarf, Dark Nova ↔ Black Dwarf).
             if (willBeActive) {
@@ -3063,7 +3120,14 @@ export const useBuildStore = create<BuildStore>()(
           });
 
         set((s) => {
-          const updatedBuild = applyToAllPowers(s.build, transformPowers);
+          // Exclusions build-wide, then the clicked power in its own category. Order matters
+          // only for the alt-run group, where the clicked power is itself a member: the sweep
+          // skips it by name, so the scoped write below is what sets it.
+          const updatedBuild = applyToCategory(
+            applyToAllPowers(s.build, transformPowers),
+            found.category,
+            setClickedPower,
+          );
           // A power that SETS a mode makes that mode live when switched on and drops it when
           // switched off — every mode it sets, not just the ones the form selector offers. The
           // engine's `collect_source_modes` reads `setsModes` unfiltered and this is the same
