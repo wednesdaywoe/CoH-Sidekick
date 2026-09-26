@@ -46,8 +46,17 @@ export interface ManualEntry {
 export const MANUAL_CHANGELOG_GROUPS: ManualChangelogGroup[] = [
   // ───────────────────────────────────────────────────────────────────────
   {
-    date: '2026-09-21',
+    date: '2026-09-26',
 
+    items: [
+      { id: 'boost-zero-state', message: 'Guarded Spin shows its melee and lethal defense, along with 13 sibling powers that were reading zero: Parry, Defensive Sweep, Follow Up, Devour Psyche, Shadow Maul and the rest', type: 'fix' },
+      { id: 'hide-defense-toggle', message: 'Hide moves defense numbers, and no longer flips Beta Decay on and off', type: 'fix' },
+      { id: 'shell-power-recharge', message: 'Suppressive Fire shows each ammunition setting\'s 8-second recharge instead of the shell power\'s 20s', type: 'fix' }, 
+    ]
+  },
+  {
+    date: '2026-09-21',
+    
     items: [
       { id: 'proc-chance-excludes-global-recharge', message: 'Fix to stop global recharge from touching proc calcs', type: 'fix' },
       { id: 'incarnate-proc-aoe-single-target', message: 'Incarnate proc damage on AoE powers was calculated as if against a single target', type: 'fix' },

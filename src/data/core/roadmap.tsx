@@ -187,7 +187,7 @@ export const ROADMAP_GROUPS: RoadmapGroup[] = [
       { label: 'Native save format', state: 'done' },
       { label: 'Importer utils', state: 'done' },
       { label: "Export to BBCode, image, SKIF", state: 'done' },
-      { label: 'Data cleanup', state: 'planned' },
+      { label: 'Data cleanup', state: 'in-progress' },
       { label: "Beta handover", state: 'planned' },
     ],
   },
