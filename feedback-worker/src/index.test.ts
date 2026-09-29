@@ -101,6 +101,7 @@ const post = (init: RequestInit & { origin?: string | null; ip?: string } = {}) 
 describe('isOriginAllowed', () => {
   it('admits the three origins that are ours', () => {
     expect(isOriginAllowed('https://coh-sidekick.com')).toBe(true);
+    expect(isOriginAllowed('https://next.coh-sidekick.com')).toBe(true);
     expect(isOriginAllowed('https://wednesdaywoe.github.io')).toBe(true);
     expect(isOriginAllowed('http://localhost:3000')).toBe(true);
   });
@@ -109,6 +110,8 @@ describe('isOriginAllowed', () => {
     // The bypass this replaced. An Origin has no path, so a prefix match is a
     // suffix wildcard on the host, and every one of these passed it.
     expect(isOriginAllowed('https://coh-sidekick.com.evil.test')).toBe(false);
+    expect(isOriginAllowed('https://next.coh-sidekick.com.evil.test')).toBe(false);
+    expect(isOriginAllowed('https://evil.coh-sidekick.com')).toBe(false);
     expect(isOriginAllowed('https://coh-sidekick.com.attacker.io')).toBe(false);
     expect(isOriginAllowed('http://localhost:3000.evil.test')).toBe(false);
   });

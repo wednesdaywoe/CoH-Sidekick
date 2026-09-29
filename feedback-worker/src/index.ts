@@ -87,6 +87,9 @@ interface FeedbackPayload {
 
 const ALLOWED_ORIGINS = [
   'https://coh-sidekick.com',
+  // The 1.0 rebuild's web build, served beside the beta while it is tested
+  // (coh-sidekick-rebuild's wrangler.toml). Same inbox, same form contract.
+  'https://next.coh-sidekick.com',
   'https://wednesdaywoe.github.io',
   'http://localhost:3000',
 ];
