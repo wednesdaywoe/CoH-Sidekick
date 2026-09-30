@@ -8,6 +8,7 @@ import { Header } from './Header';
 import { StatsDashboard } from './StatsDashboard';
 import { UpdateBanner } from './UpdateBanner';
 import { StatusBanner } from './StatusBanner';
+import { RebuildBanner } from './RebuildBanner';
 import { EngineErrorBanner } from './EngineErrorBanner';
 import { CalcErrorBanner } from './CalcErrorBanner';
 import { RuleOf5Banner } from './RuleOf5Banner';
@@ -84,6 +85,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       <CalcErrorBanner />
       <StatusBanner active={activeStatus} />
       <UpdateBanner />
+      <RebuildBanner />
       <Header />
       {/* Mobile-only: keeps level + pick/slot budget pinned while the page scrolls */}
       <MobileBuildBar />
