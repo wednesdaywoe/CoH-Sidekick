@@ -8,6 +8,7 @@
 
 import { useState } from 'react';
 import {
+  ROADMAP_CALLOUT,
   ROADMAP_INTRO,
   ROADMAP_GROUPS,
   deriveGroupState,
@@ -51,6 +52,48 @@ function groupProgress(group: RoadmapGroup): string {
   return `${done}/${group.items.length}`;
 }
 
+/**
+ * The call to action at the head of the tab: a screenshot of 1.0 with a
+ * finished build open, fading into the headline, then the blurb and the link
+ * out. The screenshot is a link too, since it is the thing people aim at.
+ */
+function RebuildCallout() {
+  return (
+    <div className="overflow-hidden rounded-lg border border-gray-700 bg-gray-800/60">
+      <a href={ROADMAP_CALLOUT.url} target="_blank" rel="noopener" className="group relative block">
+        <img
+          src={ROADMAP_CALLOUT.image}
+          alt={ROADMAP_CALLOUT.imageAlt}
+          className="block w-full transition-transform duration-500 group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+        />
+        {/* Fades the screenshot into the card, so the headline sits on it. */}
+        <span className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent" aria-hidden />
+        <span className="absolute left-4 bottom-3 space-y-0.5">
+          <span className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-sk-magenta)]">
+            {ROADMAP_CALLOUT.eyebrow}
+          </span>
+          <span className="block text-2xl font-bold text-white drop-shadow">{ROADMAP_CALLOUT.headline}</span>
+        </span>
+      </a>
+      <div className="p-4 space-y-3">
+        <p className="text-sm text-gray-300 leading-relaxed [&_code]:text-gray-100 [&_strong]:text-gray-100">
+          {ROADMAP_CALLOUT.blurb}
+        </p>
+        {/* A real link in a new tab, so this planner stays open behind it. */}
+        <a
+          href={ROADMAP_CALLOUT.url}
+          target="_blank"
+          rel="noopener"
+          className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-sk-magenta)] px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.03] hover:brightness-110"
+        >
+          {ROADMAP_CALLOUT.button}
+          <span aria-hidden>&#8599;</span>
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export function RoadmapPanel() {
   const [introOpen, setIntroOpen] = useState(false);
   // Default-expand the in-progress groups so the "current work" is visible.
@@ -73,6 +116,8 @@ export function RoadmapPanel() {
 
   return (
     <div className="space-y-5">
+      <RebuildCallout />
+
       {/* Expandable intro */}
       <div className="rounded-lg border border-gray-700 bg-gray-800/40">
         <button

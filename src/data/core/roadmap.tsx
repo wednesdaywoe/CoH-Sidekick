@@ -26,7 +26,27 @@ export interface RoadmapGroup {
 }
 
 /** Bump whenever a milestone advances, to re-flag the tab as "new". */
-export const ROADMAP_VERSION = 1;
+export const ROADMAP_VERSION = 2;
+
+/**
+ * The call to action that leads the tab: 1.0 is testable now, on its own site
+ * beside this one. Rendered by RebuildCallout in RoadmapPanel.
+ */
+export const ROADMAP_CALLOUT = {
+  eyebrow: 'Now in public testing',
+  headline: 'Try the Sidekick rebuild',
+  button: 'Open Sidekick 1.0',
+  url: 'https://next.coh-sidekick.com',
+  image: '/sidekick-1.0-preview.webp',
+  imageAlt: 'Sidekick 1.0 showing a slotted Martial Arts / Willpower Stalker and the damage breakdown for Storm Kick',
+  blurb: (
+    <>
+      The Rust rebuild of Sidekick is finally available for testing. Your saved <code>.skif
+      </code> and Mids files open in it. It&apos;s still being tested, so expect rough edges. If something looks
+      wrong or missing, please let me know with <strong>Help &rarr; Send feedback</strong> in the new planner.
+    </>
+  ),
+};
 
 /** Teaser is always visible; `full` expands to the author's explainer. */
 export const ROADMAP_INTRO: { teaser: ReactNode; full: ReactNode } = {
