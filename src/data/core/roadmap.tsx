@@ -25,8 +25,32 @@ export interface RoadmapGroup {
   items: RoadmapItem[];
 }
 
-/** Bump whenever a milestone advances, to re-flag the tab as "new". */
+/**
+ * Bump whenever the roadmap changes enough to show again. It re-flags the tab as
+ * "new" AND reopens the announcement modal on the next load — for everyone,
+ * including users who ticked "Don't show these again" (see announcementAutoOpens).
+ */
 export const ROADMAP_VERSION = 2;
+
+/** The dismissal key the modal records once a roadmap version has been shown. */
+export const roadmapSeenKey = (version: number = ROADMAP_VERSION) => `roadmap-v${version}`;
+
+/**
+ * Whether the announcement modal opens by itself on load: a featurette the user
+ * hasn't dismissed, or a roadmap version they haven't seen. "Don't show these
+ * again" dismisses the featurettes only, so a new ROADMAP_VERSION still gets
+ * through once — the modal marks it seen as soon as it shows the roadmap tab.
+ */
+export function announcementAutoOpens(
+  dismissed: readonly string[],
+  announcementIds: readonly string[],
+  version: number = ROADMAP_VERSION,
+): boolean {
+  return (
+    announcementIds.some((id) => !dismissed.includes(id)) ||
+    !dismissed.includes(roadmapSeenKey(version))
+  );
+}
 
 /**
  * The call to action that leads the tab: 1.0 is testable now, on its own site

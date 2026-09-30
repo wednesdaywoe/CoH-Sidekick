@@ -1,8 +1,9 @@
 /**
  * Tabbed feature-announcement spotlight ("What's New"). Auto-opens whenever the
- * ANNOUNCEMENTS registry has at least one entry the user hasn't dismissed,
- * defaulting to the newest unseen featurette. Each entry is a tab (newest
- * first), so the user can browse every spotlight in one place.
+ * ANNOUNCEMENTS registry has at least one entry the user hasn't dismissed, or
+ * the current ROADMAP_VERSION hasn't been seen (announcementAutoOpens), landing
+ * on the roadmap tab. Each entry is a tab (newest first), so the user can browse
+ * every spotlight in one place.
  *
  * Dismissal (keyed by id, persisted in uiStore.dismissedAnnouncements):
  *   - "Maybe later" / backdrop: hide for the session only — returns next load.
@@ -21,7 +22,7 @@ import { Button } from '@/components/ui';
 import { useUIStore } from '@/stores';
 import { resolvePath } from '@/utils/paths';
 import { ANNOUNCEMENTS, type AnnouncementAction } from '@/data/core/announcements';
-import { ROADMAP_VERSION } from '@/data/core/roadmap';
+import { announcementAutoOpens, roadmapSeenKey } from '@/data/core/roadmap';
 
 type ActiveTab = 'roadmap' | number;
 
@@ -39,10 +40,11 @@ export function AnnouncementModal() {
   // The roadmap is the landing tab; featurettes are browsed from their own tabs.
   const [activeTab, setActiveTab] = useState<ActiveTab>('roadmap');
 
-  const hasUnseen = ANNOUNCEMENTS.some((a) => !dismissed.includes(a.id));
-  const roadmapKey = `roadmap-v${ROADMAP_VERSION}`;
+  const roadmapKey = roadmapSeenKey();
   const roadmapUnseen = !dismissed.includes(roadmapKey);
-  const isOpen = announcementModalOpen || (visible && hasUnseen);
+  const isOpen =
+    announcementModalOpen ||
+    (visible && announcementAutoOpens(dismissed, ANNOUNCEMENTS.map((a) => a.id)));
 
   // Manual open (menu) → snap back to the roadmap tab.
   useLayoutEffect(() => {
