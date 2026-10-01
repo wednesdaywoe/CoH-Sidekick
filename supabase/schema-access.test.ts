@@ -165,3 +165,46 @@ describe('favoriting refuses identically for "not yours" and "not there" (F53)',
     expect(schema).toContain('build_id   TEXT NOT NULL REFERENCES shared_builds(id) ON DELETE CASCADE');
   });
 });
+
+/**
+ * user_layouts — one row per account, its owner's alone. The behaviour is
+ * graded by execution in `supabase/audit/fixture/check-user-layouts.sql`;
+ * these hold the shape against a revert.
+ */
+describe('user_layouts is readable and writable by its owner only', () => {
+  // From the table to its last grant, so a block appended after it later
+  // does not leak into these assertions.
+  const last = 'GRANT SELECT, INSERT, UPDATE ON public.user_layouts TO authenticated;';
+  const span = (sql: string) =>
+    sql.slice(sql.indexOf('CREATE TABLE IF NOT EXISTS user_layouts'), sql.indexOf(last) + last.length);
+  const block = span(schema);
+  const migration = readFileSync(
+    new URL('./migration-2026-10-01-user-layouts.sql', import.meta.url), 'utf8');
+
+  it('has RLS on, and every policy is scoped to the caller', () => {
+    expect(block).toContain('ALTER TABLE user_layouts ENABLE ROW LEVEL SECURITY');
+    const policies = block.match(/CREATE POLICY[^;]*;/g) ?? [];
+    expect(policies).toHaveLength(3);
+    for (const policy of policies) {
+      expect(policy).toContain('TO authenticated');
+      expect(policy).toContain('user_id = auth.uid()');
+    }
+  });
+
+  it('gives anon nothing and authenticated no DELETE', () => {
+    expect(block).toContain('REVOKE ALL ON public.user_layouts FROM anon, authenticated');
+    expect(block).toContain('GRANT SELECT, INSERT, UPDATE ON public.user_layouts TO authenticated');
+    expect(block).not.toMatch(/GRANT[^;]*DELETE[^;]*user_layouts/);
+  });
+
+  it('caps the stored size', () => {
+    expect(block).toContain('CHECK (octet_length(layout::text) <= 65536)');
+  });
+
+  it('migrates exactly what schema.sql holds, and is safe to re-run', () => {
+    expect(span(migration)).toBe(block);
+    for (const policy of migration.match(/CREATE POLICY "[^"]+"/g) ?? []) {
+      expect(migration).toContain(policy.replace('CREATE POLICY', 'DROP POLICY IF EXISTS'));
+    }
+  });
+});
