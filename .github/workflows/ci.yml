@@ -500,8 +500,9 @@ jobs:
       # not, so the dependency is declared instead of inherited.
       - name: the libraries the desktop link needs
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          # A stalled mirror download hung one run for 20 minutes; time out and retry instead.
+          sudo apt-get update -o Acquire::Retries=5 -o Acquire::http::Timeout=30
+          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=5 -o Acquire::http::Timeout=30 \
             libwebkit2gtk-4.1-dev libgtk-3-dev libxdo-dev libsoup-3.0-dev \
             libjavascriptcoregtk-4.1-dev pkg-config
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
