@@ -123,39 +123,69 @@ function stateEntry(item) {
   return { id: item.id, date: item.date, preview: item.message.slice(0, 80) };
 }
 
-// Discord limits: at most 10 embeds per message, and 4096 characters per embed description.
+// Discord limits: at most 10 embeds per message, 4096 characters per embed description, and
+// 6000 characters across every embed's title and description in one message. The last one is
+// what a backlog trips: nine dates fit under the embed count and still get a 400.
 const MAX_EMBEDS_PER_MESSAGE = 10;
 const MAX_DESC = 4000;
+const MAX_MESSAGE_CHARS = 6000;
 
 function pickColor(types) {
   for (const t of COLOR_PRIORITY) if (types.includes(t)) return TYPE_META[t].color;
   return 0x5865f2;
 }
 
-/** One embed per date, split into more if the text runs past Discord's limit. */
+/**
+ * One embed per date, split into more if the text runs past Discord's limit. Each embed comes
+ * back with the entries it carries, so the record can be written as each message lands.
+ */
 function embedsForGroup(date, items) {
   const color = pickColor(items.map((i) => i.type));
-  const lines = items.map((i) => `${TYPE_META[i.type].emoji} **${TYPE_META[i.type].label}** — ${i.message}`);
 
   const chunks = [];
-  let current = '';
-  for (const line of lines) {
+  let current = { text: '', items: [] };
+  for (const item of items) {
+    const line = `${TYPE_META[item.type].emoji} **${TYPE_META[item.type].label}** — ${item.message}`;
     const safeLine = line.length > MAX_DESC ? line.slice(0, MAX_DESC - 1) + '…' : line;
-    if (current && current.length + safeLine.length + 2 > MAX_DESC) {
+    if (current.text && current.text.length + safeLine.length + 2 > MAX_DESC) {
       chunks.push(current);
-      current = safeLine;
+      current = { text: safeLine, items: [item] };
     } else {
-      current = current ? `${current}\n\n${safeLine}` : safeLine;
+      current.text = current.text ? `${current.text}\n\n${safeLine}` : safeLine;
+      current.items.push(item);
     }
   }
-  if (current) chunks.push(current);
+  if (current.text) chunks.push(current);
 
-  return chunks.map((description, idx) => ({
-    title: idx === 0 ? `📋 ${PRODUCT} — What's New — ${date}` : `📋 ${PRODUCT} — What's New — ${date} (cont.)`,
-    url: SITE,
-    description,
-    color,
+  return chunks.map((chunk, idx) => ({
+    embed: {
+      title: idx === 0 ? `📋 ${PRODUCT} — What's New — ${date}` : `📋 ${PRODUCT} — What's New — ${date} (cont.)`,
+      url: SITE,
+      description: chunk.text,
+      color,
+    },
+    items: chunk.items,
   }));
+}
+
+/** Split embeds into messages that stay under both the embed count and the character total. */
+function batchEmbeds(embeds) {
+  const size = ({ embed }) => embed.title.length + embed.description.length;
+  const batches = [];
+  let current = [];
+  let chars = 0;
+  for (const embed of embeds) {
+    const full = current.length >= MAX_EMBEDS_PER_MESSAGE || chars + size(embed) > MAX_MESSAGE_CHARS;
+    if (current.length > 0 && full) {
+      batches.push(current);
+      current = [];
+      chars = 0;
+    }
+    current.push(embed);
+    chars += size(embed);
+  }
+  if (current.length > 0) batches.push(current);
+  return batches;
 }
 
 async function postBatch(webhook, embeds) {
@@ -222,14 +252,26 @@ async function main() {
     throw new Error('DISCORD_CHANGELOG_WEBHOOK_URL is not set. Add it to .env. Nothing posted.');
   }
 
-  for (let i = 0; i < embeds.length; i += MAX_EMBEDS_PER_MESSAGE) {
-    await postBatch(webhook, embeds.slice(i, i + MAX_EMBEDS_PER_MESSAGE));
-  }
-
   // Keyed by id, so --force-backlog refreshes records in place instead of adding duplicates.
+  // Written after every message Discord accepts, so a failure partway through a backlog leaves
+  // the record matching the channel and a rerun posts only what never went out.
   const byId = new Map(state.posted.map((e) => [e.id, e]));
-  for (const item of newItems) byId.set(item.id, stateEntry(item));
-  writeState({ version: STATE_VERSION, posted: [...byId.values()] });
+  let posted = 0;
+  for (const batch of batchEmbeds(embeds)) {
+    try {
+      await postBatch(webhook, batch.map((b) => b.embed));
+    } catch (err) {
+      if (posted > 0) {
+        err.message += ` (${posted} of ${newItems.length} entries were already posted and recorded)`;
+      }
+      throw err;
+    }
+    for (const { items } of batch) {
+      for (const item of items) byId.set(item.id, stateEntry(item));
+      posted += items.length;
+    }
+    writeState({ version: STATE_VERSION, posted: [...byId.values()] });
+  }
   console.log(`[changelog] Posted ${newItems.length} entr${newItems.length === 1 ? 'y' : 'ies'} to Discord and updated ${path.basename(STATE_PATH)}.`);
 }
 
