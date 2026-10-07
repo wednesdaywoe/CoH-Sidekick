@@ -99,10 +99,11 @@ pub struct ChainPower {
     pub base_recharge: f64,
     /// Slotted post-ED recharge enhancement as a fraction (0.95 = +95%).
     pub recharge_enhancement: f64,
-    /// True for a power whose authored `StrengthsDisallowed` names `RechargeTime`: no
-    /// recharge strength applies at all, slotted or global, so
-    /// [`effective_recharge`] returns `base_recharge` unchanged.
-    pub fixed_recharge: bool,
+    /// True for a power whose `StrengthsDisallowed` or `GlobalStrengthsDisallowed` names
+    /// `RechargeTime`: build and what-if global recharge never reach it. The stricter
+    /// `StrengthsDisallowed` also zeroes [`Self::recharge_enhancement`], which leaves
+    /// [`effective_recharge`] at `base_recharge`.
+    pub ignores_global_recharge: bool,
     /// Enhanced endurance cost per activation.
     pub endurance_cost: f64,
     /// Self endurance GAINED per activation (Dark Consumption-class click recovery),
@@ -133,10 +134,12 @@ pub fn effective_recharge(
     global_recharge_pct: f64,
     bounds: StrengthBounds,
 ) -> f64 {
-    if power.fixed_recharge {
-        return power.base_recharge;
-    }
-    let net = 1.0 + power.recharge_enhancement + global_recharge_pct / 100.0;
+    let global = if power.ignores_global_recharge {
+        0.0
+    } else {
+        global_recharge_pct / 100.0
+    };
+    let net = 1.0 + power.recharge_enhancement + global;
     power.base_recharge / net.clamp(bounds.floor, bounds.cap)
 }
 
@@ -674,4 +677,41 @@ pub fn compute_chain_in_lanes(
             .map(|params| simulate_endurance(powers, activations, cycle_seconds, params)),
         max_damage,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn power(recharge_enhancement: f64, ignores_global_recharge: bool) -> ChainPower {
+        ChainPower {
+            id: "test:power".into(),
+            name: "Power".into(),
+            kind: ChainPowerKind::Buff,
+            cast: 1.0,
+            base_recharge: 120.0,
+            recharge_enhancement,
+            ignores_global_recharge,
+            endurance_cost: 0.0,
+            endurance_gain: 0.0,
+            damage: 0.0,
+            dots: Vec::new(),
+            effect_window: None,
+            unresolved_damage: 0,
+        }
+    }
+
+    const BOUNDS: StrengthBounds = StrengthBounds {
+        floor: 0.2,
+        cap: 5.0,
+    };
+
+    #[test]
+    fn global_recharge_lock_keeps_slotted_recharge() {
+        // `GlobalStrengthsDisallowed RechargeTime`: slotted applies, the +100% global does not.
+        assert_eq!(effective_recharge(&power(0.5, true), 100.0, BOUNDS), 80.0);
+        // `StrengthsDisallowed RechargeTime`: chain_build zeroes the slotted term too.
+        assert_eq!(effective_recharge(&power(0.0, true), 100.0, BOUNDS), 120.0);
+        assert_eq!(effective_recharge(&power(0.5, false), 100.0, BOUNDS), 48.0);
+    }
 }

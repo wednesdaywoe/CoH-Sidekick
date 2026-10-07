@@ -317,12 +317,12 @@ fn AttackChainBody(database: Db) -> Element {
     // not zero — say so once, at the top, instead of shipping a quietly low number.
     let unresolved_total: usize = powers.iter().map(|p| p.unresolved_damage).sum();
 
-    // The floor notice: every non-fixed power pinned at the archetype floor means the slider
-    // has gone past what a debuff can actually do.
+    // The floor notice: every power the slider reaches pinned at the archetype floor means the
+    // slider has gone past what a debuff can actually do.
     let all_floored = {
         let mut any = false;
         let mut floored = true;
-        for power in powers.iter().filter(|p| !p.fixed_recharge) {
+        for power in powers.iter().filter(|p| !p.ignores_global_recharge) {
             any = true;
             if 1.0 + power.recharge_enhancement + global_pct / 100.0 > bounds.floor {
                 floored = false;

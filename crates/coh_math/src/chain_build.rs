@@ -387,9 +387,12 @@ fn chain_power(
     // lingers after it. The beta compares the DoT's duration against it with a 50ms slack.
     let raw_cast = projection.cast_time.map(|tier| tier.base).unwrap_or(0.0);
 
-    let fixed_recharge = crate::perma::disallows_recharge(def, "strengthsDisallowed")
-        || crate::perma::disallows_recharge(def, "globalStrengthsDisallowed");
-    let recharge_enhancement = if fixed_recharge {
+    // `StrengthsDisallowed` drops slotted and global recharge, `GlobalStrengthsDisallowed` only
+    // the global; slotted recharge still shortens a Kuji-In Rin.
+    let recharge_locked = crate::perma::disallows_recharge(def, "strengthsDisallowed");
+    let ignores_global_recharge =
+        recharge_locked || crate::perma::disallows_recharge(def, "globalStrengthsDisallowed");
+    let recharge_enhancement = if recharge_locked {
         0.0
     } else {
         projection
@@ -470,7 +473,7 @@ fn chain_power(
         cast,
         base_recharge: projection.recharge.map(|tier| tier.base).unwrap_or(0.0),
         recharge_enhancement,
-        fixed_recharge,
+        ignores_global_recharge,
         endurance_cost: projection
             .endurance_cost
             .map(|tier| tier.r#final)
