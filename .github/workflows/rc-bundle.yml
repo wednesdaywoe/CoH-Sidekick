@@ -58,14 +58,18 @@ on:
         description: "What to call this candidate (e.g. rc1)"
         required: true
         default: rc1
+      tag:
+        description: "Release tag to draft, e.g. v1.0.0-rc1. Empty: artifacts only, no release"
+        required: false
+        default: ""
 
 permissions:
   # Least privilege, stated rather than inherited: with no block the job
   # takes the repository's default, which is a setting in the web UI that can be changed to
   # read/write for the whole repository without touching a workflow file or leaving a trace in
-  # this history. Nothing in these three jobs writes -- no release is cut, nothing is pushed, no
-  # package is published, and `actions/upload-artifact` uses the runtime token rather than this
-  # one. The beta's four workflows have carried exactly this block since they were written; these
+  # this history. Nothing in the three build jobs writes -- nothing is pushed, no package is
+  # published, and `actions/upload-artifact` uses the runtime token rather than this one. The
+  # `release` job at the end is the exception, and asks for `contents: write` on itself alone. The beta's four workflows have carried exactly this block since they were written; these
   # three are the ones that never got it.
   contents: read
 
@@ -233,6 +237,23 @@ jobs:
         with:
           name: sidekick-${{ inputs.label }}-windows-x86_64
           path: dist/
+          if-no-files-found: error
+      # The `dx build` output is a folder, so the release carries it zipped.
+      - name: release archive
+        if: inputs.tag != ''
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          (cd dist && 7z a -tzip "../release/Sidekick-$TAG-windows-x86_64.zip" .)
+          python3 scripts/keys/rc-checksums.py release
+      - uses: actions/upload-artifact@v4
+        if: inputs.tag != ''
+        with:
+          name: release-windows
+          path: release/
           if-no-files-found: error
 
   macos:
@@ -402,6 +423,24 @@ jobs:
           name: sidekick-${{ inputs.label }}-macos-arm64
           path: dist/
           if-no-files-found: error
+      # Zipped HERE, with ditto, because upload-artifact drops the executable bit and a .app
+      # whose binary is not executable does not launch. ditto keeps the bundle intact.
+      - name: release archive
+        if: inputs.tag != ''
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          app=$(find dist -maxdepth 1 -type d -name "*.app" -print -quit)
+          ditto -c -k --keepParent "$app" "release/Sidekick-$TAG-macos-arm64.zip"
+          python3 scripts/keys/rc-checksums.py release
+      - uses: actions/upload-artifact@v4
+        if: inputs.tag != ''
+        with:
+          name: release-macos
+          path: release/
+          if-no-files-found: error
 
   linux:
     # Hosted since 2026-10-07; this leg ran on jpc before that. The macOS leg carries the
@@ -524,3 +563,63 @@ jobs:
           name: sidekick-${{ inputs.label }}-linux-x86_64
           path: dist/
           if-no-files-found: error
+      - name: release archive
+        if: inputs.tag != ''
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          cp "$(find dist -maxdepth 1 -name "*.AppImage" -print -quit)" "release/Sidekick-$TAG-linux-x86_64.AppImage"
+          python3 scripts/keys/rc-checksums.py release
+      - uses: actions/upload-artifact@v4
+        if: inputs.tag != ''
+        with:
+          name: release-linux
+          path: release/
+          if-no-files-found: error
+
+  # A DRAFT release with the three platforms attached, only when a tag was given. A draft is
+  # visible to nobody until a maintainer presses Publish, so nothing reaches the public from a
+  # run nobody has looked at. This is the one job in this file that writes, and the write is
+  # scoped to it: the workflow-level block above stays read-only.
+  release:
+    if: inputs.tag != ''
+    needs: [windows, macos, linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release
+          merge-multiple: true
+      - name: draft the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] ||
+            { echo "::error::tag '$TAG' is not vMAJOR.MINOR.PATCH[-pre]"; exit 1; }
+          cd release
+          # Each leg left its own SHA256SUMS here and the merge kept one of them; the release
+          # carries one manifest over all three files instead.
+          rm -f SHA256SUMS
+          sha256sum -- Sidekick-* > SHA256SUMS
+          cat SHA256SUMS | tee -a "$GITHUB_STEP_SUMMARY"
+          pre=()
+          [[ "$TAG" == *-* ]] && pre=(--prerelease)
+          cat > notes.md <<NOTES
+          Desktop builds of CoH Sidekick, built from ${GITHUB_SHA::9}.
+
+          - **Windows (x86_64):** unzip and run \`Sidekick.exe\`. Windows SmartScreen may warn, because the build is not code-signed: choose *More info*, then *Run anyway*.
+          - **macOS (Apple Silicon only):** unzip and move \`Sidekick.app\` to Applications. The app is not notarised, so the first time, right-click it and choose *Open*.
+          - **Linux (x86_64):** make the AppImage executable (\`chmod +x\`) and run it.
+
+          \`SHA256SUMS\` lists each file's checksum, so you can confirm a download is the file this build produced.
+          NOTES
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --draft "${pre[@]}" --title "CoH Sidekick $TAG" --notes-file notes.md \
+            ./Sidekick-* SHA256SUMS
