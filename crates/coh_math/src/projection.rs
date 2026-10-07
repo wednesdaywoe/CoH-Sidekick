@@ -113,6 +113,17 @@ impl ReductionClamps {
     }
 }
 
+/// A power's chance to hit, and the level gap it was read at.
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize)]
+pub struct HitChance {
+    /// Fraction in `[0.05, 0.95]`: the base ToHit for `level_diff`, plus the build's ToHit
+    /// buffs, times this power's final accuracy ([`crate::purple_patch::hit_chance`]).
+    pub chance: f64,
+    /// Signed levels the target sits above the caster after the level shift — the
+    /// `effective_level_diff` the build-wide hit chance is read at.
+    pub level_diff: i32,
+}
+
 /// A base → enhanced → final value, the beta `ThreeTierValues` (`powerDisplayUtils.ts`).
 /// `enhanced` folds in this power's slotting; `final` additionally folds the build-wide
 /// global. Reductions (recharge / endurance) divide by `1 + bonus`; every other aspect
@@ -203,6 +214,10 @@ pub struct PowerProjection {
     pub endurance_cost: Option<ThreeTier>,
     /// Accuracy multiplier (multiplicative). Base is `stats.accuracy` else `effects.accuracy`.
     pub accuracy: Option<ThreeTier>,
+    /// The chance this power lands on the build's chosen target, read at the target's level net
+    /// of the incarnate level shift. `None` when the power has no accuracy (it never rolls to
+    /// hit) or the purple-patch tables are empty.
+    pub hit_chance: Option<HitChance>,
     /// Activation / cast seconds (multiplicative). No enhancement aspect exists for cast time,
     /// so today base == enhanced == final; kept three-tier for uniformity with the beta.
     pub cast_time: Option<ThreeTier>,
@@ -426,6 +441,7 @@ fn project_one(
     state: &CharacterState,
     gate: &SourceContext,
     g: &GlobalBonuses,
+    effective_level_diff: i32,
     alpha: &AlphaEnhancement,
     clamps: ReductionClamps,
     db: &PowerDatabase,
@@ -469,6 +485,17 @@ fn project_one(
     });
     let accuracy = truthy_stat(shown, "accuracy", "accuracy")
         .map(|base| ThreeTier::multiplicative(base, enhancement.get("accuracy"), global_accuracy));
+    // The build-wide hit chance uses only the global accuracy; a power's own roll uses its final
+    // accuracy, slotting included, against the same base ToHit and ToHit buffs.
+    let hit_chance = accuracy
+        .zip(crate::purple_patch::get_base_to_hit(
+            &db.purple_patch,
+            effective_level_diff,
+        ))
+        .map(|(accuracy, base_to_hit)| HitChance {
+            chance: crate::purple_patch::hit_chance(base_to_hit, g.to_hit, accuracy.r#final),
+            level_diff: effective_level_diff,
+        });
     let cast_base = truthy_stat(shown, "castTime", "castTime");
     let cast_time =
         cast_base.map(|base| ThreeTier::multiplicative(base, enhancement.get("castTime"), 0.0));
@@ -539,6 +566,7 @@ fn project_one(
         recharge,
         endurance_cost,
         accuracy,
+        hit_chance,
         cast_time,
         arcana_time: arcana,
         range,
@@ -656,6 +684,7 @@ pub fn project_powers(
     state: &CharacterState,
     source_modes: &HashSet<String>,
     g: &GlobalBonuses,
+    effective_level_diff: i32,
     alpha: &AlphaEnhancement,
     db: &PowerDatabase,
     errors: &mut Vec<CalcError>,
@@ -679,6 +708,7 @@ pub fn project_powers(
                 state,
                 &gate,
                 g,
+                effective_level_diff,
                 alpha,
                 clamps,
                 db,
@@ -702,6 +732,7 @@ pub fn project_powers(
             state,
             &gate,
             g,
+            effective_level_diff,
             alpha,
             clamps,
             db,

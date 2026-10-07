@@ -35,6 +35,15 @@ pub fn get_base_to_hit(purple_patch: &PurplePatch, level_diff: i32) -> Option<f6
     }
 }
 
+/// Chance to hit, as a fraction: `clamp(clamp(base_to_hit + to_hit_pct/100) × accuracy)`, both
+/// clamps `[0.05, 0.95]`. `to_hit_pct` is the ToHit buff in percentage points; `accuracy` is the
+/// multiplier (`1.0` = unenhanced, unbuffed). One formula for the build-wide figure and the
+/// per-power one, which differ only in which accuracy they pass.
+pub fn hit_chance(base_to_hit: f64, to_hit_pct: f64, accuracy: f64) -> f64 {
+    let final_to_hit = (base_to_hit + to_hit_pct / 100.0).clamp(0.05, 0.95);
+    (final_to_hit * accuracy).clamp(0.05, 0.95)
+}
+
 /// Combat modifier (damage / debuff strength / mez duration scaling) for a signed
 /// `level_diff`. Ports beta `getCombatModifier`, same branch/clamp shape as
 /// [`get_base_to_hit`].
@@ -72,4 +81,22 @@ pub fn get_defense_softcap(
 fn clamped_index(table: &[f64], index: i32) -> Option<f64> {
     let last = table.len().checked_sub(1)?;
     Some(table[(index as usize).min(last)])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::hit_chance;
+
+    #[test]
+    fn hit_chance_scales_accuracy_against_the_level_gap() {
+        // An even-level foe: 75% base ToHit × 1.2 accuracy.
+        assert!((hit_chance(0.75, 0.0, 1.2) - 0.90).abs() < 1e-9);
+        // The same power against a +4: 39% base ToHit × 1.2.
+        assert!((hit_chance(0.39, 0.0, 1.2) - 0.468).abs() < 1e-9);
+        // ToHit adds before accuracy multiplies.
+        assert!((hit_chance(0.39, 10.0, 1.2) - 0.588).abs() < 1e-9);
+        // Both clamps: ToHit floors at 5%, and the product caps at 95%.
+        assert!((hit_chance(0.08, -50.0, 1.0) - 0.05).abs() < 1e-9);
+        assert!((hit_chance(0.75, 0.0, 2.0) - 0.95).abs() < 1e-9);
+    }
 }

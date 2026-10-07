@@ -483,6 +483,7 @@ pub fn recalculate_in_cast_context(
         state,
         &source_modes,
         &g,
+        effective_level_diff,
         &alpha,
         db,
         &mut projection_gaps,

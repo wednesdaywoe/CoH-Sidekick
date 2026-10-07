@@ -555,6 +555,34 @@ fn execution_rows(projection: &PowerProjection) -> Vec<EffectRow> {
             row
         })
         .collect();
+    // Hit chance sits beside the accuracy it is computed from. The accuracy tile reads the power
+    // against an even-level target with no ToHit; this one reads it against the target level and
+    // level shift the combat panel is set to, so the label names that gap.
+    if let Some(hit) = projection.hit_chance {
+        let accuracy_token = rows
+            .iter()
+            .find(|row| row.key == "accuracy")
+            .map(|row| row.token)
+            .unwrap_or_else(|| StatFamily::Neutral.token());
+        let row = EffectRow {
+            key: "hitChance".to_string(),
+            label: format!("hit vs {}", level_gap_label(hit.level_diff)),
+            token: accuracy_token,
+            magnitude: None,
+            duration: None,
+            mechanic: None,
+            base: format!("{}%", format_precision(hit.chance * 100.0, 1)),
+            enhanced: None,
+            enhanced_final: None,
+            enhanced_changed: false,
+            final_changed: false,
+        };
+        let at = rows
+            .iter()
+            .position(|row| row.key == "accuracy")
+            .map_or(rows.len(), |index| index + 1);
+        rows.insert(at, row);
+    }
     if let Some(arcana) = projection.arcana_time {
         rows.push(EffectRow {
             key: "arcanaTime".to_string(),
@@ -571,6 +599,15 @@ fn execution_rows(projection: &PowerProjection) -> Vec<EffectRow> {
         });
     }
     rows
+}
+
+/// The target's level relative to the caster, as a player says it: `+4`, `−1`, `even`.
+fn level_gap_label(level_diff: i32) -> String {
+    match level_diff {
+        0 => "even".to_string(),
+        diff if diff > 0 => format!("+{diff}"),
+        diff => format!("−{}", diff.unsigned_abs()),
+    }
 }
 
 /// The execution rows grouped under the headings a player reads them for, in the order those
@@ -611,7 +648,7 @@ fn execution_group(key: &str) -> &'static str {
     match key {
         "enduranceCost" | "recharge" | "castTime" | "arcanaTime" | "buffDuration"
         | "effectDuration" => "Cost and timing",
-        "accuracy" | "range" | "radius" | "arc" | "maxTargets" => "Reach",
+        "accuracy" | "hitChance" | "range" | "radius" | "arc" | "maxTargets" => "Reach",
         _ => "Other",
     }
 }

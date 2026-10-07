@@ -379,13 +379,11 @@ pub fn project_combat(
         ));
     };
 
-    // finalToHit = clamp(baseToHit + toHit/100, 0.05, 0.95); the toHit/accuracy globals are
-    // PERCENTAGES. The [0.05, 0.95] clamp is applied twice — once on ToHit, once on the
-    // ToHit×accuracy product — exactly as the beta does.
-    let final_to_hit = (base_to_hit + bonuses.to_hit / 100.0).clamp(0.05, 0.95);
+    // The toHit/accuracy globals are PERCENTAGES. The [0.05, 0.95] clamp is applied twice —
+    // once on ToHit, once on the ToHit×accuracy product — exactly as the beta does.
     let accuracy_mult = 1.0 + bonuses.accuracy / 100.0;
     bonuses.base_to_hit = base_to_hit;
-    bonuses.hit_chance = (final_to_hit * accuracy_mult).clamp(0.05, 0.95);
+    bonuses.hit_chance = purple_patch::hit_chance(base_to_hit, bonuses.to_hit, accuracy_mult);
     bonuses.combat_modifier = combat_modifier;
     Ok(())
 }
