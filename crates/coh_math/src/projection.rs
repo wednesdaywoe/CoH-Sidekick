@@ -23,6 +23,7 @@
 
 use crate::apply::{power_enhancement, PowerBreakdownSource};
 use crate::damage::{resolve_power_damage, PowerDamage};
+use crate::enhancement::EnhancementBonuses;
 use crate::expr::{SourceContext, TargetIdentity, CURRENT_TO_HIT, HIDE_METER};
 use crate::gather::PowerSourceKind;
 use crate::granted::{resolve_granted_magnitudes, GrantedMagnitude};
@@ -450,7 +451,6 @@ fn project_one(
     let level = state.level as i32;
     // The build-wide globals as fractions, per aspect (the beta `convertGlobalBonusesToAspects`,
     // which divides each dashboard percent by 100). Cast time has no global.
-    let global_recharge = g.recharge / 100.0;
     let global_endurance = g.endurance / 100.0;
     let global_accuracy = g.accuracy / 100.0;
     let global_range = g.range / 100.0;
@@ -464,6 +464,33 @@ fn project_one(
     // tracker below stay keyed to the base power, as both beta surfaces keep them.
     let effective = crate::effective::effective_power(power, state, gate, db);
     let shown = effective.as_ref();
+
+    // `StrengthsDisallowed RechargeTime` drops slotted and global recharge alike,
+    // `GlobalStrengthsDisallowed` only the global — the pair perma reads too. Stripped here so
+    // the recharge row below and the card's recharge tile in the granted rows both honour it.
+    let recharge_locked = crate::perma::disallows_recharge(shown, "strengthsDisallowed");
+    let global_recharge_locked =
+        recharge_locked || crate::perma::disallows_recharge(shown, "globalStrengthsDisallowed");
+    let enhancement = if recharge_locked {
+        EnhancementBonuses::from_aspect_values(
+            enhancement
+                .iter()
+                .filter(|(aspect, _)| *aspect != RECHARGE_ASPECT),
+        )
+    } else {
+        enhancement
+    };
+    let g_without_recharge;
+    let g = if global_recharge_locked {
+        g_without_recharge = GlobalBonuses {
+            recharge: 0.0,
+            ..g.clone()
+        };
+        &g_without_recharge
+    } else {
+        g
+    };
+    let global_recharge = g.recharge / 100.0;
 
     // An adaptive-recharge power's base depends on how many foes it hit; every other power's
     // is `stats.recharge` exactly as before.
