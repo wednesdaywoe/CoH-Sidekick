@@ -60,7 +60,7 @@
     },
     {
       "file": "crates/coh_data/src/pick_rules.rs",
-      "line": 412,
+      "line": 411,
       "column": 38,
       "text": "let category = normalize(segments[0]);",
       "count": 1,
@@ -177,7 +177,7 @@
     },
     {
       "file": "crates/coh_math/src/effective.rs",
-      "line": 466,
+      "line": 494,
       "column": 27,
       "text": "1 => Some(entries.remove(0)),",
       "count": 1,
@@ -204,7 +204,7 @@
     },
     {
       "file": "crates/coh_math/src/expr.rs",
-      "line": 654,
+      "line": 662,
       "column": 18,
       "text": "_ => unreachable!(),",
       "count": 2,
@@ -213,7 +213,7 @@
     },
     {
       "file": "crates/coh_math/src/expr.rs",
-      "line": 810,
+      "line": 818,
       "column": 19,
       "text": "Ok([it.next().unwrap(), it.next().unwrap()])",
       "count": 2,
@@ -222,7 +222,7 @@
     },
     {
       "file": "crates/coh_math/src/expr.rs",
-      "line": 816,
+      "line": 824,
       "column": 19,
       "text": "Ok([it.next().unwrap(), it.next().unwrap(), it.next().unwrap()])",
       "count": 3,
@@ -284,6 +284,15 @@
       "why": "Rule 1 over `set-bonus-stat-vocab.json`, a const compiled into the binary: reachable by a build-time defect, never by a caller."
     },
     {
+      "file": "crates/coh_math/src/stacking.rs",
+      "line": 565,
+      "column": 33,
+      "text": "let casts = f64::from(n.div_ceil(per_cast));",
+      "count": 1,
+      "class": "invariant",
+      "why": "`div_ceil` panics only on a zero divisor, and `per_cast` cannot be zero: it comes from `redirect_targets_per_cast`, which keeps a `perTargetMaxTargets` only when it is `> 1.0` before casting it to `u32`, so the smallest value that reaches here is 1 (a NaN fails the comparison and never arrives)."
+    },
+    {
       "file": "crates/coh_math/src/window_slots.rs",
       "line": 529,
       "column": 36,
@@ -312,7 +321,7 @@
     },
     {
       "file": "crates/coh_math/src/window_slots.rs",
-      "line": 1589,
+      "line": 1606,
       "column": 32,
       "text": "while let Some(pos) = lower[start..].find(word) {",
       "count": 1,
@@ -321,7 +330,7 @@
     },
     {
       "file": "crates/coh_math/src/window_slots.rs",
-      "line": 1591,
+      "line": 1608,
       "column": 30,
       "text": "let before_ok = lower[..at].chars().next_back().is_none_or(|c| !is_word(c));",
       "count": 1,
@@ -330,7 +339,7 @@
     },
     {
       "file": "crates/coh_math/src/window_slots.rs",
-      "line": 1592,
+      "line": 1609,
       "column": 29,
       "text": "let after_ok = lower[at + word.len()..]",
       "count": 1,
@@ -339,7 +348,7 @@
     },
     {
       "file": "crates/coh_math/src/window_slots.rs",
-      "line": 1614,
+      "line": 1631,
       "column": 25,
       "text": "let rest = lower[i + 1..].trim_start();",
       "count": 2,
@@ -348,7 +357,7 @@
     },
     {
       "file": "crates/coh_wasm/src/lib.rs",
-      "line": 157,
+      "line": 163,
       "column": 14,
       "text": ".expect(\"a Vec<&str> always serializes\")",
       "count": 1,

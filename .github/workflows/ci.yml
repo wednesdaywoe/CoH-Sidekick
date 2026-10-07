@@ -14,8 +14,8 @@ on:
 # the whole reason this file changed: every PR-reachable job was self-hosted on three personal
 # machines, `pull_request` carries no branch filter, and a public repository would therefore
 # have handed any GitHub user code execution on them. F03 was filed as latent-until-public and
-# it is -- this repository is private today -- but the exposure is one settings toggle away,
-# and the beta next door is already public.
+# it was until 2026-10-07, when this repository went public and the last of them moved -- see
+# EXIT CONDITION below.
 #
 # SEVEN of the eight are on hosted runners. SIX went outright; `web` went on the second pass,
 # once its costing was re-measured rather than re-read -- see the job for what the old line got
@@ -82,17 +82,13 @@ on:
 #
 # EXIT CONDITION -- `rust` moves to a hosted runner when this repository goes public, because
 # that is when hosted minutes become free and the only argument for keeping it goes away.
-# F03's row stays OPEN until then and says why: "seven of the eight moved" is not the finding
-# closed.
+# MET 2026-10-07: the repository went public with fresh history, and `rust` moved that day.
+# The fork guard went with the box -- it guarded the mac, and there is no mac behind it now.
 #
-# ONE more job stays self-hosted, and it is safe for a reason rather than by luck:
-#
-#   mutants   espresso, the Geekom A6. `mutants-diff` only, and that job is
-#             `schedule` + `workflow_dispatch` — no `pull_request` arm, so no
-#             fork can start it. It is also the one job that could not move
-#             affordably: it budgets 60 minutes a night and runs the whole suite
-#             once per mutant. See the preamble further down for why it is sized
-#             by RAM rather than by cores.
+# `mutants-diff` moved the same day, off espresso. It was safe where it was (schedule and
+# dispatch only, so no fork could start it), but the rule since then is simpler than any
+# argument for an exception: no job in this repository runs on a personal machine. The release
+# legs in rc-bundle.yml and the advisories job moved with them.
 #
 # What this file costs, stated because "be mindful of the minutes" was the constraint it was
 # decided under: 55-63 billed minutes a run measured across the two all-green hybrid runs, plus
@@ -326,53 +322,26 @@ jobs:
   # `pet_effect_routes::the_reach_check_is_reading_the_pet_table` alone takes
   # 123s on the mac and 71s on jpc.
   rust:
-    # The fork guard rather than a bare `pull_request`: this job runs on the mac, so "who can
-    # start it" IS F03. A fork PR skips it. A push or a same-repo PR runs it, and that is
-    # someone who can already push to this repository. See the header for why it stayed.
-    if: >-
-      github.event_name == 'push' ||
-      (github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: [self-hosted, macmini]
-    # Not the 360-minute default. The hosted attempt was still running the suite at 60 minutes,
-    # which is the shape this bounds: a job that is not going to finish should say so.
-    timeout-minutes: 30
-    env:
-      # 8 of 12. The cap was headroom for `pipeline` on the mac's second runner and `pipeline`
-      # is hosted now, so the box is this job's alone and 12 are free. Left at 8 anyway: the
-      # ceiling on the link step is RAM rather than cores -- that is what the 37.6 GB -j32 OOM
-      # on jpc measured -- and this file's rule for that shape is espresso's, stated at length
-      # further down. Raise it against a measured run, not against the arithmetic.
-      NEXTEST_TEST_THREADS: '8'
+    # Hosted, and for good: on 2026-10-07 this repository went public and every self-hosted
+    # runner was retired, because on a public repo a pull request is a stranger's code. With no
+    # box of ours behind it, the fork guard this job used to carry has nothing left to protect.
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    # The 30 minutes this had was sized for the mac. A hosted runner starts with an empty
+    # target/ and four cores, so the first run after a cache miss is the slow one this bounds.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      # No rust-cache: the mac's target/ and registry persist between runs, so the action would
-      # add an upload and a download to restore a cache that is already on the disk. It is the
-      # hosted jobs that start empty and need it.
-      #
-      # The toolchain is named anyway, though this box has it. The mac carried nextest 0.9.143
-      # and the wasm target installed by hand in July, and "inherited" is the state where a
-      # result differing from this file's history could mean the tool rather than the code.
-      # `rustup target add` is genuinely a no-op at the matching version. `cargo install` is
-      # NOT: it exits 101 with "binary `cargo-nextest` already exists in destination" whenever
-      # the binary is there, which on a box that keeps its $CARGO_HOME is every run. That is
-      # what took this job down in 11 seconds the first time it came back to the mac.
-      #
-      # So the version is asserted and the install is the fallback. `command -v cargo-nextest`,
-      # which is what `mutants-diff` uses below, would not do here: it passes on whatever
-      # nextest the box happens to carry, and an unnamed tool version is the exact state the
-      # paragraph above exists to rule out. --force is reached only when the assert fails, so
-      # a matching box never pays the rebuild.
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          cache-bin: false
+      # The version is asserted and the install is the fallback, so a result differing from
+      # this file's history means the code, not the tool.
       - name: the pinned nextest, and the target rust-toolchain.toml names
         run: |
           rustup target add wasm32-unknown-unknown
           cargo nextest --version 2>/dev/null | grep -qF '0.9.143' ||
             cargo install cargo-nextest --locked --version 0.9.143 --force
-      # rustup honors rust-toolchain.toml (1.96.1 + wasm32) on this box as it always did.
-      # What the mac and jpc ALSO carried was nextest 0.9.143, installed by hand; the step
-      # above names that version so a result differing from this file's history means the
-      # code, not the tool.
-      #
       # nextest rather than `cargo test`, for three reasons the sweep job below
       # already knew and this one didn't:
       #   1. The workspace has 122 integration binaries and cargo runs them one
@@ -385,33 +354,24 @@ jobs:
       #   3. Doctests are the one thing nextest drops, and there are none to drop
       #      -- all three fenced blocks in the crates are ```text, not ```rust.
       #
-      # No `nice`/`ionice` on this job, unlike the jpc ones: the mac is a dedicated runner with
-      # nobody sitting at it, so there is no contest to lose. `ionice` would in any case fail --
-      # it is a Linux tool and macOS does not ship it.
       # Cheap, and first, because what it guards is what cuts releases. It grades itself with
       # --self-test rather than only running: a check that has never been seen to refuse
       # anything is a wish, and this one is green against a correct tree by construction. F14.
       - name: every build input comes from a pinned source
         env:
-          # Rule 11 reads this, and it is the firing mechanism behind F03's
-          # ACCEPTED status: `rust` is the one PR-reachable self-hosted job
-          # left, and it is acceptable only while this repository is private.
-          # The day that flips, this check reds and names the job. Passed in
-          # rather than looked up because a file in the repository cannot know
-          # its own visibility, and a check that assumed one would be a claim.
+          # Rule 11 reads this. This repository is public and runs no self-hosted
+          # job, so the rule has nothing to name today; it is what reds the day
+          # someone adds one back. Passed in rather than looked up because a file
+          # in the repository cannot know its own visibility.
           REPO_IS_PRIVATE: ${{ github.event.repository.private }}
         run: |
           python3 scripts/keys/workflow-supply-chain.py --self-test
           python3 scripts/keys/workflow-supply-chain.py
-      # Same family, same reason, one file over: the security audit's header claims to be derived
-      # from its own table and was not. It ran one Low too many for five commits, because each
-      # session decremented the number it found. Counting is cheap; believing a count nobody
-      # recomputed is what cost. Next to the check above because both answer "does this file
-      # still say what it says it says".
-      - name: the audit's header count is the audit's table, counted
-        run: |
-          python3 scripts/keys/audit-counts.py --self-test
-          python3 scripts/keys/audit-counts.py
+      # `the audit's header count is the audit's table, counted` stood here and was removed on
+      # 2026-10-07. It counts SECURITY_AUDIT.md, which has never been in this repository -- the
+      # script came over with the init commit and the audit stayed in the private coh-sidekick-1.0
+      # repo. It failed on every run that reached it; this job had been queued for a self-hosted
+      # box, so none did. `scripts/keys/audit-counts.py` is kept for the day the audit lands.
       # F87, and the third of the same family. `.gitignore`'s `/target/` is
       # anchored on purpose -- unanchored it eats the pet exports -- and every non-root crate
       # therefore has a `target/` git will happily take. `dx bundle` copies its finished bundle
@@ -664,9 +624,8 @@ jobs:
     # 5m05s measured; the cap is a hang, not a slow day. Without it the default is 360.
     timeout-minutes: 20
     env:
-      # espresso is sized by RAM, not cores (see the mutation preamble below), and its runner
-      # unit carries MemoryMax=6G. Three crates and their deps is a small build, but it is not
-      # worth finding the ceiling on a box whose failure mode is the job being killed.
+      # Inherited from espresso's 6 GB memory cap. A hosted runner has 16 GB, so this is
+      # conservative rather than necessary; raise it against a measured run.
       CARGO_BUILD_JOBS: '4'
     steps:
       - name: pick the beta ref this run should grade
@@ -903,13 +862,10 @@ jobs:
   # thing an automated sweep can never produce: survivors adjudicated
   # "corpus-vacuous" rather than counted.
   #
-  # espresso is sized by MEMORY, not cores: 8C/16T but only ~6.8 GB free beside a
-  # desktop, immich and llama work, so --jobs drops 3 -> 1 and --jobserver-tasks
-  # 12 -> 6. Its runner unit also carries Nice=19, IOSchedulingClass=idle and
-  # MemoryHigh=5G/MemoryMax=6G, so the pass loses every contest for CPU, disk and
-  # memory rather than winning one. Raise --jobs only against a measured run: the
-  # ceiling here is RAM, and exceeding MemoryMax fails the job rather than slowing
-  # it.
+  # This ran on espresso until 2026-10-07, when the repository went public and every
+  # self-hosted runner was retired. It is hosted now: four cores and 16 GB, starting
+  # from an empty target/ each night. --jobs 1 is kept from espresso's memory cap;
+  # raise it only against a measured run.
 
   # --in-diff restricts mutants to lines the diff touched, which turns a sweep into
   # a handful. The commit that ported PAR2 into the engine yields five mutants, not
@@ -917,7 +873,7 @@ jobs:
   # gets graded that day, by a job that finishes.
   mutants-diff:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: [self-hosted, mutants]
+    runs-on: ubuntu-latest
     continue-on-error: true
     timeout-minutes: 60
     steps:
@@ -926,6 +882,9 @@ jobs:
           # --in-diff needs history to diff against; the default depth-1 checkout
           # has nothing to compare to.
           fetch-depth: 0
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          cache-bin: false
       - name: install cargo-mutants and nextest (skip if already present)
         run: |
           command -v cargo-mutants >/dev/null 2>&1 || cargo install cargo-mutants --locked
@@ -944,15 +903,13 @@ jobs:
       - name: mutate the diff
         if: steps.diff.outputs.any == '1'
         env:
-          NEXTEST_TEST_THREADS: '8'
           TMPDIR: ${{ runner.temp }}
         run: |
-          nice -n 19 cargo mutants -p coh_math \
+          cargo mutants -p coh_math \
             --test-tool=nextest \
             --in-diff day.diff \
             --timeout 900 \
-            --jobs 1 \
-            --jobserver-tasks 6 || true
+            --jobs 1 || true
       # A sweep that grades nothing reports success: the run above ends in `|| true`
       # and the job is continue-on-error, both deliberately, so a bad night cannot
       # break CI. That combination hid a real failure for a full night on

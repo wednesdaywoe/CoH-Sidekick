@@ -15,6 +15,7 @@ the dataset the app loads, and how the app uses it. For building and running, se
 | `scripts/` | The converters, the audit gates and the contract emitter. Node, plus two Python steps. |
 | `pipeline/` | Converter output, JSON. Gitignored — rebuilt, never committed. |
 | `hand-data/` | Authored data nothing derives. Committed, read where it sits. |
+| `refdata/` | Values extracted from the private Homecoming `.powers` defs, so a checkout without them (CI) regenerates the same data. Written by the regen whenever the defs are present. |
 | `mids-tables/` | Two name tables emitted from an installed Mids Reborn by `tools/mids-oracle/`. Committed. |
 | `contract/` | The dataset contract the Rust side consumes. 1,444 files, 154 MB, committed. |
 | `crates/coh_data/` | The contract in Rust: wire decode, the power and character model, build file formats. |

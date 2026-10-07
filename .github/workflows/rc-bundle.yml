@@ -4,14 +4,17 @@
 # pay for, and the Windows leg runs on GitHub's meter.
 #
 # ---------------------------------------------------------------------------------------------
-# Why the Windows leg is hosted when the rest of this repo's CI is not
+# Why the Windows leg was hosted before the others
 # ---------------------------------------------------------------------------------------------
+# Since 2026-10-07 all three legs are hosted: the repository went public and no job here runs
+# on a personal machine any more. What follows is why Windows got there first.
+#
 # `ci.yml` moved to self-hosted runners in 3712188368 (2026-07-17) because this repo ran out of
 # GitHub Actions hours, not because hosted runners were unsuitable. So this is a return to
 # something that worked, not a precedent being set. The reason it has to be hosted is narrower
 # and permanent: **there is no Windows machine in this project any more**, and an NSIS installer
 # or a Windows binary is built by running the toolchain ON Windows. macOS and Linux have their
-# own boxes and stay on them.
+# own boxes and stayed on them until the repository went public.
 #
 # Windows minutes bill at 2x on GitHub's meter. That is the whole argument for `workflow_dispatch`
 # and for the sparse checkout below.
@@ -233,10 +236,14 @@ jobs:
           if-no-files-found: error
 
   macos:
-    # Self-hosted, because the machine exists. **arm64 only** — the mac mini is Apple Silicon, so
-    # this artifact does not run on an Intel Mac. Named here rather than discovered by a tester:
-    # a universal build is its own step and nobody has asked for one yet.
-    runs-on: [self-hosted, macmini]
+    # Hosted. **arm64 only** — `macos-latest` is Apple Silicon, as the mac mini this leg used to
+    # run on was, so this artifact does not run on an Intel Mac. Named here rather than
+    # discovered by a tester: a universal build is its own step and nobody has asked for one yet.
+    #
+    # The job-local `$CARGO_HOME` and target directory below were written for a persistent box.
+    # A hosted runner is fresh every time, so they are now belt and braces; they cost a few
+    # seconds and keep the build's trust root in `Cargo.lock` if this ever runs anywhere else.
+    runs-on: macos-latest
     # F13, the two cheap clauses, and the Windows leg deliberately gets neither.
     #
     # Without this the release build reads and writes the checkout's `target/`, which `ci.yml`
@@ -302,7 +309,7 @@ jobs:
       # The Windows leg carries the
       # reasoning for the first two; `--root` is what is different here, and it is F13's half.
       #
-      # **This box is persistent and it already has a `dx`**, so on this leg `command -v dx ||`
+      # **The mac mini and jpc were persistent and already had a `dx`**, so on this leg `command -v dx ||`
       # was not skipping nothing — it skipped the pin every time, and the RC was cut by whatever
       # binary happened to be on the machine. Measured 2026-09-20: jpc's is from Jul 16, which
       # predates this workflow, and the mac mini's is from Sep 17 14:21, the day of the only
@@ -397,28 +404,15 @@ jobs:
           if-no-files-found: error
 
   linux:
-    runs-on: [self-hosted, jpc]
-    # The macOS leg carries the reasoning and the measurement — which was
-    # taken on THIS box, with this leg's exact command — and the note on why this is a
-    # `$GITHUB_ENV` line rather than a job-level `env:` block.
-    #
-    # **`CARGO_BUILD_JOBS` is here and is not on the mac, and the asymmetry is load-bearing.**
-    # Isolating `$CARGO_HOME` also isolates this leg from `~/.cargo/config.toml`, and on THIS box
-    # that file is not decoration: it caps `[build] jobs = 20` because a workspace build at the
-    # default `-j 32` peaked at 37.6 GB and the kernel OOM killer took the runner unit down —
-    # and the unit is `Restart=no`, so push CI then sat dead for hours with runs stuck queued.
-    # Measured 2026-09-23: a job-local `$CARGO_HOME` has no `config.toml`, and cargo reads the
-    # cap from nowhere else, so the clause above would hand a release cut the uncapped build that
-    # killed this machine once already. `CARGO_BUILD_JOBS` is the environment spelling of the same
-    # setting and cargo validates it (`jobs may not be 0`, measured), so the cap survives the
-    # isolation. The mac has no `~/.cargo/config.toml` at all — checked, not assumed — so there is
-    # nothing there to carry forward and no line here for it.
-    #
-    # The number lives in two places now, which is a real cost and the smaller one: the box config
-    # binds every cargo this user runs, including the ones no workflow knows about, so it stays.
-    # Copying that file into the job-local home instead was considered and refused — `rustflags`
-    # and `linker` in a box-writable `config.toml` reach the compiler, measured the same day, so
-    # importing it would re-open exactly the door this clause closes.
+    # Hosted since 2026-10-07; this leg ran on jpc before that. The macOS leg carries the
+    # reasoning for the job-local cargo home and target directory below. jpc's
+    # `CARGO_BUILD_JOBS=20` cap went with jpc: it existed because that box's own
+    # `~/.cargo/config.toml` capped jobs after an OOM, and a hosted runner has no such file.
+    runs-on: ubuntu-latest
+    env:
+      # linuxdeploy is itself an AppImage, and hosted Ubuntu ships no FUSE to mount one. This
+      # makes it unpack itself and run instead, which is its documented fallback.
+      APPIMAGE_EXTRACT_AND_RUN: '1'
     steps:
       - uses: actions/checkout@v4
       - name: build from a job-local cargo home and target directory
@@ -426,11 +420,18 @@ jobs:
           set -euo pipefail
           echo "CARGO_TARGET_DIR=$RUNNER_TEMP/rc-target" >> "$GITHUB_ENV"
           echo "CARGO_HOME=$RUNNER_TEMP/rc-cargo" >> "$GITHUB_ENV"
-          echo "CARGO_BUILD_JOBS=20" >> "$GITHUB_ENV"
+      # The same libraries `desktop-build` in ci.yml installs. jpc had them because it was a
+      # Linux desktop; a hosted runner has to be told.
+      - name: the libraries the desktop link needs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libxdo-dev libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev pkg-config
       # The Windows leg carries the
       # reasoning for the first two; `--root` is what is different here, and it is F13's half.
       #
-      # **This box is persistent and it already has a `dx`**, so on this leg `command -v dx ||`
+      # **The mac mini and jpc were persistent and already had a `dx`**, so on this leg `command -v dx ||`
       # was not skipping nothing — it skipped the pin every time, and the RC was cut by whatever
       # binary happened to be on the machine. Measured 2026-09-20: jpc's is from Jul 16, which
       # predates this workflow, and the mac mini's is from Sep 17 14:21, the day of the only
@@ -462,8 +463,8 @@ jobs:
       # would silently fall back to the unverified download and nobody would know. With it, dx
       # bails. This is the seed; that is the refusal.
       #
-      # And it re-verifies a cache that is ALREADY on this box — the jpc runner's copy predates
-      # the script by three days — which is the half of F15 a fresh download alone leaves open.
+      # On jpc it also re-verified a cache already on the box, which was the half of F15 a fresh
+      # download alone leaves open. A hosted runner never has one, so here it always downloads.
       - name: linuxdeploy, by digest
         run: |
           set -euo pipefail

@@ -146,7 +146,7 @@ function convertEpicPower(rawJson, rank, availableLevel) {
   power.fullName = rawJson.full_name;
 
   // StrengthsDisallowed from the bin export; GlobalStrengthsDisallowed from the
-  // `raw defs/` oracle, the only source for it (HC only — see
+  // `raw defs/` oracle, or its committed extract without them (HC only — see
   // getStrengthsDisallowedIndex in convert-powerset.cjs). Recharge carriers
   // here: Rune of Protection, Afterburner-class travel boosts.
   if (Array.isArray(rawJson.strengths_disallowed) && rawJson.strengths_disallowed.length) {

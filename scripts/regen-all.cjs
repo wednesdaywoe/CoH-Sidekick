@@ -277,8 +277,8 @@ if (datasets.includes('homecoming')) {
 // oracle that catches a parser DROP (regression/gate fixtures, generated from our own
 // export, structurally cannot).
 // Fails on any dropped/mistyped damage type. Self-SKIPS (exit 0, loud) when the defs
-// are absent, so it enforces on the self-hosted runner — which has them — and no-ops
-// elsewhere. HC-only (the defs are HC). Set COH_RAW_DEFS to relocate the defs.
+// are absent, so it enforces only on a machine that has them -- since 2026-10-07 that is a
+// local regen, never CI, which runs on hosted runners alone. HC-only (the defs are HC). Set COH_RAW_DEFS to relocate the defs.
 if (datasets.includes('homecoming')) {
   const cmd = 'python3 tools/defdiff.py --gate';
   console.log(`\n>>> ${cmd}`);

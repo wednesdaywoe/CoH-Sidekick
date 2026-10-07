@@ -9046,6 +9046,13 @@ function guardThunderspyAppliedMez(power, targetsAffected, effects = power.effec
 //    neither slotted enhancement nor global buffs (Hasten, set bonuses).
 //  - GlobalStrengthsDisallowed: only GLOBAL strength is ignored; slotted
 //    enhancement still applies (Kuji-In Rin).
+//
+// The defs are private and gitignored, so a checkout without them (CI, every hosted runner)
+// would emit no GlobalStrengthsDisallowed and the regen-diff would red on it. The GLOBAL half
+// is therefore also committed, as the small extract at GLOBAL_SD_TABLE: written here whenever
+// the defs are present, read whenever they are not. It holds nothing the contract does not
+// already publish, and a drift between defs and extract shows up as a diff on that file.
+const GLOBAL_SD_TABLE = path.join(__dirname, '..', 'refdata', 'homecoming-global-strengths-disallowed.json');
 let _strengthsDisallowedIndex = null;
 function getStrengthsDisallowedIndex() {
   if (_strengthsDisallowedIndex) return _strengthsDisallowedIndex;
@@ -9060,12 +9067,13 @@ function getStrengthsDisallowedIndex() {
     return idx;
   }
   if (!fs.existsSync(rawDefsRoot)) {
-    // Say so. This enrichment is HC-only and its absence is survivable, but an
-    // empty index is indistinguishable from a dataset that genuinely has no
-    // GlobalStrengthsDisallowed — and that is the whole shape of a silent skip.
+    // Say which source answered. Only the GLOBAL half is in the extract; the other half
+    // comes from the bin export (`strengths_disallowed`) and never needed the defs.
+    const table = JSON.parse(fs.readFileSync(GLOBAL_SD_TABLE, 'utf8'));
+    for (const [name, global] of Object.entries(table)) idx.set(name, { strengths: [], global });
     console.warn(
-      `warn: GlobalStrengthsDisallowed not enriched — no .powers defs at ${rawDefsRoot} `
-      + `(set COH_RAW_DEFS)`,
+      `note: GlobalStrengthsDisallowed read from ${path.relative(process.cwd(), GLOBAL_SD_TABLE)} `
+      + `— no .powers defs at ${rawDefsRoot} (set COH_RAW_DEFS to read the defs instead)`,
     );
     _strengthsDisallowedIndex = idx;
     return idx;
@@ -9091,6 +9099,15 @@ function getStrengthsDisallowedIndex() {
     }
   };
   walk(rawDefsRoot);
+  const table = {};
+  for (const name of [...idx.keys()].sort()) {
+    if (idx.get(name).global.length) table[name] = idx.get(name).global;
+  }
+  const text = `${JSON.stringify(table, null, 2)}\n`;
+  if (!fs.existsSync(GLOBAL_SD_TABLE) || fs.readFileSync(GLOBAL_SD_TABLE, 'utf8') !== text) {
+    fs.mkdirSync(path.dirname(GLOBAL_SD_TABLE), { recursive: true });
+    fs.writeFileSync(GLOBAL_SD_TABLE, text);
+  }
   _strengthsDisallowedIndex = idx;
   return idx;
 }
