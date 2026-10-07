@@ -1,0 +1,179 @@
+{
+  "name": "Regeneration_Aura_Pulse",
+  "full_name": "Redirects.Empathy.Regeneration_Aura_Pulse",
+  "short_name": "Regeneration_Aura_Pulse",
+  "type": "Auto",
+  "display_name": "Regeneration Aura",
+  "display_fullname": "Redirects Empathy Regeneration Aura Pulse",
+  "display_help": "The Regeneration Aura dramatically increases the healing rate of all nearby heroes for a limited time. Emitting this Aura costs you a lot of Endurance, and it takes a long time to recharge.",
+  "display_short_help": "PBAoE, Ally +Regeneration",
+  "icon": "empathy_regenerationaura.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 0,
+  "radius": 30.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 360.0,
+  "activate_period": 1.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Friend"
+  ],
+  "targets_affected": [
+    "Friend"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Recharge",
+    "Heal"
+  ],
+  "allowed_set_categories": [
+    "Healing"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "lifetime": 10.0,
+  "max_lifetime_in_game": 10.0,
+  "destroy_on_limit": true,
+  "stacking_usage": false,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Regeneration"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 3.75,
+          "duration": "90 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/BUFFMAXHPCONT.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "HitPoints"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Maximum",
+          "target": "AnyAffected",
+          "table": "Ranged_Heal",
+          "scale": 1.0,
+          "duration": "90 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "PFX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "Regeneration"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Resistance",
+          "target": "AnyAffected",
+          "table": "Ranged_Res_Boolean",
+          "scale": 1.5,
+          "duration": "90 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        }
+      ]
+    }
+  ],
+  "show_in_inventory": "Never",
+  "show_in_manage": false,
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 0,
+  "powerset": "Redirects.Empathy"
+}

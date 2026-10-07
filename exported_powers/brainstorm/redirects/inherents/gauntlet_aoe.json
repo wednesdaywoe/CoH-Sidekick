@@ -1,0 +1,282 @@
+{
+  "name": "Gauntlet_AoE",
+  "full_name": "Redirects.Inherents.Gauntlet_AoE",
+  "short_name": "Gauntlet_AoE",
+  "type": "Click",
+  "display_name": "Gauntlet's Area of Effect",
+  "display_fullname": "Redirects Inherents Gauntlet AoE",
+  "display_help": "Taunt.<br><br><color #fcfc95>Notes:<br>Gauntlet's Area of Effect is unaffected by Radius or TimeToRoot changes.</color>",
+  "display_short_help": "Taunt",
+  "icon": "battleaxe_taunt.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 5,
+  "radius": 10.0,
+  "arc": 0.0,
+  "range": 500.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 0.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Foe"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "Taunt",
+    "Natural",
+    "Technology",
+    "Magic",
+    "Mutation",
+    "Science"
+  ],
+  "allowed_set_categories": [
+    "Threat Duration"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [
+    "$archetype",
+    "@Class_Tanker",
+    "=="
+  ],
+  "activate_requires": [
+    "$archetype",
+    "@Class_Tanker",
+    "=="
+  ],
+  "target_requires": [
+    "enttype",
+    "target>",
+    "critter",
+    "eq"
+  ],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Raid",
+        "target.HasTag?",
+        "@ToHitRoll",
+        "0.2",
+        "+",
+        "@ToHit",
+        "<",
+        "&&"
+      ],
+      "tags": [],
+      "flags": [
+        "PVEOnly"
+      ],
+      "is_pvp": "PVE_ONLY",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 2,
+      "templates": [
+        {
+          "attribs": [
+            "Taunt"
+          ],
+          "type": "Duration",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Melee_InherentTaunt",
+          "scale": 1.1,
+          "duration": "0 seconds",
+          "magnitude": 4.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You Taunt {PlayerDest} with your {PowerName}.",
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags": [
+            "CancelOnMiss",
+            "Boost"
+          ],
+          "flags_raw": 6660
+        },
+        {
+          "attribs": [
+            "Null"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "1 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/TAUNTGAUNTLET.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 112
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Raid",
+        "target.HasTag?",
+        "!"
+      ],
+      "tags": [],
+      "flags": [
+        "PVEOnly"
+      ],
+      "is_pvp": "PVE_ONLY",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Taunt"
+          ],
+          "type": "Duration",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Melee_InherentTaunt",
+          "scale": 1.1,
+          "duration": "0 seconds",
+          "magnitude": 4.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You Taunt {PlayerDest} with your {PowerName}.",
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags": [
+            "CancelOnMiss",
+            "Boost"
+          ],
+          "flags_raw": 6660
+        },
+        {
+          "attribs": [
+            "Null"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "1 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/TAUNTGAUNTLET.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 112
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "strengths_disallowed": [
+    "Radius"
+  ],
+  "global_strengths_disallowed": [
+    "Unknown(89)"
+  ],
+  "procs_only_on_main_target": true,
+  "anim_main_target_only": true,
+  "show_in_inventory": "Never",
+  "show_in_manage": false,
+  "show_in_info": false,
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 0,
+  "powerset": "Redirects.Inherents"
+}

@@ -1,0 +1,112 @@
+{
+  "name": "Supremacy",
+  "full_name": "Inherent.Inherent.Supremacy",
+  "short_name": "Supremacy",
+  "type": "Auto",
+  "display_name": "Supremacy",
+  "display_fullname": "Inherent Inherent Supremacy",
+  "display_help": "A good Mastermind knows how to manage his Henchmen. The Mastermind imparts a bonus to his Henchmen's Accuracy if he is nearby and not Phased or otherwise can only use Self Only powers.  Additionally, your Henchmen within range in Defensive mode and Follow mode will share damage with the Mastermind, with damage being divided evenly between the Mastermind and each one of his Henchmen in range.",
+  "display_short_help": "PBAoE, Henchman +ACC, +DMG",
+  "icon": "inherentpeacebringer_interspaciallink.png",
+  "auto_issue": true,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 16,
+  "radius": 60.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 0.5,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "MyPet"
+  ],
+  "targets_affected": [
+    "MyPet"
+  ],
+  "boosts_allowed": [],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [
+    "$archetype",
+    "@Class_Mastermind",
+    "=="
+  ],
+  "activate_requires": [
+    "$archetype",
+    "@Class_Mastermind",
+    "=="
+  ],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "group",
+        "target>",
+        "MastermindPets",
+        "eq"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "ToHit"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 0.05,
+          "duration": "0.75 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 112
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "show_in_manage": false,
+  "available_level": 0,
+  "powerset": "Inherent.Inherent"
+}

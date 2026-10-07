@@ -1,0 +1,254 @@
+{
+  "name": "Containment_4",
+  "full_name": "Incarnate.Hybrid_Silent.Containment_4",
+  "short_name": "Containment_4",
+  "type": "GlobalBoost",
+  "display_name": "Waylay",
+  "display_fullname": "Incarnate Hybrid Silent Containment 4",
+  "display_help": "Control Genome",
+  "display_short_help": "Control Genome",
+  "icon": "incarnate_hybrid_control_veryrare.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 10.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Damage",
+    "Natural",
+    "Technology",
+    "Magic",
+    "Mutation",
+    "Science"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "lifetime": 120.0,
+  "destroy_on_limit": true,
+  "stacking_usage": false,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 0.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "cur.kHeld",
+        "target>",
+        "0",
+        ">",
+        "cur.kStun",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "cur.kSleep",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "cur.kImmobilize",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "cur.kConfused",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "cur.kTerrorized",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "target.isFriend?",
+        "!",
+        "&&"
+      ],
+      "tags": [
+        "ControlProc"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "Axp",
+            "source.inVolume>",
+            "Bxp",
+            "source.inVolume>",
+            "||",
+            "ABxp",
+            "source.inVolume>",
+            "||",
+            "Cxp",
+            "source.inVolume>",
+            "||",
+            "Temporary_Powers.Temporary_Powers.Incarnate_Reward_Dark_Astoria",
+            "source.ownPower?",
+            "||",
+            "kIncarnateRewards",
+            "Source.Mode?",
+            "||"
+          ],
+          "tags": [
+            "IncarnateContent"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Lethal_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "AnyAffected",
+              "table": "Melee_Tempdamage",
+              "scale": 0.3,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Collective",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Lethal damage (WAYLAY!).",
+                "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Lethal damage (WAYLAY!).",
+                "display_float": "Waylay!",
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "INCARNATEPOWERS/INTERFACE/REACTIVE.FX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags": [
+                "CancelOnMiss",
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1300
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Lethal_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "AnyAffected",
+              "table": "Melee_IncarnateProcDamage",
+              "scale": 0.3,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Collective",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Lethal damage (WAYLAY!).",
+                "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Lethal damage (WAYLAY!).",
+                "display_float": "Waylay!",
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "INCARNATEPOWERS/INTERFACE/REACTIVE.FX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags": [
+                "CancelOnMiss",
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1300
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "modes_disallowed": [
+    "Disable_All",
+    "Disable_Epic",
+    "Disable_Incarnate"
+  ],
+  "available_level": 0,
+  "powerset": "Incarnate.Hybrid_Silent"
+}

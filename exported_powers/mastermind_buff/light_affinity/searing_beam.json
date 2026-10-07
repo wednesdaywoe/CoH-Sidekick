@@ -1,0 +1,359 @@
+{
+  "name": "Searing_Beam",
+  "full_name": "Mastermind_Buff.Light_Affinity.Searing_Beam",
+  "short_name": "Searing_Beam",
+  "type": "Click",
+  "display_name": "Searing Beam",
+  "display_fullname": "Mastermind Buff Light Affinity Searing Beam",
+  "display_help": "Fire an intense beam of light that burns your target, leaving them with reduced regeneration and secondary effect strength for some time. This beam then refracts around this burning light, causing minor Fire Damage Over Time and lowering the Damage Resistance of all targets. This searing light is especially damaging vs Undead targets.<br><br><color #fcfc95>Radiance: </color><br>Under the effects of Radiance, this power will deal additional Fire Damage Over Time.",
+  "display_short_help": "Ranged Foe -Regeneration, -Special, -Res (DMG), Fire DoT, Special vs. Undead",
+  "icon": "lightaffinity_searingbeam.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 80.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.07,
+  "time_to_root": 2.07,
+  "recharge_time": 60.0,
+  "activate_period": 0.0,
+  "endurance_cost": 13.0,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Foe"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Mastermind Archetype Sets",
+    "Ranged AoE Damage",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    112,
+    124
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Regeneration"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": -2.5,
+          "duration": "30 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "Main Target Only"
+          },
+          "flags": [
+            "IgnoreStrength"
+          ],
+          "flags_raw": 1296
+        }
+      ],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [
+            "ScheduleA"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Heal_Dmg",
+                "Endurance",
+                "RunningSpeed",
+                "FlyingSpeed",
+                "Confused",
+                "Terrorized",
+                "Held",
+                "Immobilized",
+                "Stunned",
+                "Sleep",
+                "Knockup",
+                "Knockback",
+                "Repel"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Strength",
+              "target": "AnyAffected",
+              "table": "Ranged_Stun",
+              "scale": -0.5,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Main Target Only"
+              },
+              "flags": [
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1296
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [
+            "ScheduleB"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Ranged",
+                "Melee",
+                "Area",
+                "Smashing",
+                "Lethal",
+                "Fire",
+                "Cold",
+                "Energy",
+                "Negative_Energy",
+                "Psionic",
+                "Toxic",
+                "Base_Defense",
+                "ToHit"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Strength",
+              "target": "AnyAffected",
+              "table": "Ranged_Stun",
+              "scale": -0.5,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Main Target Only"
+              },
+              "flags": [
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1296
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [
+        "Refract"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Redirects.Light_Affinity.Refracted_SearingBeam"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags": [
+            "CopyBoosts"
+          ],
+          "flags_raw": 1280,
+          "flags2_raw": 4
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "kChain_Jolt_Mode",
+        "Source.Mode?"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "Self",
+          "table": "Ranged_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Redirects.Light_Affinity.Prism",
+              "Redirects.Light_Affinity.Radiance_Heal_Med"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags_raw": 1280
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 23,
+  "powerset": "Mastermind_Buff.Light_Affinity"
+}

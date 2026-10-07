@@ -1,0 +1,886 @@
+{
+  "name": "Kuji-In_Retsu",
+  "full_name": "Redirects.Ninjitsu.Kuji-In_Retsu",
+  "short_name": "Kuji-In_Retsu",
+  "type": "Click",
+  "display_name": "Kuji-In Retsu",
+  "display_fullname": "Redirects Ninjitsu Kuji-In Retsu",
+  "display_help": "Kuji-In Retsu is the mastery of space and time. Focusing your power on Retsu enables you to control your own time to easily defeat your foes. Mastery of this power allows you recharge all your Ninjitsu powers, invoke an invisible shadow of your future self to absorb damage while you avoid almost any attack and protect you from crowd ccontrol effects. Your running speed, jumping height and Endurance Recovery are also increased. Retsu also grants you high resistance to Defense DeBuffs.<br><br><color #fcfc95>Notes: In PvP, Kuji-In Retsu recharges in 1000s and will drain your endurance when it expires.</color>",
+  "display_short_help": "Self +Absorb, +DEF, +SPD, +Recovery, Res(DeBuff DEF), +Special",
+  "icon": "ninjitsu_kujinzen.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.83,
+  "recharge_time": 300.0,
+  "activate_period": 0.5,
+  "endurance_cost": 10.4,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Recovery",
+    "EnduranceDiscount",
+    "SpeedRunning",
+    "Recharge",
+    "Heal",
+    "Buff_Defense"
+  ],
+  "allowed_set_categories": [
+    "Defense Sets",
+    "Endurance Modification",
+    "Healing",
+    "Running",
+    "Running & Sprints",
+    "Universal Travel"
+  ],
+  "cast_through": [
+    "hold",
+    "sleep",
+    "stun",
+    "terror"
+  ],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Absorb"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Maximum",
+              "target": "Self",
+              "table": "Melee_HealSelf",
+              "scale": 4.0,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": "You receive {Damage} points of absorption over time from your {PowerName}.",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "PFX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags": [
+                "IgnoreCombatMods"
+              ],
+              "flags_raw": 320
+            },
+            {
+              "attribs": [
+                "Recovery"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 1.0,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1056
+            },
+            {
+              "attribs": [
+                "Confused",
+                "Terrorized",
+                "Held",
+                "Immobilized",
+                "Stunned",
+                "Sleep"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Res_Boolean",
+              "scale": -30.0,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "PFX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags": [
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1056
+            },
+            {
+              "attribs": [
+                "Ranged",
+                "Melee",
+                "Area"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Buff_Def",
+              "scale": 3.0,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1056
+            },
+            {
+              "attribs": [
+                "Base_Defense"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Resistance",
+              "target": "Self",
+              "table": "Melee_Res_Boolean",
+              "scale": 1.0,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            },
+            {
+              "attribs": [
+                "JumpHeight"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 2.0,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1056
+            },
+            {
+              "attribs": [
+                "RunningSpeed"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_SpeedRunning",
+              "scale": 0.5,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1056
+            },
+            {
+              "attribs": [
+                "Recharge_Power"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 1.0,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "powerset_names": [
+                  "Scrapper_Defense.Ninjitsu",
+                  "Sentinel_Defense.Ninjitsu",
+                  "Stalker_Defense.Ninjitsu"
+                ],
+                "count": 1,
+                "type": "Power"
+              },
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [
+            "PVPOnly"
+          ],
+          "is_pvp": "PVP_ONLY",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Absorb"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Maximum",
+                  "target": "Self",
+                  "table": "Melee_HealSelf",
+                  "scale": 4.0,
+                  "duration": "15 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": null,
+                    "display_victim_hit": "You receive {Damage} points of absorption over time from your {PowerName}.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "PFX",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags": [
+                    "IgnoreCombatMods"
+                  ],
+                  "flags_raw": 320
+                },
+                {
+                  "attribs": [
+                    "Recovery"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Ones",
+                  "scale": 1.0,
+                  "duration": "180 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "flags": [
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1056
+                },
+                {
+                  "attribs": [
+                    "Confused",
+                    "Terrorized",
+                    "Held",
+                    "Immobilized",
+                    "Stunned",
+                    "Sleep"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Resistance",
+                  "target": "Self",
+                  "table": "Melee_Res_Boolean",
+                  "scale": 3.0,
+                  "duration": "120 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "PFX2",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags": [
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1056
+                },
+                {
+                  "attribs": [
+                    "Ranged",
+                    "Melee",
+                    "Area"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Buff_Def",
+                  "scale": 6.0,
+                  "duration": "180 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "flags": [
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1056
+                },
+                {
+                  "attribs": [
+                    "Ranged_Elusivity",
+                    "Melee_Elusivity",
+                    "Area_Elusivity"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Strength",
+                  "target": "Self",
+                  "table": "Melee_Ones",
+                  "scale": 0.2,
+                  "duration": "180 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "flags": [
+                    "IgnoreStrength",
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1072
+                },
+                {
+                  "attribs": [
+                    "Base_Defense"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Resistance",
+                  "target": "Self",
+                  "table": "Melee_Res_Boolean",
+                  "scale": 1.0,
+                  "duration": "180 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "flags": [
+                    "IgnoreStrength",
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1072
+                },
+                {
+                  "attribs": [
+                    "JumpHeight"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Ones",
+                  "scale": 2.0,
+                  "duration": "180 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "flags": [
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1056
+                },
+                {
+                  "attribs": [
+                    "RunningSpeed"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_SpeedRunning",
+                  "scale": 0.5,
+                  "duration": "180 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "flags": [
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1056
+                },
+                {
+                  "attribs": [
+                    "Null"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_Ones",
+                  "scale": 1.0,
+                  "duration": "180 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "PFX2",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags": [
+                    "IgnoreStrength",
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1072
+                },
+                {
+                  "attribs": [
+                    "Recharge_Power"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Ones",
+                  "scale": 1.0,
+                  "duration": "0 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "params": {
+                    "powerset_names": [
+                      "Scrapper_Defense.Ninjitsu",
+                      "Sentinel_Defense.Ninjitsu",
+                      "Stalker_Defense.Ninjitsu"
+                    ],
+                    "count": 1,
+                    "type": "Power"
+                  },
+                  "flags": [
+                    "IgnoreStrength",
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1072
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [
+                "Crash"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Designer_Status"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "Self",
+                  "table": "Melee_Ones",
+                  "scale": -1.0,
+                  "duration": "10 seconds",
+                  "magnitude": 1.0,
+                  "delay": 170.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": null,
+                    "display_victim_hit": "Focus loosening!",
+                    "display_float": "Focus loosening!",
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "PFX2",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags": [
+                    "IgnoreStrength",
+                    "IgnoreResistance",
+                    "IgnoreCombatMods"
+                  ],
+                  "flags_raw": 112
+                },
+                {
+                  "attribs": [
+                    "Endurance"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Ones",
+                  "scale": -1.0,
+                  "duration": "0 seconds",
+                  "magnitude": 1.0,
+                  "delay": 180.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": null,
+                    "display_victim_hit": "Your {PowerName} drains {Damage} points of your endurance.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "flags": [
+                    "IgnoreStrength",
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1072
+                },
+                {
+                  "attribs": [
+                    "Recovery"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Ones",
+                  "scale": -100.0,
+                  "duration": "20 seconds",
+                  "magnitude": 1.0,
+                  "delay": 180.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "{PowerName} has left you exhausted and unable to Recovery Endurance for a while!",
+                    "display_victim_hit": null,
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "GENERICCONTINUING/DEBUFFEND2CONTINUING.FX",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags": [
+                    "IgnoreStrength",
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1072
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 29,
+  "powerset": "Redirects.Ninjitsu"
+}

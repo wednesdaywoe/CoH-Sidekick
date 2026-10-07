@@ -1,0 +1,1114 @@
+{
+  "name": "Vacuum",
+  "full_name": "Controller_Control.Wind_Control.Vacuum",
+  "short_name": "Vacuum",
+  "type": "Click",
+  "display_name": "Vacuum",
+  "display_fullname": "Controller Control Wind Control Vacuum",
+  "display_help": "You release all Pressure to create a vacuum space around a target. With a foe target, the foe is held. Nearby foes may also be held. Foes in the field suffer lethal damage and persistent movement, attack speed, and chance to hit debuffs that grow stronger the longer they are in the field. If centered on an ally, the main target is not held, but foes are affected as normal. For each Pressure released, the Vacuum field persists for 2 seconds more. At your highest Pressure level, the main target will take extra damage and the field will persist long enough to reapply its hold. If Vacuum is targeted on your Vortex, you will gain the Clear Skies boon, but at the expense of using the power to harm foes. The boon lasts 5 seconds more for each Pressure released. Both Vacuum and Vortex are required to unlock Clear Skies. Damage: Minor, Recharge: Very Long",
+  "display_short_help": "Ranged (Targeted AoE), Hold (Foe), Moderate DoT (Lethal), -Movement(Foe), -Rech(Foe), -ToHit(Foe), Special(Pet), Pressure Consumer (Self)",
+  "icon": "windcontrol_vacuum.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 80.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.47,
+  "recharge_time": 240.0,
+  "activate_period": 0.0,
+  "endurance_cost": 15.6,
+  "interrupt_time": 0.0,
+  "target_type": "Any",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Friend",
+    "MyPet"
+  ],
+  "targets_affected": [
+    "Any"
+  ],
+  "boosts_allowed": [
+    "Hold",
+    "Slow",
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Debuff_ToHit",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Accurate To-Hit Debuff",
+    "Controller Archetype Sets",
+    "Holds",
+    "Slow Movement",
+    "Targeted AoE Damage",
+    "To Hit Debuff",
+    "Universal Control Duration Sets",
+    "Universal Damage Sets",
+    "Universal Debuff"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    112,
+    120
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "entref",
+        "target.owner>",
+        "entref",
+        "source>",
+        "eq",
+        "!"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Expression",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": -1.0,
+          "duration": "8 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [
+            "8",
+            "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+            "source.ownPowerNum?",
+            "2",
+            "*",
+            "+"
+          ],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "entref",
+            "target.owner>",
+            "entref",
+            "source>",
+            "eq",
+            "!"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "type": "EntCreate",
+            "entity_def": "Pets_WindControl_Vacuum_Controller",
+            "priority_list": "PL_StaticObject"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 2096
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "entref",
+        "target.owner>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "target.isFriend?",
+        "!",
+        "&&",
+        "enttype",
+        "target>",
+        "critter",
+        "eq",
+        "&&"
+      ],
+      "tags": [
+        "Immobilize"
+      ],
+      "flags": [],
+      "is_pvp": "PVE_ONLY",
+      "requires_pv": "PVE_ONLY",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Held"
+          ],
+          "type": "Duration",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Immobilize",
+          "scale": 8.0,
+          "duration": "0 seconds",
+          "magnitude": 3.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "entref",
+            "target.owner>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "target.isFriend?",
+            "!",
+            "&&",
+            "enttype",
+            "target>",
+            "critter",
+            "eq",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": null,
+            "conditional_bits": [
+              389,
+              692
+            ],
+            "conditional_fx": "PFX"
+          },
+          "flags_raw": 2560
+        }
+      ]
+    },
+    {
+      "chance": 0.20000000298023224,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "entref",
+        "target.owner>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "target.isFriend?",
+        "!",
+        "&&",
+        "enttype",
+        "target>",
+        "critter",
+        "eq",
+        "&&"
+      ],
+      "tags": [
+        "Immobilize"
+      ],
+      "flags": [],
+      "is_pvp": "PVE_ONLY",
+      "requires_pv": "PVE_ONLY",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Held"
+          ],
+          "type": "Duration",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Immobilize",
+          "scale": 6.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 0.20000000298023224,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "entref",
+            "target.owner>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "target.isFriend?",
+            "!",
+            "&&",
+            "enttype",
+            "target>",
+            "critter",
+            "eq",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": null,
+            "conditional_bits": [
+              389,
+              692
+            ],
+            "conditional_fx": "PFX"
+          },
+          "flags": [
+            "NearGround"
+          ],
+          "flags_raw": 2568
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "entref",
+        "target.owner>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "target.isFriend?",
+        "!",
+        "&&",
+        "enttype",
+        "target>",
+        "player",
+        "eq",
+        "&&"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "PVP_ONLY",
+      "requires_pv": "PVP_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Held"
+          ],
+          "type": "Duration",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 4.0,
+          "duration": "0 seconds",
+          "magnitude": 4.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "entref",
+            "target.owner>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "target.isFriend?",
+            "!",
+            "&&",
+            "enttype",
+            "target>",
+            "player",
+            "eq",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": null,
+            "conditional_bits": [
+              389,
+              692
+            ],
+            "conditional_fx": "PFX"
+          },
+          "suppress_events": [
+            {
+              "event": "Held",
+              "event_id": 21,
+              "duration": 15.0,
+              "always": 0
+            },
+            {
+              "event": "Sleep",
+              "event_id": 22,
+              "duration": 15.0,
+              "always": 0
+            },
+            {
+              "event": "Stunned",
+              "event_id": 19,
+              "duration": 15.0,
+              "always": 0
+            },
+            {
+              "event": "Immobilized",
+              "event_id": 20,
+              "duration": 15.0,
+              "always": 0
+            },
+            {
+              "event": "Terrorized",
+              "event_id": 23,
+              "duration": 15.0,
+              "always": 0
+            }
+          ],
+          "flags_raw": 2560
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "critter",
+        "eq",
+        "entref",
+        "target.owner>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "&&",
+        "target.isFriend?",
+        "!",
+        "&&",
+        "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+        "source.ownPowerNum?",
+        "6",
+        "==",
+        "&&"
+      ],
+      "tags": [
+        "Damage"
+      ],
+      "flags": [],
+      "is_pvp": "PVE_ONLY",
+      "requires_pv": "PVE_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Lethal_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Damage",
+          "scale": 0.15,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "enttype",
+            "target>",
+            "critter",
+            "eq",
+            "entref",
+            "target.owner>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "&&",
+            "target.isFriend?",
+            "!",
+            "&&",
+            "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+            "source.ownPowerNum?",
+            "6",
+            "==",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags_raw": 1280
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "critter",
+        "eq",
+        "target.isFriend?",
+        "!",
+        "&&",
+        "kImmobilized",
+        "target>",
+        "0",
+        ">",
+        "kHeld",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "kSleep",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "kStunned",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "IncarnateBoss",
+        "target.hasTag?",
+        "||",
+        "&&",
+        "entref",
+        "target.owner>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "&&",
+        "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+        "source.ownPowerNum?",
+        "6",
+        "==",
+        "&&"
+      ],
+      "tags": [
+        "Damage"
+      ],
+      "flags": [],
+      "is_pvp": "PVE_ONLY",
+      "requires_pv": "PVE_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Lethal_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Damage",
+          "scale": 0.15,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "enttype",
+            "target>",
+            "critter",
+            "eq",
+            "target.isFriend?",
+            "!",
+            "&&",
+            "kImmobilized",
+            "target>",
+            "0",
+            ">",
+            "kHeld",
+            "target>",
+            "0",
+            ">",
+            "||",
+            "kSleep",
+            "target>",
+            "0",
+            ">",
+            "||",
+            "kStunned",
+            "target>",
+            "0",
+            ">",
+            "||",
+            "IncarnateBoss",
+            "target.hasTag?",
+            "||",
+            "&&",
+            "entref",
+            "target.owner>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "&&",
+            "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+            "source.ownPowerNum?",
+            "6",
+            "==",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags_raw": 1280
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "player",
+        "eq",
+        "target.isFriend?",
+        "!",
+        "&&",
+        "entref",
+        "target.owner>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "&&",
+        "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+        "source.ownPowerNum?",
+        "6",
+        "==",
+        "&&"
+      ],
+      "tags": [
+        "Damage"
+      ],
+      "flags": [],
+      "is_pvp": "PVP_ONLY",
+      "requires_pv": "PVP_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Lethal_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Damage",
+          "scale": 0.27,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "enttype",
+            "target>",
+            "player",
+            "eq",
+            "target.isFriend?",
+            "!",
+            "&&",
+            "entref",
+            "target.owner>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "&&",
+            "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+            "source.ownPowerNum?",
+            "6",
+            "==",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags_raw": 1280
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "player",
+        "eq",
+        "target.isFriend?",
+        "!",
+        "&&",
+        "kImmobilized",
+        "target>",
+        "0",
+        ">",
+        "kHeld",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "kSleep",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "kStunned",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "&&",
+        "entref",
+        "target.owner>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "&&",
+        "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+        "source.ownPowerNum?",
+        "6",
+        "==",
+        "&&"
+      ],
+      "tags": [
+        "Damage"
+      ],
+      "flags": [],
+      "is_pvp": "PVP_ONLY",
+      "requires_pv": "PVP_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Lethal_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Damage",
+          "scale": 0.03,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "enttype",
+            "target>",
+            "player",
+            "eq",
+            "target.isFriend?",
+            "!",
+            "&&",
+            "kImmobilized",
+            "target>",
+            "0",
+            ">",
+            "kHeld",
+            "target>",
+            "0",
+            ">",
+            "||",
+            "kSleep",
+            "target>",
+            "0",
+            ">",
+            "||",
+            "kStunned",
+            "target>",
+            "0",
+            ">",
+            "||",
+            "&&",
+            "entref",
+            "target.owner>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "&&",
+            "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+            "source.ownPowerNum?",
+            "6",
+            "==",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags_raw": 1280
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "kCloudedSkies",
+        "source.mode?",
+        "!",
+        "entref",
+        "target.owner>",
+        "entref",
+        "source>",
+        "eq",
+        "&&"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Set_Mode"
+          ],
+          "type": "Expression",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 115.0,
+          "delay": 0.0,
+          "duration_expression": [
+            "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+            "source.ownPowerNum?",
+            "5",
+            "*",
+            "30",
+            "+"
+          ],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "kCloudedSkies",
+            "source.mode?",
+            "!",
+            "entref",
+            "target.owner>",
+            "entref",
+            "source>",
+            "eq",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 112,
+          "mode_name": "ClearSkies"
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "entref",
+        "target.owner>",
+        "entref",
+        "source>",
+        "eq"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Set_Mode"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "239 seconds",
+          "magnitude": 116.0,
+          "delay": 0.5,
+          "duration_expression": [
+            "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+            "source.ownPowerNum?",
+            "5",
+            "*",
+            "30",
+            "+"
+          ],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "entref",
+            "target.owner>",
+            "entref",
+            "source>",
+            "eq"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 112,
+          "mode_name": "CloudedSkies"
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+        "source.ownPower?"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Revoke_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "SelfAndPets",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "1.1 seconds",
+          "magnitude": 1.0,
+          "delay": 0.2,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.20000000298023224,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+            "source.ownPower?"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "type": "Power",
+            "power_names": [
+              "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure"
+            ]
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+        "source.ownPower?"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Null"
+          ],
+          "type": "Constant",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "Self",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "Temporary_Powers.Temporary_Powers.Wind_Control_Pressure",
+            "source.ownPower?"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 3120
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 25,
+  "powerset": "Controller_Control.Wind_Control"
+}

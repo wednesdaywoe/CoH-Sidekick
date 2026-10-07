@@ -1,0 +1,393 @@
+{
+  "name": "Consume",
+  "full_name": "Stalker_Defense.Fiery_Aura.Consume",
+  "short_name": "Consume",
+  "type": "Click",
+  "display_name": "Consume",
+  "display_fullname": "Stalker Defense Fiery Aura Consume",
+  "display_help": "You can drain body heat from all nearby foes, and even from the air itself, increasing your health, resistance against endurance drain, as well as replenishing your own Endurance. The more foes affected, the more Endurance is gained. Foes suffer minimal Fire damage.<br><br><color #fcfc95>Notes: This power has adaptive recharge. It has a base recharge of <color #FF7F27>10</color> seconds and each affected foe will increase the recharge by <color #FF7F27>5</color> seconds for a maximum total of <color #FF7F27>60</color> seconds.</color>",
+  "display_short_help": "PBAoE, DMG(Fire), Self +End, +Max HP",
+  "icon": "flamingshield_consume.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 10,
+  "radius": 20.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.03,
+  "time_to_root": 2.03,
+  "recharge_time": 10.0,
+  "activate_period": 0.0,
+  "endurance_cost": 0.52,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Foe"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "Recovery",
+    "EnduranceDiscount",
+    "Recharge",
+    "Heal",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Endurance Modification",
+    "Healing",
+    "Melee AoE Damage",
+    "Stalker Archetype Sets",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    112,
+    124
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Endurance"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 15.0,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.25,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": "Your {PowerName} grants you {Damage} points of endurance.",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "flags": [
+                "IgnoreResistance",
+                "IgnoreCombatMods"
+              ],
+              "flags_raw": 96
+            },
+            {
+              "attribs": [
+                "Recovery"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 0.05,
+              "duration": "15 seconds",
+              "magnitude": 1.0,
+              "delay": 0.25,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1056
+            },
+            {
+              "attribs": [
+                "Recharge_Power"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 5.0,
+              "duration": "0 seconds",
+              "magnitude": 0.0,
+              "delay": 2.05,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "power_names": [
+                  "Brute_Defense.Fiery_Aura.Consume",
+                  "Mission_Maker_Secondary.Fiery_Aura.Consume",
+                  "Scrapper_Defense.Fiery_Aura.Consume",
+                  "Sentinel_Defense.Fiery_Aura.Consume",
+                  "Stalker_Defense.Fiery_Aura.Consume",
+                  "Tanker_Defense.Fiery_Aura.Consume"
+                ],
+                "count": 1,
+                "type": "Power"
+              },
+              "flags": [
+                "IgnoreCombatMods",
+                "NoHitDelay",
+                "NoProjectileDelay",
+                "AdjustTimer"
+              ],
+              "flags_raw": 196928,
+              "flags2_raw": 2
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Fire_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "AnyAffected",
+              "table": "Melee_Damage",
+              "scale": 0.4,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage.",
+                "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage.",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "This effect requires an accuracy check."
+              },
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Fire_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "AnyAffected",
+              "table": "Melee_Damage",
+              "scale": 0.1,
+              "duration": "2.1 seconds",
+              "magnitude": 1.0,
+              "delay": 0.5,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.75,
+              "tick_chance": 0.800000011920929,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage over time.",
+                "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage over time.",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "PFX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags": [
+                "CancelOnMiss"
+              ],
+              "flags_raw": 1284
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "activation_effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Endurance"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Resistance",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 0.5,
+          "duration": "120 seconds",
+          "magnitude": 1.0,
+          "delay": 0.25,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "This effect applies even if no targets are hit."
+          },
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "HitPoints"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Maximum",
+          "target": "Self",
+          "table": "Melee_HealSelf",
+          "scale": 1.5,
+          "duration": "120 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "This effect applies even if no targets are hit."
+          },
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 19,
+  "powerset": "Stalker_Defense.Fiery_Aura"
+}

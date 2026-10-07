@@ -1,0 +1,625 @@
+{
+  "name": "Turbulent_Aura",
+  "full_name": "Dominator_Control.Water_Control.Turbulent_Aura",
+  "short_name": "Turbulent_Aura",
+  "type": "Toggle",
+  "display_name": "Turbulent Aura",
+  "display_fullname": "Dominator Control Water Control Turbulent Aura",
+  "display_help": "You create a barrier of rapidly flowing water around you causing foes that enter the aura to suffer minor cold damage and have a chance to be knocked down while inside it.  The caster will also heal for a small amount of health for each Drowning foe within the aura.  Turbulent Aura has a small chance to inflict Drowning on targets. Damage: Minor, Recharge: Moderate",
+  "display_short_help": "Toggle, Minor DMG(Cold) Foe -Knockdown",
+  "icon": "watercontrol_turbulentaura.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 16,
+  "radius": 20.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.03,
+  "recharge_time": 20.0,
+  "activate_period": 2.0,
+  "endurance_cost": 0.5,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Foe"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Recharge",
+    "Knockback",
+    "Heal",
+    "Damage"
+  ],
+  "allowed_set_categories": [
+    "Accurate Healing",
+    "Healing",
+    "Knockback",
+    "PBAoE Damage",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [
+    "hold",
+    "sleep",
+    "stun"
+  ],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    112,
+    128
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Temporary_Powers.Temporary_Powers.Water_Control_Drowning",
+        "target.ownPower?",
+        "!",
+        "@ToHitRoll",
+        "@ToHit",
+        "<",
+        "@ForceHit",
+        "||",
+        "&&"
+      ],
+      "tags": [
+        "Damage"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Cold_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Damage",
+          "scale": 0.15,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "Your {PowerName} chills {PlayerDest} for {Damage} points of cold damage.",
+            "display_victim_hit": "{PlayerSource} chills you with their {PowerName} for {Damage} points of cold damage.",
+            "display_float": null,
+            "display_attrib_defense_float": null
+          },
+          "flags": [
+            "NearGround"
+          ],
+          "flags_raw": 1288
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Temporary_Powers.Temporary_Powers.Water_Control_Drowning",
+        "target.ownPower?",
+        "@ToHitRoll",
+        "@ToHit",
+        "<",
+        "@ForceHit",
+        "||",
+        "&&"
+      ],
+      "tags": [
+        "Drowning"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Cold_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Damage",
+          "scale": 0.1875,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "Your {PowerName} chills {PlayerDest} for {Damage} points of cold damage.",
+            "display_victim_hit": "{PlayerSource} chills you with their {PowerName} for {Damage} points of cold damage.",
+            "display_float": null,
+            "display_attrib_defense_float": null
+          },
+          "flags": [
+            "NearGround"
+          ],
+          "flags_raw": 1288
+        }
+      ]
+    },
+    {
+      "chance": 0.20000000298023224,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "critter",
+        "eq",
+        "Temporary_Powers.Temporary_Powers.Water_Control_Drowning",
+        "target.ownPower?",
+        "!",
+        "&&"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "PVE_ONLY",
+      "requires_pv": "PVE_ONLY",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Knockback"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 0.2,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "vec_start": "Target",
+            "vec_end": "Target",
+            "priority": 1,
+            "vel": 1.0,
+            "vel_mag": 0.02500000037252903,
+            "height": 3.0,
+            "height_mag": 0.25,
+            "vec_adjust_pyr": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "type": "Knock"
+          },
+          "messages": {
+            "display_attacker_hit": "You knocked {PlayerDest} from their feet with your {PowerName} attack!",
+            "display_victim_hit": "{PlayerSource} knocks you from your feet with their {PowerName} attack!",
+            "display_float": null,
+            "display_attrib_defense_float": null
+          },
+          "flags": [
+            "Boost"
+          ],
+          "flags_raw": 5376
+        }
+      ]
+    },
+    {
+      "chance": 0.15000000596046448,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "player",
+        "eq",
+        "Temporary_Powers.Temporary_Powers.Water_Control_Drowning",
+        "target.ownPower?",
+        "!",
+        "&&"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "PVP_ONLY",
+      "requires_pv": "PVP_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Knockback"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 0.2,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "vec_start": "Target",
+            "vec_end": "Target",
+            "priority": 1,
+            "vel": 1.0,
+            "vel_mag": 0.02500000037252903,
+            "height": 3.0,
+            "height_mag": 0.25,
+            "vec_adjust_pyr": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "type": "Knock"
+          },
+          "messages": {
+            "display_attacker_hit": "You knocked {PlayerDest} from their feet with your {PowerName} attack!",
+            "display_victim_hit": "{PlayerSource} knocks you from your feet with their {PowerName} attack!",
+            "display_float": null,
+            "display_attrib_defense_float": null
+          },
+          "flags": [
+            "Boost"
+          ],
+          "flags_raw": 5376
+        }
+      ]
+    },
+    {
+      "chance": 0.25,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "critter",
+        "eq",
+        "Temporary_Powers.Temporary_Powers.Water_Control_Drowning",
+        "target.ownPower?",
+        "&&"
+      ],
+      "tags": [
+        "Drowning"
+      ],
+      "flags": [],
+      "is_pvp": "PVE_ONLY",
+      "requires_pv": "PVE_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Knockback"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 0.2,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "vec_start": "Target",
+            "vec_end": "Target",
+            "priority": 1,
+            "vel": 1.0,
+            "vel_mag": 0.02500000037252903,
+            "height": 3.0,
+            "height_mag": 0.25,
+            "vec_adjust_pyr": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "type": "Knock"
+          },
+          "messages": {
+            "display_attacker_hit": "You knocked {PlayerDest} from their feet with your {PowerName} attack!",
+            "display_victim_hit": "{PlayerSource} knocks you from your feet with their {PowerName} attack!",
+            "display_float": null,
+            "display_attrib_defense_float": null
+          },
+          "flags": [
+            "Boost"
+          ],
+          "flags_raw": 5376
+        }
+      ]
+    },
+    {
+      "chance": 0.1899999976158142,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "player",
+        "eq",
+        "Temporary_Powers.Temporary_Powers.Water_Control_Drowning",
+        "target.ownPower?",
+        "&&"
+      ],
+      "tags": [
+        "Drowning"
+      ],
+      "flags": [],
+      "is_pvp": "PVP_ONLY",
+      "requires_pv": "PVP_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Knockback"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 0.2,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "vec_start": "Target",
+            "vec_end": "Target",
+            "priority": 1,
+            "vel": 1.0,
+            "vel_mag": 0.02500000037252903,
+            "height": 3.0,
+            "height_mag": 0.25,
+            "vec_adjust_pyr": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "type": "Knock"
+          },
+          "messages": {
+            "display_attacker_hit": "You knocked {PlayerDest} from their feet with your {PowerName} attack!",
+            "display_victim_hit": "{PlayerSource} knocks you from your feet with their {PowerName} attack!",
+            "display_float": null,
+            "display_attrib_defense_float": null
+          },
+          "flags": [
+            "Boost"
+          ],
+          "flags_raw": 5376
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Temporary_Powers.Temporary_Powers.Water_Control_Drowning",
+        "target.ownPower?"
+      ],
+      "tags": [
+        "HealSelf"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Heal_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "Self",
+          "table": "Ranged_HealSelf",
+          "scale": 0.15,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You gain {Damage} hit points from your {PowerName}!",
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null
+          },
+          "flags": [
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 320
+        }
+      ]
+    },
+    {
+      "chance": 0.10000000149011612,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "entref",
+        "target>",
+        "entref",
+        "source>",
+        "eq",
+        "!"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Grant_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Temporary_Powers.Temporary_Powers.Water_Control_Drowning"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": "Drowning",
+            "display_attrib_defense_float": null
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 1,
+  "powerset": "Dominator_Control.Water_Control"
+}

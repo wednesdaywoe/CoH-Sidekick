@@ -1,0 +1,273 @@
+{
+  "name": "Spirit_Ward",
+  "full_name": "Pool.Sorcery.Spirit_Ward",
+  "short_name": "Spirit_Ward",
+  "type": "Toggle",
+  "display_name": "Spirit Ward",
+  "display_fullname": "Pool Sorcery Spirit Ward",
+  "display_help": "You encompass an ally in a mystical Spirit Ward, which causes them to gain a moderate amount of damage absorption instantly, in addition to a small amount of damage absorption every few seconds while the power is active.<br><br><color #fcfc95>Recharge: Slow.</color>",
+  "display_short_help": "Toggle: Ally, +Absorb over time",
+  "icon": "sorcerypool_spiritward.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 1,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 80.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.0,
+  "recharge_time": 15.0,
+  "activate_period": 2.0,
+  "endurance_cost": 0.78,
+  "interrupt_time": 0.0,
+  "target_type": "Friend",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Friend"
+  ],
+  "targets_affected": [
+    "Friend"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Heal"
+  ],
+  "allowed_set_categories": [
+    "Healing"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Absorb"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Maximum",
+          "target": "AnyAffected",
+          "table": "Ranged_Heal",
+          "scale": 0.2,
+          "duration": "20 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Continuous",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You grant {PlayerDest} {Damage} points of absorption over time with {PowerName}.",
+            "display_victim_hit": "{PlayerSource} grants you {Damage} points of absorption over time with their {PowerName}.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags": [
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 320
+        },
+        {
+          "attribs": [
+            "Null"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Strength",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": 1.0,
+          "duration": "2 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Continuous",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "PFX1",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags_raw": 1280
+        },
+        {
+          "attribs": [
+            "Global_Chance_Mod"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": -1.0,
+          "duration": "9999 seconds",
+          "magnitude": 1.0,
+          "delay": 0.5,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Overlap",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "tags": [
+              "initAbsorb"
+            ],
+            "type": "EffectFilter"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "KeepThroughDeath"
+          ],
+          "flags_raw": 17456
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [
+        "initAbsorb"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Absorb"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Maximum",
+          "target": "AnyAffected",
+          "table": "Ranged_Heal",
+          "scale": 1.0,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You grant {PlayerDest} {Damage} points of absorption over time with {PowerName}.",
+            "display_victim_hit": "{PlayerSource} grants you {Damage} points of absorption over time with their {PowerName}.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags": [
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 320
+        },
+        {
+          "attribs": [
+            "Null"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "1 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "PFX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags_raw": 1280
+        }
+      ]
+    }
+  ],
+  "procs_only_on_main_target": true,
+  "modes_disallowed": [
+    "Disable_All",
+    "Disable_Pool"
+  ],
+  "modes_suspended": [
+    "Peacebringer_Blaster_Mode",
+    "Peacebringer_Tanker_Mode",
+    "Warshade_Blaster_Mode",
+    "Warshade_Tanker_Mode"
+  ],
+  "available_level": 0,
+  "powerset": "Pool.Sorcery"
+}

@@ -1,0 +1,801 @@
+{
+  "name": "Positronic_Fist",
+  "full_name": "Blaster_Support.Radiation_Manipulation.Positronic_Fist",
+  "short_name": "Positronic_Fist",
+  "type": "Click",
+  "display_name": "Positronic Fist",
+  "display_fullname": "Blaster Support Radiation Manipulation Positronic Fist",
+  "display_help": "You hammer your foe with a brutal smashing attack charged with a lethal dose of radiation. Your target will suffer Energy and Smashing damage, will have its defense reduced and will be disoriented for a short time in addition to being surrounded by positively charged particles. Hitting a foe that has negatively charged particles will trigger a Gamma Burst.",
+  "display_short_help": "Melee, DMG(Energy/Smash), Foe Disorient, -DEF, +Positrons",
+  "icon": "atomicmanipulation_heavypunch",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.2,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 7.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.67,
+  "time_to_root": 2.67,
+  "recharge_time": 20.0,
+  "activate_period": 0.0,
+  "endurance_cost": 18.512,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Stun",
+    "Recharge",
+    "Debuff_Defense",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Accurate Defense Debuff",
+    "Blaster Archetype Sets",
+    "Defense Debuff",
+    "Melee Damage",
+    "Stuns",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    108,
+    132
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "critter",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVE_ONLY",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Smashing_Dmg"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_Damage",
+                  "scale": 0.89,
+                  "duration": "0 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Smashing damage.",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Smashing damage.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "flags_raw": 1280
+                },
+                {
+                  "attribs": [
+                    "Energy_Dmg"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_Damage",
+                  "scale": 2.67,
+                  "duration": "0 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Energy damage.",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Energy damage.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "flags_raw": 1280
+                }
+              ]
+            },
+            {
+              "chance": 0.6000000238418579,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Stunned"
+                  ],
+                  "type": "Duration",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_Immobilize",
+                  "scale": 10.0,
+                  "duration": "0 seconds",
+                  "magnitude": 3.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You Stun {PlayerDest} with your {PowerName}.",
+                    "display_victim_hit": "{PlayerSource} Stuns you with their {PowerName}.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": null,
+                    "conditional_bits": [
+                      21
+                    ],
+                    "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                  },
+                  "flags_raw": 2560
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "player",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVP_ONLY",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Smashing_Dmg"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_PvPDamage",
+                  "scale": 0.7672,
+                  "duration": "0 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Smashing damage.",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Smashing damage.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "flags_raw": 1280
+                },
+                {
+                  "attribs": [
+                    "Energy_Dmg"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_PvPDamage",
+                  "scale": 2.3015,
+                  "duration": "0 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Energy damage.",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Energy damage.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "flags_raw": 1280
+                }
+              ]
+            },
+            {
+              "chance": 0.6000000238418579,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Stunned"
+                  ],
+                  "type": "Duration",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_PvPMez",
+                  "scale": 1.0,
+                  "duration": "0 seconds",
+                  "magnitude": 3.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You Stun {PlayerDest} with your {PowerName}.",
+                    "display_victim_hit": "{PlayerSource} Stuns you with their {PowerName}.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": null,
+                    "conditional_bits": [
+                      21
+                    ],
+                    "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                  },
+                  "suppress_events": [
+                    {
+                      "event": "Stunned",
+                      "event_id": 23,
+                      "duration": 15.0,
+                      "always": 0
+                    },
+                    {
+                      "event": "Immobilized",
+                      "event_id": 24,
+                      "duration": 15.0,
+                      "always": 0
+                    },
+                    {
+                      "event": "Held",
+                      "event_id": 25,
+                      "duration": 15.0,
+                      "always": 0
+                    },
+                    {
+                      "event": "Sleep",
+                      "event_id": 26,
+                      "duration": 15.0,
+                      "always": 0
+                    },
+                    {
+                      "event": "Terrorized",
+                      "event_id": 27,
+                      "duration": 15.0,
+                      "always": 0
+                    }
+                  ],
+                  "flags_raw": 2560
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Base_Defense"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_Debuff_Def",
+              "scale": 2.0,
+              "duration": "10 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags": [
+                "CancelOnMiss"
+              ],
+              "flags_raw": 1284
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "Temporary_Powers.Temporary_Powers.Radiation_Control_Negatrons",
+            "target.ownPower?",
+            "Temporary_Powers.Temporary_Powers.Radiation_Control_GammaBurst",
+            "target.ownPower?",
+            "!",
+            "&&"
+          ],
+          "tags": [
+            "GammaBurst"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Grant_Power"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 1.0,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "power_names": [
+                  "Temporary_Powers.Temporary_Powers.Radiation_Control_GammaBurst"
+                ],
+                "count": 1,
+                "type": "Power"
+              },
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": "Gamma Ray",
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Execute_Power"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Strength",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 0.0,
+              "duration": "0 seconds",
+              "magnitude": 0.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "power_names": [
+                  "Temporary_Powers.Temporary_Powers.Radiation_Control_GammaBurstDebuff"
+                ],
+                "count": 1,
+                "type": "Power"
+              },
+              "flags": [
+                "CopyBoosts"
+              ],
+              "flags_raw": 1280,
+              "flags2_raw": 4
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "Temporary_Powers.Temporary_Powers.Radiation_Control_GammaBurst",
+            "target.ownPower?",
+            "!",
+            "Temporary_Powers.Temporary_Powers.Radiation_Control_Negatrons",
+            "target.ownPower?",
+            "!",
+            "&&"
+          ],
+          "tags": [
+            "Polarize"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Grant_Power"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 1.0,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "power_names": [
+                  "Temporary_Powers.Temporary_Powers.Radiation_Control_Positrons"
+                ],
+                "count": 1,
+                "type": "Power"
+              },
+              "messages": {
+                "display_attacker_hit": "You surround {PlayerDest} with positrons!",
+                "display_victim_hit": "{PlayerSource} has surrounded you with positrons!",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "Temporary_Powers.Temporary_Powers.Radiation_Control_Negatrons",
+            "target.ownPower?"
+          ],
+          "tags": [
+            "Polarize"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Revoke_Power"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 1.0,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "power_names": [
+                  "Temporary_Powers.Temporary_Powers.Radiation_Control_Positrons"
+                ],
+                "count": 1,
+                "type": "Power"
+              },
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [
+            "Defiance"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Smashing_Dmg",
+                "Lethal_Dmg",
+                "Fire_Dmg",
+                "Cold_Dmg",
+                "Energy_Dmg",
+                "Negative_Energy_Dmg",
+                "Psionic_Dmg",
+                "Toxic_Dmg"
+              ],
+              "type": "Expression",
+              "application_type": "OnTick",
+              "aspect": "Strength",
+              "target": "Self",
+              "table": "Ranged_Ones",
+              "scale": 0.0,
+              "duration": "0 seconds",
+              "magnitude": 0.0,
+              "delay": 0.0,
+              "duration_expression": [
+                "activatetime",
+                "power.base>",
+                "7.5",
+                "+"
+              ],
+              "magnitude_expression": [
+                "0.066",
+                "activatetime",
+                "power.base>",
+                "*",
+                "areafactor",
+                "power.base>",
+                "/"
+              ],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Defiance"
+              },
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance",
+                "IgnoreCombatMods"
+              ],
+              "flags_raw": 112
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "strengths_disallowed": [
+    "Range"
+  ],
+  "anim_main_target_only": true,
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 29,
+  "powerset": "Blaster_Support.Radiation_Manipulation"
+}

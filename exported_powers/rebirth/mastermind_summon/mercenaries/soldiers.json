@@ -1,0 +1,249 @@
+{
+  "name": "Soldiers",
+  "full_name": "Mastermind_Summon.Mercenaries.Soldiers",
+  "short_name": "Soldiers",
+  "type": "Click",
+  "display_name": "Soldiers",
+  "display_fullname": "Mastermind Summon Mercenaries Soldiers",
+  "display_help": "Calls forth one to three Mercenary Soldiers (depending on your level) to do your bidding. The third Soldier you gain will be a Medic.  All Soldiers use Sub Machine Guns, but these can be upgraded. You may only have 3 Soldiers under your control at any given time.  If you attempt to call more Soldiers, you can only replace the ones you have lost in battle.  If you already have three, the power will fail. Recharge: Very Long",
+  "display_short_help": "P2937209522",
+  "icon": "paramilitary_draftarmy.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Location",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 60.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.03,
+  "recharge_time": 60.0,
+  "activate_period": 0.0,
+  "endurance_cost": 19.5,
+  "interrupt_time": 0.0,
+  "target_type": "Location",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Heal",
+    "Debuff_Defense",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Defense Debuff",
+    "Mastermind Archetype Sets",
+    "Pet Damage",
+    "Recharge Intensive Pets",
+    "Universal Damage Sets",
+    "Universal Debuff"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [
+        "Levelminus2"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Levelminus2",
+          "scale": 1.0,
+          "duration": "99999 seconds",
+          "magnitude": 1.0,
+          "delay": 2.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "type": "EntCreate",
+            "entity_def": "MastermindPets_Soldier",
+            "priority_list": "Pet"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "DoNotTintCostume"
+          ],
+          "flags_raw": 1072,
+          "flags2_raw": 2
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "combatlevel",
+        "source>",
+        "5",
+        ">"
+      ],
+      "tags": [
+        "Levelminus2"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Levelminus2",
+          "scale": 1.0,
+          "duration": "99999 seconds",
+          "magnitude": 1.0,
+          "delay": 3.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "combatlevel",
+            "source>",
+            "5",
+            ">"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "type": "EntCreate",
+            "entity_def": "MastermindPets_Soldier",
+            "priority_list": "Pet"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "DoNotTintCostume"
+          ],
+          "flags_raw": 1072,
+          "flags2_raw": 2
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "combatlevel",
+        "source>",
+        "17",
+        ">"
+      ],
+      "tags": [
+        "Levelminus2"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Levelminus2",
+          "scale": 1.0,
+          "duration": "99999 seconds",
+          "magnitude": 1.0,
+          "delay": 4.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "combatlevel",
+            "source>",
+            "17",
+            ">"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "type": "EntCreate",
+            "entity_def": "MastermindPets_Medic",
+            "priority_list": "Pet"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "DoNotTintCostume"
+          ],
+          "flags_raw": 1072,
+          "flags2_raw": 2
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 0,
+  "powerset": "Mastermind_Summon.Mercenaries"
+}

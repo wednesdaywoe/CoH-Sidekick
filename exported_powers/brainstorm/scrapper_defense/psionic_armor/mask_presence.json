@@ -1,0 +1,740 @@
+{
+  "name": "Mask_Presence",
+  "full_name": "Scrapper_Defense.Psionic_Armor.Mask_Presence",
+  "short_name": "Mask_Presence",
+  "type": "Toggle",
+  "display_name": "Mask Presence",
+  "display_fullname": "Scrapper Defense Psionic Armor Mask Presence",
+  "display_help": "Mask Presence makes you almost impossible to detect. When you attack or are damaged while using this power, you will be discovered. Even if discovered, you are hard to see and retain some bonus to Defense to melee and ranged attacks. While stealthed you will get additional defense to all attack types and the strength of your next attack will be more powerful; however, you can only attempt this after spending 8 seconds without attacking.",
+  "display_short_help": "Toggle: Self Stealth, +DEF(Melee, Ranged)",
+  "icon": "psionicarmor_maskpresence",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.73,
+  "recharge_time": 4.0,
+  "activate_period": 0.5,
+  "endurance_cost": 0.104,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Recharge",
+    "Buff_Defense"
+  ],
+  "allowed_set_categories": [
+    "Defense Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [
+    "hold",
+    "sleep",
+    "stun"
+  ],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [
+            "StealthCrit"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Smashing_Dmg",
+                "Lethal_Dmg",
+                "Fire_Dmg",
+                "Cold_Dmg",
+                "Energy_Dmg",
+                "Negative_Energy_Dmg",
+                "Psionic_Dmg",
+                "Toxic_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Strength",
+              "target": "Self",
+              "table": "Melee_Buff_Dmg",
+              "scale": 4.0,
+              "duration": "0.75 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Suppresses in combat."
+              },
+              "cancel_events": [
+                "Stunned",
+                "Held",
+                "Sleep"
+              ],
+              "suppress_events": [
+                {
+                  "event": "Attacked",
+                  "event_id": 2,
+                  "duration": 8.0,
+                  "always": 1
+                },
+                {
+                  "event": "Damaged",
+                  "event_id": 21,
+                  "duration": 8.0,
+                  "always": 1
+                },
+                {
+                  "event": "MissionObjectClick",
+                  "event_id": 38,
+                  "duration": 8.0,
+                  "always": 1
+                },
+                {
+                  "event": "PseudoPetAttacked",
+                  "event_id": 48,
+                  "duration": 8.0,
+                  "always": 1
+                }
+              ],
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [
+            "PVEOnly"
+          ],
+          "is_pvp": "PVE_ONLY",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Ranged",
+                    "Melee"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Buff_Def",
+                  "scale": 0.5,
+                  "duration": "0.75 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "cancel_events": [
+                    "Stunned",
+                    "Held",
+                    "Sleep"
+                  ],
+                  "flags": [
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1056
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "Attacked",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "HitByFoe",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&",
+                "MissionObjectClick",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&",
+                "Helped",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&",
+                "CommandedPet",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&",
+                "PseudoPetAttacked",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&",
+                "PseudoPetHelped",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&"
+              ],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Ranged",
+                    "Melee",
+                    "Area",
+                    "Smashing",
+                    "Lethal",
+                    "Fire",
+                    "Cold",
+                    "Energy",
+                    "Negative_Energy",
+                    "Psionic",
+                    "Toxic"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Buff_Def",
+                  "scale": 1.0,
+                  "duration": "0.55 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Suppress",
+                  "stack_limit": 2,
+                  "stack_key": "StealthToggle",
+                  "messages": {
+                    "display_attacker_hit": null,
+                    "display_victim_hit": null,
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Suppresses in combat, does not stack with other sources of stealth"
+                  },
+                  "cancel_events": [
+                    "Attacked",
+                    "Helped",
+                    "HitByFoe",
+                    "Stunned",
+                    "Held",
+                    "Sleep",
+                    "MissionObjectClick",
+                    "CommandedPet",
+                    "PseudoPetAttacked",
+                    "PseudoPetHelped"
+                  ],
+                  "flags": [
+                    "IgnoreResistance",
+                    "StackByAttribAndKey"
+                  ],
+                  "flags_raw": 263200
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [
+            "PVPOnly"
+          ],
+          "is_pvp": "PVP_ONLY",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Ranged",
+                    "Melee",
+                    "Area",
+                    "Smashing",
+                    "Lethal",
+                    "Fire",
+                    "Cold",
+                    "Energy",
+                    "Negative_Energy"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Buff_Def",
+                  "scale": 0.5,
+                  "duration": "0.75 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "flags": [
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1056
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "Attacked",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "HitByFoe",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&",
+                "MissionObjectClick",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&",
+                "Helped",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&",
+                "CommandedPet",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&",
+                "PseudoPetAttacked",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&",
+                "PseudoPetHelped",
+                "source.EventTimeSince>",
+                "10",
+                ">",
+                "&&"
+              ],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Ranged",
+                    "Melee",
+                    "Area",
+                    "Smashing",
+                    "Lethal",
+                    "Fire",
+                    "Cold",
+                    "Energy",
+                    "Negative_Energy",
+                    "Psionic",
+                    "Toxic"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Buff_Def",
+                  "scale": 1.0,
+                  "duration": "0.55 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Suppress",
+                  "stack_limit": 2,
+                  "stack_key": "StealthToggle",
+                  "messages": {
+                    "display_attacker_hit": null,
+                    "display_victim_hit": null,
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Suppresses in combat, does not stack with other sources of stealth"
+                  },
+                  "cancel_events": [
+                    "Attacked",
+                    "Helped",
+                    "HitByFoe",
+                    "Stunned",
+                    "Held",
+                    "Sleep",
+                    "MissionObjectClick",
+                    "CommandedPet",
+                    "PseudoPetAttacked",
+                    "PseudoPetHelped"
+                  ],
+                  "flags": [
+                    "IgnoreResistance",
+                    "StackByAttribAndKey"
+                  ],
+                  "flags_raw": 263200
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "MissionObjectClick",
+            "source.EventTimeSince>",
+            "10",
+            ">"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "StealthRadius_PVE"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 35.5,
+              "duration": "0.75 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Suppress",
+              "stack_limit": 2,
+              "stack_key": "StealthToggle",
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Suppresses in combat."
+              },
+              "cancel_events": [
+                "Attacked",
+                "HitByFoe",
+                "Stunned",
+                "Held",
+                "Sleep",
+                "MissionObjectClick"
+              ],
+              "flags": [
+                "IgnoreResistance",
+                "StackByAttribAndKey"
+              ],
+              "flags_raw": 263200
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "Attacked",
+            "source.EventTimeSince>",
+            "10",
+            ">",
+            "HitByFoe",
+            "source.EventTimeSince>",
+            "10",
+            ">",
+            "&&",
+            "MissionObjectClick",
+            "source.EventTimeSince>",
+            "10",
+            ">",
+            "&&"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "StealthRadius_PVP"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 390.0,
+              "duration": "0.75 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Suppress",
+              "stack_limit": 2,
+              "stack_key": "StealthToggle",
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Suppresses in combat."
+              },
+              "cancel_events": [
+                "Attacked",
+                "HitByFoe",
+                "Stunned",
+                "Held",
+                "Sleep",
+                "MissionObjectClick"
+              ],
+              "flags": [
+                "IgnoreResistance",
+                "StackByAttribAndKey"
+              ],
+              "flags_raw": 263200
+            },
+            {
+              "attribs": [
+                "Translucency"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 0.15,
+              "duration": "0.75 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Suppresses in combat."
+              },
+              "cancel_events": [
+                "Attacked",
+                "HitByFoe",
+                "Stunned",
+                "Held",
+                "Sleep",
+                "MissionObjectClick"
+              ],
+              "suppress_events": [
+                {
+                  "event": "Attacked",
+                  "event_id": 2,
+                  "duration": 10.0,
+                  "always": 1
+                },
+                {
+                  "event": "Damaged",
+                  "event_id": 21,
+                  "duration": 10.0,
+                  "always": 1
+                },
+                {
+                  "event": "MissionObjectClick",
+                  "event_id": 38,
+                  "duration": 10.0,
+                  "always": 1
+                }
+              ],
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 3,
+  "powerset": "Scrapper_Defense.Psionic_Armor"
+}

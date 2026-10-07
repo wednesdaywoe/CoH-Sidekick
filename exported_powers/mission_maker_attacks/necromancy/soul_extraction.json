@@ -1,0 +1,316 @@
+{
+  "name": "Soul_Extraction",
+  "full_name": "Mission_Maker_Attacks.Necromancy.Soul_Extraction",
+  "short_name": "Soul_Extraction",
+  "type": "Click",
+  "display_name": "Soul Extraction",
+  "display_fullname": "Mission Maker Attacks Necromancy Soul Extraction",
+  "display_help": "You can extract the soul from one of your defeated Undead Henchmen and summon its spectral essence to do your bidding. The power of the soul is dependent upon the type of undead Henchman you extract it from, however it will always be one level lower than you. Unlike your other Henchman, the extracted Soul is only loosely bound to your control and will eventually move on to the next world. The Soul cannot gain new powers with Enchanted Undead or Dark Empowerment.",
+  "display_short_help": "Summon Ghost (Special)",
+  "icon": "necromancy_soulextraction.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 60.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.03,
+  "time_to_root": 2.03,
+  "recharge_time": 30.0,
+  "activate_period": 0.0,
+  "endurance_cost": 14.0,
+  "interrupt_time": 0.0,
+  "target_type": "DeadMyPet",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "DeadMyPet"
+  ],
+  "targets_affected": [
+    "DeadMyPet"
+  ],
+  "boosts_allowed": [],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "arch",
+        "target>",
+        "Class_Minion_Henchman",
+        "eq",
+        "arch",
+        "target>",
+        "Class_Minion_Grunt",
+        "eq",
+        "||"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Levelminus",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "entity_def": "NPC_Pets_MA_Ghost_Minion",
+            "priority_list": "Combat",
+            "type": "EntCreate"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods",
+            "CopyBoosts"
+          ],
+          "flags_raw": 112,
+          "flags2_raw": 4
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "arch",
+        "target>",
+        "Class_Lt_Henchman",
+        "eq",
+        "arch",
+        "target>",
+        "Class_Lt_Grunt",
+        "eq",
+        "||"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Levelminus",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "entity_def": "NPC_Pets_MA_Ghost_Lt",
+            "priority_list": "Combat",
+            "type": "EntCreate"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods",
+            "CopyBoosts"
+          ],
+          "flags_raw": 112,
+          "flags2_raw": 4
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "arch",
+        "target>",
+        "Class_Boss_Henchman",
+        "eq",
+        "arch",
+        "target>",
+        "Class_Boss_Grunt",
+        "eq",
+        "||",
+        "arch",
+        "target>",
+        "Class_Boss_Elite",
+        "eq",
+        "||",
+        "arch",
+        "target>",
+        "Class_Boss_Archvillain",
+        "eq",
+        "||"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Levelminus",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "entity_def": "NPC_Pets_MA_Ghost_Boss",
+            "priority_list": "Combat",
+            "type": "EntCreate"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods",
+            "CopyBoosts"
+          ],
+          "flags_raw": 112,
+          "flags2_raw": 4
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Heal_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 0.0,
+          "duration": "0.5 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 1.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You heal {PlayerDest} with {PowerName} for {Damage} health points over time.",
+            "display_victim_hit": "{PlayerSource} heals you with their {PowerName} for {Damage} health points over time.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "fx": {
+            "continuing_bits": [
+              331,
+              690
+            ],
+            "continuing_fx": null,
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 11,
+  "powerset": "Mission_Maker_Attacks.Necromancy"
+}

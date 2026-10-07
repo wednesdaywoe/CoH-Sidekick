@@ -1,0 +1,746 @@
+{
+  "name": "Blinding_Powder",
+  "full_name": "Sentinel_Defense.Ninjitsu.Blinding_Powder",
+  "short_name": "Blinding_Powder",
+  "type": "Click",
+  "display_name": "Blinding Powder",
+  "display_fullname": "Sentinel Defense Ninjitsu Blinding Powder",
+  "display_help": "Blinding powder can be thrown in a wide arc that can briefly distract your foes and Placate them so they can no longer find or target you. Most foes will be blinded, and unable to see. Some affected targets may be overcome by the powder that they may start attacking their own allies. If you attack the blinded foes, they will be alerted to your presence, but will continue to suffer a penalty to their chance to hit.<br><br>During the chaos, your chances to critically hit are improved.",
+  "display_short_help": "Ranged (Cone), Foe Placate, -To Hit, Sleep, Confuse, -Perception, +Special",
+  "icon": "ninjitsu_blindingpowder.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Cone",
+  "max_targets_hit": 10,
+  "radius": 40.0,
+  "arc": 1.5707963705062866,
+  "range": 40.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.07,
+  "time_to_root": 1.07,
+  "recharge_time": 90.0,
+  "activate_period": 0.0,
+  "endurance_cost": 12.28,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Foe"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "Taunt",
+    "EnduranceDiscount",
+    "Range",
+    "Sleep",
+    "Recharge",
+    "Debuff_ToHit",
+    "Confuse",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Accurate To-Hit Debuff",
+    "Confuse",
+    "Sleep",
+    "Threat Duration",
+    "To Hit Debuff"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    112,
+    140
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "critter",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVE_ONLY",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "enttype",
+                "target>",
+                "critter",
+                "eq"
+              ],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "PVE_ONLY",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Sleep"
+                  ],
+                  "type": "Duration",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_Sleep",
+                  "scale": 10.0,
+                  "duration": "0 seconds",
+                  "magnitude": 3.0,
+                  "delay": 0.25,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You Sleep {PlayerDest} with your {PowerName}.",
+                    "display_victim_hit": "{PlayerSource} Sleeps you with their {PowerName}.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": null,
+                    "conditional_bits": [
+                      384
+                    ],
+                    "conditional_fx": "PFX"
+                  },
+                  "flags_raw": 2560
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Placate"
+                  ],
+                  "type": "Duration",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_Taunt",
+                  "scale": 8.0,
+                  "duration": "0 seconds",
+                  "magnitude": 3.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You Placate {PlayerDest} with your {PowerName}.",
+                    "display_victim_hit": "{PlayerSource} Placates you with their {PowerName}.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Requires a hit roll"
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": null,
+                    "conditional_bits": [],
+                    "conditional_fx": "GENERICCONTINUING/PLACATEHIT.FX"
+                  },
+                  "flags_raw": 2560
+                },
+                {
+                  "attribs": [
+                    "PerceptionRadius"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_Ones",
+                  "scale": -0.9,
+                  "duration": "20 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": null,
+                    "display_victim_hit": null,
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Requires a hit roll"
+                  },
+                  "flags_raw": 1280
+                },
+                {
+                  "attribs": [
+                    "ToHit"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_DeBuff_ToHit",
+                  "scale": 1.0,
+                  "duration": "15 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": null,
+                    "display_victim_hit": null,
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Requires a hit roll"
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "PFX",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags_raw": 1280
+                }
+              ]
+            },
+            {
+              "chance": 0.5,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "enttype",
+                "target>",
+                "critter",
+                "eq"
+              ],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "PVE_ONLY",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Confused"
+                  ],
+                  "type": "Duration",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_Immobilize",
+                  "scale": 10.0,
+                  "duration": "0 seconds",
+                  "magnitude": 3.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You Confuse {PlayerDest} with your {PowerName}.",
+                    "display_victim_hit": "{PlayerSource} Confuses you with their {PowerName}.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Requires a hit roll"
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": null,
+                    "conditional_bits": [],
+                    "conditional_fx": "GENERICCONTINUING/CONFUSECONTINUING.FX"
+                  },
+                  "flags_raw": 2560
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "player",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVP_ONLY",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "enttype",
+                "target>",
+                "player",
+                "eq"
+              ],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "PVP_ONLY",
+              "requires_default": "UNSATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Sleep"
+                  ],
+                  "type": "Duration",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_PvPMez",
+                  "scale": 1.0,
+                  "duration": "0 seconds",
+                  "magnitude": 2.0,
+                  "delay": 0.25,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You Sleep {PlayerDest} with your {PowerName}.",
+                    "display_victim_hit": "{PlayerSource} Sleeps you with their {PowerName}.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Requires a hit roll"
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": null,
+                    "conditional_bits": [
+                      384
+                    ],
+                    "conditional_fx": "PFX"
+                  },
+                  "suppress_events": [
+                    {
+                      "event": "Stunned",
+                      "event_id": 23,
+                      "duration": 15.0,
+                      "always": 0
+                    },
+                    {
+                      "event": "Immobilized",
+                      "event_id": 24,
+                      "duration": 15.0,
+                      "always": 0
+                    },
+                    {
+                      "event": "Held",
+                      "event_id": 25,
+                      "duration": 15.0,
+                      "always": 0
+                    },
+                    {
+                      "event": "Sleep",
+                      "event_id": 26,
+                      "duration": 15.0,
+                      "always": 0
+                    },
+                    {
+                      "event": "Terrorized",
+                      "event_id": 27,
+                      "duration": 15.0,
+                      "always": 0
+                    }
+                  ],
+                  "flags_raw": 2560
+                },
+                {
+                  "attribs": [
+                    "Placate"
+                  ],
+                  "type": "Duration",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_Taunt",
+                  "scale": 6.0,
+                  "duration": "0 seconds",
+                  "magnitude": 3.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You Placate {PlayerDest} with your {PowerName}.",
+                    "display_victim_hit": "{PlayerSource} Placates you with their {PowerName}.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Requires a hit roll"
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": null,
+                    "conditional_bits": [],
+                    "conditional_fx": "GENERICCONTINUING/PLACATEHIT.FX"
+                  },
+                  "flags_raw": 2560
+                },
+                {
+                  "attribs": [
+                    "PerceptionRadius"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_Ones",
+                  "scale": -0.9,
+                  "duration": "20 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": null,
+                    "display_victim_hit": null,
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Requires a hit roll"
+                  },
+                  "cancel_events": [
+                    "Damaged"
+                  ],
+                  "flags_raw": 1280
+                },
+                {
+                  "attribs": [
+                    "ToHit"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_DeBuff_ToHit",
+                  "scale": 1.0,
+                  "duration": "15 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": null,
+                    "display_victim_hit": null,
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Requires a hit roll"
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "PFX",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags_raw": 1280
+                }
+              ]
+            },
+            {
+              "chance": 0.5,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "enttype",
+                "target>",
+                "player",
+                "eq"
+              ],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "PVP_ONLY",
+              "requires_default": "UNSATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Confused"
+                  ],
+                  "type": "Duration",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "AnyAffected",
+                  "table": "Melee_PvPMez",
+                  "scale": 1.0,
+                  "duration": "0 seconds",
+                  "magnitude": 2.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You Confuse {PlayerDest} with your {PowerName}.",
+                    "display_victim_hit": "{PlayerSource} Confuses you with their {PowerName}.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": "Requires a hit roll"
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": null,
+                    "conditional_bits": [],
+                    "conditional_fx": "GENERICCONTINUING/CONFUSECONTINUING.FX"
+                  },
+                  "suppress_events": [
+                    {
+                      "event": "Confused",
+                      "event_id": 28,
+                      "duration": 15.0,
+                      "always": 0
+                    }
+                  ],
+                  "flags_raw": 2560
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "activation_effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Global_Chance_Mod"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 0.3,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 1.67,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "tags": [
+              "SentCritST"
+            ],
+            "type": "EffectFilter"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        },
+        {
+          "attribs": [
+            "Global_Chance_Mod"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 0.3,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 1.67,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "tags": [
+              "SentCritAoE"
+            ],
+            "type": "EffectFilter"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 27,
+  "powerset": "Sentinel_Defense.Ninjitsu"
+}

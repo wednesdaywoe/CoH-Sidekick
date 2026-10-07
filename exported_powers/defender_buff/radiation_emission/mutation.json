@@ -1,0 +1,531 @@
+{
+  "name": "Mutation",
+  "full_name": "Defender_Buff.Radiation_Emission.Mutation",
+  "short_name": "Mutation",
+  "type": "Click",
+  "display_name": "Mutation",
+  "display_fullname": "Defender Buff Radiation Emission Mutation",
+  "display_help": "Using a concentrated burst of radiation, you can revive a fallen hero and Mutate them into a killing machine. The Mutated hero has increased damage, chance to hit, Endurance recovery, and attack speed and is protected from XP Debt fort 90 seconds. The entire experience is very taxing on the Mutated hero, and they will soon be severely weakened. All effects of the Mutation will eventually wear off.",
+  "display_short_help": "Close, Ally Rez, Special",
+  "icon": "radiationpoisoning_mutation.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 60.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.67,
+  "recharge_time": 120.0,
+  "activate_period": 0.0,
+  "endurance_cost": 5.2,
+  "interrupt_time": 0.0,
+  "target_type": "DeadPlayerFriend",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "DeadPlayerFriend"
+  ],
+  "targets_affected": [
+    "DeadPlayerFriend"
+  ],
+  "boosts_allowed": [
+    "Recovery",
+    "EnduranceDiscount",
+    "Range",
+    "Recharge"
+  ],
+  "allowed_set_categories": [
+    "Endurance Modification"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Heal_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 1.0,
+              "duration": "0.5 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 1.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You heal {PlayerDest} with {PowerName} for {Damage} health points over time.",
+                "display_victim_hit": "{PlayerSource} heals you with their {PowerName} for {Damage} health points over time.",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "fx": {
+                "continuing_bits": [
+                  331
+                ],
+                "continuing_fx": null,
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Endurance"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 1.0,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} granting them {Damage} points of endurance.",
+                "display_victim_hit": "{PlayerSource} hits you with their {PowerName} granting you {Damage} points of endurance.",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "flags": [
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1056
+            },
+            {
+              "attribs": [
+                "Recovery"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 2.0,
+              "duration": "90 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "PFX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags": [
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1056
+            },
+            {
+              "attribs": [
+                "RechargeTime"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Strength",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 1.0,
+              "duration": "90 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            },
+            {
+              "attribs": [
+                "Smashing_Dmg",
+                "Lethal_Dmg",
+                "Fire_Dmg",
+                "Cold_Dmg",
+                "Energy_Dmg",
+                "Negative_Energy_Dmg",
+                "Psionic_Dmg",
+                "Toxic_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Strength",
+              "target": "AnyAffected",
+              "table": "Ranged_Buff_Dmg",
+              "scale": 4.0,
+              "duration": "90 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            },
+            {
+              "attribs": [
+                "ToHit"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Buff_ToHit",
+              "scale": 3.0,
+              "duration": "90 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [
+            "PVEOnly"
+          ],
+          "is_pvp": "PVE_ONLY",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "StealthRadius_PVE"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 300.0,
+              "duration": "15 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "cancel_events": [
+                "Attacked",
+                "Stunned",
+                "Held",
+                "Sleep"
+              ],
+              "suppress_events": [
+                {
+                  "event": "Attacked",
+                  "event_id": 2,
+                  "duration": 8.0,
+                  "always": 1
+                },
+                {
+                  "event": "Damaged",
+                  "event_id": 21,
+                  "duration": 8.0,
+                  "always": 1
+                },
+                {
+                  "event": "MissionObjectClick",
+                  "event_id": 38,
+                  "duration": 8.0,
+                  "always": 1
+                }
+              ],
+              "flags": [
+                "IgnoreResistance",
+                "KeepThroughDeath"
+              ],
+              "flags_raw": 17440
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [
+            "Crash"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Null"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 1.0,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 90.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": "Your accelerated Mutation has worn off, and you are now weakened.",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            },
+            {
+              "attribs": [
+                "Smashing_Dmg",
+                "Lethal_Dmg",
+                "Fire_Dmg",
+                "Cold_Dmg",
+                "Energy_Dmg",
+                "Negative_Energy_Dmg",
+                "Psionic_Dmg",
+                "Toxic_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Strength",
+              "target": "AnyAffected",
+              "table": "Ranged_Debuff_Dam",
+              "scale": 4.0,
+              "duration": "45 seconds",
+              "magnitude": 1.0,
+              "delay": 90.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "GENERICCONTINUING/DEBUFFDAMAGECONTINUING.FX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags": [
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1296
+            },
+            {
+              "attribs": [
+                "ToHit"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Debuff_ToHit",
+              "scale": 3.0,
+              "duration": "45 seconds",
+              "magnitude": 1.0,
+              "delay": 90.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            },
+            {
+              "attribs": [
+                "XPDebtProtection"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 1.0,
+              "duration": "90 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 7,
+  "powerset": "Defender_Buff.Radiation_Emission"
+}

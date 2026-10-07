@@ -1,0 +1,448 @@
+{
+  "name": "Tear_Gas",
+  "full_name": "Mastermind_Pets.Spec_Ops_3.Tear_Gas",
+  "short_name": "Tear_Gas",
+  "type": "Click",
+  "display_name": "Tear Gas",
+  "display_fullname": "Mastermind Pets Spec Ops 3 Tear Gas",
+  "display_help": "The Tear Gas is making you choke. Your Damage is Debuffed and suffer toxic damage over time.<br><br><color #fcfc95>Notes: Tear Gas is unaffected by Recharge Time changes.</color>",
+  "display_short_help": "Choke, DoT (Toxic), -DMG",
+  "icon": "traps_droppedaoedebuffdamage.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 16,
+  "radius": 15.0,
+  "arc": 0.0,
+  "range": 70.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.87,
+  "time_to_root": 1.87,
+  "recharge_time": 180.0,
+  "activate_period": 0.0,
+  "endurance_cost": 7.8,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "Hold",
+    "EnduranceDiscount",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    112,
+    144
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "critter",
+        "eq"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "PVE_ONLY",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Held"
+          ],
+          "type": "Duration",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Immobilize",
+          "scale": 6.0,
+          "duration": "0 seconds",
+          "magnitude": 3.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You Hold {PlayerDest} with your {PowerName}.",
+            "display_victim_hit": "{PlayerSource} Holds you with their {PowerName}.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": null,
+            "conditional_bits": [
+              383
+            ],
+            "conditional_fx": "V_COV/POWERS/POISON/POISONTRAPCONTINUING.FX"
+          },
+          "flags_raw": 2560
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "target>",
+        "player",
+        "eq"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "PVP_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Held"
+          ],
+          "type": "Duration",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_PvPMez",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 3.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You Hold {PlayerDest} with your {PowerName}.",
+            "display_victim_hit": "{PlayerSource} Holds you with their {PowerName}.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": null,
+            "conditional_bits": [
+              383
+            ],
+            "conditional_fx": "V_COV/POWERS/POISON/POISONTRAPCONTINUING.FX"
+          },
+          "suppress_events": [
+            {
+              "event": "Stunned",
+              "event_id": 23,
+              "duration": 15.0,
+              "always": 0
+            },
+            {
+              "event": "Immobilized",
+              "event_id": 24,
+              "duration": 15.0,
+              "always": 0
+            },
+            {
+              "event": "Held",
+              "event_id": 25,
+              "duration": 15.0,
+              "always": 0
+            },
+            {
+              "event": "Sleep",
+              "event_id": 26,
+              "duration": 15.0,
+              "always": 0
+            },
+            {
+              "event": "Terrorized",
+              "event_id": 27,
+              "duration": 15.0,
+              "always": 0
+            }
+          ],
+          "flags_raw": 2560
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Smashing_Dmg",
+            "Lethal_Dmg",
+            "Fire_Dmg",
+            "Cold_Dmg",
+            "Energy_Dmg",
+            "Negative_Energy_Dmg",
+            "Psionic_Dmg",
+            "Toxic_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Strength",
+          "target": "AnyAffected",
+          "table": "Ranged_Debuff_Dam",
+          "scale": 2.0,
+          "duration": "20 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/DEBUFFDAMAGECONTINUING.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreStrength"
+          ],
+          "flags_raw": 1296
+        }
+      ],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "kFocusFire_Burst",
+                "target.mode?",
+                "kPersonalAttack1",
+                "Source.Mode?",
+                "&&",
+                "kFocusFire_Slug",
+                "target.mode?",
+                "kPersonalAttack2",
+                "Source.Mode?",
+                "&&",
+                "||",
+                "kFocusFire_M30",
+                "target.mode?",
+                "kPersonalAttack3",
+                "Source.Mode?",
+                "&&",
+                "||"
+              ],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "UNSATISFIED",
+              "eval_flags": 4,
+              "templates": [
+                {
+                  "attribs": [
+                    "Toxic_Dmg"
+                  ],
+                  "type": "Expression",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Ranged_Damage",
+                  "scale": 0.1,
+                  "duration": "20.1 seconds",
+                  "magnitude": 1.0,
+                  "delay": 1.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [
+                    "@StdResult",
+                    "kFocusFire_Burst",
+                    "target.mode?",
+                    "kPersonalAttack1",
+                    "Source.Mode?",
+                    "&&",
+                    "kFocusFire_Slug",
+                    "target.mode?",
+                    "kPersonalAttack2",
+                    "Source.Mode?",
+                    "&&",
+                    "+",
+                    "kFocusFire_M30",
+                    "target.mode?",
+                    "kPersonalAttack3",
+                    "Source.Mode?",
+                    "&&",
+                    "+",
+                    "0.0333",
+                    "*",
+                    "1",
+                    "+",
+                    "*"
+                  ],
+                  "application_period": 1.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Toxic damage over time.",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Toxic damage over time.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "POWERS/FIRECONTROL/CINDERSHIT.FX",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags_raw": 1280
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Toxic_Dmg"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Ranged_Damage",
+                  "scale": 0.1,
+                  "duration": "20.1 seconds",
+                  "magnitude": 1.0,
+                  "delay": 1.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 1.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Toxic damage over time.",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Toxic damage over time.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "POWERS/FIRECONTROL/CINDERSHIT.FX",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags_raw": 1280
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "strengths_disallowed": [
+    "RechargeTime"
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 0,
+  "powerset": "Mastermind_Pets.Spec_Ops_3"
+}

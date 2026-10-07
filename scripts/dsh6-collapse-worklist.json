@@ -1,0 +1,36 @@
+{
+  "schema": "dsh6-collapse-worklist/1",
+  "scope": {
+    "byTypeGate": "by-type sibling collapse (multi-type explosion) over Defense/Resistance/Elusivity/Mez/MezResist/Movement — an input sub-type with no output slot while the effectType is present. FP-free (5 traced fixes). Finding: clean by-type collapse does not occur in HC; residual is target-directed / conditional. 2026-07-05: ally/team MOVEMENT buffs are now emitted (converter movement branch routes non-Self aspect=Current buffs to effects.movement — Speed Boost/Accelerate Metabolism +run/fly, Inertial Reduction +jump, Group Fly team fly; calc ALLY_ONLY_TARGET_TYPES gate keeps ally-only powers off caster totals), clearing the Movement flags. isPVPMap? PvP-map atoms now filtered like `player eq` (Enforced Morale mez-RESIST is PvP-map-only; its PvE sleep-resist + full mez PROTECTION already render). Remaining 2 collapses = display-name aggregation across NPC variants (Focused Fighting/ESD Arrow), not player last-write-wins; class-absent = control/ combo/self-conditional edge cases (Telekinesis, Genetic Corruption, Savage Leap).",
+    "scalarGate": "site-A table-variant collapse over scalar effectTypes (ToHit/Recovery/Regen/Endurance/…): two same-(effectType,sign) templates on DIFFERENT tables where last-write-wins keeps one. resistible folded OUT (buffs have no twin; DSH3 gates debuff twins); the PvP `enttype target> player eq` variant is dropped exactly as the converter does (mirrors convert-powerset.cjs:1068). NOW AT ZERO: this surfaced one real bug — the conditional pipeline (collectConditionalsGrouped) omitted that PvP-drop, so Beam Rifle Disintegrate kept the PvP -3/Ranged_Res_Boolean regen over the PvE -0.75/Ranged_Ones (Mids-confirmed). Fixed 2026-07-05 → gate green (0).",
+    "excluded": "aspect=Str (→specialBuff Enhancement), aspect=Res (→debuffResistance), PvP-only, scale-0 markers, Expression phantoms, exotic resist types, KB protection.",
+    "signRule": "sign follows the converter (scale<0 OR table matches /debuff/), not scale alone."
+  },
+  "coverage": {
+    "powersTotal": 3440,
+    "powersChecked": 3440,
+    "sourceMissing": 0,
+    "requireFail": 0,
+    "atomsChecked": 6428,
+    "scalarChecked": 1316
+  },
+  "summary": {
+    "highConfidenceCollapses": 0,
+    "distinctCollapseGroups": 0,
+    "classAbsent": 0,
+    "scalarCollapses": 0,
+    "scalarDistinctGroups": 0,
+    "scalarClassAbsent": 0,
+    "discriminatorCollapses": 0,
+    "discriminatorGroups": 0,
+    "discriminatorClassAbsent": 0
+  },
+  "collapseGroups": [],
+  "classAbsentGroups": [],
+  "scalarCollapseGroups": [],
+  "scalarClassAbsentGroups": [],
+  "scalarCollapses": [],
+  "discriminatorCollapseGroups": [],
+  "discriminatorClassAbsentGroups": [],
+  "discriminatorCollapses": []
+}

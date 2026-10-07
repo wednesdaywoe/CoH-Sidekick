@@ -1,0 +1,384 @@
+{
+  "name": "Impassioned_Serenade",
+  "full_name": "Controller_Control.Symphony_Control.Impassioned_Serenade",
+  "short_name": "Impassioned_Serenade",
+  "type": "Click",
+  "display_name": "Impassioned Serenade",
+  "display_fullname": "Controller Control Symphony Control Impassioned Serenade",
+  "display_help": "You serenade your target with an impassioned song, charming them into fighting for you.<br><br><color #fcfc95>Note: this power inflicts damage over time for up to 30 seconds as long as the target is confused.</color>",
+  "display_short_help": "Ranged, DoT(Psionic), Foe Confuse",
+  "icon": "symphonycontrol_confusest",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.2,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 80.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.0,
+  "time_to_root": 2.0,
+  "recharge_time": 8.0,
+  "activate_period": 0.0,
+  "endurance_cost": 8.528,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Damage",
+    "Confuse",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Confuse",
+    "Controller Archetype Sets",
+    "Ranged Damage",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    104,
+    140
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Psionic_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Damage",
+          "scale": 0.65,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Psionic damage.",
+            "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Psionic damage.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags_raw": 1280
+        },
+        {
+          "attribs": [
+            "Psionic_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Damage",
+          "scale": 0.04,
+          "duration": "30 seconds",
+          "magnitude": 1.0,
+          "delay": 1.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 1.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Psionic damage over time.",
+            "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Psionic damage over time.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "While target is confused."
+          },
+          "required_events": [
+            {
+              "event": "Confused",
+              "event_id": 28,
+              "duration": 1.0,
+              "always": 0
+            }
+          ],
+          "suppress_events": [
+            {
+              "event": "Sleep",
+              "event_id": 26,
+              "duration": 1.0,
+              "always": 1
+            }
+          ],
+          "flags_raw": 1280
+        },
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 0.25,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Redirects.Symphony_Control.Impassioned_Serenade_Controller"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags_raw": 1280
+        }
+      ],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "kTerrorized",
+            "target>",
+            "0",
+            ">",
+            "kImmobilized",
+            "target>",
+            "0",
+            ">",
+            "||",
+            "kHeld",
+            "target>",
+            "0",
+            ">",
+            "||",
+            "kStunned",
+            "target>",
+            "0",
+            ">",
+            "||",
+            "Sleep",
+            "target.EventTimeSince>",
+            "3",
+            "<=",
+            "||",
+            "IncarnateBoss",
+            "target.HasTag?",
+            "||"
+          ],
+          "tags": [
+            "Containment"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Psionic_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "AnyAffected",
+              "table": "Ranged_InherentDamage",
+              "scale": 0.65,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Psionic damage (CONTAINMENT).",
+                "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Psionic damage (CONTAINMENT).",
+                "display_float": "Containment",
+                "display_attrib_defense_float": null,
+                "display_info": "Only against immobilized, held, sleeping, terrified or stunned targets"
+              },
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Psionic_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "AnyAffected",
+              "table": "Ranged_InherentDamage",
+              "scale": 0.04,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 1.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 1.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Psionic damage over time (CONTAINMENT).",
+                "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Psionic damage over time (CONTAINMENT).",
+                "display_float": "Containment",
+                "display_attrib_defense_float": null,
+                "display_info": "Only against immobilized, held, sleeping, terrified or stunned targets"
+              },
+              "required_events": [
+                {
+                  "event": "Confused",
+                  "event_id": 28,
+                  "duration": 1.0,
+                  "always": 0
+                }
+              ],
+              "suppress_events": [
+                {
+                  "event": "Sleep",
+                  "event_id": 26,
+                  "duration": 1.0,
+                  "always": 1
+                }
+              ],
+              "flags_raw": 1280
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "activation_effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [
+        "ReverbImpassionedSerenade"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 1,
+      "templates": [
+        {
+          "attribs": [
+            "Grant_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "SelfAndPets",
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 2.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "Pets_Reverberant_Controller",
+            "target.VillainName>"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Pets.Reverberant.Impassioned_Serenade"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags_raw": 1280
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 5,
+  "powerset": "Controller_Control.Symphony_Control"
+}

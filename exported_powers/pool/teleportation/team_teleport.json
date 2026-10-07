@@ -1,0 +1,228 @@
+{
+  "name": "Team_Teleport",
+  "full_name": "Pool.Teleportation.Team_Teleport",
+  "short_name": "Team_Teleport",
+  "type": "Click",
+  "display_name": "Team Teleport",
+  "display_fullname": "Pool Teleportation Team Teleport",
+  "display_help": "You can Teleport yourself and your nearby teammates to a targeted location. Teammates must be in close proximity to you. Team Teleport costs slightly more Endurance than Teleport, but you can Teleport your entire team for no additional cost.<br><br>You must be at least level 14 and have two other Teleportation Powers before selecting Team Teleport.<br><br><color #fcfc95>Recharge: Very Fast.</color>",
+  "display_short_help": "Ranged (Location), Team Teleport",
+  "icon": "teleportation_groupteleport.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 255,
+  "radius": 30.0,
+  "arc": 0.0,
+  "range": 25.0,
+  "range_secondary": 225.0,
+  "activation_time": 1.67,
+  "time_to_root": 1.67,
+  "recharge_time": 1.5,
+  "activate_period": 0.0,
+  "endurance_cost": 16.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "Teleport",
+  "targets_autohit": [
+    "DeadOrAliveTeammate",
+    "Self"
+  ],
+  "targets_affected": [
+    "DeadOrAliveTeammate",
+    "Self"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Range",
+    "Recharge"
+  ],
+  "allowed_set_categories": [
+    "Teleport",
+    "Universal Travel"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [
+    "Pool.Teleportation.Recall_Friend",
+    "Pool.Teleportation.Teleport_Foe",
+    "&&",
+    "Pool.Teleportation.Recall_Friend",
+    "Pool.Teleportation.Teleport",
+    "&&",
+    "||",
+    "Pool.Teleportation.Teleport_Foe",
+    "Pool.Teleportation.Teleport",
+    "&&",
+    "||"
+  ],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Power_DisallowTeamTeleport",
+        "target.TokenOwned?",
+        "!"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Translucency"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 0.0,
+          "duration": "1.5 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 96
+        },
+        {
+          "attribs": [
+            "Teleport"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 3.1,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 1.17,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 96
+        },
+        {
+          "attribs": [
+            "Fly"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "4 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 112
+        },
+        {
+          "attribs": [
+            "FlyingSpeed",
+            "MovementControl",
+            "MovementFriction"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": -1.0,
+          "duration": "4 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 112
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All",
+    "Disable_Pool",
+    "Disable_Teleport",
+    "Disable_Travel",
+    "NoTeleport",
+    "Peacebringer_Blaster_Mode",
+    "Peacebringer_Tanker_Mode",
+    "Warshade_Blaster_Mode",
+    "Warshade_Tanker_Mode"
+  ],
+  "modes_suspended": [
+    "Suppress_TravelToggles"
+  ],
+  "available_level": 13,
+  "powerset": "Pool.Teleportation"
+}

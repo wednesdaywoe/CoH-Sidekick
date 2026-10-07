@@ -1,0 +1,89 @@
+{
+  "name": "Water_Jet",
+  "full_name": "Defender_Ranged.Water_Blast.Water_Jet",
+  "short_name": "Water_Jet",
+  "type": "Click",
+  "display_name": "Water Jet",
+  "display_fullname": "Defender Ranged Water Blast Water Jet",
+  "display_help": "You spray a concentrated torrent of water toward your target that causes Cold and Smashing damage as well as reducing your target's movement speed. If you have 2 or less Tidal Power, you will gain a stack of Tidal Power. If you have 3 Tidal Power and you activate this power, it will have an enhanced effect causing Water Jet to cast slightly faster and immediately reset the recharge of Water Jet. Water Jet's enhanced effect can be used once every 8 seconds.",
+  "display_short_help": "Ranged, DMG(Cold/Smash), Foe -Speed, +Wet, Self +/-Tidal Power",
+  "icon": "waterblast_waterjet.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 80.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.43,
+  "time_to_root": 1.43,
+  "recharge_time": 10.0,
+  "activate_period": 0.0,
+  "endurance_cost": 10.192,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "Slow",
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Defender Archetype Sets",
+    "Ranged Damage",
+    "Slow Movement",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    104,
+    128
+  ],
+  "effects": [],
+  "redirect": [
+    {
+      "name": "Pets.Water_Blast_Defender.Water_Jet_Fast",
+      "condition_expression": [
+        "temporary_powers.temporary_powers.tidal_power",
+        "source.ownPowerNum?",
+        "3",
+        "==",
+        "temporary_powers.temporary_powers.enhanced_water_jet_lock",
+        "source.ownPower?",
+        "!",
+        "&&"
+      ],
+      "show_in_info": true
+    },
+    {
+      "name": "Pets.Water_Blast_Defender.Water_Jet_Normal",
+      "condition_expression": [
+        "1"
+      ],
+      "show_in_info": true
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 23,
+  "powerset": "Defender_Ranged.Water_Blast"
+}

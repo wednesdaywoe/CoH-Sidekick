@@ -1,0 +1,106 @@
+{
+  "name": "Time_Bomb",
+  "full_name": "Defender_Buff.Traps.Time_Bomb",
+  "short_name": "Time_Bomb",
+  "type": "Click",
+  "display_name": "Temporal Bomb",
+  "display_fullname": "Defender Buff Traps Time Bomb",
+  "display_help": "You can place a Temporal Bomb on the ground. The Temporal Bomb will detonate once the power is activated a second time, resulting in a massive explosion that can damage all nearby foes and send them flying, as well as create a Temporal Bubble that speeds up yourself and allies, while slowing down all enemies inside. If used while targeting an enemy in melee range, you can attach the Temporal Bomb to them instead!<br><br>The Temporal Bomb is small, and almost impossible to detect.",
+  "display_short_help": "Place Bomb: PBAoE, DMG(Lethal/Fire), Foe Knockback, Special",
+  "icon": "traps_remotebomb.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 2.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 0.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Anything",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "None"
+  ],
+  "boosts_allowed": [
+    "Recovery",
+    "Slow",
+    "EnduranceDiscount",
+    "Recharge",
+    "Knockback",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Defender Archetype Sets",
+    "Endurance Modification",
+    "Knockback",
+    "Melee AoE Damage",
+    "Slow Movement",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [],
+  "redirect": [
+    {
+      "name": "Redirects.Gadgets.Remote_Bomb_Target",
+      "condition_expression": [
+        "kRemoteBomb",
+        "Source.Mode?",
+        "!",
+        "target.isFriend?",
+        "!",
+        "&&"
+      ],
+      "show_in_info": true
+    },
+    {
+      "name": "Redirects.Gadgets.Remote_Bomb_Self",
+      "condition_expression": [
+        "kRemoteBomb",
+        "Source.Mode?",
+        "!"
+      ],
+      "show_in_info": true
+    },
+    {
+      "name": "Redirects.Gadgets.Temp_Bomb",
+      "condition_expression": [
+        "kRemoteBomb",
+        "Source.Mode?"
+      ],
+      "show_in_info": true
+    },
+    {
+      "name": "Redirects.Gadgets.Remote_Bomb_Info",
+      "condition_expression": [
+        "0"
+      ],
+      "show_in_info": true
+    }
+  ],
+  "strengths_disallowed": [
+    "Range"
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 25,
+  "powerset": "Defender_Buff.Traps"
+}

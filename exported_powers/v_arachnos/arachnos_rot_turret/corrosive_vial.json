@@ -1,0 +1,118 @@
+{
+  "name": "Corrosive_Vial",
+  "full_name": "V_Arachnos.Arachnos_ROT_Turret.Corrosive_Vial",
+  "short_name": "Corrosive_Vial",
+  "type": "Click",
+  "display_name": "Corrosive Blast",
+  "display_fullname": "V Arachnos Arachnos ROT Turret Corrosive Vial",
+  "display_help": "You hurl a blob of toxic fluid that explodes upon impact leaving a corrosive puddle at your target's feet. Any foe that stands within the puddle will take toxic damage and have their defense and regeneration reduced for a short while.",
+  "display_short_help": "Ranged (Targeted AoE), High DoT(Toxic), -Defense",
+  "icon": "experimentation_corrosivevial.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 200.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.53,
+  "time_to_root": 1.53,
+  "recharge_time": 15.0,
+  "activate_period": 0.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Foe"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [
+    "Arachnos_Weaver1",
+    "target.VillainName>",
+    "!",
+    "SecretModeTurrets",
+    "arcvar>",
+    "2",
+    "==",
+    "!",
+    "&&"
+  ],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": -1.0,
+          "duration": "14 seconds",
+          "magnitude": 1.0,
+          "delay": 0.5,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "entity_def": "Pets_Arachnos_Corrosive_Blast",
+            "display_name": "Corrosive Blast",
+            "priority_list": "Gang(3),PL_StaticObject",
+            "redirects": [
+              "Pets.Experimentation_Corrosive_Vial_Arachnos.Corrosive_Vial_Splat"
+            ],
+            "type": "EntCreate"
+          },
+          "flags": [
+            "NearGround",
+            "IgnoreResistance",
+            "KeepThroughDeath",
+            "CopyBoosts",
+            "PseudoPet"
+          ],
+          "flags_raw": 17448,
+          "flags2_raw": 36
+        }
+      ]
+    }
+  ],
+  "available_level": 0,
+  "powerset": "V_Arachnos.Arachnos_ROT_Turret"
+}

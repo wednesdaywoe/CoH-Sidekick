@@ -1,0 +1,585 @@
+{
+  "name": "Black_Hole",
+  "full_name": "Corruptor_Buff.Dark_Miasma.Black_Hole",
+  "short_name": "Black_Hole",
+  "type": "Click",
+  "display_name": "Black Hole",
+  "display_fullname": "Corruptor Buff Dark Miasma Black Hole",
+  "display_help": "Opens up a Black Hole to the Netherworld that temporarily pulls in all foes within its grasp. If the main target is immune to the pull, it will become phase shifted and are completely intangible. They are hard to see, and cannot affect or be affected by those in normal space.",
+  "display_short_help": "Ranged (Targeted AoE), Foe Intangible",
+  "icon": "darkmiasma_blackhole.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 16,
+  "radius": 30.0,
+  "arc": 0.0,
+  "range": 50.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.03,
+  "time_to_root": 1.03,
+  "recharge_time": 120.0,
+  "activate_period": 0.0,
+  "endurance_cost": 13.0,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Accuracy"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    112,
+    136
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Repel"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 1.0,
+              "duration": "0.75 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "vec_start": "Target",
+                "vec_end": "MainTarget",
+                "vec_adjust_pyr": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "priority": 0,
+                "vel": 1.0,
+                "vel_mag": 1.0,
+                "height": -1.0,
+                "height_mag": -1.0,
+                "type": "Knock"
+              },
+              "flags": [
+                "IgnoreCombatMods"
+              ],
+              "flags_raw": 320
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "critter",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVE_ONLY",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Immobilized",
+                "Intangible"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 3.0,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You pull {PlayerDest} into another dimension, making {PlayerDest} intangible!",
+                "display_victim_hit": "{PlayerSource} pulls you into another dimension with a {PowerName}, making you intangible!",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Main target only<br>Effect instantly cancels if the target is pulled"
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": null,
+                "conditional_bits": [],
+                "conditional_fx": "PFX"
+              },
+              "cancel_events": [
+                "Repelled"
+              ],
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Combat_Phase"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 3.0,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "combat_phases": [
+                  3
+                ],
+                "vision_phases": [],
+                "exclusive_vision_phase": -1,
+                "type": "Phase"
+              },
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Main target only<br>Effect instantly cancels if the target is pulled"
+              },
+              "cancel_events": [
+                "Repelled"
+              ],
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Combat_Phase"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 3.0,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "combat_phases": [
+                  0
+                ],
+                "vision_phases": [],
+                "exclusive_vision_phase": -1,
+                "type": "Phase"
+              },
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Main target only<br>Effect instantly cancels if the target is pulled"
+              },
+              "cancel_events": [
+                "Repelled"
+              ],
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "ThreatLevel"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": -1.0,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "Main target only<br>Effect instantly cancels if the target is pulled"
+              },
+              "cancel_events": [
+                "Repelled"
+              ],
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Translucency"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 0.1,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": "Black Hole",
+                "display_attrib_defense_float": null,
+                "display_info": "Main target only<br>Effect instantly cancels if the target is pulled"
+              },
+              "cancel_events": [
+                "Repelled"
+              ],
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "player",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVP_ONLY",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Immobilized",
+                "Intangible"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 2.0,
+              "duration": "4 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You pull {PlayerDest} into another dimension, making {PlayerDest} intangible!",
+                "display_victim_hit": "{PlayerSource} pulls you into another dimension, making you intangible!",
+                "display_float": "Black Hole",
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": null,
+                "conditional_bits": [],
+                "conditional_fx": "PFX"
+              },
+              "suppress_events": [
+                {
+                  "event": "Untouchable",
+                  "event_id": 29,
+                  "duration": 15.0,
+                  "always": 0
+                }
+              ],
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Combat_Phase"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 2.0,
+              "duration": "4 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "combat_phases": [
+                  3
+                ],
+                "vision_phases": [],
+                "exclusive_vision_phase": -1,
+                "type": "Phase"
+              },
+              "suppress_events": [
+                {
+                  "event": "Untouchable",
+                  "event_id": 29,
+                  "duration": 15.0,
+                  "always": 0
+                }
+              ],
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Combat_Phase"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": 2.0,
+              "duration": "4 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "combat_phases": [
+                  0
+                ],
+                "vision_phases": [],
+                "exclusive_vision_phase": -1,
+                "type": "Phase"
+              },
+              "suppress_events": [
+                {
+                  "event": "Untouchable",
+                  "event_id": 29,
+                  "duration": 15.0,
+                  "always": 0
+                }
+              ],
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "ThreatLevel"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Ranged_Ones",
+              "scale": -1.0,
+              "duration": "4 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "suppress_events": [
+                {
+                  "event": "Untouchable",
+                  "event_id": 29,
+                  "duration": 15.0,
+                  "always": 0
+                }
+              ],
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Translucency"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 0.1,
+              "duration": "30 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "cancel_events": [
+                "Repelled"
+              ],
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance"
+              ],
+              "flags_raw": 1072
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 27,
+  "powerset": "Corruptor_Buff.Dark_Miasma"
+}

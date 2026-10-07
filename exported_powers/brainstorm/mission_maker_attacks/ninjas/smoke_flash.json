@@ -1,0 +1,277 @@
+{
+  "name": "Smoke_Flash",
+  "full_name": "Mission_Maker_Attacks.Ninjas.Smoke_Flash",
+  "short_name": "Smoke_Flash",
+  "type": "Click",
+  "display_name": "Smoke Flash",
+  "display_fullname": "Mission Maker Attacks Ninjas Smoke Flash",
+  "display_help": "You can command one of your Ninja Henchmen to throw down a Smoke Bomb. The Smoke Flash will allow the Ninja to Placate his nearby foes, and thus unable to target the Ninja. The Smoke Flash also makes the Ninja stealthy and Hidden for about 10 seconds, enabling him to perform Critical hits with his next few attacks. You can only use this power on a Ninja Henchmen.",
+  "display_short_help": "Hide Ninja",
+  "icon": "ninjas_kujikiri.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 100.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.17,
+  "recharge_time": 10.0,
+  "activate_period": 0.0,
+  "endurance_cost": 30.0,
+  "interrupt_time": 0.0,
+  "target_type": "MyPet",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "MyPet"
+  ],
+  "targets_affected": [
+    "MyPet"
+  ],
+  "boosts_allowed": [],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "NPC_Pets_MA_Genin",
+        "target.VillainName>",
+        "NPC_Pets_MA_Jonin",
+        "target.VillainName>",
+        "||",
+        "NPC_Pets_MA_Oni",
+        "target.VillainName>",
+        "||"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "StealthRadius_PVE"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 54.0,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 1.17,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "V_COV/POWERS/NINJITSU/HIDE.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "suppress_events": [
+            {
+              "event": "Attacked",
+              "event_id": 2,
+              "duration": 15.0,
+              "always": 1
+            },
+            {
+              "event": "Damaged",
+              "event_id": 21,
+              "duration": 15.0,
+              "always": 1
+            },
+            {
+              "event": "MissionObjectClick",
+              "event_id": 38,
+              "duration": 15.0,
+              "always": 1
+            }
+          ],
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "StealthRadius_PVP"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 500.0,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 1.17,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "suppress_events": [
+            {
+              "event": "Attacked",
+              "event_id": 2,
+              "duration": 15.0,
+              "always": 1
+            },
+            {
+              "event": "Damaged",
+              "event_id": 21,
+              "duration": 15.0,
+              "always": 1
+            },
+            {
+              "event": "MissionObjectClick",
+              "event_id": 38,
+              "duration": 15.0,
+              "always": 1
+            }
+          ],
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "Meter"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 1.17,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        },
+        {
+          "attribs": [
+            "Translucency"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 0.2,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 1.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        },
+        {
+          "attribs": [
+            "Grant_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Villain_Pets.Kuji_Kiri.Smoke_Bomb"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 17,
+  "powerset": "Mission_Maker_Attacks.Ninjas"
+}

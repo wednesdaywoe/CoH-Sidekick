@@ -1,0 +1,163 @@
+{
+  "name": "Spring_Attack",
+  "full_name": "Pool.Leaping.Spring_Attack",
+  "short_name": "Spring_Attack",
+  "type": "Click",
+  "display_name": "Spring Attack",
+  "display_fullname": "Pool Leaping Spring Attack",
+  "display_help": "You leap into the air and smash down among ranks of foes in the blink of an eye. Using this power allows you to jump to a selected area to deal significant smashing damage to all foes near the location you teleport to, most foes that are struck by your Spring Attack will be knocked down.<br><br>You must be at least level 14 and have two other Leaping Powers before selecting Spring Attack.",
+  "display_short_help": "PBAoE DMG(Smash), Foe Knockdown; Self Teleport",
+  "icon": "jump_springattack.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Location",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 60.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.5,
+  "time_to_root": 1.5,
+  "recharge_time": 120.0,
+  "activate_period": 0.0,
+  "endurance_cost": 13.52,
+  "interrupt_time": 0.0,
+  "target_type": "Teleport",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Knockback",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Knockback",
+    "Melee AoE Damage",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [
+    "Pool.Leaping.Jump_Kick",
+    "Pool.Leaping.Combat_Jumping",
+    "&&",
+    "Pool.Leaping.Jump_Kick",
+    "Pool.Leaping.Long_Jump",
+    "&&",
+    "||",
+    "Pool.Leaping.Combat_Jumping",
+    "Pool.Leaping.Long_Jump",
+    "&&",
+    "||"
+  ],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Teleport"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.7,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 1.3,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Redirects.Pool_Leaping.Spring_Attack"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags": [
+            "CopyBoosts"
+          ],
+          "flags_raw": 1280,
+          "flags2_raw": 4
+        }
+      ]
+    }
+  ],
+  "procs_allowed": false,
+  "modes_disallowed": [
+    "Disable_All",
+    "Disable_Pool",
+    "Peacebringer_Blaster_Mode",
+    "Peacebringer_Tanker_Mode",
+    "Warshade_Blaster_Mode",
+    "Warshade_Tanker_Mode"
+  ],
+  "available_level": 13,
+  "powerset": "Pool.Leaping"
+}

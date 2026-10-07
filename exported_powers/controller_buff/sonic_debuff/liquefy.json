@@ -1,0 +1,172 @@
+{
+  "name": "Liquefy",
+  "full_name": "Controller_Buff.Sonic_Debuff.Liquefy",
+  "short_name": "Liquefy",
+  "type": "Click",
+  "display_name": "Liquefy",
+  "display_fullname": "Controller Buff Sonic Debuff Liquefy",
+  "display_help": "You unleash a barrage of sonic waves on the Earth itself, generating a powerful, localized earthquake. The impact of the sonic shockwave may Hold some foes and deal some minor damage. Most foes that pass through the location will fall down. The violent shaking also reduces their chance to hit, Defense, and their maximum hit points.<br><br><color #fcfc95>Recharge: Very Long.</color>",
+  "display_short_help": "Ranged (Location AoE), Foe Knockback, Hold, -To Hit, -DEF, -MaxHP",
+  "icon": "sonicdebuff_dropknockback.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Location",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 60.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.67,
+  "time_to_root": 2.67,
+  "recharge_time": 120.0,
+  "activate_period": 0.0,
+  "endurance_cost": 23.4,
+  "interrupt_time": 0.0,
+  "target_type": "Location",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Hold",
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Debuff_ToHit",
+    "Debuff_Defense",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Accurate Defense Debuff",
+    "Accurate To-Hit Debuff",
+    "Controller Archetype Sets",
+    "Defense Debuff",
+    "Holds",
+    "Ranged AoE Damage",
+    "To Hit Debuff",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Level",
+          "scale": 1.0,
+          "duration": "30 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "display_name": "Liquefy",
+            "priority_list": "PL_StaticObject",
+            "redirects": [
+              "Pets.ResistAll.ResistAll",
+              "Pets.Liquefy.Liquefy"
+            ],
+            "type": "EntCreate"
+          },
+          "messages": {
+            "display_attacker_hit": "You {PowerName} the ground!",
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "CopyBoosts",
+            "PseudoPet"
+          ],
+          "flags_raw": 1072,
+          "flags2_raw": 36
+        },
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Strength",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Pets.Liquefy.LiquefyShock"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags": [
+            "CopyBoosts"
+          ],
+          "flags_raw": 1280,
+          "flags2_raw": 4
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 29,
+  "powerset": "Controller_Buff.Sonic_Debuff"
+}

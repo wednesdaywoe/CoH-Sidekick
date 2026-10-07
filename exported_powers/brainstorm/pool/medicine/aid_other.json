@@ -1,0 +1,79 @@
+{
+  "name": "Aid_Other",
+  "full_name": "Pool.Medicine.Aid_Other",
+  "short_name": "Aid_Other",
+  "type": "Click",
+  "display_name": "Aid Other",
+  "display_fullname": "Pool Medicine Aid Other",
+  "display_help": "You heal a single targeted ally. This power is interruptible unless you have also trained Field Medic, in which case it is not interruptible.<br><br><color #fcfc95>Recharge: Moderate.</color>",
+  "display_short_help": "Close, Heal(Ally)",
+  "icon": "medicine_aid.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 25.0,
+  "range_secondary": 0.0,
+  "activation_time": 3.93,
+  "recharge_time": 10.0,
+  "activate_period": 0.0,
+  "endurance_cost": 6.5,
+  "interrupt_time": 1.0,
+  "target_type": "Friend",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Friend"
+  ],
+  "targets_affected": [
+    "Friend"
+  ],
+  "boosts_allowed": [
+    "Interrupt",
+    "EnduranceDiscount",
+    "Recharge",
+    "Heal"
+  ],
+  "allowed_set_categories": [
+    "Healing"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [],
+  "redirect": [
+    {
+      "name": "Pets.Pool_Medicine_AidOther.AidOther_NoInterrupt",
+      "condition_expression": [
+        "Pool.Medicine.Field_Medic",
+        "source.ownPower?"
+      ],
+      "show_in_info": true
+    },
+    {
+      "name": "Pets.Pool_Medicine_AidOther.AidOther_Interrupt",
+      "condition_expression": [
+        "1"
+      ],
+      "show_in_info": true
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All",
+    "Disable_Pool",
+    "Peacebringer_Blaster_Mode",
+    "Peacebringer_Tanker_Mode",
+    "Warshade_Blaster_Mode",
+    "Warshade_Tanker_Mode"
+  ],
+  "available_level": 0,
+  "powerset": "Pool.Medicine"
+}

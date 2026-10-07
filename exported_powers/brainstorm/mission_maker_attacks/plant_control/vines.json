@@ -1,0 +1,146 @@
+{
+  "name": "Vines",
+  "full_name": "Mission_Maker_Attacks.Plant_Control.Vines",
+  "short_name": "Vines",
+  "type": "Click",
+  "display_name": "Vines",
+  "display_fullname": "Mission Maker Attacks Plant Control Vines",
+  "display_help": "Creates a field of Strangler Vines that can Hold multiple foes at range. The affected targets are held helpless by the massive root-like vines. Unlike the power Strangler, this power does not deal any damage, but it can Hold multiple foes at once.",
+  "display_short_help": "Ranged (Targeted AoE), Foe Hold",
+  "icon": "plantcontrol_vines.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 0.8,
+  "effect_area": "Sphere",
+  "max_targets_hit": 16,
+  "radius": 20.0,
+  "arc": 0.0,
+  "range": 80.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.1,
+  "time_to_root": 2.1,
+  "recharge_time": 120.0,
+  "activate_period": 0.0,
+  "endurance_cost": 21.0,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    112
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 1,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Melee_Level",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "display_name": "Vines",
+            "priority_list": "PL_Untargetable_FightPreferRanged",
+            "redirects": [
+              "Villain_Pets.Vines.Self_Destruct",
+              "Pets.ResistAll.ResistAll",
+              "Villain_Pets.Vines.Vines_Pulse",
+              "Villain_Pets.Vines.Vines_Debuff",
+              "Villain_Pets.Vines.Vines_OneShot"
+            ],
+            "type": "EntCreate"
+          },
+          "flags": [
+            "CopyBoosts",
+            "CopyCreatorMods",
+            "PseudoPet"
+          ],
+          "flags_raw": 1280,
+          "flags2_raw": 44
+        },
+        {
+          "attribs": [
+            "Silent_Kill"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "SelfAndPets",
+          "table": "Melee_Ones",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "Villain_Pets.Vines.Vines_OneShot",
+            "target.ownPower?"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "NoHitDelay",
+            "NoProjectileDelay"
+          ],
+          "flags_raw": 197680
+        }
+      ]
+    }
+  ],
+  "available_level": 17,
+  "powerset": "Mission_Maker_Attacks.Plant_Control"
+}

@@ -1,0 +1,51 @@
+{
+  "name": "coh-sidekick-pipeline",
+  "version": "1.0.0",
+  "description": "CoH Sidekick 1.0 data pipeline: converters, regen, gates, and contract/fixture emitters over the frozen TS oracle",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build:web": "rm -rf target/dx/Sidekick/release/web && cd crates/app && dx build --platform web --release --debug-symbols false --keep-names",
+    "deploy:web": "scripts/deploy-web.sh",
+    "regen": "node scripts/regen-all.cjs",
+    "regen:generated": "node scripts/regen-all.cjs --generated-only",
+    "audit:set-categories": "for ds in $(node -p \"require('./scripts/_dataset-paths.cjs').ALL_DATASETS.join(' ')\"); do node scripts/audit-allowed-set-categories.cjs --dataset \"$ds\" --gate || exit 1; done",
+    "audit:twins": "node scripts/audit-converter-twins.cjs",
+    "audit:census": "node scripts/audit-coverage-census.cjs",
+    "audit:dataset-roster": "node scripts/audit-dataset-roster.cjs --gate",
+    "audit:form-coverage": "node scripts/audit-form-coverage.cjs --gate",
+    "audit:conditional-coverage": "node scripts/audit-conditional-coverage.cjs --gate",
+    "audit:damage-types": "node scripts/audit-damage-type-recovery.cjs",
+    "audit:export-integrity": "python3 tools/export-integrity.py --gate",
+    "audit:shard-drift": "node scripts/keys/prov8-shard-drift.cjs --gate",
+    "audit:atom-coverage": "node scripts/audit-atom-coverage.cjs --gate",
+    "lint:js": "eslint .",
+    "lint:py": "ruff check .",
+    "lint:rust": "cargo clippy --no-deps -p coh_data -p coh_math -p coh_wasm -p app --all-targets -- -D warnings",
+    "fmt:rust": "cargo fmt -p coh_data -p coh_math -p coh_wasm -p app",
+    "fmt:rust:check": "cargo fmt -p coh_data -p coh_math -p coh_wasm -p app -- --check",
+    "baseline:check": "cargo test -p coh_math --test totals_baseline -- --nocapture",
+    "baseline:write": "node scripts/keys/prov8-shard-drift.cjs --gate && COH_WRITE_BASELINE=1 cargo test -p coh_math --test totals_baseline -- --nocapture",
+    "audit:def-fidelity": "python3 tools/defdiff.py --gate",
+    "audit:attrib-completeness": "python3 tools/extraction-audit/audit.py --gate",
+    "audit:thunderspy-expressions": "node scripts/audit-thunderspy-expressions.cjs",
+    "validate:converter": "for ds in $(node -p \"require('./scripts/_dataset-paths.cjs').ALL_DATASETS.join(' ')\"); do node scripts/validate-converter-output.cjs --dataset \"$ds\" --gate || exit 1; done",
+    "validate:incarnate-collapse": "for ds in $(node -p \"require('./scripts/_dataset-paths.cjs').ALL_DATASETS.join(' ')\"); do node scripts/dsh8-incarnate-collapse-detector.cjs --dataset \"$ds\" --gate || exit 1; done",
+    "emit:contract": "node scripts/emit-contract.cjs",
+    "audit:grid-viewport": "node scripts/audit-grid-viewport-fit.cjs --gate",
+    "audit:cloud-target-arms": "node scripts/audit-cloud-target-arms.cjs --gate",
+    "changelog:push": "node --env-file-if-exists=.env scripts/push-changelog-discord.cjs"
+  },
+  "author": "Wednesdaywoe",
+  "license": "AGPL-3.0-or-later",
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/mcp": "^0.0.78",
+    "@playwright/test": "^1.61.1",
+    "eslint": "10.11.0",
+    "tsx": "^4.21.0"
+  },
+  "dependencies": {
+    "playwright": "^1.61.1"
+  }
+}

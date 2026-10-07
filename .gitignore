@@ -1,0 +1,135 @@
+# The converters' JSON output, read by emit-contract.cjs. Rebuilt, not committed:
+# `exported_powers/` IS committed, so a clone with no game install regenerates the whole
+# tree with `npm run regen`. Committing it would put an 80 MB derived copy beside the
+# 694 MB it derives from, with nothing checking they agree.
+#
+# Nothing authored or vendored lives in here, and that is the rule that keeps this safe to
+# delete: `hand-data/` and `mids-tables/` are read where they sit, never copied in.
+/pipeline/
+
+# Node (pipeline scripts). Unanchored and without the trailing slash: a worktree that
+# borrows a sibling checkout's install has `node_modules` as a SYMLINK, which `node_modules/`
+# does not match, so it showed up as untracked and one `git add -A` from being committed.
+node_modules
+
+# Rust — anchored: an unanchored `target/` also swallowed the pet-target export
+# directories (exported_powers/*/pets/target), silently leaving real export data
+# untracked.
+/target/
+
+# SECURITY_AUDIT.md F87. The anchor above is right and the hole it leaves is real: every
+# NON-root crate has a `target/` the anchor does not reach, and `dioxus.toml`'s
+# `out_dir = "target/dx"` is resolved by dx against the CRATE directory, so `dx bundle`
+# copies each finished bundle into `crates/app/target/dx` — inside the source tree.
+# 3,492 files and a 41.6 MB Mach-O got committed that way in 682c3e32 before anyone noticed.
+# Listed per crate rather than as an unanchored `target/`, because unanchoring is the thing
+# the comment above forbids. `scripts/keys/no-crate-target-tracked.py` fails when a crate is
+# added to the workspace and not added here.
+/crates/*/target/
+/vendor/*/target/
+
+# Python (bin-crawler / pigg-wrangler tooling)
+__pycache__/
+*.pyc
+
+# Dioxus
+dist/
+.dioxus/
+
+# Local scratch / env
+*.local
+.env
+.env.*
+!.env.example
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Machine-local cargo config (libxdo path)
+.cargo/
+
+# Planning and notes, reference
+bins/
+# Moved out of the tree on 2026-09-24 with the two below — see tools/refdata.py.
+raw defs/
+
+# Manual mids-oracle canonical dump — regenerable cache, 14 MB (see tools/mids-oracle/README.md)
+tools/mids-oracle/.oracle_cache/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Playwright MCP snapshot artifacts
+/.playwright-mcp/
+
+#Other
+.impeccable/
+
+# Understand-analysis output. The graph it produced was a one-shot snapshot that
+# rotted (54% of the files it described had moved or vanished within 3 weeks), and
+# nothing was ignoring its scratch dir, so 6.4 MB of generator trash got committed.
+# If the tool is ever run again, this keeps its output local.
+.ua/
+
+# cargo-mutants run output; CI uploads it as an artifact instead.
+mutants.out*/
+
+# Reference inputs that used to be vendored here and are NOT any more (2026-09-24).
+# They live in a tree beside the repo now — see tools/refdata.py, which is the one
+# place that says where, and COH_REFDATA / COH_RAW_DEFS, which relocate it.
+#
+# Kept as ignores rather than deleted, because the failure they prevent is silent:
+# a gitignored directory inside the tree resolves to nothing on a fresh checkout,
+# and every gate over it self-skips, which reads exactly like a pass. If one of
+# these trees is ever dropped back in, it stays untracked instead of being
+# committed and quietly becoming the default again.
+#
+# `/Thunderspy/` is ANCHORED and must stay that way. Unanchored it matches at
+# any depth, and with core.ignorecase it also swallows
+# src/data/datasets/thunderspy/ — tracked files there keep working, so only NEW
+# files go silently un-added. That is how a Thunderspy-only fix ships as a no-op.
+MidsReborn-master/
+/Thunderspy/
+
+# Tooling activity log — local session bookkeeping, not project state.
+/.pi/
+
+# Debug scratch (probes, .bak snapshots, test-run logs). Individual probe
+# scripts get force-added and tracked when a committed comment or doc cites
+# them by path as census evidence. No committed comment cites one today.
+/.scratch/
+
+# `ruff check` (npm run lint:py) writes its cache here. Added with the gate, 2026-09-26;
+# it had been sitting untracked and unignored since somebody ran ruff by hand on 2026-09-20.
+.ruff_cache/
+
+# AI agent files: instructions, skills, settings and tool output, for Claude and other
+# coding assistants. All of it stays local. The shared copies live outside the repo,
+# in ../.claude/skills/ and ../next/, versioned by the parent folder's own git repo.
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+GEMINI.md
+.claude/
+.agents/
+.mcp.json
+.cursor/
+.cursorrules
+.windsurf/
+.windsurfrules
+.github/copilot-instructions.md
+.aider*
+.codex/
+.gemini/
+.continue/
+.clinerules
+.roo/
+.ua/
+.ori/
+.pi/
+.playwright-mcp/

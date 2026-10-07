@@ -1,0 +1,133 @@
+{
+  "name": "Disruption_Field",
+  "full_name": "Controller_Buff.Sonic_Debuff.Disruption_Field",
+  "short_name": "Disruption_Field",
+  "type": "Toggle",
+  "display_name": "Disruption Field",
+  "display_fullname": "Controller Buff Sonic Debuff Disruption Field",
+  "display_help": "You set up a constant wave of sonic energy around an enemy or ally, weakening the Damage Resistance of all nearby foes.<br><br><color #fcfc95>Recharge: Moderate.</color>",
+  "display_short_help": "Toggle: Ranged (Target Ally AoE), Foe -Res",
+  "icon": "sonicdebuff_teamdebuffdamres.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 16,
+  "radius": 15.0,
+  "arc": 0.0,
+  "range": 70.0,
+  "range_secondary": 0.0,
+  "activation_time": 2.0,
+  "time_to_root": 2.0,
+  "recharge_time": 8.0,
+  "activate_period": 0.5,
+  "endurance_cost": 0.17,
+  "interrupt_time": 0.0,
+  "target_type": "DeadOrAliveAny",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Friend",
+    "Foe"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Recharge"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [
+    "hold",
+    "sleep",
+    "stun"
+  ],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [
+    "Held",
+    "source.EventTimeSince>",
+    "5",
+    ">",
+    "Stunned",
+    "source.EventTimeSince>",
+    "5",
+    ">",
+    "&&",
+    "Sleep",
+    "source.EventTimeSince>",
+    "5",
+    ">",
+    "&&"
+  ],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Smashing_Dmg",
+            "Lethal_Dmg",
+            "Fire_Dmg",
+            "Cold_Dmg",
+            "Energy_Dmg",
+            "Negative_Energy_Dmg",
+            "Psionic_Dmg",
+            "Toxic_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Resistance",
+          "target": "AnyAffected",
+          "table": "Ranged_Res_Dmg",
+          "scale": -3.0,
+          "duration": "0.75 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreStrength"
+          ],
+          "flags_raw": 1296
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 15,
+  "powerset": "Controller_Buff.Sonic_Debuff"
+}

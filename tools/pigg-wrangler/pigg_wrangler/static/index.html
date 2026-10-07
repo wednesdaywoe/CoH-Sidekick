@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pigg Wrangler</title>
+<style>
+:root {
+    --bg: #0f1729;
+    --bg-panel: #162042;
+    --bg-input: #0f3460;
+    --bg-hover: #1a3a6e;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --accent: #D62BCE;
+    --accent-hover: #e879de;
+    --border: #2a2a4a;
+    --success: #34d399;
+    --error: #e94560;
+    --mono: 'Consolas', 'Courier New', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text);
+    display: flex; flex-direction: column;
+}
+
+/* Header */
+.header {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.6rem 1rem;
+    background: var(--bg-panel); border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.header h1 {
+    font-size: 1.2rem; font-weight: 700; color: var(--accent);
+    white-space: nowrap;
+}
+.header .stats {
+    color: var(--text-muted); font-size: 0.8rem; white-space: nowrap;
+}
+.header .search-wrap {
+    flex: 1; max-width: 500px; position: relative;
+}
+.header input[type="text"] {
+    width: 100%; padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border); background: var(--bg-input);
+    color: var(--text); border-radius: 4px; font-size: 0.85rem; outline: none;
+}
+.header input[type="text"]:focus { border-color: var(--accent); }
+.header input[type="text"]::placeholder { color: var(--text-muted); }
+.search-filters {
+    display: flex; align-items: center; gap: 0.3rem;
+    margin-top: 0.3rem;
+}
+.filter-label { font-size: 0.72rem; color: var(--text-muted); }
+.filter-chip {
+    padding: 0.1rem 0.45rem; font-size: 0.72rem;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: transparent; color: var(--text-muted);
+    cursor: pointer; font-family: var(--mono);
+    transition: all 0.15s;
+}
+.filter-chip:hover { border-color: var(--accent); color: var(--text); }
+.filter-chip.active {
+    background: var(--accent); color: #fff;
+    border-color: var(--accent);
+}
+
+/* Layout */
+.app-layout {
+    display: flex; flex: 1; overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px; min-width: 200px;
+    background: var(--bg-panel); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0;
+    overflow: hidden;
+}
+.sidebar-header {
+    padding: 0.5rem; border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.sidebar-header select {
+    width: 100%; padding: 0.35rem 0.5rem;
+    border: 1px solid var(--border); background: var(--bg-input);
+    color: var(--text); border-radius: 4px; font-size: 0.82rem; outline: none;
+}
+.sidebar-header select:focus { border-color: var(--accent); }
+.sidebar-tree {
+    flex: 1; overflow-y: auto; padding: 0.25rem 0;
+}
+
+/* Tree nodes */
+.tree-item {
+    padding: 0.2rem 0.4rem; cursor: pointer;
+    font-size: 0.82rem; border-radius: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: flex; align-items: center; gap: 0.2rem;
+    user-select: none;
+}
+.tree-item:hover { background: var(--bg-hover); }
+.tree-item.active { background: var(--bg-input); color: var(--accent); }
+.tree-toggle {
+    display: inline-block; width: 1.2em; text-align: center;
+    color: var(--text-muted); font-size: 0.7rem; flex-shrink: 0;
+    font-family: var(--mono);
+}
+.tree-icon { color: var(--text-muted); flex-shrink: 0; font-size: 0.8rem; }
+.tree-name { overflow: hidden; text-overflow: ellipsis; }
+.tree-count {
+    color: var(--text-muted); font-size: 0.72rem; margin-left: auto;
+    flex-shrink: 0; padding-left: 0.5rem;
+}
+.tree-children { padding-left: 0.8rem; }
+
+/* Main content */
+.main-content {
+    flex: 1; overflow: hidden;
+    display: flex; flex-direction: column;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+    padding: 0.5rem 1rem; font-size: 0.85rem;
+    color: var(--text-muted); border-bottom: 1px solid var(--border);
+    flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.breadcrumbs a {
+    color: var(--accent); cursor: pointer; text-decoration: none;
+}
+.breadcrumbs a:hover { text-decoration: underline; }
+.breadcrumbs .sep { margin: 0 0.3rem; color: var(--text-muted); }
+
+/* Batch bar */
+.batch-bar {
+    display: flex; gap: 0.5rem; padding: 0.4rem 1rem;
+    align-items: center; border-bottom: 1px solid var(--border);
+    flex-shrink: 0; font-size: 0.82rem; background: var(--bg-panel);
+}
+.batch-bar.hidden { display: none; }
+.batch-count { color: var(--text-muted); }
+button.btn {
+    padding: 0.3rem 0.7rem; border: 1px solid var(--border);
+    background: var(--bg-input); color: var(--text);
+    cursor: pointer; border-radius: 4px; font-size: 0.82rem;
+    transition: all 0.15s; white-space: nowrap;
+}
+button.btn:hover { background: var(--bg-hover); border-color: var(--accent); }
+button.btn-accent {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+}
+button.btn-accent:hover { background: var(--accent-hover); }
+button.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* File table area */
+.file-area {
+    flex: 1; overflow-y: auto; padding: 0;
+}
+.file-area table {
+    width: 100%; border-collapse: collapse; font-size: 0.82rem;
+}
+.file-area th, .file-area td {
+    padding: 0.3rem 0.6rem; text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+.file-area th {
+    color: var(--text-muted); font-weight: 600; font-size: 0.78rem;
+    text-transform: uppercase; position: sticky; top: 0;
+    background: var(--bg-panel); z-index: 1; cursor: pointer;
+    user-select: none;
+}
+.file-area th:hover { color: var(--text); }
+.file-area th .sort-arrow { font-size: 0.7rem; margin-left: 0.2rem; }
+.file-area tr.file-row:hover { background: var(--bg-hover); }
+.file-area tr.file-row { cursor: pointer; }
+.file-area tr.file-row.selected { background: var(--bg-input); }
+.file-area tr.dir-row { cursor: pointer; }
+.file-area tr.dir-row:hover { background: var(--bg-hover); }
+.file-area .dir-icon { color: var(--accent); margin-right: 0.3rem; }
+.mono { font-family: var(--mono); font-size: 0.8rem; }
+.text-muted { color: var(--text-muted); }
+.text-right { text-align: right; }
+
+/* Checkbox styling */
+.file-area input[type="checkbox"] {
+    cursor: pointer; accent-color: var(--accent);
+}
+
+/* Empty state */
+.empty { color: var(--text-muted); padding: 2rem; text-align: center; }
+.loading { color: var(--text-muted); padding: 2rem; text-align: center; }
+
+/* Preview panel */
+.preview-overlay {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 50%; max-width: 700px;
+    background: var(--bg-panel); border-left: 2px solid var(--accent);
+    display: flex; flex-direction: column;
+    z-index: 100; box-shadow: -4px 0 20px rgba(0,0,0,0.5);
+    transform: translateX(100%); transition: transform 0.2s ease;
+}
+.preview-overlay.open { transform: translateX(0); }
+.preview-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.6rem 1rem; border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.preview-header .preview-title {
+    flex: 1; font-weight: 600; font-size: 0.9rem;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.preview-header .close-btn {
+    background: none; border: none; color: var(--text-muted);
+    font-size: 1.2rem; cursor: pointer; padding: 0.2rem 0.5rem;
+}
+.preview-header .close-btn:hover { color: var(--text); }
+.preview-path {
+    padding: 0.35rem 1rem; font-size: 0.8rem;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+    font-family: var(--mono); display: flex; flex-wrap: wrap; align-items: center; gap: 0;
+}
+.preview-path a {
+    color: var(--accent); cursor: pointer; text-decoration: none;
+}
+.preview-path a:hover { text-decoration: underline; }
+.preview-path .sep { color: var(--text-muted); margin: 0 0.15rem; }
+.preview-path .leaf { color: var(--text); }
+.preview-meta {
+    padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+    font-family: var(--mono); line-height: 1.6;
+}
+.preview-body {
+    flex: 1; overflow: auto; padding: 0.75rem 1rem;
+}
+.preview-body pre {
+    font-family: var(--mono); font-size: 0.78rem;
+    white-space: pre; overflow-x: auto;
+    color: var(--text); line-height: 1.5;
+    tab-size: 4;
+}
+.preview-body audio { width: 100%; margin-top: 0.5rem; }
+.preview-actions {
+    padding: 0.5rem 1rem; border-top: 1px solid var(--border);
+    flex-shrink: 0; display: flex; gap: 0.5rem; flex-wrap: wrap;
+}
+.preview-body img {
+    background: repeating-conic-gradient(#333 0% 25%, #222 0% 50%) 50% / 16px 16px;
+}
+
+/* Toast */
+.toast {
+    position: fixed; bottom: 1rem; right: 1rem;
+    padding: 0.75rem 1.25rem; border-radius: 4px;
+    font-size: 0.9rem; z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+.toast-success { background: var(--success); color: #000; }
+.toast-error { background: var(--error); color: #fff; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+
+/* Search results highlight */
+.search-results-header {
+    padding: 0.5rem 1rem; font-size: 0.82rem; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.search-results-header a { color: var(--accent); cursor: pointer; text-decoration: none; font-size: 0.82rem; }
+.search-results-header a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <h1>Pigg Wrangler</h1>
+    <select id="source-select" style="padding:0.3rem 0.5rem;border:1px solid var(--border);background:var(--bg-input);color:var(--text);border-radius:4px;font-size:0.82rem" onchange="App.switchSource(this.value)"></select>
+    <span class="stats" id="stats-bar"></span>
+    <div class="search-wrap">
+        <input type="text" id="search-input" placeholder="Search files across all archives...">
+        <div class="search-filters" id="search-filters">
+            <span class="filter-label">Filter:</span>
+            <button class="filter-chip" data-ext=".texture" onclick="App.toggleFilter(this)">.texture</button>
+            <button class="filter-chip" data-ext=".ogg" onclick="App.toggleFilter(this)">.ogg</button>
+            <button class="filter-chip" data-ext=".geo" onclick="App.toggleFilter(this)">.geo</button>
+            <button class="filter-chip" data-ext=".anim" onclick="App.toggleFilter(this)">.anim</button>
+        </div>
+    </div>
+    <button class="btn" id="btn-settings" title="Settings" style="font-size:1rem;padding:0.3rem 0.5rem">&#9881;</button>
+</div>
+
+<!-- Main layout -->
+<div class="app-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <select id="pigg-selector">
+                <option value="">All Archives</option>
+            </select>
+        </div>
+        <div class="sidebar-tree" id="sidebar-tree"></div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <div class="breadcrumbs" id="breadcrumbs"></div>
+        <div class="batch-bar hidden" id="batch-bar">
+            <span class="batch-count" id="batch-count">0 selected</span>
+            <button class="btn" id="btn-select-all">Select All</button>
+            <button class="btn" id="btn-clear-selection">Clear</button>
+            <select id="export-format" style="padding:0.25rem 0.4rem;border:1px solid var(--border);background:var(--bg-input);color:var(--text);border-radius:4px;font-size:0.82rem">
+                <option value="">Raw files</option>
+                <option value="dds">Convert .texture to .dds</option>
+                <option value="png">Convert .texture to .png</option>
+                <option value="png-trimmed">Convert .texture to .png (cropped)</option>
+            </select>
+            <button class="btn btn-accent" id="btn-download-selected">Download Selected</button>
+        </div>
+        <div class="file-area" id="file-area">
+            <div class="loading">Loading...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview overlay -->
+<div class="preview-overlay" id="preview-panel">
+    <div class="preview-header">
+        <span class="preview-title" id="preview-title"></span>
+        <button class="close-btn" id="preview-close">&times;</button>
+    </div>
+    <div class="preview-path" id="preview-path"></div>
+    <div class="preview-meta" id="preview-meta"></div>
+    <div class="preview-body" id="preview-body"></div>
+    <div class="preview-actions" id="preview-actions"></div>
+</div>
+
+<!-- Settings modal -->
+<div id="settings-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center">
+    <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;padding:1.5rem;width:90%;max-width:500px;box-shadow:0 8px 32px rgba(0,0,0,0.5)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+            <h2 style="font-size:1.1rem;color:var(--accent);margin:0">Settings</h2>
+            <button onclick="App.closeSettings()" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;padding:0.2rem 0.5rem">&times;</button>
+        </div>
+        <label style="display:block;font-size:0.85rem;color:var(--text-muted);margin-bottom:0.3rem">Assets Root Directory</label>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem">
+            Parent folder containing asset subdirectories (e.g. live/, issue24/) with .pigg files.
+        </p>
+        <input type="text" id="settings-assets-root" style="width:100%;padding:0.4rem 0.75rem;border:1px solid var(--border);background:var(--bg-input);color:var(--text);border-radius:4px;font-size:0.85rem;font-family:var(--mono);margin-bottom:0.75rem" placeholder="C:\Games\CoH\assets">
+        <div id="settings-status" style="font-size:0.82rem;margin-bottom:0.75rem;min-height:1.2em"></div>
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end">
+            <button class="btn" onclick="App.closeSettings()">Cancel</button>
+            <button class="btn btn-accent" id="btn-save-settings" onclick="App.saveSettings()">Scan &amp; Apply</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const App = {
+    currentPath: '',
+    currentPigg: '',
+    selectedFiles: new Set(),
+    searchMode: false,
+    sortCol: 'filename',
+    sortAsc: true,
+    treeLoaded: {},    // path -> true (tracks which tree nodes have been loaded)
+    treeExpanded: {},  // path -> true (tracks which tree nodes are open)
+    currentFiles: [],  // current file list for sorting
+    currentDirs: [],   // current dir list
+    activeFilters: new Set(),  // active extension filters (e.g. ".texture")
+
+    // ---- API ----
+    async api(endpoint, params = {}) {
+        const url = new URL(endpoint, location.origin);
+        for (const [k, v] of Object.entries(params)) {
+            if (v != null && v !== '') url.searchParams.set(k, v);
+        }
+        const res = await fetch(url);
+        return res.json();
+    },
+
+    async apiPost(endpoint, body = {}) {
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body),
+        });
+        return res;
+    },
+
+    // ---- Init ----
+    async init() {
+        this.setupSearch();
+        this.setupBatch();
+        this.setupPreview();
+        this.setupPiggSelector();
+        $('btn-settings').addEventListener('click', () => this.openSettings());
+        await this.loadSources();
+        await this.loadStats();
+        await this.loadTree('');
+        this.navigateTo('');
+        this.applyHash();
+        window.addEventListener('hashchange', () => this.applyHash());
+    },
+
+    applyHash() {
+        const hash = location.hash.slice(1);
+        if (!hash) return;
+        const params = new URLSearchParams(hash);
+        const path = params.get('path');
+        if (path != null && path !== this.currentPath) {
+            this.navigateTo(path);
+            this.expandTreeToPath(path);
+        }
+    },
+
+    // ---- Source switching ----
+    async loadSources() {
+        const data = await this.api('/api/sources');
+        const sel = $('source-select');
+        sel.innerHTML = '';
+
+        if (data.sources.length === 0) {
+            // No sources -- show setup prompt
+            sel.style.display = 'none';
+            $('stats-bar').textContent = 'No assets configured';
+            $('file-area').innerHTML = `
+                <div class="empty" style="padding:3rem;text-align:center">
+                    <h2 style="color:var(--accent);margin-bottom:1rem">Welcome to Pigg Wrangler</h2>
+                    <p style="margin-bottom:1rem">No City of Heroes asset directories found.</p>
+                    <p style="margin-bottom:1.5rem;color:var(--text-muted)">
+                        Click the gear icon above or the button below to point<br>
+                        Pigg Wrangler at your game assets folder.
+                    </p>
+                    <button class="btn btn-accent" onclick="App.openSettings()"
+                        style="font-size:1rem;padding:0.5rem 1.5rem">
+                        Configure Assets Path
+                    </button>
+                </div>`;
+            return;
+        }
+
+        for (const s of data.sources) {
+            const opt = document.createElement('option');
+            opt.value = s.name;
+            opt.textContent = s.name + (s.file_count != null ? ` (${s.file_count.toLocaleString()})` : '');
+            sel.appendChild(opt);
+        }
+        sel.value = data.current;
+        // Hide dropdown if only one source
+        sel.style.display = data.sources.length > 1 ? '' : 'none';
+    },
+
+    async switchSource(name) {
+        const sel = $('source-select');
+        sel.disabled = true;
+        toast(`Loading ${name}...`, 'success');
+
+        try {
+            const res = await this.apiPost('/api/switch-source', {source: name});
+            const data = await res.json();
+            if (!res.ok) {
+                toast('Switch failed: ' + (data.error || 'Unknown error'), 'error');
+                return;
+            }
+
+            // Reset UI state
+            this.currentPath = '';
+            this.currentPigg = '';
+            this.searchMode = false;
+            this.selectedFiles.clear();
+            this.treeLoaded = {};
+            this.treeExpanded = {};
+            $('search-input').value = '';
+            $('pigg-selector').selectedIndex = 0;
+            location.hash = '';
+
+            // Reload everything
+            await this.loadSources();
+            await this.loadStats();
+            await this.loadPiggs();
+            await this.loadTree('');
+            this.navigateTo('');
+            this.updateBatchBar();
+            toast(`Switched to ${name} (${data.file_count.toLocaleString()} files)`, 'success');
+        } catch (e) {
+            toast('Switch error: ' + e.message, 'error');
+        } finally {
+            sel.disabled = false;
+        }
+    },
+
+    async loadStats() {
+        try {
+            const data = await this.api('/api/stats');
+            if (data.error) return;
+            $('stats-bar').textContent =
+                `${data.total_files.toLocaleString()} files | ${data.pigg_count} PIGGs | ${formatSize(data.total_size)}`;
+        } catch (e) {
+            // No sources loaded yet
+        }
+    },
+
+    // ---- PIGG selector ----
+    setupPiggSelector() {
+        $('pigg-selector').addEventListener('change', (e) => {
+            this.currentPigg = e.target.value;
+            this.treeLoaded = {};
+            this.treeExpanded = {};
+            this.loadTree('');
+            this.navigateTo('');
+        });
+    },
+
+    async loadPiggs() {
+        const data = await this.api('/api/piggs');
+        const sel = $('pigg-selector');
+        // Clear existing options beyond the first
+        while (sel.options.length > 1) sel.remove(1);
+        for (const p of data.piggs) {
+            const opt = document.createElement('option');
+            opt.value = p.name;
+            opt.textContent = `${p.name} (${p.file_count.toLocaleString()})`;
+            sel.appendChild(opt);
+        }
+    },
+
+    // ---- Sidebar tree ----
+    async loadTree(path) {
+        if (!this.treeLoaded['__piggs__']) {
+            await this.loadPiggs();
+            this.treeLoaded['__piggs__'] = true;
+        }
+
+        const data = await this.api('/api/tree', {path, pigg: this.currentPigg});
+        const container = path === '' ? $('sidebar-tree') : document.querySelector(`.tree-children[data-path="${CSS.escape(path)}"]`);
+        if (!container) return;
+
+        if (path === '') container.innerHTML = '';
+
+        if (data.error || !Array.isArray(data.dirs)) {
+            const msg = data.error || 'tree response had no dirs array';
+            throw new Error(`/api/tree failed: ${msg}`);
+        }
+        const dirs = data.dirs;
+        for (const d of dirs) {
+            // Skip if already rendered
+            if (container.querySelector(`:scope > .tree-node[data-path="${CSS.escape(d.full_path)}"]`)) continue;
+
+            const node = document.createElement('div');
+            node.className = 'tree-node';
+            node.dataset.path = d.full_path;
+
+            const item = document.createElement('div');
+            item.className = 'tree-item';
+            item.innerHTML = `<span class="tree-toggle">+</span><span class="tree-name">${esc(d.name)}/</span><span class="tree-count">${d.file_count.toLocaleString()}</span>`;
+
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.onTreeNodeClick(d.full_path, node);
+            });
+
+            const children = document.createElement('div');
+            children.className = 'tree-children';
+            children.dataset.path = d.full_path;
+            children.style.display = 'none';
+
+            node.appendChild(item);
+            node.appendChild(children);
+            container.appendChild(node);
+        }
+
+        this.treeLoaded[path] = true;
+    },
+
+    async onTreeNodeClick(path, nodeEl) {
+        // Navigate main content
+        this.navigateTo(path);
+
+        // Toggle expand/collapse
+        const childrenEl = nodeEl.querySelector('.tree-children');
+        const toggleEl = nodeEl.querySelector('.tree-toggle');
+
+        if (this.treeExpanded[path]) {
+            childrenEl.style.display = 'none';
+            toggleEl.textContent = '+';
+            this.treeExpanded[path] = false;
+        } else {
+            if (!this.treeLoaded[path]) {
+                await this.loadTree(path);
+            }
+            childrenEl.style.display = '';
+            toggleEl.textContent = '-';
+            this.treeExpanded[path] = true;
+        }
+
+        // Highlight active node
+        document.querySelectorAll('.tree-item.active').forEach(el => el.classList.remove('active'));
+        nodeEl.querySelector('.tree-item').classList.add('active');
+    },
+
+    async expandTreeToPath(path) {
+        // Expand tree nodes from root down to the given path
+        const parts = path.split('/');
+        let acc = '';
+        for (const part of parts) {
+            acc += (acc ? '/' : '') + part;
+            if (!this.treeLoaded[acc.split('/').slice(0, -1).join('/') || '']) {
+                await this.loadTree(acc.split('/').slice(0, -1).join('/') || '');
+            }
+            const nodeEl = document.querySelector(`.tree-node[data-path="${CSS.escape(acc)}"]`);
+            if (nodeEl) {
+                const childrenEl = nodeEl.querySelector('.tree-children');
+                const toggleEl = nodeEl.querySelector('.tree-toggle');
+                if (!this.treeLoaded[acc]) await this.loadTree(acc);
+                childrenEl.style.display = '';
+                toggleEl.textContent = '-';
+                this.treeExpanded[acc] = true;
+            }
+        }
+        // Highlight final node
+        document.querySelectorAll('.tree-item.active').forEach(el => el.classList.remove('active'));
+        const finalNode = document.querySelector(`.tree-node[data-path="${CSS.escape(path)}"]`);
+        if (finalNode) finalNode.querySelector('.tree-item').classList.add('active');
+    },
+
+    // ---- Main content: directory listing ----
+    async navigateTo(path) {
+        this.currentPath = path;
+        this.selectedFiles.clear();
+        this.searchMode = false;
+        this.updateBatchBar();
+        location.hash = path ? `path=${path}` : '';
+
+        $('file-area').innerHTML = '<div class="loading">Loading...</div>';
+        const data = await this.api('/api/tree', {path, pigg: this.currentPigg});
+        this.currentDirs = data.dirs;
+        this.currentFiles = data.files;
+        this.renderBreadcrumbs(path);
+        this.renderContent();
+    },
+
+    renderBreadcrumbs(path) {
+        const el = $('breadcrumbs');
+        let html = `<a onclick="App.navigateTo('')">root</a>`;
+        if (path) {
+            const parts = path.split('/');
+            let acc = '';
+            for (const p of parts) {
+                acc += (acc ? '/' : '') + p;
+                html += `<span class="sep">/</span><a onclick="App.navigateTo('${esc(acc)}')">${esc(p)}</a>`;
+            }
+        }
+        el.innerHTML = html;
+    },
+
+    renderContent() {
+        const el = $('file-area');
+        const dirs = this.currentDirs;
+        const files = this.sortFiles(this.currentFiles);
+
+        if (!dirs.length && !files.length) {
+            el.innerHTML = '<div class="empty">Empty directory.</div>';
+            return;
+        }
+
+        let html = '<table><thead><tr>';
+        html += '<th style="width:30px"><input type="checkbox" id="check-all"></th>';
+        html += this.sortHeader('filename', 'Filename');
+        html += this.sortHeader('extension', 'Ext');
+        html += this.sortHeader('size', 'Size', true);
+        html += this.sortHeader('pigg', 'PIGG');
+        html += '</tr></thead><tbody>';
+
+        // Directories first
+        for (const d of dirs) {
+            html += `<tr class="dir-row">
+                <td></td>
+                <td onclick="App.navigateTo('${esc(d.full_path)}'); App.expandTreeToPath('${esc(d.full_path)}')" style="cursor:pointer"><span class="dir-icon">[dir]</span> ${esc(d.name)}/</td>
+                <td></td>
+                <td class="text-right text-muted">${d.file_count.toLocaleString()} files</td>
+                <td class="text-right"><button class="btn" style="padding:0.15rem 0.4rem;font-size:0.75rem" onclick="event.stopPropagation(); App.showFolderExport('${esc(d.full_path)}', this)">Export</button></td>
+            </tr>`;
+        }
+
+        // Files
+        for (const f of files) {
+            const checked = this.selectedFiles.has(f.path) ? 'checked' : '';
+            const selectedClass = this.selectedFiles.has(f.path) ? ' selected' : '';
+            html += `<tr class="file-row${selectedClass}" data-path="${esc(f.path)}">
+                <td><input type="checkbox" ${checked} onclick="event.stopPropagation(); App.toggleFile('${esc(f.path)}')"></td>
+                <td class="mono" onclick="App.previewFile('${esc(f.path)}')">${esc(f.filename)}</td>
+                <td class="text-muted">${esc(f.extension)}</td>
+                <td class="text-right">${formatSize(f.size)}</td>
+                <td class="text-muted">${esc(f.pigg)}</td>
+            </tr>`;
+        }
+
+        html += '</tbody></table>';
+        el.innerHTML = html;
+
+        // Wire check-all
+        const checkAll = $('check-all');
+        if (checkAll) {
+            checkAll.addEventListener('change', () => {
+                if (checkAll.checked) this.selectAllVisible();
+                else this.clearSelection();
+            });
+        }
+    },
+
+    sortHeader(col, label, rightAlign) {
+        const arrow = this.sortCol === col ? (this.sortAsc ? ' ^' : ' v') : '';
+        const align = rightAlign ? ' class="text-right"' : '';
+        return `<th${align} onclick="App.changeSort('${col}')">${label}<span class="sort-arrow">${arrow}</span></th>`;
+    },
+
+    changeSort(col) {
+        if (this.sortCol === col) this.sortAsc = !this.sortAsc;
+        else { this.sortCol = col; this.sortAsc = true; }
+        this.renderContent();
+    },
+
+    sortFiles(files) {
+        const col = this.sortCol;
+        const asc = this.sortAsc ? 1 : -1;
+        return [...files].sort((a, b) => {
+            let va = a[col], vb = b[col];
+            if (typeof va === 'string') va = va.toLowerCase();
+            if (typeof vb === 'string') vb = vb.toLowerCase();
+            if (va < vb) return -1 * asc;
+            if (va > vb) return 1 * asc;
+            return 0;
+        });
+    },
+
+    // ---- Search ----
+    setupSearch() {
+        const input = $('search-input');
+        input.addEventListener('input', debounce(() => this.doSearch(), 300));
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                input.value = '';
+                this.activeFilters.clear();
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                if (this.searchMode) this.navigateTo(this.currentPath);
+            }
+        });
+    },
+
+    toggleFilter(btn) {
+        const ext = btn.dataset.ext;
+        if (this.activeFilters.has(ext)) {
+            this.activeFilters.delete(ext);
+            btn.classList.remove('active');
+        } else {
+            this.activeFilters.add(ext);
+            btn.classList.add('active');
+        }
+        this.doSearch();
+    },
+
+    async doSearch() {
+        const q = $('search-input').value.trim();
+        const ext = this.activeFilters.size ? Array.from(this.activeFilters).join(',') : '';
+        if (!q && !ext) {
+            if (this.searchMode) this.navigateTo(this.currentPath);
+            return;
+        }
+
+        this.searchMode = true;
+        this.selectedFiles.clear();
+        this.updateBatchBar();
+
+        $('file-area').innerHTML = '<div class="loading">Searching...</div>';
+
+        // Build breadcrumb description
+        let desc = '';
+        if (q) desc += `"${esc(q)}"`;
+        if (ext) desc += (desc ? ' ' : '') + `[${esc(ext)}]`;
+        $('breadcrumbs').innerHTML = `<span class="text-muted">Search results for ${desc}</span> <a onclick="$('search-input').value=''; App.activeFilters.clear(); document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active')); App.navigateTo(App.currentPath)" style="margin-left:0.5rem;color:var(--accent);cursor:pointer;font-size:0.82rem">Clear</a>`;
+
+        const data = await this.api('/api/search', {q: q || '', ext, pigg: this.currentPigg, limit: 500});
+        this.currentDirs = [];
+        this.currentFiles = data.results;
+        this.renderSearchResults(data);
+    },
+
+    renderSearchResults(data) {
+        const el = $('file-area');
+        const files = this.sortFiles(data.results);
+
+        if (!files.length) {
+            el.innerHTML = '<div class="empty">No results found.</div>';
+            return;
+        }
+
+        let html = '<table><thead><tr>';
+        html += '<th style="width:30px"><input type="checkbox" id="check-all"></th>';
+        html += this.sortHeader('path', 'Path');
+        html += this.sortHeader('extension', 'Ext');
+        html += this.sortHeader('size', 'Size', true);
+        html += this.sortHeader('pigg', 'PIGG');
+        html += '</tr></thead><tbody>';
+
+        for (const f of files) {
+            const checked = this.selectedFiles.has(f.path) ? 'checked' : '';
+            html += `<tr class="file-row" data-path="${esc(f.path)}">
+                <td><input type="checkbox" ${checked} onclick="event.stopPropagation(); App.toggleFile('${esc(f.path)}')"></td>
+                <td class="mono" onclick="App.previewFile('${esc(f.path)}')" style="font-size:0.78rem">${esc(f.path)}</td>
+                <td class="text-muted">${esc(f.extension)}</td>
+                <td class="text-right">${formatSize(f.size)}</td>
+                <td class="text-muted">${esc(f.pigg)}</td>
+            </tr>`;
+        }
+
+        html += '</tbody></table>';
+        el.innerHTML = html;
+
+        const checkAll = $('check-all');
+        if (checkAll) {
+            checkAll.addEventListener('change', () => {
+                if (checkAll.checked) this.selectAllVisible();
+                else this.clearSelection();
+            });
+        }
+    },
+
+    // ---- Batch selection ----
+    setupBatch() {
+        $('btn-select-all').addEventListener('click', () => this.selectAllVisible());
+        $('btn-clear-selection').addEventListener('click', () => this.clearSelection());
+        $('btn-download-selected').addEventListener('click', () => this.downloadSelected());
+    },
+
+    toggleFile(path) {
+        if (this.selectedFiles.has(path)) this.selectedFiles.delete(path);
+        else this.selectedFiles.add(path);
+
+        // Update row highlight
+        const row = document.querySelector(`tr[data-path="${CSS.escape(path)}"]`);
+        if (row) row.classList.toggle('selected', this.selectedFiles.has(path));
+
+        this.updateBatchBar();
+    },
+
+    selectAllVisible() {
+        const files = this.searchMode ? this.currentFiles : this.currentFiles;
+        for (const f of files) this.selectedFiles.add(f.path);
+        // Update checkboxes
+        document.querySelectorAll('.file-row input[type="checkbox"]').forEach(cb => cb.checked = true);
+        document.querySelectorAll('.file-row').forEach(row => row.classList.add('selected'));
+        this.updateBatchBar();
+    },
+
+    clearSelection() {
+        this.selectedFiles.clear();
+        document.querySelectorAll('.file-row input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.file-row').forEach(row => row.classList.remove('selected'));
+        const checkAll = $('check-all');
+        if (checkAll) checkAll.checked = false;
+        this.updateBatchBar();
+    },
+
+    updateBatchBar() {
+        const bar = $('batch-bar');
+        const count = this.selectedFiles.size;
+        if (count > 0) {
+            bar.classList.remove('hidden');
+            $('batch-count').textContent = `${count} file${count !== 1 ? 's' : ''} selected`;
+        } else {
+            bar.classList.add('hidden');
+        }
+    },
+
+    async downloadSelected() {
+        const paths = Array.from(this.selectedFiles);
+        if (!paths.length) return;
+
+        const convert = $('export-format').value;
+        $('btn-download-selected').disabled = true;
+        $('btn-download-selected').textContent = 'Preparing...';
+
+        try {
+            const body = {paths};
+            if (convert) body.convert = convert;
+            const response = await this.apiPost('/api/download-zip', body);
+            if (!response.ok) {
+                const err = await response.json();
+                toast('Download failed: ' + (err.error || 'Unknown error'), 'error');
+                return;
+            }
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pigg_export.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            const suffix = convert ? ` (converted to .${convert})` : '';
+            toast(`Downloaded ${paths.length} files as zip${suffix}`, 'success');
+        } catch (e) {
+            toast('Download error: ' + e.message, 'error');
+        } finally {
+            $('btn-download-selected').disabled = false;
+            $('btn-download-selected').textContent = 'Download Selected';
+        }
+    },
+
+    // ---- Preview panel ----
+    setupPreview() {
+        $('preview-close').addEventListener('click', () => this.closePreview());
+        // Close on Escape
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') this.closePreview();
+        });
+    },
+
+    async previewFile(path) {
+        const panel = $('preview-panel');
+        const node = this.currentFiles.find(f => f.path === path);
+        if (!node) return;
+
+        $('preview-title').textContent = node.filename;
+
+        // Build clickable path breadcrumb
+        const parts = path.split('/');
+        const filename = parts.pop();
+        let pathHtml = '';
+        let acc = '';
+        for (const p of parts) {
+            acc += (acc ? '/' : '') + p;
+            pathHtml += `<a onclick="App.navigateFromPreview('${esc(acc)}')">${esc(p)}</a><span class="sep">/</span>`;
+        }
+        pathHtml += `<span class="leaf">${esc(filename)}</span>`;
+        $('preview-path').innerHTML = pathHtml;
+
+        $('preview-meta').innerHTML = `Size: ${formatSize(node.size)} (${node.size.toLocaleString()} bytes)<br>PIGG: ${esc(node.pigg)}${node.compressed_size ? '<br>Compressed: ' + formatSize(node.compressed_size) + ' (' + Math.round(node.compressed_size / node.size * 100) + '%)' : ''}`;
+        $('preview-body').innerHTML = '<div class="loading">Loading preview...</div>';
+        $('preview-actions').innerHTML = `<button class="btn btn-accent" onclick="App.downloadFile('${esc(path)}')">Download .texture</button>`;
+
+        panel.classList.add('open');
+
+        const data = await this.api('/api/preview', {path});
+
+        if (data.error) {
+            $('preview-body').innerHTML = `<div class="text-muted">${esc(data.error)}</div>`;
+            return;
+        }
+
+        if (data.type === 'texture') {
+            // Texture: show image preview + format info + export buttons
+            const ep = encodeURIComponent(path);
+            let meta = $('preview-meta').innerHTML;
+            meta += `<br>Dimensions: ${data.width} x ${data.height}`;
+            meta += `<br>Format: ${esc(data.dds_format || data.image_format)}`;
+            if (data.has_alpha) meta += ' (alpha)';
+            if (data.mipmap_count > 1) meta += `<br>Mipmaps: ${data.mipmap_count}`;
+            $('preview-meta').innerHTML = meta;
+
+            $('preview-body').innerHTML = `<div style="text-align:center;padding:0.5rem"><img src="${esc(data.image_url)}" style="max-width:100%;max-height:500px;image-rendering:auto;border:1px solid var(--border);border-radius:4px;background:repeating-conic-gradient(#333 0% 25%, #222 0% 50%) 50% / 16px 16px" alt="texture preview"></div>`;
+
+            // Export buttons: DDS (for modding) + PNG (lossless editing)
+            let actions = `<button class="btn btn-accent" onclick="App.downloadFile('${esc(path)}')">Download .texture</button>`;
+            if (data.image_format === 'dds') {
+                actions += ` <button class="btn" onclick="App.downloadTextureDDS('${esc(path)}')">Export .dds</button>`;
+            }
+            actions += ` <button class="btn" onclick="App.downloadTexturePNG('${esc(path)}')">Export .png</button>`;
+            actions += ` <button class="btn" onclick="App.downloadTexturePNGTrimmed('${esc(path)}')">Export .png (cropped)</button>`;
+            $('preview-actions').innerHTML = actions;
+        } else if (data.type === 'audio') {
+            $('preview-body').innerHTML = `<div style="padding:1rem 0"><audio controls preload="auto" src="${esc(data.url)}"></audio></div><div class="text-muted" style="font-size:0.8rem">Format: ${esc(data.mime)}</div>`;
+        } else if (data.type === 'text') {
+            $('preview-body').innerHTML = `<pre>${esc(data.content)}</pre>`;
+        } else if (data.type === 'hex') {
+            let info = '';
+            if (data.showing < data.size) {
+                info = `<div class="text-muted" style="font-size:0.78rem;margin-bottom:0.5rem">Showing first ${formatSize(data.showing)} of ${formatSize(data.size)}</div>`;
+            }
+            $('preview-body').innerHTML = info + `<pre>${esc(data.content)}</pre>`;
+        }
+    },
+
+    downloadFile(path) {
+        window.open('/api/download?path=' + encodeURIComponent(path), '_blank');
+    },
+
+    downloadTextureDDS(path) {
+        window.open('/api/texture/dds?path=' + encodeURIComponent(path), '_blank');
+    },
+
+    downloadTexturePNG(path) {
+        window.open('/api/texture/png?path=' + encodeURIComponent(path), '_blank');
+    },
+
+    downloadTexturePNGTrimmed(path) {
+        window.open('/api/texture/png-trimmed?path=' + encodeURIComponent(path), '_blank');
+    },
+
+    // ---- Folder export ----
+    showFolderExport(dirPath, btnEl) {
+        // Remove any existing popup
+        const old = document.getElementById('folder-export-popup');
+        if (old) old.remove();
+
+        const popup = document.createElement('div');
+        popup.id = 'folder-export-popup';
+        popup.style.cssText = 'position:absolute;z-index:200;background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;padding:0.4rem 0;box-shadow:0 4px 16px rgba(0,0,0,0.4);min-width:180px';
+
+        const options = [
+            {label: 'Raw files', value: ''},
+            {label: 'Convert .texture -> .dds', value: 'dds'},
+            {label: 'Convert .texture -> .png', value: 'png'},
+            {label: 'Convert .texture -> .png (cropped)', value: 'png-trimmed'},
+        ];
+        for (const opt of options) {
+            const item = document.createElement('div');
+            item.textContent = opt.label;
+            item.style.cssText = 'padding:0.35rem 0.75rem;cursor:pointer;font-size:0.82rem;white-space:nowrap';
+            item.addEventListener('mouseenter', () => item.style.background = 'var(--bg-hover)');
+            item.addEventListener('mouseleave', () => item.style.background = 'none');
+            item.addEventListener('click', () => {
+                popup.remove();
+                this.downloadFolder(dirPath, opt.value);
+            });
+            popup.appendChild(item);
+        }
+
+        // Position near the button
+        const rect = btnEl.getBoundingClientRect();
+        popup.style.top = (rect.bottom + 2) + 'px';
+        popup.style.left = rect.left + 'px';
+        popup.style.position = 'fixed';
+        document.body.appendChild(popup);
+
+        // Close on outside click
+        const close = (e) => {
+            if (!popup.contains(e.target) && e.target !== btnEl) {
+                popup.remove();
+                document.removeEventListener('click', close);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', close), 0);
+    },
+
+    async downloadFolder(dirPath, convert) {
+        const dirName = dirPath.split('/').pop() || 'root';
+        toast(`Exporting ${dirName}/...`, 'success');
+
+        try {
+            const body = {path: dirPath};
+            if (convert) body.convert = convert;
+            if (this.currentPigg) body.pigg = this.currentPigg;
+
+            const response = await this.apiPost('/api/download-folder', body);
+            if (!response.ok) {
+                const err = await response.json();
+                toast('Export failed: ' + (err.error || 'Unknown error'), 'error');
+                return;
+            }
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${dirName}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            const suffix = convert ? ` (as .${convert})` : '';
+            toast(`Exported ${dirName}/${suffix}`, 'success');
+        } catch (e) {
+            toast('Export error: ' + e.message, 'error');
+        }
+    },
+
+    navigateFromPreview(dirPath) {
+        this.closePreview();
+        $('search-input').value = '';
+        this.searchMode = false;
+        this.navigateTo(dirPath);
+        this.expandTreeToPath(dirPath);
+    },
+
+    closePreview() {
+        $('preview-panel').classList.remove('open');
+    },
+
+    // ---- Settings ----
+    async openSettings() {
+        const overlay = $('settings-overlay');
+        const data = await this.api('/api/config');
+        $('settings-assets-root').value = data.assets_root || '';
+        $('settings-status').textContent = '';
+        $('settings-status').style.color = '';
+        overlay.style.display = 'flex';
+    },
+
+    closeSettings() {
+        $('settings-overlay').style.display = 'none';
+    },
+
+    async saveSettings() {
+        const root = $('settings-assets-root').value.trim();
+        if (!root) {
+            $('settings-status').textContent = 'Please enter a path.';
+            $('settings-status').style.color = 'var(--error)';
+            return;
+        }
+
+        const btn = $('btn-save-settings');
+        btn.disabled = true;
+        btn.textContent = 'Scanning...';
+        $('settings-status').textContent = 'Scanning for PIGG archives...';
+        $('settings-status').style.color = 'var(--text-muted)';
+
+        try {
+            const res = await this.apiPost('/api/set-assets-root', {assets_root: root});
+            const data = await res.json();
+            if (!res.ok) {
+                $('settings-status').textContent = data.error || 'Unknown error';
+                $('settings-status').style.color = 'var(--error)';
+                return;
+            }
+
+            $('settings-status').textContent =
+                `Found ${data.sources.length} source(s): ${data.sources.join(', ')}`;
+            $('settings-status').style.color = 'var(--success)';
+
+            // Reset UI state and reload
+            this.currentPath = '';
+            this.currentPigg = '';
+            this.searchMode = false;
+            this.selectedFiles.clear();
+            this.treeLoaded = {};
+            this.treeExpanded = {};
+            $('search-input').value = '';
+            $('pigg-selector').selectedIndex = 0;
+            location.hash = '';
+
+            await this.loadSources();
+            await this.loadStats();
+            await this.loadPiggs();
+            await this.loadTree('');
+            this.navigateTo('');
+            this.updateBatchBar();
+
+            setTimeout(() => this.closeSettings(), 800);
+            toast(`Loaded ${data.file_count.toLocaleString()} files from ${data.current}`, 'success');
+        } catch (e) {
+            $('settings-status').textContent = 'Error: ' + e.message;
+            $('settings-status').style.color = 'var(--error)';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Scan & Apply';
+        }
+    },
+};
+
+// ---- Utilities ----
+function $(id) { return document.getElementById(id); }
+
+function debounce(fn, ms) {
+    let timer;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
+}
+
+function formatSize(bytes) {
+    if (bytes == null || bytes === 0) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+    return (bytes / 1073741824).toFixed(2) + ' GB';
+}
+
+function esc(s) {
+    if (s == null) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function toast(msg, type = 'success') {
+    const el = document.createElement('div');
+    el.className = 'toast toast-' + type;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>

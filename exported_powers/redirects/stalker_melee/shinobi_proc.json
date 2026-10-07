@@ -1,0 +1,481 @@
+{
+  "name": "Shinobi_Proc",
+  "full_name": "Redirects.Stalker_Melee.Shinobi_Proc",
+  "short_name": "Shinobi_Proc",
+  "type": "GlobalBoost",
+  "display_name": "Hidden Shinobi",
+  "display_fullname": "Redirects Stalker Melee Shinobi Proc",
+  "display_help": "Hidden Shinobi makes you almost impossible to detect. When properly 'Hidden\", a Stalker can pull off Critical hits with his attacks, and even land a massive 'Assassin's Strike' with an Assassin's power. When you attack or are damaged while using this power, you will be discovered. Even if discovered, you are hard to see and retain some bonus to Defense. Unlike most stealth powers, Hide can be used at the same time as other Concealment powers, giving you even greater stealth capability. No Endurance cost.<br><br>Your Shinobi skills give you deadly aim, able to deal bonus Lethal Damage when you attack while 'Hidden'.",
+  "display_short_help": "Toggle: Self Stealth, +DEF(Melee, Ranged, AoE), +Stealth Crit",
+  "icon": "ninjatools_assassin",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 0.5,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self",
+    "Self"
+  ],
+  "targets_affected": [
+    "Self",
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Damage",
+    "Natural",
+    "Technology",
+    "Magic",
+    "Mutation",
+    "Science"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [
+    "hold",
+    "sleep",
+    "stun",
+    "terror"
+  ],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "num_charges": 1,
+  "max_num_charges": 1,
+  "lifetime": 172800.0,
+  "max_lifetime": 172800.0,
+  "destroy_on_limit": true,
+  "stacking_usage": false,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "source>",
+        "player",
+        "eq",
+        "target.isFriend?",
+        "!",
+        "&&",
+        "PowerSetName",
+        "power.base>",
+        "Incarnate.Judgement",
+        "eq",
+        "!",
+        "&&",
+        "PowerSetName",
+        "power.base>",
+        "Incarnate.Ion_Judgement",
+        "eq",
+        "!",
+        "&&",
+        "activateperiod",
+        "power.base>",
+        "0",
+        "==",
+        "&&"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "critter",
+            "eq"
+          ],
+          "tags": [
+            "Damage"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVE_ONLY",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "kMeter",
+                "source>",
+                "0",
+                ">"
+              ],
+              "tags": [
+                "StealthCrit"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "UNSATISFIED",
+              "eval_flags": 4,
+              "templates": [
+                {
+                  "attribs": [
+                    "Lethal_Dmg"
+                  ],
+                  "type": "Expression",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_InherentDamage",
+                  "scale": 0.8,
+                  "duration": "0 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [
+                    ".8",
+                    "rechargetime",
+                    "power.base>",
+                    "0",
+                    "20",
+                    "minmax",
+                    "*",
+                    "1.8",
+                    "+",
+                    ".2",
+                    "*",
+                    "@StdResult",
+                    "*",
+                    "areafactor",
+                    "power.base>",
+                    "/"
+                  ],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Lethal damage (CRITICAL).",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Lethal damage (CRITICAL).",
+                    "display_float": "CRITICAL",
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "flags": [
+                    "CancelOnMiss",
+                    "IgnoreStrength"
+                  ],
+                  "flags_raw": 1300
+                }
+              ]
+            },
+            {
+              "chance": 0.07000000029802322,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "kMeter",
+                "source>",
+                ".9",
+                "<"
+              ],
+              "tags": [
+                "ASTeamCrit"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 4,
+              "templates": [
+                {
+                  "attribs": [
+                    "Lethal_Dmg"
+                  ],
+                  "type": "Expression",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_InherentDamage",
+                  "scale": 0.8,
+                  "duration": "0 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [
+                    ".8",
+                    "rechargetime",
+                    "power.base>",
+                    "0",
+                    "20",
+                    "minmax",
+                    "*",
+                    "1.8",
+                    "+",
+                    ".2",
+                    "*",
+                    "@StdResult",
+                    "*",
+                    "areafactor",
+                    "power.base>",
+                    "/"
+                  ],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Lethal damage (CRITICAL).",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Lethal damage (CRITICAL).",
+                    "display_float": "CRITICAL",
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "flags": [
+                    "CancelOnMiss",
+                    "IgnoreStrength"
+                  ],
+                  "flags_raw": 1300
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "player",
+            "eq"
+          ],
+          "tags": [
+            "Damage"
+          ],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVP_ONLY",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "kMeter",
+                "source>",
+                "0",
+                ">"
+              ],
+              "tags": [
+                "StealthCrit"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "UNSATISFIED",
+              "eval_flags": 4,
+              "templates": [
+                {
+                  "attribs": [
+                    "Lethal_Dmg"
+                  ],
+                  "type": "Expression",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_PvPDamage",
+                  "scale": 0.8,
+                  "duration": "0 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [
+                    "activatetime",
+                    "power.base>",
+                    "0.70",
+                    "*",
+                    "rechargetime",
+                    "power.base>",
+                    "0",
+                    "20",
+                    "minmax",
+                    "0.04",
+                    "*",
+                    "+",
+                    "0.40",
+                    "+",
+                    "@StdResult",
+                    "*"
+                  ],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Lethal damage (CRITICAL).",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Lethal damage (CRITICAL).",
+                    "display_float": "CRITICAL",
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "flags": [
+                    "CancelOnMiss",
+                    "IgnoreStrength"
+                  ],
+                  "flags_raw": 1300
+                }
+              ]
+            },
+            {
+              "chance": 0.20000000298023224,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "kMeter",
+                "source>",
+                ".9",
+                "<",
+                "kHeld",
+                "target>",
+                "0",
+                ">",
+                "kSleep",
+                "target>",
+                "0",
+                ">",
+                "||",
+                "&&"
+              ],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "UNSATISFIED",
+              "eval_flags": 4,
+              "templates": [
+                {
+                  "attribs": [
+                    "Lethal_Dmg"
+                  ],
+                  "type": "Expression",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_PvPDamage",
+                  "scale": 0.8,
+                  "duration": "0 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [
+                    "activatetime",
+                    "power.base>",
+                    "0.70",
+                    "*",
+                    "rechargetime",
+                    "power.base>",
+                    "0",
+                    "20",
+                    "minmax",
+                    "0.04",
+                    "*",
+                    "+",
+                    "0.40",
+                    "+",
+                    "@StdResult",
+                    "*"
+                  ],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Lethal damage (CRITICAL).",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Lethal damage (CRITICAL).",
+                    "display_float": "CRITICAL",
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "flags": [
+                    "CancelOnMiss",
+                    "IgnoreStrength"
+                  ],
+                  "flags_raw": 1300
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "show_in_inventory": "Never",
+  "show_in_manage": false,
+  "show_in_info": false,
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 0,
+  "powerset": "Redirects.Stalker_Melee"
+}

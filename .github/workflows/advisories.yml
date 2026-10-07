@@ -1,0 +1,138 @@
+# Known advisories against the two lockfiles, on a schedule and never on a push.
+#
+# no cargo-audit, cargo-deny, Dependabot or npm audit anywhere in CI.
+#
+# ---------------------------------------------------------------------------------------------
+# Why this is a schedule and not a gate, which is the only interesting decision here
+# ---------------------------------------------------------------------------------------------
+# An advisory database is not a property of this repository. RUSTSEC and the npm registry change
+# daily, and they change without anybody here committing anything — so a per-push `cargo audit`
+# reds a pull request that touched a stylesheet, for a vulnerability published overnight in a
+# transitive dependency, and the only way to make it green is a lockfile bump on a branch that
+# has nothing to do with it. That is a gate whose failures are not about the change being
+# graded, and this project has been bitten before by a check that goes red for a reason the
+# reader cannot act on: it teaches people to re-run it.
+#
+# So the split is deliberate. **Determinism belongs on the push path; freshness belongs here.**
+# `ci.yml` keeps the checks that only move when the tree moves — `workflow-supply-chain.py`,
+# `audit-counts.py`, `no-crate-target-tracked.py` — and this job carries the one input that
+# arrives from outside. A finding here is a real finding either way; what changes is that it
+# lands as a red scheduled run somebody triages, rather than as a blocked merge.
+#
+# The cost is stated rather than hidden: an advisory published on Tuesday is found on the next
+# Monday, not at the commit that pulls it in. For a project with one maintainer, no automated
+# dependency bumps and a manually fast-forwarded `main`, a week is the right resolution. Move
+# the cron if that stops being true.
+#
+# **Dependabot is the fourth thing F57 names, and it was considered and NOT taken.** It opens a
+# pull request per bump against a `main` that is strictly linear and merged fast-forward only,
+# so every bump becomes a rebase somebody does by hand. What F57 actually asks for is detection,
+# and detection is what this file is. A bump is then one `cargo update -p <crate>` on a branch
+# of our own — which is exactly how F60 and F61 were closed.
+#
+# ---------------------------------------------------------------------------------------------
+# Why the remediation half of F57 was already done
+# ---------------------------------------------------------------------------------------------
+# F60 (rustls, RUSTSEC-2026-0285) and F61 (webbrowser, RUSTSEC-2026-0257) are the two advisories
+# this job would have raised, and both are FIXED — `Cargo.lock` pins rustls 0.23.45,
+# rustls-webpki 0.103.15 and webbrowser 1.2.4. They were found by a human running `cargo audit`
+# by hand during a verification pass, four days after F60 was published. That is the gap this
+# file closes: not that the advisories were unfixed, but that nothing except somebody's memory
+# was looking.
+name: Advisories
+
+on:
+  schedule:
+    # Monday 07:20 UTC. Twenty past, not on the hour: `ci.yml`'s nightly mutation run is at
+    # 07:00 and the two would otherwise contend for the same boxes.
+    - cron: '20 7 * * 1'
+  workflow_dispatch:
+
+# Least privilege, stated rather than inherited — with no block the job
+# takes the repository default, which is a web-UI setting that can be widened without touching
+# this file. This job reads two lockfiles and writes nothing.
+permissions:
+  contents: read
+
+jobs:
+  advisories:
+    runs-on: [self-hosted, jpc]
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned and `--locked`, for the reason `rc-bundle.yml` gives at length about dioxus-cli
+      # and `scripts/keys/workflow-supply-chain.py` enforces: a tool installed from a floating
+      # version is a build input with no provenance. Into `$RUNNER_TEMP` rather than the box's
+      # cargo home, because jpc is persistent and this workflow does not own the machine's
+      # tooling — the same `--root` argument F42 settled for the RC legs.
+      #
+      # **0.22.2 and not 0.21.2, and the difference is not cosmetic.** 0.21.2 was written here
+      # first and then run on jpc, where it did not report a vulnerability or a clean bill —
+      # it ABORTED: `error loading advisory database: unsupported CVSS version: 4.0`, on
+      # `RUSTSEC-2026-0041`. An advisory published in a format the pinned tool predates takes
+      # the whole database with it, so the job would have been red every Monday for a reason
+      # having nothing to do with this repository.
+      #
+      # **That is a pin against a moving target, and it will happen again.** The advisory
+      # database is not versioned with the tool, so any pin here eventually meets a record it
+      # cannot parse. The pin still stays — an unpinned build input is the thing F14 and F42
+      # are about — and the residual is bounded by where this job sits: a parse error on a
+      # weekly triage run is a bump somebody makes on Monday, and a parse error on a merge gate
+      # is every branch blocked until they do. That asymmetry is the third argument for the
+      # schedule, and it was found by running the thing rather than by reasoning about it.
+      - name: cargo-audit, pinned
+        run: |
+          set -euo pipefail
+          cargo install cargo-audit --locked --version 0.22.2 --root "$RUNNER_TEMP/audit-cli"
+          echo "$RUNNER_TEMP/audit-cli/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/audit-cli/bin/cargo-audit" audit --version | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # No `--deny warnings`, and this is the second thing the measurement changed. It was
+      # written here on the argument that a triage run can afford the strictest setting; run on
+      # jpc 2026-09-21 it exits 1, because the tree carries **six** warnings today — `fxhash`,
+      # `paste` and `proc-macro-error` unmaintained, `glib` and `rand` unsound, `chacha20`
+      # yanked. A job that is red on the day it lands has no signal left to give: the first
+      # genuine finding arrives into a red that everybody has already learned to ignore.
+      #
+      # So the bar is a VULNERABILITY and the warnings are reported rather than enforced —
+      # plain `cargo audit` prints all six and exits 0. They are named in F57's entry as a known
+      # backlog rather than allow-listed here, because an allow-list is how a warning stops
+      # being re-raised.
+      #
+      # Measured baseline, same run: **0 vulnerabilities across 624 crate dependencies** against
+      # 1,258 loaded advisories. The first red this step ever produces is a real one.
+      - name: cargo audit
+        run: |
+          set -euo pipefail
+          cargo audit | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # `npm audit` reads `package-lock.json` and needs no install, which is why there is no
+      # `npm ci` above it — this job has no reason to execute any package's install scripts.
+      #
+      # **`--omit=dev` was written here first and then measured out.** The obvious argument for
+      # it is that dev dependencies never reach a user. It does not hold in this repository, and
+      # the numbers say so plainly: `dependencies` has exactly ONE entry (playwright), and
+      # `npm ls --all` walks 179 packages against 5 with `--omit=dev`. So the flag would have
+      # audited 3% of the tree and reported "found 0 vulnerabilities" in a voice that sounded
+      # like it had looked. The node side here is pipeline tooling — converters, gates, the
+      # regen — and tooling that runs on the box which cuts releases is not a lower tier of
+      # exposure than shipped code. That is F13's entire subject.
+      #
+      # Two commands rather than one, because the report and the exit condition want different
+      # thresholds: print everything, then fail only at `high`. A weekly job that blocks nothing
+      # should say everything it knows and still have a bar.
+      #
+      # Measured on jpc 2026-09-21, before this file was committed: **0 vulnerabilities at every
+      # level, dev included.** That is the baseline this job starts from, so the first red it
+      # ever produces is a real one and not a backlog.
+      #
+      # `|| true` on the reporting line is load-bearing and not laziness. `npm audit` exits
+      # non-zero when it finds anything at or above its audit level, and that level defaults to
+      # `low` — so under `set -o pipefail` the first line would fail the step on a single low
+      # finding and the `--audit-level=high` bar below would never be reached. The threshold
+      # would have been decided by the line that was only supposed to print.
+      - name: npm audit
+        run: |
+          set -euo pipefail
+          npm audit | tee -a "$GITHUB_STEP_SUMMARY" || true
+          npm audit --audit-level=high

@@ -1,0 +1,157 @@
+{
+  "name": "Adrenaline_Boost_Death_Protection",
+  "full_name": "Redirects.Empathy.Adrenaline_Boost_Death_Protection",
+  "short_name": "Adrenaline_Boost_Death_Protection",
+  "type": "Auto",
+  "display_name": "Adrenalin Boost",
+  "display_fullname": "Redirects Empathy Adrenaline Boost Death Protection",
+  "display_help": "Dramatically increases an ally's Endurance Recovery, Hit Point Regeneration and attack rate for 90 seconds. Also grants the target high resistance to slow effects. The boost is strong enough to restore unconscious allies to consciousness. If used on a conscious ally, it will automatically revive them should they fall.",
+  "display_short_help": "Ranged, Ally +End, +Regeneration, +Recharge, Res (Slow), Rez",
+  "icon": "empathy_adrenalinboost.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 9999.0,
+  "activate_period": 200.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Recovery",
+    "Recharge",
+    "Heal"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "lifetime_in_game": 90.0,
+  "max_lifetime_in_game": 90.0,
+  "destroy_on_limit": true,
+  "stacking_usage": true,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 1,
+      "templates": [
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 5.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Temporary_Powers.Temporary_Powers.Second_Wind"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags": [
+            "KeepThroughDeath",
+            "CopyBoosts"
+          ],
+          "flags_raw": 17664,
+          "flags2_raw": 4
+        },
+        {
+          "attribs": [
+            "Revoke_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "Self",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 4.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "Cur.kHitPoints",
+            "source>",
+            "0",
+            "=="
+          ],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Redirects.Empathy.Adrenaline_Boost_Death_Protection"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "DelayEval",
+            "RevokeAll"
+          ],
+          "flags_raw": 33840,
+          "flags2_raw": 1
+        }
+      ]
+    }
+  ],
+  "castable_after_death": "DeadOnly",
+  "procs_allowed": false,
+  "available_level": 0,
+  "powerset": "Redirects.Empathy"
+}

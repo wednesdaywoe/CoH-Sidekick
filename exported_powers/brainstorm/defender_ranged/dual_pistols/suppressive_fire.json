@@ -1,0 +1,92 @@
+{
+  "name": "Suppressive_Fire",
+  "full_name": "Defender_Ranged.Dual_Pistols.Suppressive_Fire",
+  "short_name": "Suppressive_Fire",
+  "type": "Click",
+  "display_name": "Suppressive Fire",
+  "display_fullname": "Defender Ranged Dual Pistols Suppressive Fire",
+  "display_help": "Suppressive Fire allows the user to quickly stun their target for a short time and deal a very minor amount of Lethal damage.<br><br>Changing your ammo type with the 'Swap Ammo' power will change your secondary damage from lethal to cold, fire or toxic.<br><br>Additionally, changing your ammunition type will also change the secondary effect of this attack from Disorient effect to a Hold effect if <color #9bfafa>'Cryo Ammo'</color>, <color #fac39b>'Incendiary Ammo'</color> or <color #9efa9b>'Chemical Ammo'</color> are loaded. Damage and duration of the hold will variate by ammo type.",
+  "display_short_help": "Ranged, DMG(Lethal/Special), Foe Disorient/Special",
+  "icon": "dualpistols_suppressivefire.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.1,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 60.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.5,
+  "time_to_root": 1.5,
+  "recharge_time": 20.0,
+  "activate_period": 0.0,
+  "endurance_cost": 10.192,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "Hold",
+    "EnduranceDiscount",
+    "Range",
+    "Stun",
+    "Recharge",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Defender Archetype Sets",
+    "Holds",
+    "Ranged Damage",
+    "Stuns",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    104,
+    120
+  ],
+  "effects": [],
+  "redirect": [
+    {
+      "name": "Redirects.Dual_Pistols.Suppressive_Fire_Lethal",
+      "condition_expression": [
+        "kIceAmmo",
+        "Source.Mode?",
+        "kFireAmmo",
+        "Source.Mode?",
+        "||",
+        "kToxicAmmo",
+        "Source.Mode?",
+        "||",
+        "!"
+      ],
+      "show_in_info": true
+    },
+    {
+      "name": "Redirects.Dual_Pistols.Suppressive_Fire",
+      "condition_expression": [
+        "1"
+      ],
+      "show_in_info": true
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 19,
+  "powerset": "Defender_Ranged.Dual_Pistols"
+}

@@ -1,0 +1,375 @@
+{
+  "name": "Serum",
+  "full_name": "Mastermind_Summon.Mercenaries.Serum",
+  "short_name": "Serum",
+  "type": "Click",
+  "display_name": "Serum",
+  "display_fullname": "Mastermind Summon Mercenaries Serum",
+  "display_help": "You can use a special Serum to turn your Mercenaries into a virtually Unstoppable killing machines for a short time. The Serum, will increase their Damage, chance to hit, Endurance Recovery, and Damage Resistance to all damage except Psionics. They will also be virtually immune to controlling effects including Disorient, Sleep, Hold, Immobilize and Knockback. The effects will start to slowly fade away over 60 seconds.",
+  "display_short_help": "Buff Mercenaries +DMG, +RES(All except Psionic), +To Hit, +Recovery",
+  "icon": "paramilitary_serum.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 100.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.3,
+  "recharge_time": 250.0,
+  "activate_period": 0.0,
+  "endurance_cost": 15.0,
+  "interrupt_time": 0.0,
+  "target_type": "MyPet",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "MyPet"
+  ],
+  "targets_affected": [
+    "MyPet"
+  ],
+  "boosts_allowed": [
+    "Res_Damage",
+    "Recovery",
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Buff_ToHit"
+  ],
+  "allowed_set_categories": [
+    "Endurance Modification",
+    "Resist Damage",
+    "To Hit Buff"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [
+    "MastermindPets_Soldier",
+    "target.VillainName>",
+    "MastermindPets_Medic",
+    "target.VillainName>",
+    "||",
+    "MastermindPets_Spec_Ops",
+    "target.VillainName>",
+    "||",
+    "MastermindPets_Commando",
+    "target.VillainName>",
+    "||"
+  ],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [
+        "Resistances"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 1,
+      "templates": [
+        {
+          "attribs": [
+            "Smashing_Dmg",
+            "Lethal_Dmg",
+            "Fire_Dmg",
+            "Cold_Dmg",
+            "Energy_Dmg",
+            "Negative_Energy_Dmg",
+            "Toxic_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Resistance",
+          "target": "AnyAffectedAndPets",
+          "table": "Ranged_Res_Dmg",
+          "scale": 4.0,
+          "duration": "60 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": -0.008799999952316284,
+          "jit_requires": [
+            "MastermindPets_Soldier",
+            "target.VillainName>",
+            "MastermindPets_Medic",
+            "target.VillainName>",
+            "||",
+            "MastermindPets_Spec_Ops",
+            "target.VillainName>",
+            "||",
+            "MastermindPets_Commando",
+            "target.VillainName>",
+            "||"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "Effect decays over time."
+          },
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "Held",
+            "Immobilized",
+            "Stunned",
+            "Sleep",
+            "Knockup",
+            "Knockback",
+            "Repel"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffectedAndPets",
+          "table": "Ranged_Res_Boolean",
+          "scale": -30.0,
+          "duration": "60 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.06599999964237213,
+          "jit_requires": [
+            "MastermindPets_Soldier",
+            "target.VillainName>",
+            "MastermindPets_Medic",
+            "target.VillainName>",
+            "||",
+            "MastermindPets_Spec_Ops",
+            "target.VillainName>",
+            "||",
+            "MastermindPets_Commando",
+            "target.VillainName>",
+            "||"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "Effect decays over time."
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [
+        "Offensive"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 1,
+      "templates": [
+        {
+          "attribs": [
+            "Smashing_Dmg",
+            "Lethal_Dmg",
+            "Fire_Dmg",
+            "Cold_Dmg",
+            "Energy_Dmg",
+            "Negative_Energy_Dmg",
+            "Psionic_Dmg",
+            "Toxic_Dmg",
+            "Radiation_Dmg",
+            "Electrical_Dmg",
+            "Sonic_Dmg",
+            "Quantum_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Strength",
+          "target": "AnyAffectedAndPets",
+          "table": "Ranged_Buff_Dmg",
+          "scale": 10.0,
+          "duration": "60 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": -0.02199999988079071,
+          "jit_requires": [
+            "MastermindPets_Soldier",
+            "target.VillainName>",
+            "MastermindPets_Medic",
+            "target.VillainName>",
+            "||",
+            "MastermindPets_Spec_Ops",
+            "target.VillainName>",
+            "||",
+            "MastermindPets_Commando",
+            "target.VillainName>",
+            "||"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "Effect decays over time."
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        },
+        {
+          "attribs": [
+            "ToHit"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffectedAndPets",
+          "table": "Ranged_Buff_ToHit",
+          "scale": 1.0,
+          "duration": "60 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": -0.002199999988079071,
+          "jit_requires": [
+            "MastermindPets_Soldier",
+            "target.VillainName>",
+            "MastermindPets_Medic",
+            "target.VillainName>",
+            "||",
+            "MastermindPets_Spec_Ops",
+            "target.VillainName>",
+            "||",
+            "MastermindPets_Commando",
+            "target.VillainName>",
+            "||"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "Effect decays over time."
+          },
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "Recovery"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffectedAndPets",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "60 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": -0.002199999988079071,
+          "jit_requires": [
+            "MastermindPets_Soldier",
+            "target.VillainName>",
+            "MastermindPets_Medic",
+            "target.VillainName>",
+            "||",
+            "MastermindPets_Spec_Ops",
+            "target.VillainName>",
+            "||",
+            "MastermindPets_Commando",
+            "target.VillainName>",
+            "||"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": "Effect decays over time."
+          },
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 17,
+  "powerset": "Mastermind_Summon.Mercenaries"
+}

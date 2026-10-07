@@ -1,0 +1,83 @@
+# The Python half of the lint gate, added 2026-09-26.
+#
+# Rust was gated on 2026-09-25 and JavaScript the next day, each saying in its own commit that
+# it did not cover the other languages. This is the third: 78 `.py` files, 29,738 lines, and
+# nothing had ever checked one of them.
+#
+# Python is not a side language here. `scripts/regen-all.cjs` shells out to `python3` five
+# times. Three are GATES the regen refuses to continue past — `tools/export-integrity.py`,
+# `tools/defdiff.py`, `tools/extraction-audit/audit.py`. The other two WRITE committed data:
+# `scripts/extract-rebirth-io-sets-v2.py` and `scripts/extract-proc-data.py`. Underneath all
+# of it, `tools/bin-crawler/` is the parser that reads the game's binary files and produces
+# `exported_powers/`, which every converter in this repository treats as ground truth.
+#
+# Run it with `npm run lint:py`, and in CI in the `pipeline` job beside `lint:js`.
+
+exclude = [
+    # Dead by intent. `scripts/attic/` is kept so the next person can read what was tried;
+    # nothing imports it and nothing runs it. The JavaScript gate excludes it for the same
+    # reason. 16 findings live here and are not worth an edit.
+    "scripts/attic",
+    # Vendored, MIT, and its value is staying diffable against upstream — the same argument
+    # that keeps `vendor/dioxus-asset-resolver` out of the Rust gate. This is the `humanizer`
+    # skill at version 3.0.0, not this project's code. 1 finding.
+    ".agents",
+]
+
+# 3.10 is what CI asserts before it runs anything Python (`the host's python is new enough for
+# the parser`), because the bin parser uses PEP 604 unions and a 3.9 host fails at import.
+# Naming it here keeps the linter from suggesting anything newer than the floor CI enforces.
+target-version = "py310"
+
+# Pinned, and enforced by ruff itself rather than by a comment. `select` below names rule
+# GROUPS, and a group grows when the tool does — so an unpinned ruff can turn this gate red
+# against code nobody touched. CI installs exactly this version; the assertion here is what
+# makes a local run and a CI run the same run. Same posture as the rust job's
+# `cargo nextest --version | grep -qF '0.9.143'`. To move it: bump here, run
+# `npm run lint:py`, and land whatever the new rules found as its own change.
+required-version = "==0.16.1"
+
+[lint]
+# Ruff 0.16 ships a wide default rule set. Selecting explicitly, because the alternative is a
+# gate whose contents change when the tool upgrades — and this repository has enough of those.
+#
+#   F    pyflakes. Undefined names, unused imports and variables, f-strings with no
+#        placeholders, duplicate dict keys. This is the direct counterpart of the
+#        `js.configs.recommended` set the JavaScript gate runs: things that are probably a
+#        mistake, not things that are merely unfashionable.
+#   E4   import placement. Only E402 survives the ignore list below, and it earns its place:
+#        23 `# noqa: E402` comments were already written across this tree, for the
+#        `sys.path.insert` then local-import pattern the scripts use. Somebody ran a linter
+#        here once and wrote the suppressions; nothing was ever wired up to read them.
+#        Enabling E402 makes those 23 comments mean something again, and it caught one site
+#        that had been missed.
+#   E7   the pycodestyle checks that are bug-shaped rather than layout-shaped — `== None`,
+#        `== True`, `not x is y`, bare `except`, ambiguous single-letter names. The layout
+#        ones are in the ignore list.
+#   E9   syntax and IO errors. Always worth having.
+#   B    flake8-bugbear. Mutable default arguments, closures over loop variables, and
+#        `zip()` without `strict=`. That last one is this repository's signature failure mode
+#        wearing a different hat: `zip()` truncates to the shorter input in silence, which is
+#        how a parser drops the tail of a record and hands downstream a number nobody
+#        recomputes. Seven sites; each one is now explicit about which behaviour it wants.
+#   PLE  the pylint rules that are errors rather than opinions.
+select = ["F", "E4", "E7", "E9", "B", "PLE"]
+
+# Layout, not correctness — and there is no Python formatter running here to have an opinion.
+#
+# `ruff format` is deliberately NOT part of this gate, which is the same call the JavaScript
+# gate made and for a stronger reason. Measured on this tree under this config: 72 of 85 files
+# would be rewritten, 11,218 diff lines, and 36 of those files are `tools/bin-crawler/`. That
+# package has no test suite and cannot be regenerate-and-diffed — CI has no `.pigg` archives,
+# which is the whole reason `_export_fingerprint.py` exists. Rust could take its 4,139-line
+# reformat because 25 tests and a 20,163-number baseline prove the result; here there would be
+# nothing behind it but hope. If a formatter is wanted later it should land on its own, against
+# a re-export.
+ignore = [
+    "E701",  # `if x: return` on one line. 48 sites, a deliberate house style in the parser's
+             # long dispatch chains, and not one of them is ambiguous to read.
+    "E702",  # two statements separated by `;`. 2 sites, same answer.
+    "E401",  # `import os, sys`. 10 sites. Layout; pyflakes still reports either one unused.
+    "E731",  # `parser = lambda sub: ...`. 6 sites, all of them a genuinely anonymous one-line
+             # dispatch handed straight to a caller. `def` would name something with no name.
+]

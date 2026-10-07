@@ -1,0 +1,22 @@
+{
+  "_comment": "Hand-curated variable-control metadata for the procs whose contribution is not a single always-on literal: self-stacking buffs, which need a stack cap, and \"By the Slotted Power\" magnitudes, which resolve through an archetype modifier table.\n\nThis is an ADDITIVE overlay and the LAST of the eight merges `emit-contract.cjs` performs to build the contract's `proc-data` section. Unlike `proc-residual-effects.json`, which replaces a proc's whole `effects` array, each entry here patches a few fields onto the effects the earlier merges already stitched on, and only onto the effects whose `category` matches — which is what guards a multi-effect entry. That keeps the derived `value`, `duration` and `category` live and regen-safe, and layers on only what the generator cannot derive.\n\nThe three patchable fields:\n- `maxStacks` — a self-stacking buff's cap, which the generator cannot read because it lives in the proc's prose `mechanics` (\"stacks 3 times\").\n- `scaleTable` — marks a \"By the Slotted Power\" effect. The derived `value` is `scale × 100`, a raw scale and NOT a percent; the real per-stack magnitude is `value × getTableValue(archetype, scaleTable, level)`. Might of the Tanker: 50 (0.5 × 100) × 0.10 (the Tanker Melee_Res_Dmg value, flat by level) = 5% per stack.\n- `valueMax` — the cap on an HP-scaling floor (Reactive Defenses 3% → 12.9%).\n\nKeys match `proc-data.json` keys exactly, and are sorted: there are three of them and no grouping to lose.",
+  "_notes": {
+    "Chance for +RES(ALL)": "Might of the Tanker (Tanker ATO) — \"Chance for +5% Resistance(All) … By the Slotted Power, stacks 3 times\". Derived value 50 = scale 0.5 × 100; resolved via Melee_Res_Dmg (Tanker 0.10) ⇒ 5% Res(All) per stack, up to 3 (= 15%).",
+    "Scaling +Res(All)": "Reactive Defenses \"Scaling +Res(All)\" — an HP-scaling floor and cap. The floor (value 3) is set in the derived globals table with `scaling: true`; this adds the 12.9% cap.",
+    "Superior Might of the Tanker: Recharge/Chance for +Res(All)": "Superior Might of the Tanker — same mechanic, derived value 67 = scale 0.67."
+  },
+  "Chance for +RES(ALL)": {
+    "category": "Resistance",
+    "maxStacks": 3,
+    "scaleTable": "Melee_Res_Dmg"
+  },
+  "Scaling +Res(All)": {
+    "category": "Resistance",
+    "valueMax": 12.9
+  },
+  "Superior Might of the Tanker: Recharge/Chance for +Res(All)": {
+    "category": "Resistance",
+    "maxStacks": 3,
+    "scaleTable": "Melee_Res_Dmg"
+  }
+}

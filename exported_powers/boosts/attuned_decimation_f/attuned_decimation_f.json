@@ -1,0 +1,143 @@
+{
+  "name": "Attuned_Decimation_F",
+  "full_name": "Boosts.Attuned_Decimation_F.Attuned_Decimation_F",
+  "short_name": "Attuned_Decimation_F",
+  "type": "Boost",
+  "display_name": "Decimation: Chance for Build Up",
+  "display_fullname": "Boosts Attuned Decimation F Attuned Decimation F",
+  "display_help": "UNIQUE -- No more than 1 enhancement of this type may be slotted by a character. Gives a chance to have a \"Build Up\" power effect the caster. This effect will trigger roughly 1 time per minute.",
+  "display_short_help": "Chance for Build Up",
+  "icon": "e_icon_decimation.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 10.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Damage",
+    "Natural",
+    "Technology",
+    "Magic",
+    "Mutation",
+    "Science"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [
+    "Crafted_Decimation_F",
+    "BoostsSlotted>",
+    "0",
+    "<=",
+    "Attuned_Decimation_F",
+    "BoostsSlotted>",
+    "0",
+    "<=",
+    "&&"
+  ],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 1.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "source>",
+        "player",
+        "eq",
+        "activateperiod",
+        "power.base>",
+        "activatetime",
+        "power.base>",
+        "+",
+        "0",
+        ">",
+        "&&"
+      ],
+      "tags": [
+        "Boost"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Grant_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 1.0,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 10.25,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Set_Bonus.Global_Bonus.Boost_Up"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "messages": {
+            "display_attacker_hit": "Your attack strength has increased temporarily.",
+            "display_victim_hit": null,
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags": [
+            "CancelOnMiss",
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods",
+            "NoProjectileDelay"
+          ],
+          "flags_raw": 131188
+        }
+      ]
+    }
+  ],
+  "available_level": 0,
+  "powerset": "Boosts.Attuned_Decimation_F"
+}

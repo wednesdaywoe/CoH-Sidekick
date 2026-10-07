@@ -1,0 +1,510 @@
+{
+  "name": "Brimstone_Proc_Sentinel",
+  "full_name": "Redirects.Stone_Armor.Brimstone_Proc_Sentinel",
+  "short_name": "Brimstone_Proc_Sentinel",
+  "type": "GlobalBoost",
+  "display_name": "Brimstone",
+  "display_fullname": "Redirects Stone Armor Brimstone Proc Sentinel",
+  "display_help": "While this power is active, your skin becomes encrusted in cracked magma. Brimstone Armor makes you highly resistant to Fire and Cold damage, and help your attacks set enemies on fire, delivering damage over time.<br><br>Cannot be active at the same time as Granite Armor.",
+  "display_short_help": "Toggle: Self +Res(Fire, Cold), Special",
+  "icon": "stonearmor_magmaarmor.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 2.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self",
+    "Self"
+  ],
+  "targets_affected": [
+    "Self",
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Damage",
+    "Natural",
+    "Technology",
+    "Magic",
+    "Mutation",
+    "Science"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [
+    "hold",
+    "sleep",
+    "stun",
+    "terror"
+  ],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "num_charges": 1,
+  "max_num_charges": 1,
+  "destroy_on_limit": true,
+  "stacking_usage": false,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "source>",
+        "player",
+        "eq",
+        "target.isFriend?",
+        "!",
+        "&&",
+        "PowerSetName",
+        "power.base>",
+        "Incarnate.Judgement",
+        "eq",
+        "!",
+        "&&",
+        "PowerSetName",
+        "power.base>",
+        "Incarnate.Ion_Judgement",
+        "eq",
+        "!",
+        "&&",
+        "activateperiod",
+        "power.base>",
+        "0",
+        "==",
+        "&&"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Revoke_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Redirects.Stone_Armor.Thermal"
+            ],
+            "count": 2,
+            "type": "Power"
+          },
+          "flags_raw": 1280
+        }
+      ],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "@CustomFX",
+            "*null*",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 8,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "Range",
+                "power.base>",
+                "20",
+                ">"
+              ],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "INDETERMINATE",
+              "eval_flags": 4,
+              "templates": [
+                {
+                  "attribs": [
+                    "Fire_Dmg"
+                  ],
+                  "type": "Expression",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Ranged_PvPDamage",
+                  "scale": 0.1972,
+                  "duration": "2.1 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.5,
+                  "duration_expression": [],
+                  "magnitude_expression": [
+                    "activatetime",
+                    "power.base>",
+                    "0",
+                    "3",
+                    "minmax",
+                    "areafactor",
+                    "power.base>",
+                    "/",
+                    "@StdResult",
+                    "*",
+                    "Redirects.Stone_Armor.Thermal",
+                    "source.ownPowerNum?",
+                    ".08",
+                    "*",
+                    "1",
+                    "+",
+                    "*"
+                  ],
+                  "application_period": 1.0,
+                  "tick_chance": 0.800000011920929,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage over time.",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage over time.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "POWERS/FIRECONTROL/CINDERSHIT.FX",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags": [
+                    "CancelOnMiss",
+                    "IgnoreStrength"
+                  ],
+                  "flags_raw": 1300
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 4,
+              "templates": [
+                {
+                  "attribs": [
+                    "Fire_Dmg"
+                  ],
+                  "type": "Expression",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_PvPDamage",
+                  "scale": 0.1972,
+                  "duration": "2.1 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.5,
+                  "duration_expression": [],
+                  "magnitude_expression": [
+                    "activatetime",
+                    "power.base>",
+                    "0",
+                    "3",
+                    "minmax",
+                    "areafactor",
+                    "power.base>",
+                    "/",
+                    "@StdResult",
+                    "*",
+                    "Redirects.Stone_Armor.Thermal",
+                    "source.ownPowerNum?",
+                    ".08",
+                    "*",
+                    "1",
+                    "+",
+                    "*"
+                  ],
+                  "application_period": 1.0,
+                  "tick_chance": 0.800000011920929,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage over time.",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage over time.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "POWERS/FIRECONTROL/CINDERSHIT.FX",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags": [
+                    "CancelOnMiss",
+                    "IgnoreStrength"
+                  ],
+                  "flags_raw": 1300
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "@CustomFX",
+            "*null*",
+            "eq",
+            "!"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 8,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "Range",
+                "power.base>",
+                "20",
+                ">"
+              ],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "INDETERMINATE",
+              "eval_flags": 4,
+              "templates": [
+                {
+                  "attribs": [
+                    "Fire_Dmg"
+                  ],
+                  "type": "Expression",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Ranged_PvPDamage",
+                  "scale": 0.1972,
+                  "duration": "2.1 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.5,
+                  "duration_expression": [],
+                  "magnitude_expression": [
+                    "activatetime",
+                    "power.base>",
+                    "0",
+                    "3",
+                    "minmax",
+                    "areafactor",
+                    "power.base>",
+                    "/",
+                    "@StdResult",
+                    "*",
+                    "Redirects.Stone_Armor.Thermal",
+                    "source.ownPowerNum?",
+                    ".08",
+                    "*",
+                    "1",
+                    "+",
+                    "*"
+                  ],
+                  "application_period": 1.0,
+                  "tick_chance": 0.800000011920929,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage over time.",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage over time.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "CUSTOMIZEABLEPOWERS/CONTINUINGCONDITIONALFX/FIRE_CONTINUING.FX",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags": [
+                    "CancelOnMiss",
+                    "IgnoreStrength"
+                  ],
+                  "flags_raw": 1300
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 4,
+              "templates": [
+                {
+                  "attribs": [
+                    "Fire_Dmg"
+                  ],
+                  "type": "Expression",
+                  "application_type": "OnTick",
+                  "aspect": "Absolute",
+                  "target": "AnyAffected",
+                  "table": "Melee_PvPDamage",
+                  "scale": 0.1972,
+                  "duration": "2.1 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.5,
+                  "duration_expression": [],
+                  "magnitude_expression": [
+                    "activatetime",
+                    "power.base>",
+                    "0",
+                    "3",
+                    "minmax",
+                    "areafactor",
+                    "power.base>",
+                    "/",
+                    "@StdResult",
+                    "*",
+                    "Redirects.Stone_Armor.Thermal",
+                    "source.ownPowerNum?",
+                    ".08",
+                    "*",
+                    "1",
+                    "+",
+                    "*"
+                  ],
+                  "application_period": 1.0,
+                  "tick_chance": 0.800000011920929,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage over time.",
+                    "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage over time.",
+                    "display_float": null,
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "fx": {
+                    "continuing_bits": [],
+                    "continuing_fx": "CUSTOMIZEABLEPOWERS/CONTINUINGCONDITIONALFX/FIRE_CONTINUING.FX",
+                    "conditional_bits": [],
+                    "conditional_fx": null
+                  },
+                  "flags": [
+                    "CancelOnMiss",
+                    "IgnoreStrength"
+                  ],
+                  "flags_raw": 1300
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "show_in_inventory": "Never",
+  "show_in_manage": false,
+  "show_in_info": false,
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 0,
+  "powerset": "Redirects.Stone_Armor"
+}

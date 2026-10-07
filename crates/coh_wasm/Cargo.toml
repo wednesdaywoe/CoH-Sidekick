@@ -1,0 +1,33 @@
+[package]
+name = "coh_wasm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "SPIKE2 — wasm-bindgen boundary exposing coh_math::recalculate to the beta React planner"
+
+[lib]
+# cdylib: the wasm artifact wasm-bindgen post-processes. rlib: so native `cargo test`
+# can link the core (target-independent) functions without a wasm toolchain.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+coh_data = { path = "../coh_data" }
+coh_math = { path = "../coh_math" }
+serde_json = { workspace = true }
+
+# wasm-bindgen is pulled only for the wasm target; the native build/test path (which
+# exercises the core fns) never links it. Keeps `cargo test` toolchain-free.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+
+# NO [dev-dependencies] HERE ON PURPOSE. This crate had one until 2026-09-26, holding the
+# workspace `flate2`, which nothing in src/ imports. It was there for the test that needs it,
+# `crates/coh_wasm/tests/panic_freedom.rs` in `coh-sidekick-1.0`, which has never been ported into
+# this repository. Removed by decision, on the ground that a dependency kept for absent code is
+# indistinguishable from one kept by accident, and the suite is not coming without a deliberate
+# port that would add it back in the same breath. `crates/coh_math/Cargo.toml` lost the same block
+# on the same day and carries the longer note. `flate2` is an ordinary `[dependencies]` of
+# coh_data, so the lockfile is unchanged either way.
+
+[lints]
+workspace = true

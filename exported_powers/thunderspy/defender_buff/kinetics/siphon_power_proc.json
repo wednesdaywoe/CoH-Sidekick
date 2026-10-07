@@ -1,0 +1,212 @@
+{
+  "name": "Siphon_Power_Proc",
+  "full_name": "Defender_Buff.Kinetics.Siphon_Power_Proc",
+  "short_name": "Siphon_Power_Proc",
+  "type": "GlobalBoost",
+  "display_name": "Siphon Power",
+  "display_fullname": "Defender Buff Kinetics Siphon Power Proc",
+  "display_help": "Every attack you make has a chance to Siphon Power from a targeted foe, reducing their damage potential. The power is transferred back to you, increasing your own damage potential and that of all nearby allies. Recharge: Slow",
+  "display_short_help": "All Attacks: Chance for Foe -DMG, Team +DMG",
+  "icon": "kineticboost_siphonpower.png",
+  "auto_issue": true,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 10.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Damage",
+    "Natural",
+    "Technology",
+    "Magic",
+    "Mutation",
+    "Science"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [
+    "Defender_Buff.Kinetics.Siphon_Power"
+  ],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 4.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "CategoryName",
+        "power.base>",
+        "Pets",
+        "eq",
+        "!",
+        "CategoryName",
+        "power.base>",
+        "Villain_Pets",
+        "eq",
+        "!",
+        "&&",
+        "CategoryName",
+        "power.base>",
+        "Mastermind_Pets",
+        "eq",
+        "!",
+        "&&"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Pets.KineticsPlayer.SiphonPowerPLAYER"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags": [
+            "CopyBoosts"
+          ],
+          "flags_raw": 1280,
+          "flags2_raw": 4
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 4.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "CategoryName",
+        "power.base>",
+        "Pets",
+        "eq",
+        "!",
+        "CategoryName",
+        "power.base>",
+        "Villain_Pets",
+        "eq",
+        "!",
+        "&&",
+        "CategoryName",
+        "power.base>",
+        "Mastermind_Pets",
+        "eq",
+        "!",
+        "&&"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Smashing_Dmg",
+            "Lethal_Dmg",
+            "Energy_Dmg",
+            "Negative_Energy_Dmg",
+            "Fire_Dmg",
+            "Cold_Dmg",
+            "Toxic_Dmg",
+            "Psionic_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Strength",
+          "target": "AnyAffected",
+          "table": "Ranged_Debuff_Dam",
+          "scale": 2.5,
+          "duration": "30 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "target.isFriend?",
+            "!"
+          ],
+          "caster_stack": "Individual",
+          "stack": "StackThenIgnore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/DEBUFFDAMAGECONTINUING.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        }
+      ]
+    }
+  ],
+  "show_in_inventory": "Never",
+  "show_in_manage": false,
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": -1,
+  "powerset": "Defender_Buff.Kinetics"
+}

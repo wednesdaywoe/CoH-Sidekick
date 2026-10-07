@@ -1,0 +1,147 @@
+{
+  "name": "Superior_Opportunity_Strikes",
+  "full_name": "Set_Bonus.Global_Bonus.Superior_Opportunity_Strikes",
+  "short_name": "Superior_Opportunity_Strikes",
+  "type": "GlobalBoost",
+  "display_name": "Critical Strikes",
+  "display_fullname": "Set Bonus Global Bonus Superior Opportunity Strikes",
+  "display_help": "While Opportunity Strikes is active, you gain a +an additional chance to find an opportunity for a short time.",
+  "display_short_help": "+Scrutiny Chance",
+  "icon": "superreflexes_quickness.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 10.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Damage",
+    "Natural",
+    "Technology",
+    "Magic",
+    "Mutation",
+    "Science"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 0.05000000074505806,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "source>",
+        "player",
+        "eq",
+        "activateperiod",
+        "power.base>",
+        "activatetime",
+        "power.base>",
+        "+",
+        "0",
+        ">",
+        "&&"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 0.05000000074505806,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": 0.0,
+          "radius_outer": 0.0,
+          "requires_expression": [
+            "Temporary_Powers.Temporary_Powers.Opportunity_Lock",
+            "source.ownPower?",
+            "!"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Rage"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 100.0,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": "Opportunity Strikes",
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance",
+                "StackExactPower"
+              ],
+              "flags_raw": 525360
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "modes_disallowed": [
+    "Disable_SetBonus"
+  ],
+  "available_level": 0,
+  "powerset": "Set_Bonus.Global_Bonus"
+}

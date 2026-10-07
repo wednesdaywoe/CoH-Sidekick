@@ -1,0 +1,141 @@
+{
+  "name": "World_of_Pain_Proc",
+  "full_name": "Temporary_Powers.Temporary_Powers.World_of_Pain_Proc",
+  "short_name": "World_of_Pain_Proc",
+  "type": "GlobalBoost",
+  "display_name": "World of Pain Proc",
+  "display_fullname": "Temporary Powers Temporary Powers World of Pain Proc",
+  "display_help": "This power adds Psionic damage to all of your attacks",
+  "display_short_help": "+Psionic Damage",
+  "icon": "paindomination_worldofpain.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 10.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Damage",
+    "Natural",
+    "Technology",
+    "Magic",
+    "Mutation",
+    "Science"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "lifetime": 60.0,
+  "destroy_on_limit": true,
+  "stacking_usage": false,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "target.isFriend?",
+        "!"
+      ],
+      "tags": [
+        "Damage"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Psionic_Dmg"
+          ],
+          "type": "Expression",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Melee_Damage",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [
+            ".8",
+            "RechargeTime",
+            "power.base>",
+            "1",
+            "25",
+            "minmax",
+            "*",
+            "1.8",
+            "+",
+            "2",
+            "*",
+            "@StdResult",
+            "*",
+            "10",
+            "/",
+            "areafactor",
+            "power.base>",
+            "/",
+            ".25",
+            "*"
+          ],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You hit for {Damage} points of Psionic damage!",
+            "display_victim_hit": "You are struck by {PlayerSource} for {Damage} points of Psionic damage!",
+            "display_float": null,
+            "display_attrib_defense_float": null
+          },
+          "flags": [
+            "IgnoreStrength"
+          ],
+          "flags_raw": 1296
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "show_in_inventory": "Never",
+  "show_in_manage": false,
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 0,
+  "powerset": "Temporary_Powers.Temporary_Powers"
+}

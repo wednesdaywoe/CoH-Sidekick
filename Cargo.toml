@@ -1,0 +1,58 @@
+[workspace]
+resolver = "2"
+members = ["crates/coh_data", "crates/coh_math", "crates/coh_wasm", "crates/app", "vendor/dioxus-asset-resolver"]
+
+# F86 (and the upstream half of F81). `dioxus-asset-resolver` serves any path
+# that already exists on the filesystem, because it consults the bundle root only when the literal
+# path missed - so `dioxus://index.html/etc/hostname` answered 200 with `Access-Control-Allow-
+# Origin: *`, and an unrecognised extension is typed `text/html`, which makes any attacker-writable
+# file a same-origin document. It is not reachable from this app's `Config`: wry refuses a second
+# registration of the `dioxus` protocol with `DuplicateCustomProtocol` (wry-0.53.5/src/lib.rs:1114),
+# and `register_asset_handler` keys on the first path segment, so neither can confine it.
+#
+# The vendored copy is 0.7.9 unchanged except for `resolve_asset_path_from_filesystem`, which is
+# marked `SIDEKICK PATCH`. Vendored rather than forked to a git url so the RC builds from this
+# tree alone - F14 and F15 are both about build inputs fetched from somewhere else.
+[patch.crates-io]
+dioxus-asset-resolver = { path = "vendor/dioxus-asset-resolver" }
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+
+# The lint policy, opted into by each of our four crates (`[lints] workspace = true`) and
+# NOT by `vendor/dioxus-asset-resolver`, which is upstream 0.7.9 plus one marked patch and has
+# to stay diffable against it. `npm run lint:rust` gates on this at `-D warnings`.
+#
+# Both entries below are style opinions declined on purpose, recorded here rather than as
+# scattered `#[allow]`s so the decision has one home:
+#
+# `too_many_arguments` fires at 8 on a threshold of 7 — five sites, four of them drawing
+# routines in `export_image.rs`/`grid/view.rs` that take a canvas plus its geometry, and
+# `WalkCtx::new`, which takes the walk's context because that is what a context is. Bundling
+# those into structs to satisfy an arbitrary count is churn against code the whole-build
+# replay grades, and buys nothing a reader wants.
+#
+# `type_complexity` fires twice, both in UI plumbing, on types that are already the shortest
+# honest spelling of what they hold.
+[workspace.lints.clippy]
+too_many_arguments = "allow"
+type_complexity = "allow"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+# preserve_order: bundle JSON object order must match the JS emitters' insertion
+# order so fixture ordinals align power-for-power across the two languages.
+# float_roundtrip: the default float parser is up-to-1-ulp lossy, which breaks
+# exact f64 parity with the TS oracle (0.47500000000000003 parsed as 0.475).
+serde_json = { version = "1", features = ["preserve_order", "float_roundtrip"] }
+flate2 = "1"
+thiserror = "2"
+image = { version = "0.25", default-features = false, features = ["png"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+# The PNG renderer draws the build's power icons from the vendored `assets/img` tree. The
+# icons are served to the webview at runtime by Dioxus's asset system, but the renderer runs
+# in Rust on BOTH targets (desktop-native and wasm) and must read the bytes synchronously —
+# so they are embedded at compile time rather than fetched. Same bytes the webview serves.
+include_dir = "0.7"

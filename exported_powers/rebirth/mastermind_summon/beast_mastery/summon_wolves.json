@@ -1,0 +1,260 @@
+{
+  "name": "Summon_Wolves",
+  "full_name": "Mastermind_Summon.Beast_Mastery.Summon_Wolves",
+  "short_name": "Summon_Wolves",
+  "type": "Click",
+  "display_name": "Summon Wolves",
+  "display_fullname": "Mastermind Summon Beast Mastery Summon Wolves",
+  "display_help": "Calls forth one to three Wolves to do your bidding. The third one summoned will be an Alpha Wolf, which grants some leadership bonuses to the pack. Wolves have no ranged attacks, but can quickly close in on their prey. You may only have 3 Wolves under your control at any given time. If you attempt to call more Wolves, you can only replace the ones you have lost in battle. If you already have three, the power will fail. Wolf attacks have a chance to build a charge of Pack Mentality.  Pack Mentality is a Damage buff aura that radiates from the Mastermind and can stack up to 10 times.  Recharge: Very Long",
+  "display_short_help": "Summon Wolves",
+  "icon": "beastmastery_summonwolves.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Location",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 60.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.97,
+  "recharge_time": 60.0,
+  "activate_period": 0.0,
+  "endurance_cost": 19.5,
+  "interrupt_time": 0.0,
+  "target_type": "Location",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "SpeedRunning",
+    "Knockback",
+    "Heal",
+    "Debuff_ToHit",
+    "Debuff_Defense",
+    "Damage",
+    "Buff_ToHit",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Accurate Defense Debuff",
+    "Accurate To-Hit Debuff",
+    "Defense Debuff",
+    "Healing",
+    "Knockback",
+    "Mastermind Archetype Sets",
+    "Pet Damage",
+    "Recharge Intensive Pets",
+    "Running",
+    "To Hit Buff",
+    "To Hit Debuff",
+    "Universal Damage Sets",
+    "Universal Debuff"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [
+        "Levelminus2"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Levelminus2",
+          "scale": 1.0,
+          "duration": "99999 seconds",
+          "magnitude": 1.0,
+          "delay": 2.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "type": "EntCreate",
+            "entity_def": "MastermindPets_Howler_Wolf",
+            "priority_list": "Pet"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "DoNotTintCostume"
+          ],
+          "flags_raw": 1072,
+          "flags2_raw": 2
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "combatlevel",
+        "source>",
+        "5",
+        ">"
+      ],
+      "tags": [
+        "Levelminus2"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Levelminus2",
+          "scale": 1.0,
+          "duration": "99999 seconds",
+          "magnitude": 1.0,
+          "delay": 3.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "combatlevel",
+            "source>",
+            "5",
+            ">"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "type": "EntCreate",
+            "entity_def": "MastermindPets_Howler_Wolf",
+            "priority_list": "Pet"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "DoNotTintCostume"
+          ],
+          "flags_raw": 1072,
+          "flags2_raw": 2
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "combatlevel",
+        "source>",
+        "17",
+        ">"
+      ],
+      "tags": [
+        "Levelminus2"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Levelminus2",
+          "scale": 1.0,
+          "duration": "99999 seconds",
+          "magnitude": 1.0,
+          "delay": 4.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "combatlevel",
+            "source>",
+            "17",
+            ">"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "type": "EntCreate",
+            "entity_def": "MastermindPets_Howler_Wolf_Alpha",
+            "priority_list": "Pet"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "DoNotTintCostume"
+          ],
+          "flags_raw": 1072,
+          "flags2_raw": 2
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 0,
+  "powerset": "Mastermind_Summon.Beast_Mastery"
+}

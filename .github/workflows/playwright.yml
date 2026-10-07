@@ -1,0 +1,64 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+permissions:
+  # Least privilege, stated rather than inherited: with no block the job
+  # takes the repository's default, which is a setting in the web UI that can be changed to
+  # read/write for the whole repository without touching a workflow file or leaving a trace in
+  # this history. Nothing in these three jobs writes -- no release is cut, nothing is pushed, no
+  # package is published, and `actions/upload-artifact` uses the runtime token rather than this
+  # one. The beta's four workflows have carried exactly this block since they were written; these
+  # three are the ones that never got it.
+  contents: read
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    - name: Install dependencies
+      run: npm ci
+    # THIS JOB RUNS NO BROWSER TESTS, and has never been able to. Three steps stood here --
+    # `npx playwright install --with-deps`, `npx playwright test`, and an upload of
+    # `playwright-report/` under `if: ${{ !cancelled() }}`. Measured 2026-09-26:
+    # `npx playwright test` exits 1 with "Error: No tests found", and `--list` reports
+    # "Total: 0 tests in 0 files". There is no `playwright.config.*` anywhere in the repo
+    # (outside node_modules) and no `*.spec.*` or `*.test.*` file in any language, so the
+    # artifact step uploaded a directory the run could not produce either.
+    #
+    # It has failed on every push to main/master and every PR into them since d4eaf49ae, which
+    # makes it the fifth job of its kind here. Three were fixed in 90c25c600 and one in
+    # 158de4710, which fixed three of them and in the same breath justified keeping the
+    # `playwright` dependency on the bare ground that "two workflows" use it. That unexamined
+    # phrase is what hid this one: nobody asked what `npx playwright test` does in a repo the
+    # same argument declares test-free. This workflow came in with the init commit from
+    # `coh-sidekick-1.0`.
+    #
+    # Stated rather than deleted, because the scaffold above it is the part that is hard to get
+    # right and is already correct -- the triggers, the `contents: read` block whose reasoning is
+    # at the top of this file, the checkout and the node setup. To turn this into a real browser
+    # suite: add a `playwright.config.ts` and at least one spec, then restore the three steps
+    # above, in that order. The browser install is NOT kept warm in the meantime because
+    # `--with-deps` downloads Chromium, Firefox and WebKit on every run, which is minutes of CI
+    # for a suite that does not exist.
+    #
+    # Note for whoever does that: `@playwright/test` is a live dependency already, required by
+    # `scripts/audit-grid-viewport-fit.cjs`. That gate DOES run in CI since 2026-09-27 -- in the
+    # `web` job of ci.yml, off the debug bundle that job already builds, installing chromium alone
+    # -- so a browser does open on every push; it just does not open through `playwright test`.
+    # This file described the gate as "in no workflow" until that day, and the sentence is
+    # corrected here rather than deleted because the distinction is the whole content of this
+    # file: there is Playwright IN this repository and there is no Playwright SUITE.
+    # The separately declared `playwright` is redundant either way -- `@playwright/test` depends
+    # on it, as package-lock.json records.
+    - name: no browser suite in this repo, stated rather than skipped
+      run: |
+        echo "::notice::no 'playwright test' suite exists in this repository, and none ever has. No playwright.config.*, no spec files. This step replaces an 'npx playwright test' that exited 1 with 'No tests found' on every push since the first commit. A Playwright-driven browser gate DOES run, in ci.yml's 'web' job: scripts/audit-grid-viewport-fit.cjs, which steps a real OS window through 22 sizes."
+        echo "Add a config and a spec, then restore the three steps named in the comment above -- that is what this step is here for."

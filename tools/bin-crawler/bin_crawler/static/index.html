@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bin Crawler</title>
+<style>
+:root {
+    --bg: #0f1729;
+    --bg-panel: #162042;
+    --bg-input: #0f3460;
+    --bg-hover: #1a3a6e;
+    --bg-detail: #0d1b36;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --accent: #D62BCE;
+    --accent-dim: #922296;
+    --border: #253656;
+    --mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    background: var(--bg-panel);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+.header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+}
+.header input[type="text"] {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 240px;
+}
+.header input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+.header select {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    max-width: 200px;
+}
+.header select:focus { outline: none; border-color: var(--accent); }
+
+/* Source selector — distinct styling */
+.source-select {
+    background: #1a3a3e;
+    border-color: #2a6a5e;
+    color: #7fd8c0;
+    font-weight: 600;
+}
+.source-select:focus { border-color: #4ae0b0; }
+
+.stats-line {
+    color: var(--text-muted);
+    font-size: 12px;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+/* Table container */
+.table-wrap {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    table-layout: fixed;
+}
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+thead th {
+    background: var(--bg-panel);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 2px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+thead th:hover { color: var(--accent); }
+thead th .sort-arrow { font-size: 10px; margin-left: 4px; }
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr.active { background: var(--bg-input); }
+tbody td {
+    padding: 6px 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+td.num { text-align: right; font-family: var(--mono); font-size: 12px; }
+td.dim { color: var(--text-muted); }
+td.power-name {
+    color: var(--text);
+    font-weight: 500;
+}
+td.powerset-name {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* Column widths */
+.col-name { width: 18%; }
+.col-set { width: 13%; }
+.col-boosts { width: 19%; }
+.col-area { width: 7%; }
+.col-tgt { width: 5%; }
+.col-range { width: 7%; }
+.col-rad { width: 7%; }
+.col-cast { width: 6%; }
+.col-rech { width: 7%; }
+.col-end { width: 6%; }
+.col-int { width: 5%; }
+
+/* Detail row */
+tr.detail-row td {
+    padding: 0;
+    background: var(--bg-detail);
+    border-bottom: 2px solid var(--accent-dim);
+}
+.detail-panel {
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px 24px;
+}
+.detail-panel .field {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+.detail-panel .field .label {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+.detail-panel .field .value {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+}
+.detail-panel .full-name {
+    grid-column: 1 / -1;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+.detail-panel .short-help {
+    grid-column: 1 / -1;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 4px;
+    white-space: normal;
+    line-height: 1.4;
+}
+.detail-panel .boosts-row {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+.detail-panel .export-row {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+}
+.btn-export {
+    background: var(--accent-dim);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.btn-export:hover { background: var(--accent); }
+.detail-panel .boosts-row .label {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-right: 4px;
+}
+
+/* Area badges */
+.badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.badge-single { background: #1a3a4e; color: #5ba8c8; }
+.badge-cone { background: #3a2a1a; color: #c8a05b; }
+.badge-sphere { background: #2a1a3a; color: #a05bc8; }
+.badge-location { background: #1a3a2a; color: #5bc86b; }
+
+/* Boost tags */
+.boost-tag {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 500;
+    background: #1e2d4a;
+    color: #8aa8cc;
+    white-space: nowrap;
+}
+td .boost-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+/* Loading */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-muted);
+    font-size: 15px;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    z-index: 100;
+    animation: fadeIn 0.2s;
+}
+.toast.info { background: var(--bg-input); color: var(--text); }
+.toast.error { background: #5a1a1a; color: #ff8888; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Bin Crawler</h1>
+    <select id="source-filter" class="source-select" title="Data source"></select>
+    <input type="text" id="search" placeholder="Search powers..." autocomplete="off">
+    <select id="cat-filter"><option value="">All Categories</option></select>
+    <select id="set-filter"><option value="">All Powersets</option></select>
+    <select id="area-filter">
+        <option value="">All Areas</option>
+        <option value="Single">Single</option>
+        <option value="Cone">Cone</option>
+        <option value="Sphere">Sphere</option>
+        <option value="Location">Location</option>
+    </select>
+    <select id="boost-filter"><option value="">All Boost Types</option></select>
+    <button class="btn-export" id="btn-export-all" onclick="App.exportAll()">Export JSON</button>
+    <button class="btn-export" id="btn-cog" title="Change game assets folder" style="padding:0.45rem 0.6rem">&#9881;</button>
+    <span class="stats-line" id="stats-line"></span>
+</div>
+
+<!-- Config banner: shown while no folder is set or a parse is in progress. -->
+<div id="config-banner" style="display:none;padding:0.9rem 1.25rem;margin:0.75rem;border:1px solid var(--border);border-radius:6px;background:var(--bg-alt,#1a1d23);color:var(--text);font-size:0.95rem"></div>
+
+<!-- Settings overlay: typed assets-folder path → /api/set-assets-dir. -->
+<div id="settings-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center">
+  <div style="background:var(--bg,#15171c);border:1px solid var(--border);border-radius:8px;padding:1.25rem 1.5rem;max-width:560px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.5)">
+    <h2 style="margin:0 0 0.5rem;font-size:1.05rem">Game assets folder</h2>
+    <p style="margin:0 0 0.75rem;font-size:0.85rem;color:var(--text-dim,#9aa4b2)">
+      The folder containing the game's <code>.pigg</code> archives (e.g.
+      <code>…/Homecoming/assets/live</code> or a Rebirth/Thunderspy assets folder).
+      Changing it re-parses in the background (1–3&nbsp;min on first load).
+    </p>
+    <input type="text" id="settings-input" spellcheck="false"
+           style="width:100%;padding:0.5rem 0.7rem;border:1px solid var(--border);background:var(--bg-input,#0f1115);color:var(--text);border-radius:4px;font-size:0.85rem;font-family:monospace;box-sizing:border-box"
+           placeholder="/path/to/assets/live">
+    <div id="settings-status" style="font-size:0.82rem;margin:0.6rem 0;min-height:1.2em;color:var(--text-dim,#9aa4b2)"></div>
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end">
+      <button class="btn-export" id="settings-cancel">Cancel</button>
+      <button class="btn-export" id="settings-apply" style="background:var(--accent);color:#0f1115">Apply</button>
+    </div>
+  </div>
+</div>
+
+<div class="table-wrap" id="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th class="col-name" data-col="display_name">Name <span class="sort-arrow"></span></th>
+                <th class="col-set" data-col="powerset">Powerset <span class="sort-arrow"></span></th>
+                <th class="col-boosts">Boosts Allowed</th>
+                <th class="col-area" data-col="effect_area_name">Area <span class="sort-arrow"></span></th>
+                <th class="col-tgt" data-col="max_targets_hit">Tgt <span class="sort-arrow"></span></th>
+                <th class="col-range" data-col="range">Range <span class="sort-arrow"></span></th>
+                <th class="col-rad" data-col="radius">Radius <span class="sort-arrow"></span></th>
+                <th class="col-cast" data-col="activate_period">Cast <span class="sort-arrow"></span></th>
+                <th class="col-rech" data-col="recharge_time">Recharge <span class="sort-arrow"></span></th>
+                <th class="col-end" data-col="endurance_cost">End <span class="sort-arrow"></span></th>
+                <th class="col-int" data-col="interrupt_time">Int <span class="sort-arrow"></span></th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+
+const AREA_BADGE = {
+    'Single': 'badge-single',
+    'Cone': 'badge-cone',
+    'Sphere': 'badge-sphere',
+    'Location': 'badge-location',
+};
+
+const BOOST_SHORT = {
+    'Accuracy': 'Acc',
+    'Damage': 'Dam',
+    'EnduranceDiscount': 'EndRdx',
+    'Recharge': 'Rchg',
+    'Range': 'Rng',
+    'Heal': 'Heal',
+    'Hold': 'Hold',
+    'Stun': 'Stun',
+    'Sleep': 'Sleep',
+    'Immobilize': 'Immob',
+    'Knockback': 'KB',
+    'Confuse': 'Conf',
+    'Fear': 'Fear',
+    'Taunt': 'Taunt',
+    'Slow': 'Slow',
+    'Buff_Defense': 'DefBuf',
+    'Buff_ToHit': 'ToHitBuf',
+    'Buff_Damage': 'DamBuf',
+    'Debuff_Defense': 'DefDbf',
+    'Debuff_ToHit': 'ToHitDbf',
+    'Debuff_Damage': 'DamDbf',
+    'SpeedFlying': 'Fly',
+    'SpeedRunning': 'Run',
+    'Jump': 'Jump',
+    'Res_Damage': 'Resist',
+    'Recovery': 'EndMod',
+    'Endurance_Drain': 'EndDrn',
+    'Interrupt': 'Intrupt',
+    'Intangible': 'Intang',
+    'Radius': 'Radius',
+    'Cone': 'Cone',
+};
+
+const BOOST_TYPES = [
+    'Accuracy', 'Buff_Damage', 'Buff_Defense', 'Buff_ToHit', 'Cone',
+    'Confuse', 'Damage', 'Debuff_Damage', 'Debuff_Defense', 'Debuff_ToHit',
+    'Endurance_Drain', 'EnduranceDiscount', 'Fear', 'Heal', 'Hold',
+    'Immobilize', 'Intangible', 'Interrupt', 'Jump', 'Knockback',
+    'Radius', 'Range', 'Recharge', 'Recovery', 'Res_Damage',
+    'Sleep', 'Slow', 'SpeedFlying', 'SpeedRunning', 'Stun', 'Taunt',
+];
+
+function boostTags(list) {
+    if (!list || !list.length) return '<span class="dim">-</span>';
+    return '<div class="boost-tags">' +
+        list.map(b => `<span class="boost-tag">${esc(BOOST_SHORT[b] || b)}</span>`).join('') +
+        '</div>';
+}
+
+const App = {
+    powers: [],
+    sources: [],
+    currentSource: '',
+    sortCol: 'full_name',
+    sortDesc: false,
+    expandedRow: null,
+
+    async api(endpoint, params = {}) {
+        const url = new URL(endpoint, location.origin);
+        if (this.currentSource) params.source = this.currentSource;
+        for (const [k, v] of Object.entries(params))
+            if (v != null && v !== '') url.searchParams.set(k, v);
+        const res = await fetch(url);
+        return res.json();
+    },
+
+    async init() {
+        this.setupSearch();
+        this.setupSortHeaders();
+        this.populateBoostFilter();
+        this.setupSettings();
+        await this.boot();
+    },
+
+    // ---- Directory config / background-load state ----
+
+    setupSettings() {
+        document.getElementById('btn-cog').addEventListener('click', () => this.openSettings());
+        document.getElementById('settings-cancel').addEventListener('click', () => this.closeSettings());
+        document.getElementById('settings-apply').addEventListener('click', () => this.applySettings());
+        document.getElementById('settings-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') this.applySettings();
+            if (e.key === 'Escape') this.closeSettings();
+        });
+    },
+
+    async getConfig() {
+        try { return await (await fetch('/api/config')).json(); }
+        catch { return null; }
+    },
+
+    applyConfigState(cfg) {
+        const banner = document.getElementById('config-banner');
+        const table = document.getElementById('table-wrap');
+        if (!cfg || cfg.status === 'ready' || cfg.multi_source) {
+            banner.style.display = 'none';
+            table.style.display = '';
+        } else {
+            banner.textContent = cfg.message || '';
+            banner.style.display = '';
+            table.style.display = 'none';
+        }
+    },
+
+    // First load (and after a folder change): branch on the server's load state.
+    async boot() {
+        const cfg = await this.getConfig();
+        this.applyConfigState(cfg);
+        if (!cfg || cfg.status === 'ready' || cfg.multi_source) {
+            await this.loadAll();
+        } else if (cfg.status === 'loading') {
+            await this.waitForReady();
+        } else {
+            this.openSettings();  // unconfigured / error → prompt for a folder
+        }
+    },
+
+    async loadAll() {
+        await this.loadSources();
+        await this.loadCategories();
+        await this.loadPowers();
+    },
+
+    // Poll while a background parse runs, then load (or re-open settings on error).
+    async waitForReady() {
+        for (;;) {
+            await new Promise((r) => setTimeout(r, 2000));
+            const cfg = await this.getConfig();
+            this.applyConfigState(cfg);
+            if (!cfg || cfg.status === 'ready') { await this.loadAll(); return; }
+            if (cfg.status === 'error' || cfg.status === 'unconfigured') { this.openSettings(); return; }
+        }
+    },
+
+    async openSettings() {
+        const cfg = await this.getConfig();
+        document.getElementById('settings-input').value = (cfg && (cfg.assets_dir || cfg.saved_dir)) || '';
+        document.getElementById('settings-status').textContent = (cfg && cfg.status !== 'ready') ? (cfg.message || '') : '';
+        document.getElementById('settings-overlay').style.display = 'flex';
+        document.getElementById('settings-input').focus();
+    },
+
+    closeSettings() {
+        document.getElementById('settings-overlay').style.display = 'none';
+    },
+
+    async applySettings() {
+        const path = document.getElementById('settings-input').value.trim();
+        const status = document.getElementById('settings-status');
+        if (!path) { status.textContent = 'Enter a folder path.'; return; }
+        status.textContent = 'Checking folder…';
+        let data;
+        try {
+            const res = await fetch('/api/set-assets-dir', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path }),
+            });
+            data = await res.json();
+        } catch (e) { status.textContent = 'Request failed: ' + e; return; }
+        if (!data.ok) { status.textContent = data.error || 'Failed to set folder.'; return; }
+        this.closeSettings();
+        this.currentSource = '';  // reset; loadSources will repopulate
+        await this.waitForReady();
+    },
+
+    async loadSources() {
+        this.sources = await this.api('/api/sources');
+        const sel = $('source-filter');
+        sel.innerHTML = '';
+
+        if (this.sources.length <= 1) {
+            sel.style.display = 'none';
+            if (this.sources.length === 1) {
+                this.currentSource = this.sources[0].name;
+            }
+            return;
+        }
+
+        this.sources.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.name;
+            opt.textContent = `${s.label} (${s.total.toLocaleString()} powers)`;
+            sel.appendChild(opt);
+        });
+        this.currentSource = this.sources[0].name;
+
+        sel.addEventListener('change', () => {
+            this.currentSource = sel.value;
+            $('search').value = '';
+            $('area-filter').value = '';
+            $('boost-filter').value = '';
+            this.resetCategoryFilter();
+            this.updateExportLabel();
+            this.loadCategories().then(() => this.loadPowers());
+        });
+    },
+
+    resetCategoryFilter() {
+        $('cat-filter').innerHTML = '<option value="">All Categories</option>';
+        $('set-filter').innerHTML = '<option value="">All Powersets</option>';
+    },
+
+    populateBoostFilter() {
+        const sel = $('boost-filter');
+        BOOST_TYPES.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b;
+            opt.textContent = (BOOST_SHORT[b] || b) + ' (' + b + ')';
+            sel.appendChild(opt);
+        });
+    },
+
+    setupSearch() {
+        const doSearch = debounce(() => this.loadPowers(), 300);
+        $('search').addEventListener('input', doSearch);
+        $('cat-filter').addEventListener('change', () => {
+            this.updatePowersetFilter();
+            this.loadPowers();
+            this.updateExportLabel();
+        });
+        $('set-filter').addEventListener('change', () => {
+            this.loadPowers();
+            this.updateExportLabel();
+        });
+        $('area-filter').addEventListener('change', () => this.loadPowers());
+        $('boost-filter').addEventListener('change', () => this.loadPowers());
+    },
+
+    setupSortHeaders() {
+        document.querySelectorAll('thead th[data-col]').forEach(th => {
+            th.addEventListener('click', () => {
+                const col = th.dataset.col;
+                if (this.sortCol === col) {
+                    this.sortDesc = !this.sortDesc;
+                } else {
+                    this.sortCol = col;
+                    this.sortDesc = false;
+                }
+                this.updateSortArrows();
+                this.loadPowers();
+            });
+        });
+    },
+
+    updateSortArrows() {
+        document.querySelectorAll('thead th[data-col]').forEach(th => {
+            const arrow = th.querySelector('.sort-arrow');
+            if (th.dataset.col === this.sortCol) {
+                arrow.textContent = this.sortDesc ? ' v' : ' ^';
+            } else {
+                arrow.textContent = '';
+            }
+        });
+    },
+
+    async loadCategories() {
+        const cats = await this.api('/api/categories');
+        const sel = $('cat-filter');
+        sel.innerHTML = '<option value="">All Categories</option>';
+        cats.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c.replace(/_/g, ' ');
+            sel.appendChild(opt);
+        });
+    },
+
+    async updatePowersetFilter() {
+        const cat = $('cat-filter').value;
+        const sel = $('set-filter');
+        sel.innerHTML = '<option value="">All Powersets</option>';
+        if (!cat) return;
+        const sets = await this.api('/api/powersets', { category: cat });
+        sets.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s;
+            sel.appendChild(opt);
+        });
+    },
+
+    async loadPowers() {
+        this.expandedRow = null;
+        const data = await this.api('/api/powers', {
+            q: $('search').value.trim(),
+            category: $('cat-filter').value,
+            powerset: $('set-filter').value,
+            area: $('area-filter').value,
+            boost: $('boost-filter').value,
+            sort: this.sortCol,
+            desc: this.sortDesc ? '1' : '',
+            limit: '500',
+        });
+        this.powers = data.powers;
+
+        const srcInfo = this.sources.find(s => s.name === this.currentSource);
+        const srcLabel = srcInfo ? srcInfo.label : '';
+        $('stats-line').textContent = data.count + ' powers' +
+            (data.count > 500 ? ' (showing 500)' : '') +
+            (this.sources.length > 1 && srcLabel ? ` | ${srcLabel}` : '');
+        this.renderTable();
+    },
+
+    renderTable() {
+        const tbody = $('tbody');
+        const rows = [];
+        for (const pw of this.powers) {
+            const areaClass = AREA_BADGE[pw.effect_area_name] || '';
+            rows.push(
+                `<tr data-fn="${esc(pw.full_name)}" onclick="App.toggleDetail(this)">` +
+                `<td class="power-name" title="${esc(pw.full_name)}">${esc(pw.display_name || pw.power_name)}</td>` +
+                `<td class="powerset-name" title="${esc(pw.category + '.' + pw.powerset)}">${esc(pw.powerset)}</td>` +
+                `<td>${boostTags(pw.boosts_allowed)}</td>` +
+                `<td><span class="badge ${areaClass}">${esc(pw.effect_area_name)}</span></td>` +
+                `<td class="num ${pw.max_targets_hit ? '' : 'dim'}">${pw.max_targets_hit || '-'}</td>` +
+                `<td class="num ${pw.range ? '' : 'dim'}">${pw.range ? pw.range : '-'}</td>` +
+                `<td class="num ${pw.radius ? '' : 'dim'}">${pw.radius ? pw.radius : '-'}</td>` +
+                `<td class="num">${fmtTime(pw.activate_period)}</td>` +
+                `<td class="num">${fmtTime(pw.recharge_time)}</td>` +
+                `<td class="num ${pw.endurance_cost ? '' : 'dim'}">${pw.endurance_cost ? pw.endurance_cost.toFixed(2) : '-'}</td>` +
+                `<td class="num ${pw.interrupt_time ? '' : 'dim'}">${pw.interrupt_time ? fmtTime(pw.interrupt_time) : '-'}</td>` +
+                `</tr>`
+            );
+        }
+        tbody.innerHTML = rows.join('');
+    },
+
+    toggleDetail(tr) {
+        const fn = tr.dataset.fn;
+        const existing = document.querySelector('tr.detail-row');
+        if (existing) {
+            const wasSame = existing.previousElementSibling === tr;
+            existing.remove();
+            tr.classList.remove('active');
+            if (wasSame) { this.expandedRow = null; return; }
+        }
+        document.querySelectorAll('tr.active').forEach(r => r.classList.remove('active'));
+
+        const pw = this.powers.find(p => p.full_name === fn);
+        if (!pw) return;
+
+        tr.classList.add('active');
+        this.expandedRow = fn;
+
+        const boostsList = (pw.boosts_allowed || []).map(b =>
+            `<span class="boost-tag">${esc(BOOST_SHORT[b] || b)}</span>`
+        ).join(' ');
+
+        // boostsets.bin-derived IO set categories. null = not indexed (fall back
+        // to inference downstream); [] = game says no sets slot here.
+        const setCats = pw.allowed_set_categories;
+        const setCatsRow = setCats == null ? '' : `
+                <div class="boosts-row">
+                    <span class="label">Boostsets Allowed:</span>
+                    ${setCats.length
+                        ? setCats.map(c => `<span class="boost-tag">${esc(c)}</span>`).join(' ')
+                        : '<span class="dim">None</span>'}
+                </div>`;
+
+        const shortHelp = pw.short_help && pw.short_help.length > 2
+            ? `<div class="short-help">${esc(pw.short_help)}</div>` : '';
+
+        const detailTr = document.createElement('tr');
+        detailTr.className = 'detail-row';
+        detailTr.innerHTML = `<td colspan="11">
+            <div class="detail-panel">
+                <div class="full-name">${esc(pw.full_name)}</div>
+                ${shortHelp}
+                ${field('Display Name', pw.display_name)}
+                ${field('Category', pw.category.replace(/_/g, ' '))}
+                ${field('Powerset', pw.powerset)}
+                ${field('Icon', pw.icon || '(none)')}
+                ${field('Effect Area', pw.effect_area_name)}
+                ${field('Max Targets', pw.max_targets_hit || '-')}
+                ${field('Range', pw.range ? pw.range + ' ft' : '-')}
+                ${field('Radius', pw.radius ? pw.radius + ' ft' : '-')}
+                ${field('Arc', pw.arc ? pw.arc + '\u00B0' : '-')}
+                ${field('Cast Time', fmtTime(pw.time_to_activate) + 's')}
+                ${field('Activate Period', fmtTime(pw.activate_period) + 's')}
+                ${field('Interrupt', pw.interrupt_time ? fmtTime(pw.interrupt_time) + 's' : '-')}
+                ${field('Recharge', fmtTime(pw.recharge_time) + 's')}
+                ${field('End Cost', pw.endurance_cost ? pw.endurance_cost.toFixed(2) : '-')}
+                ${field('Accuracy', pw.accuracy ? (pw.accuracy * 100).toFixed(0) + '%' : '-')}
+                <div class="boosts-row">
+                    <span class="label">Boosts Allowed:</span>
+                    ${boostsList || '<span class="dim">None</span>'}
+                </div>
+                ${setCatsRow}
+                <div class="export-row">
+                    <button class="btn-export" onclick="event.stopPropagation(); App.exportPower('${esc(pw.full_name)}')">Export JSON</button>
+                </div>
+            </div>
+        </td>`;
+        tr.after(detailTr);
+    },
+
+    exportPower(fullName) {
+        const pw = this.powers.find(p => p.full_name === fullName);
+        if (!pw) return;
+        const blob = new Blob([JSON.stringify(pw, null, 2)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = pw.full_name.replace(/\./g, '_') + '.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    },
+
+    updateExportLabel() {
+        const cat = $('cat-filter').value;
+        const ps = $('set-filter').value;
+        const btn = $('btn-export-all');
+        if (ps) btn.textContent = 'Export Powerset';
+        else if (cat) btn.textContent = 'Export Category';
+        else btn.textContent = 'Export All';
+    },
+
+    async exportAll() {
+        const btn = $('btn-export-all');
+        btn.textContent = 'Exporting...';
+        btn.disabled = true;
+        try {
+            const category = $('cat-filter').value;
+            const powerset = $('set-filter').value;
+            const params = {};
+            if (category) params.category = category;
+            if (powerset) params.powerset = powerset;
+
+            const data = await this.api('/api/export', params);
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            const parts = [this.currentSource || 'powers'];
+            if (category) parts.push(category);
+            if (powerset) parts.push(powerset);
+            a.download = parts.join('_') + '.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        } catch (e) {
+            alert('Export failed: ' + e.message);
+        } finally {
+            btn.textContent = 'Export JSON';
+            btn.disabled = false;
+        }
+    },
+};
+
+function field(label, value) {
+    return `<div class="field"><span class="label">${esc(label)}</span><span class="value">${esc(String(value))}</span></div>`;
+}
+
+function fmtTime(v) {
+    if (!v) return '-';
+    return v % 1 === 0 ? String(v) : v.toFixed(2);
+}
+
+document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>

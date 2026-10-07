@@ -1,0 +1,562 @@
+{
+  "name": "Repulsion_Field_New",
+  "full_name": "Controller_Buff.Force_Field.Repulsion_Field_New",
+  "short_name": "Repulsion_Field_New",
+  "type": "Toggle",
+  "display_name": "Repulsion Field",
+  "display_fullname": "Controller Buff Force Field Repulsion Field New",
+  "display_help": "This Toggle power creates a field that repels nearby foes. If Force Bubble is also active, then when Repulsion Field is active it grants a Repel effect to Force Bubble, but has no effects itself. If used on its own, Repulsion Field violently flings away any foes that get too close, at the cost of some Endurance for each foe repelled. Repulsion Field's knockback can still affect a target that has been captured by Barrier Field. Repulsion Field costs no endurance to run, and is automatically granted by purchasing the Force Bubble power. Recharge: Slow",
+  "display_short_help": "Toggle: PBAoE Knockback OR Repel (Special)",
+  "icon": "forcefield_repulsionfield.png",
+  "auto_issue": true,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 16,
+  "radius": 9.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.03,
+  "recharge_time": 15.0,
+  "activate_period": 0.5,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Foe",
+    "Self"
+  ],
+  "targets_affected": [
+    "Foe",
+    "Self"
+  ],
+  "boosts_allowed": [],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [
+    "Controller_Buff.Force_Field.Force_Bubble"
+  ],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "cur.kUntouchable",
+        "target>",
+        "0",
+        "<=",
+        "Temporary_Powers.Temporary_Powers.DetentionAnchor",
+        "target.ownPower?",
+        "||",
+        "enttype",
+        "target>",
+        "critter",
+        "eq",
+        "&&",
+        "entref",
+        "target>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "&&"
+      ],
+      "tags": [
+        "RepulsionFieldEffects"
+      ],
+      "flags": [],
+      "is_pvp": "PVE_ONLY",
+      "requires_pv": "PVE_ONLY",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Knockback"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Knockback",
+          "scale": 3.0,
+          "duration": "0.75 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "cur.kUntouchable",
+            "target>",
+            "0",
+            "<=",
+            "Temporary_Powers.Temporary_Powers.DetentionAnchor",
+            "target.ownPower?",
+            "||",
+            "enttype",
+            "target>",
+            "critter",
+            "eq",
+            "&&",
+            "entref",
+            "target>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 320
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "cur.kUntouchable",
+        "target>",
+        "0",
+        "<=",
+        "Temporary_Powers.Temporary_Powers.DetentionAnchor",
+        "target.ownPower?",
+        "||",
+        "entref",
+        "target>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "&&"
+      ],
+      "tags": [
+        "RepulsionFieldEffects"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Endurance"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "Self",
+          "table": "Ranged_Ones",
+          "scale": -1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "cur.kUntouchable",
+            "target>",
+            "0",
+            "<=",
+            "Temporary_Powers.Temporary_Powers.DetentionAnchor",
+            "target.ownPower?",
+            "||",
+            "entref",
+            "target>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 112
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "cur.kUntouchable",
+        "target>",
+        "0",
+        "<=",
+        "Temporary_Powers.Temporary_Powers.DetentionAnchor",
+        "target.ownPower?",
+        "||",
+        "enttype",
+        "target>",
+        "player",
+        "eq",
+        "&&",
+        "entref",
+        "target>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "&&"
+      ],
+      "tags": [
+        "RepulsionFieldEffects"
+      ],
+      "flags": [],
+      "is_pvp": "PVP_ONLY",
+      "requires_pv": "PVP_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Knockback"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Knockback",
+          "scale": 3.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "cur.kUntouchable",
+            "target>",
+            "0",
+            "<=",
+            "Temporary_Powers.Temporary_Powers.DetentionAnchor",
+            "target.ownPower?",
+            "||",
+            "enttype",
+            "target>",
+            "player",
+            "eq",
+            "&&",
+            "entref",
+            "target>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "suppress_events": [
+            {
+              "event": "Knocked",
+              "event_id": 29,
+              "duration": 10.0,
+              "always": 0
+            }
+          ],
+          "flags": [
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 320
+        }
+      ]
+    },
+    {
+      "chance": 0.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "cur.kUntouchable",
+        "target>",
+        "0",
+        "<=",
+        "Temporary_Powers.Temporary_Powers.DetentionAnchor",
+        "target.ownPower?",
+        "||",
+        "enttype",
+        "target>",
+        "player",
+        "eq",
+        "&&",
+        "entref",
+        "target>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "&&"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "PVP_ONLY",
+      "requires_pv": "PVP_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Drop_Toggles"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 0.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "cur.kUntouchable",
+            "target>",
+            "0",
+            "<=",
+            "Temporary_Powers.Temporary_Powers.DetentionAnchor",
+            "target.ownPower?",
+            "||",
+            "enttype",
+            "target>",
+            "player",
+            "eq",
+            "&&",
+            "entref",
+            "target>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "CancelOnMiss",
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1076
+        }
+      ]
+    },
+    {
+      "chance": 0.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "cur.kUntouchable",
+        "target>",
+        "0",
+        "<=",
+        "Temporary_Powers.Temporary_Powers.DetentionAnchor",
+        "target.ownPower?",
+        "||",
+        "enttype",
+        "target>",
+        "player",
+        "eq",
+        "&&",
+        "entref",
+        "target>",
+        "entref",
+        "source>",
+        "eq",
+        "!",
+        "&&"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "PVP_ONLY",
+      "requires_pv": "PVP_ONLY",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Drop_Toggles"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 0.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "cur.kUntouchable",
+            "target>",
+            "0",
+            "<=",
+            "Temporary_Powers.Temporary_Powers.DetentionAnchor",
+            "target.ownPower?",
+            "||",
+            "enttype",
+            "target>",
+            "player",
+            "eq",
+            "&&",
+            "entref",
+            "target>",
+            "entref",
+            "source>",
+            "eq",
+            "!",
+            "&&"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "entref",
+        "target>",
+        "entref",
+        "source>",
+        "eq"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Global_Chance_Mod"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 1.0,
+          "duration": "0.75 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "entref",
+            "target>",
+            "entref",
+            "source>",
+            "eq"
+          ],
+          "caster_stack": "Individual",
+          "stack": "RefreshToCount",
+          "stack_limit": 1,
+          "stack_key": null,
+          "params": {
+            "type": "Power",
+            "power_names": [
+              "ForceBubbleRepel"
+            ]
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 112
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "show_in_manage": false,
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": -1,
+  "powerset": "Controller_Buff.Force_Field"
+}

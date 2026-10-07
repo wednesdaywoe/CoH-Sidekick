@@ -1,0 +1,377 @@
+{
+  "_comment": "Hand-curated structured effects for the procs the derived generator cannot reach — the thin hand-override layer for the genuinely underivable. It exists so a proc lookup never has to fall back to parsing the `mechanics` prose, which is what let that parser be retired. Each entry is a FAITHFUL transcription of the proc's binary-sourced `mechanics` string, structured the way the generator would emit it.\n\nWhy an entry is here, by bucket (the `_groups` headings): Rebirth-only sets, which are absent from the Homecoming export the generator reads; Create_Entity pet summons, where the binary encodes a summon redirect rather than a dashboard stat; PBAoE ally buffs, whose value scales by the slotted power so there is no clean self contribution; self meters and conditional stacks, which no surface models; and utility pieces.\n\nFoe debuff, mez and knock effects carry `target: \"foe\"` so no dashboard path applies them — they are display-only. Two foe procs where the Homecoming binary disagrees with the hand string are transcribed to MATCH the hand value, flagged in `_notes`; resolving them is an in-game verification, not a data change.\n\n`emit-contract.cjs` applies this table seventh of the eight merges that build the contract's `proc-data` section, REPLACING an entry's whole `effects` array — unlike `proc-variable-controls.json`, which patches fields onto what is already there. Keys match `proc-data.json` keys exactly; a key matching no entry is silently ignored, the way the TypeScript merge loop was. Order is not sorted: it is the bucket grouping `_groups` records.",
+  "_groups": [
+    {
+      "heading": "Foe debuffs / mez / knock (display-only; target 'foe')",
+      "firstKey": "Witchcraft: Chance for -Res Debuff"
+    },
+    {
+      "heading": "Damage procs not in the Homecoming bins (Rebirth)",
+      "firstKey": "Absolute Resolution: Chance for Energy Damage"
+    },
+    {
+      "heading": "Always-on globals (Rebirth) — dashboard-relevant",
+      "firstKey": "Superior Winter's Gift: Slow Resistance",
+      "note": "Mirrors the Homecoming \"Winter's Gift: Slow Resistance\" shape; values 25/25 per the mechanics."
+    },
+    {
+      "heading": "PBAoE ally buffs (caster + nearby allies; slotted-power-scaled)",
+      "firstKey": "Vigilant Assault: Recharge/Chance for +Absorb"
+    },
+    {
+      "heading": "Create_Entity pet summons",
+      "firstKey": "Chance for Fiery Orb"
+    },
+    {
+      "heading": "Self meters / conditional stacks / utility (not dashboard-modeled)",
+      "firstKey": "Chance for +Fury"
+    },
+    {
+      "heading": "Self heal / resurrect (Rebirth)",
+      "firstKey": "Vampire's Bite: Chance for Heal"
+    }
+  ],
+  "_notes": {
+    "Witchcraft: Chance for -Res Debuff": "Witchcraft / Superior Witchcraft (Rebirth): Foe(-Resistance 20%) for 10s.",
+    "Chance for Stun": "Stupefy generic \"Chance for Stun\": Foe(Disorient Mag 2) for 8s.",
+    "Chance for Confusion": "Coercive Persuasion \"Chance for Confusion\": Foe(Confusion) for 10s (Execute_Power redirect — magnitude not in the string).",
+    "Imperial Might: Chance for Knockdown": "Imperial Might (Rebirth): Foe(Knockback Mag 0.67 = Knockdown).",
+    "Winter's Bite: Chance for Recharge Slow": "Winter's Bite \"Recharge Slow\": hand Foe(-Recharge 20%) for 20s. NB the Homecoming binary shows the proc as -Speed 20% (RunningSpeed), not -Recharge — transcribed to the hand value.",
+    "Superior Winter's Bite: Recharge/Chance for -Recharge,Slow": "Superior Winter's Bite: Foe(-Recharge 20%, -Speed 20%) for 10s.",
+    "Superior Avalanche: Recharge/Chance for Knockback": "Superior Avalanche: hand Foe(Knockback Mag 6). NB the Homecoming binary shows this proc as a knockdown magnitude (<1), not Mag 6 — transcribed to the hand value.",
+    "Endless Nightmare: Recharge/Chance for Fear, Psionic Damage": "Endless Nightmare / Superior (Rebirth): Foe Fear(8s) + conditional Psionic damage (shown as a damage proc, as before).",
+    "Absolute Resolution: Chance for Energy Damage": "Absolute Resolution (Rebirth): Damage(Energy 7-72); Superior entered flat 72 in the hand string.",
+    "Liberty's Belt: Resistance/Global Damage Bonus": "Liberty's Belt (Rebirth): always-on global +7.5% Damage to all the user's powers — the LotG +Recharge analogue for damage, Rule-of-5 capped. Never functional in Mids (the value is not cleanly in the boost template), hence hand-curated.",
+    "Synapse's Agility: Endurance Drain Resistance (20%)": "Synapse's Agility (Rebirth): always-on 20% resistance to endurance drain, fused onto the 6th piece. The bins carry it as an F-piece-gated auto power (Set_Bonus.Challenge_Set_Bonus.Synapses_Agility) whose two templates are 0.2×Melee_Ones on the Recovery and Endurance attribs — one named effect covering both drain axes, so the one category fans out to both debuff resists at the consumer.",
+    "Guardian's Gift: Chance for PBAoE Resolve": "Guardian's Gift / Superior (Rebirth): PBAoE allies Absorb + Mez Prot + Mez Resist for 15s.",
+    "Subaluwa: Chance for Knockback": "Subaluwa (Thunderspy): Foe(Knockback Mag 6) — Melee_Ones scale 6, PvE only.",
+    "Forced Indoctrination: Chance for Psionic Damage": "Forced Indoctrination (Rebirth): Psionic 0.67 × Melee_TempDamage = 6.7–71.75. Winter Storm and its Superior (Rebirth) carry the same template on Cold.",
+    "Primalist's Nature: Recharge/Primal Energy Bonus": "Primalist's Nature / Superior (Thunderspy): +1 / +2 Primal Energy (the Rage meter, 10 per point), not on PvP maps. A self meter no surface models, hence Special."
+  },
+  "Witchcraft: Chance for -Res Debuff": [
+    {
+      "category": "Debuff",
+      "value": -20,
+      "effectType": "Resistance",
+      "duration": 10,
+      "target": "foe"
+    }
+  ],
+  "Superior Witchcraft: Chance for -Res Debuff": [
+    {
+      "category": "Debuff",
+      "value": -20,
+      "effectType": "Resistance",
+      "duration": 10,
+      "target": "foe"
+    }
+  ],
+  "Chance for Stun": [
+    {
+      "category": "Control",
+      "value": 2,
+      "effectType": "Stun",
+      "duration": 8,
+      "target": "foe"
+    }
+  ],
+  "Chance for Confusion": [
+    {
+      "category": "Control",
+      "effectType": "Confuse",
+      "duration": 10,
+      "target": "foe"
+    }
+  ],
+  "Imperial Might: Chance for Knockdown": [
+    {
+      "category": "Control",
+      "value": 0.67,
+      "effectType": "Knockdown",
+      "target": "foe"
+    }
+  ],
+  "Winter's Bite: Chance for Recharge Slow": [
+    {
+      "category": "Debuff",
+      "value": -20,
+      "effectType": "Recharge",
+      "duration": 20,
+      "target": "foe"
+    }
+  ],
+  "Superior Winter's Bite: Recharge/Chance for -Recharge,Slow": [
+    {
+      "category": "Debuff",
+      "value": -20,
+      "effectType": "Recharge",
+      "duration": 10,
+      "target": "foe"
+    },
+    {
+      "category": "Debuff",
+      "value": -20,
+      "effectType": "Speed",
+      "duration": 10,
+      "target": "foe"
+    }
+  ],
+  "Superior Avalanche: Recharge/Chance for Knockback": [
+    {
+      "category": "Control",
+      "value": 6,
+      "effectType": "Knockback",
+      "target": "foe"
+    }
+  ],
+  "Subaluwa: Chance for Knockback": [
+    {
+      "category": "Control",
+      "value": 6,
+      "effectType": "Knockback",
+      "target": "foe"
+    }
+  ],
+  "Endless Nightmare: Recharge/Chance for Fear, Psionic Damage": [
+    {
+      "category": "Damage",
+      "value": 7,
+      "valueMax": 72,
+      "effectType": "Psionic"
+    },
+    {
+      "category": "Control",
+      "effectType": "Fear",
+      "duration": 8,
+      "target": "foe"
+    }
+  ],
+  "Superior Endless Nightmare: Recharge/Chance for Fear, Psionic Damage": [
+    {
+      "category": "Damage",
+      "value": 10,
+      "valueMax": 107,
+      "effectType": "Psionic"
+    },
+    {
+      "category": "Control",
+      "effectType": "Fear",
+      "duration": 8,
+      "target": "foe"
+    }
+  ],
+  "Absolute Resolution: Chance for Energy Damage": [
+    {
+      "category": "Damage",
+      "value": 7,
+      "valueMax": 72,
+      "effectType": "Energy"
+    }
+  ],
+  "Superior Absolute Resolution: Chance for Energy Damage": [
+    {
+      "category": "Damage",
+      "value": 72,
+      "valueMax": 72,
+      "effectType": "Energy"
+    }
+  ],
+  "Forced Indoctrination: Chance for Psionic Damage": [
+    {
+      "category": "Damage",
+      "value": 6.7,
+      "valueMax": 71.75,
+      "effectType": "Psionic"
+    }
+  ],
+  "Winter Storm: Recharge/Chance for Cold Damage": [
+    {
+      "category": "Damage",
+      "value": 6.7,
+      "valueMax": 71.75,
+      "effectType": "Cold"
+    }
+  ],
+  "Superior Winter Storm: Recharge/Chance for Cold Damage": [
+    {
+      "category": "Damage",
+      "value": 6.7,
+      "valueMax": 71.75,
+      "effectType": "Cold"
+    }
+  ],
+  "Superior Winter's Gift: Slow Resistance": [
+    {
+      "category": "SlowResistance",
+      "value": 25
+    },
+    {
+      "category": "RechargeResistance",
+      "value": 25
+    }
+  ],
+  "Liberty's Belt: Resistance/Global Damage Bonus": [
+    {
+      "category": "Damage",
+      "value": 7.5
+    }
+  ],
+  "Synapse's Agility: Endurance Drain Resistance (20%)": [
+    {
+      "category": "EnduranceDrainResistance",
+      "value": 20
+    }
+  ],
+  "Vigilant Assault: Recharge/Chance for +Absorb": [
+    {
+      "category": "Absorb"
+    }
+  ],
+  "Superior Vigilant Assault: Recharge/Chance for +Absorb": [
+    {
+      "category": "Absorb"
+    }
+  ],
+  "Chance for Minor PBAoE Heal": [
+    {
+      "category": "Heal"
+    }
+  ],
+  "Scourging Blast: Recharge/Chance for +Endurance,+Health": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Scourging Blast: Recharge/Chance for +Endurance,+Health": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Defender's Bastion: Recharge/Chance for +Health": [
+    {
+      "category": "Heal"
+    }
+  ],
+  "Guardian's Gift: Chance for PBAoE Resolve": [
+    {
+      "category": "Special",
+      "duration": 15
+    }
+  ],
+  "Superior Guardian's Gift: Chance for PBAoE Resolve": [
+    {
+      "category": "Special",
+      "duration": 15
+    }
+  ],
+  "Chance for Fiery Orb": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Chance for Energy Font": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Dominating Grasp: Recharge/Chance for Fiery Orb": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Overpowering Presence: Recharge/Chance for Energy Font": [
+    {
+      "category": "Special"
+    }
+  ],
+  "The Haunting: Chance to Summon Haunts": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Haunting: Chance to Summon Haunts": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Chance for +Fury": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Brute's Fury: Recharge/Chance for +Rage": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Primalist's Nature: Recharge/Primal Energy Bonus": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Primalist's Nature: Recharge/Primal Energy Bonus": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Opportunity Strikes: Recharge/Chance for +Opportunity": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Opportunity Strikes: Recharge/Chance for +Opportunity": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Chance for +Damage": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Ascendancy of the Dominator: Recharge/Chance for +Dam(All)": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Assassin's Mark: Recharge/Chance for Recharge Power": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Convert Knockback to Knockdown": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Chance to Recharge Build Up": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Vampire's Bite: Chance for Heal": [
+    {
+      "category": "Heal"
+    }
+  ],
+  "Superior Vampire's Bite: Chance for Heal": [
+    {
+      "category": "Heal"
+    }
+  ],
+  "Return From The Grave: Chance for Self Resurrect": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Superior Return From The Grave: Chance for Self Resurrect": [
+    {
+      "category": "Special"
+    }
+  ],
+  "Inexhaustibility: Chance for Heal/Endurance/Regen": [
+    {
+      "category": "Special"
+    }
+  ]
+}

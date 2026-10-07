@@ -1,0 +1,134 @@
+{
+  "schema": "bin-crawler-assets-sources/2",
+  "note": [
+    "The canonical game-install tree for every dataset and ring. DATA-GAP-REGISTER PROV-1/PROV-2.",
+    "Exports read the LIVE game installs directly. The repo keeps no .pigg snapshots: a snapshot",
+    "goes stale in place, shares its shard basename with the tree it was copied from, and so",
+    "cannot be told apart by name \u2014 which is how a month-old Thunderspy corpus nearly shipped.",
+    "Only 'exportable_ring' may produce a committed export; the other rings exist to be READ when",
+    "checking what a patch is about to do, never to be exported into the tree users get.",
+    "",
+    "Each dataset lists every ROOT it has been seen at \u2014 one per workstation \u2014 and each ring names",
+    "only its SUBPATH inside that root. Roots vary by machine; ring layout does not. The root in",
+    "use is whichever one exists here; if two exist, resolution refuses rather than guesses, and",
+    "BIN_CRAWLER_ASSETS_HOST=<host label> picks one by name. Adding a machine means adding a root,",
+    "not editing paths, so no workstation's entry has to be traded away for another's.",
+    "Paths may be written home-relative (~/\u2026). Rejected subpaths apply under EVERY root, so a trap",
+    "named once stays named on every machine \u2014 schema 1 named them absolutely, so a trap silently",
+    "stopped rejecting anything the moment the workstation changed.",
+    "Every archive here was verified byte-identical to what the committed manifests recorded",
+    "before the 2026-08-04 re-export, so the moves recorded here restated WHERE, never WHAT."
+  ],
+  "datasets": {
+    "homecoming": {
+      "exportable_ring": "live",
+      "roots": [
+        {
+          "host": "mac-launchcat",
+          "path": "~/Library/Application Support/LaunchCat/coh/assets",
+          "note": "macOS, installed by the LaunchCat launcher."
+        },
+        {
+          "host": "linux-wine",
+          "path": "~/.wine/drive_c/Games/Homecoming/assets",
+          "note": "Linux, Homecoming under Wine."
+        }
+      ],
+      "rings": {
+        "live": {
+          "subpath": "live",
+          "note": "The only Homecoming data users may see under the 'homecoming' dataset. The open beta is no longer a ring here: it is the 'brainstorm' dataset, which ships to users in its own right (dev, 2026-08-21)."
+        },
+        "closed_beta": {
+          "subpath": "experimental",
+          "note": "Closed beta, despite the folder being named 'experimental'. Checked once a patch moves from development to closed beta."
+        }
+      },
+      "rejected_subpaths": {
+        "closedbeta": "NOT the closed beta despite the name \u2014 the closed beta is the 'experimental' folder. Never export from here.",
+        "issue24": "An Issue-24 era snapshot (bin.pigg dated 2023-05-08) sitting beside the live rings. Not a Homecoming ring at all \u2014 it is the pre-fork retail corpus, so an export from here would be a different GAME, not a stale one. Byte-identical bin.pigg to the Sweet Tea 'piggs' decoy \u2014 the same unrelated corpus, and it resolves powers.bin just as convincingly. Never export from here."
+      }
+    },
+    "rebirth": {
+      "exportable_ring": "live",
+      "roots": [
+        {
+          "host": "mac-sweettea",
+          "path": "~/github/Thunderspy Gaming/Sweet Tea",
+          "note": "macOS copy of the Sweet Tea install."
+        },
+        {
+          "host": "linux-sweettea",
+          "path": "~/Games/coh-sweettea/drive_c/users/jiiwii/AppData/Local/Thunderspy Gaming/Sweet Tea",
+          "note": "Linux, Sweet Tea under Wine."
+        }
+      ],
+      "rings": {
+        "live": {
+          "subpath": "rebirth",
+          "note": "Rebirth ships from the Sweet Tea install, alongside Thunderspy. Its shard is z_rebirth_bin.pigg, not bin.pigg."
+        }
+      },
+      "rejected_subpaths": {
+        "rebirth_test": "Rebirth's test ring. Not tracked \u2014 Rebirth's major updates are infrequent and its user base small, so only live is followed (dev, 2026-08-01).",
+        "piggs": "A decoy: it resolves powers.bin but yields an unrelated corpus (12,169 files differ from live)."
+      }
+    },
+    "thunderspy": {
+      "exportable_ring": "live",
+      "roots": [
+        {
+          "host": "mac-sweettea",
+          "path": "~/github/Thunderspy Gaming/Sweet Tea",
+          "note": "macOS copy of the Sweet Tea install."
+        },
+        {
+          "host": "linux-sweettea",
+          "path": "~/Games/coh-sweettea/drive_c/users/jiiwii/AppData/Local/Thunderspy Gaming/Sweet Tea",
+          "note": "Linux, Sweet Tea under Wine."
+        }
+      ],
+      "rings": {
+        "live": {
+          "subpath": "tspy",
+          "note": "Thunderspy ships from the Sweet Tea install, alongside Rebirth."
+        }
+      },
+      "rejected_subpaths": {
+        "piggs": "A decoy: it resolves powers.bin but yields an unrelated corpus."
+      }
+    },
+    "brainstorm": {
+      "exportable_ring": "open_beta",
+      "note": [
+        "Homecoming's OPEN beta shard, promoted from a ring Homecoming read to a dataset that",
+        "ships. Brainstorm is a public server anyone may play 24/7, so its data is not",
+        "pre-release in the sense the live-only rule guards against (dev, 2026-08-21). The",
+        "CLOSED beta stays forbidden \u2014 it is homecoming's 'closed_beta' ring, readable for",
+        "checking what a patch will do, never exportable.",
+        "Shares Homecoming's roots because it is the same install; only the subpath differs.",
+        "It names no rejected_subpaths of its own: rejections are matched against every root,",
+        "so homecoming's 'closedbeta' and 'issue24' traps already cover this dataset, and a",
+        "rejection named here would fire on homecoming's own rings too."
+      ],
+      "roots": [
+        {
+          "host": "mac-launchcat",
+          "path": "~/Library/Application Support/LaunchCat/coh/assets",
+          "note": "macOS, installed by the LaunchCat launcher."
+        },
+        {
+          "host": "linux-wine",
+          "path": "~/.wine/drive_c/Games/Homecoming/assets",
+          "note": "Linux, Homecoming under Wine."
+        }
+      ],
+      "rings": {
+        "open_beta": {
+          "subpath": "beta",
+          "note": "The open beta \u2014 the Brainstorm server. Re-pointed at each release cycle rather than retired: when a patch ships to live this shard becomes whatever the next beta is."
+        }
+      }
+    }
+  }
+}

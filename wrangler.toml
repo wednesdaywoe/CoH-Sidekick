@@ -1,0 +1,21 @@
+# The web build's host: a Cloudflare Worker that serves static files and runs no code of its own.
+#
+# A Worker rather than a Pages project because wrangler 4.144 no longer creates Pages projects —
+# `wrangler pages project create` hands itself to Workers and fails without this file (measured
+# 2026-09-29). The live beta at coh-sidekick.com is untouched by it: that site is GitHub Pages,
+# built from the CoH-Sidekick repo.
+#
+# `npm run build:web` fills the directory below, and `npx wrangler deploy` publishes it.
+name = "coh-sidekick-rebuild"
+compatibility_date = "2026-09-29"
+
+# The address testers use. `custom_domain` makes Cloudflare create and own the DNS record and the
+# certificate on deploy -- coh-sidekick.com's zone is on Cloudflare -- so no record is hand-made
+# in the dashboard. It names one host only; the apex stays the beta's.
+routes = [{ pattern = "next.coh-sidekick.com", custom_domain = true }]
+
+[assets]
+directory = "target/dx/Sidekick/release/web/public"
+# Any path that is not a file answers with index.html, so a reload on a deep link, or a sign-in
+# redirect carrying a fragment, lands in the app rather than on a Cloudflare 404.
+not_found_handling = "single-page-application"

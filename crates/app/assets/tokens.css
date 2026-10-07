@@ -1,0 +1,519 @@
+/* ============================================================
+   CoH Sidekick — token system.
+
+   Tier 1 (primitives) lives in themes/<id>.css under a
+   [data-theme='<id>'] selector: surface ramp, ink ramp, thermal
+   accents, fonts. Adding a theme = adding a css file and a
+   manifest entry — no rebuild, no component edits.
+
+   This file holds what themes rarely touch:
+     Tier 1b — stat colors (every theme MAY remap, MUST keep readable)
+              + the brand, which is the product's and not a theme's
+     Tier 2  — semantic aliases (components use ONLY these + stat vars)
+     Tier 3  — geometry & motion
+   ============================================================ */
+
+:root {
+  /* ---- Tier 1b: the stat color code (beta STAT_COLORS, preserved) ----
+     One hue per stat family, everywhere it appears; a debuff is the same
+     hue at 60% opacity. Thermal accents say what STATE a control is in;
+     stat colors say what KIND of number you're reading. Never trade jobs. */
+  --stat-damage: #f87171;
+  --stat-tohit: #facc15;
+  --stat-defense: #c084fc;
+  --stat-resistance: #fb923c;
+  --stat-heal: #4ade80;
+  --stat-endurance: #60a5fa;
+  --stat-movement: #2dd4bf;
+  --stat-mez: #f472b6;
+  --stat-ddr: #22d3ee;
+  --stat-special: #fbbf24;
+  /* Slotted proc damage on the damage bar and its "+N proc" line: the beta's cyan. */
+  --proc-damage: #22d3ee;
+  --stat-neutral: var(--ink-dim);
+  --stat-neutral-dim: var(--ink-faint);
+  --stat-damage-debuff: color-mix(in srgb, var(--stat-damage) 60%, transparent);
+  --stat-tohit-debuff: color-mix(in srgb, var(--stat-tohit) 60%, transparent);
+  --stat-defense-debuff: color-mix(in srgb, var(--stat-defense) 60%, transparent);
+  --stat-resistance-debuff: color-mix(in srgb, var(--stat-resistance) 60%, transparent);
+  --stat-heal-debuff: color-mix(in srgb, var(--stat-heal) 60%, transparent);
+  --stat-endurance-debuff: color-mix(in srgb, var(--stat-endurance) 60%, transparent);
+  --stat-movement-debuff: color-mix(in srgb, var(--stat-movement) 60%, transparent);
+  --stat-mez-debuff: color-mix(in srgb, var(--stat-mez) 60%, transparent);
+
+  /* ---- Tier 1b: the damage-type code ----
+     One hue per damage type, so a type is findable by colour rather than by reading eight
+     identically-painted chips (PR9). The vocabulary is closed and is the schema's, not a
+     game proper noun list: `SubType`'s wire names, minus `Special`, which `damage_types()`
+     filters out before a chip is ever built.
+
+     Mapped onto the stat primitives above rather than given literal hex, for the same reason
+     --enh-* and --tier-* are: a theme that remaps the stat hues carries the damage code along
+     without restating eight more values, and a theme that wants its own damage code still
+     overrides these eight directly.
+
+     Smashing and Lethal are the pair with no hue of their own — the game draws both as plain
+     physical impact — so they take the ink ramp tempered warm and cool instead of a colour.
+     That keeps them reading as the two neutral types while still telling them apart, and it
+     leaves the saturated end of the palette to the six types that ARE elemental. */
+  --dmg-smashing: color-mix(in srgb, var(--stat-resistance) 38%, var(--ink-dim));
+  --dmg-lethal: color-mix(in srgb, var(--stat-endurance) 38%, var(--ink-dim));
+  --dmg-fire: var(--stat-damage);
+  --dmg-cold: var(--stat-ddr);
+  --dmg-energy: var(--stat-tohit);
+  --dmg-negative: var(--stat-defense);
+  --dmg-psionic: var(--stat-mez);
+  --dmg-toxic: var(--stat-heal);
+
+  /* Enhancement type colors — the slot border code (beta getEnhancementBorderColor:
+     io-set yellow, generic gray, special purple, origin green), mapped onto stat
+     primitives so a theme that remaps stat hues carries the slot colors along. */
+  --enh-io-set: var(--stat-special);
+  --enh-generic: var(--stat-neutral);
+  --enh-special: var(--stat-defense);
+  --enh-origin: var(--stat-heal);
+
+  /* Incarnate tier colors — the game's salvage rarity code (common white,
+     uncommon yellow, rare orange, very rare purple), mapped onto stat primitives
+     for the same theme-following reason as the slot border code above. */
+  --tier-common: var(--stat-neutral);
+  --tier-uncommon: var(--stat-tohit);
+  --tier-rare: var(--stat-resistance);
+  --tier-veryrare: var(--stat-defense);
+
+  /* ---- Tier 1b: the brand ----
+     SKMagenta (the beta `--color-sk-magenta`). Defined once here rather than per theme
+     because it belongs to the product, not to a look: a theme swaps the surface ramp, the
+     ink ramp and the thermal accents, and the app is still CoH Sidekick underneath. */
+  --brand: #d62bce;
+  /* The support button's purple: not a stat and not the brand, but it has to darken on a light
+     ramp like they do, so it is a token rather than a literal at its rule. */
+  --support: #a855f7;
+
+  /* ---- Tier 2: semantic aliases over the theme's tier-1 primitives ---- */
+  --surface-app: var(--metal-0);
+  --surface-panel: var(--metal-1);
+  --surface-raised: var(--metal-2);
+  --surface-warmed: var(--metal-3);
+  --seam: var(--line);
+  --seam-raised: var(--line-2);
+  --text: var(--ink);
+  --text-dim: var(--ink-dim);
+  --text-faint: var(--ink-faint);
+  /* The wordmark's ink — the brand, not a state color: the app's name is not hovered,
+     live, or dangerous, so it holds still while the thermal tokens move. */
+  --text-brand: var(--brand);
+  /* Thermal states — the weld semantics every theme maps to its own palette:
+     hover/cooling = heat, live/selected/focus = arc, destructive = ember. */
+  --action-active: var(--arc);
+  --action-active-core: var(--arc-core);
+  --action-hover: var(--heat);
+  --action-danger: var(--ember);
+  --focus-ring: var(--arc-glow);
+  --selected: var(--arc);
+  --ok-signal: var(--ok);
+
+  /* ---- Tier 3: geometry & motion ---- */
+  --r: 5px;
+  --ease: 150ms cubic-bezier(0.4, 0.1, 0.3, 1);
+
+  /* Glyph ramp — the size of a bare symbol (caret, gear, close, grip, ⋮). These are drawn
+     as text, so their size is a font-size, and every one of them was originally set to its
+     neighbouring *label's* size (9–11px), which is the size of a word rather than of a
+     mark: a caret has no x-height or counters to read, so at label size it reads as a
+     speck. Sized on their own ramp instead, and the control seats that hold them derive
+     from `--glyph-seat`, so a mark that grows moves its box with it rather than colliding.
+     Three steps, by how much room the mark's container has: `lg` for panel/modal chrome
+     that owns a seat, the middle step for section carets in a heading's line box, `sm` for
+     marks packed into a dense row.
+
+     THE RAMP IS AUTHORED IN INK, NOT IN EM. A font-size is the em box; what a reader sees
+     is the mark inside it, and the two differ by a factor that is a property of the glyph.
+     So the three steps below are stated as the ink height each one should draw — 11px for a
+     mark that carries a seat of its own, down to 8px for one packed into a dense row — and
+     the font-size is derived. Setting the em directly is how both failures happened: at a
+     label's 10px a caret drew 2.9px of ink, and at the 26px that was meant to fix it a
+     close drew 18.5px, taller than the words either side of it. For scale, the panel title
+     these marks sit beside has an 8px cap height.
+
+     ONE RATIO ONLY DIVIDES OUT FOR GLYPHS WITH COMPARABLE INK, AND MOST OF THESE DON'T.
+     Measured in the running app — `measureText(...).actualBoundingBoxAscent + …Descent` over
+     the resolved font stack, which is the ink box the browser will actually paint — as
+     ink ÷ font-size:
+
+       ✕ 0.74   ⋮ 0.74   ⠿ 0.72        ← `--ink-solid`, the ramp's reference
+       ▼ 0.60                          ← `--ink-caret`
+       ⚙ 0.50   ✓ 0.51   ↶ ↷ 0.50      ← line-drawn marks, half the em
+       ▶ 0.92   ⚡ 1.16   ⚠ 0.82   ☰ 0.44   × 0.47   ▸ ▾ 0.29
+
+     A mark off the reference is NOT a ramp step away from it, it is a different divisor into
+     the same ink target — `--glyph-caret` below, and the calls at `.accolade-row__check`,
+     `.undo-redo`, `.power-row__icon` and `.reorder-handle`, each citing the row it read. That
+     is also why nothing draws ▶ any more: a fold caret is one ▼ rotated (`.caret--folded`),
+     because at 0.92 against 0.60 the collapsed state was drawing half again the ink of the
+     expanded one, on the same control.
+
+     ⚡ is likewise no longer drawn — it marked an available power row until that chip started
+     holding the power's own art, and a picture of the power says "this is a power" better than
+     a bolt did. Its row stays in the table because `.power-row__icon` is still a call on this
+     ramp: the chip now divides by ⚠ 0.82, the fault glyph being the one mark it has left to
+     draw.
+
+     Do not copy the ratios from a font table or a previous version of this comment — the
+     resolved stack decides them, and an earlier table here was wrong about five of these
+     rows. Re-measure in the app.
+
+     THE PANEL HEADER'S THREE MARKS NO LONGER COME THROUGH HERE AT ALL. ✕, ▼ and ⚙ each needed
+     their own divisor, and ⚙ additionally needed the ramp's top step and still read soft,
+     because a font cannot draw a cog at chrome size. They are drawn now — `--icon-chrome` /
+     `--icon-stroke` below, shapes in `src/view/marks.rs` — which is what a mark wants when the
+     answer keeps being "this glyph is the wrong shape at this size." The ramp keeps the marks
+     that sit INSIDE text, where matching the surrounding type is the whole point. */
+  --mark-ink-lg: 11px;
+  --mark-ink: 9.5px;
+  --mark-ink-sm: 8px;
+  --ink-solid: 0.72;
+  --ink-caret: 0.6;
+  --glyph-lg: calc(var(--mark-ink-lg) / var(--ink-solid));
+  --glyph: calc(var(--mark-ink) / var(--ink-solid));
+  --glyph-sm: calc(var(--mark-ink-sm) / var(--ink-solid));
+  --glyph-caret: calc(var(--mark-ink) / var(--ink-caret));
+  /* The same divisor into the SMALL ink target, for a caret that follows a word rather than
+     standing on its own. At `--mark-ink` a ▼ carries 9.5px of ink against a 12px label whose
+     cap-height is about 8.6px, so the arrow outweighs the thing it is subordinate to — which is
+     what put seven of them in the header once the ☰ split into File, Options and Help (HM8). A
+     ramp step, not a guess: the ink target changes, the ▼ divisor does not. */
+  --glyph-caret-sm: calc(var(--mark-ink-sm) / var(--ink-caret));
+  /* One control seat: the box a chrome mark sits in, and the unit the panel header's control
+     lane is counted in. Sized to hold `--glyph-lg`'s em box with room either side, not to a
+     touch target — the lane is desktop chrome, and three seats of it is width the panel
+     title gives up. */
+  --glyph-seat: 26px;
+  /* The other seat: the box a FINGER needs. It is a different measurement from the box a mark
+     needs and must never derive from one — `--glyph-seat` moves when the ink ramp moves, and a
+     fingertip does not care what the ramp says.
+     Claimed only under `(pointer: coarse)`, and the switch is on the POINTER rather than on a
+     width on purpose: a touchscreen laptop is wide and still has the finger, a 400px window on
+     a desktop is narrow and still has the mouse. Sizing the touch target off a breakpoint gets
+     both of those backwards.
+     44px is the platform figure both mobile HIGs land near. WCAG 2.5.8 asks only 24, which is
+     what the two families that cannot spend 44 are held to instead — see the touch layer at the
+     foot of app.css, which is the only place this token is read. */
+  --touch-seat: 44px;
+
+  /* ---- Tier 3: density ----
+     The spacing the planner repeats, named by the ROLE it plays rather than by a step on a
+     scale, so tightening the interface is one edit here instead of a sweep through 300
+     literals. Every rule that draws one of these roles reads the token; a one-off space
+     (the gap inside a single chip, a tooltip's inset) stays a literal at its site, because a
+     token used once is just a rename.
+
+     Tuned against the case that sets the budget: a 1920×1080 screen showing a full build —
+     both powersets, pools, the epic, incarnates, the info panel and a column of stat panels
+     — which the earlier values could not fit. VERTICAL is the whole constraint there, so the
+     vertical roles are cut hard and the horizontal ones are barely touched: the same panel
+     is never short of width (the free grid gives it as many of twelve columns as it needs),
+     and a row that loses its left inset stops reading as a row. */
+
+  /* A panel body's inset from its surface edge — every scrolling body (`.build`, `.powers`,
+     `.stats`, `.info`, `.incarnates`, `.combat`) draws it, so the panels agree on where
+     content starts no matter which surface you look at. Matched to the grid's own row margin,
+     which is what makes the space inside a panel read as the same size as the space between
+     two of them. It is also the one value here that changes a CELL COUNT — it was raised to 9px
+     once and a stat group crossed a row boundary on the strength of that pixel alone. Retune it
+     against a measured surface, never by eye: which group sits nearest a boundary moved when
+     `.stats` went to two columns, so the group that caught it then is not the one to watch now. */
+  --pad-panel: 8px;
+  /* The panel header's own vertical padding. Read by `.panel` into `--panel-head-pad`, which
+     the absolutely-positioned header controls also derive their height from. */
+  --pad-head: 5px;
+  /* One list row's inset — an available power, a pool in the picker, an accolade, a config
+     line. The vertical half is the number that decides how many rows a surface shows, since
+     a panel body is mostly rows. */
+  --pad-row-y: 3px;
+  --pad-row-x: 8px;
+  /* Between the SECTIONS of a panel body (picked cards / available lists / inherents) — the
+     air that says two things are different, so it stays the largest of these. */
+  --gap-section: 10px;
+  /* Between the rows or cards WITHIN one section, where the reading is "more of the same"
+     and air only costs rows. */
+  --gap-stack: 4px;
+  /* A modal's inset. Larger than a panel's: a modal is a surface you opened on purpose and
+     it is sized from the viewport, so it is never the thing that fails to fit. */
+  --pad-modal: 12px;
+
+  /* The round-cell family's diameter — an enhancement slot, the add/remove handles beside it,
+     the ghost a drag previews, and the power icon the row leads with. All one circle, because a
+     row of them reads as a grid of dots only for as long as they agree; it was the same literal
+     copied into six rules, which is fine right up until something has to move it. The touch
+     layer moves it. `.perma-ring` derives both its box and its mask radius from this, and the
+     slot drag measures its step off the rendered cell rather than assuming this number. */
+  --slot-size: 24px;
+  /* The slot stepper's box. Deliberately NOT `--slot-size`: it sits in the slot row but it is
+     chrome on it, not a member of it, and drawing it at the cell diameter made a fully slotted
+     power a run of identical circles with no seam between the content and the control, while
+     costing the card width it turned out not to have. Sizing it apart is what lets a full row of
+     six slots stay on one line at the width a power card is actually dealt. */
+  --slot-control: 18px;
+
+  /* ---- drawn marks ----
+     The ink ramp above is for marks that are TYPED — a glyph the font decides the shape of. The
+     panel chrome's marks are drawn instead (`.panel-icon`), and a drawn mark needs neither the
+     ramp nor its divisors: the viewBox IS the ink box, so the box below is the ink, exactly, in
+     every font stack. It is smaller than `--mark-ink-lg` because that target was set for a ✕
+     the font drew thin — 11px of hairline reads as 11px of nothing much, and the fix for thin is
+     stroke weight, which a typed glyph does not have and this one does. Against the 8px cap
+     height of the title these sit beside, a 13px box carrying ~6.5px of drawn mark is chrome. */
+  --icon-chrome: 13px;
+  /* Real CSS pixels, not viewBox units — the shapes carry `vector-effect: non-scaling-stroke`,
+     so this is the width the stroke lands at whatever the box is scaled to. */
+  --icon-stroke: 1.4px;
+}
+
+/* ---- Tier 1b on a light ramp ----
+   The stat code above is pastel because it was picked against dark metal: on white its yellow
+   is 1.5:1 and its cyan 1.8:1. Any theme whose id ends in `-light` takes this set instead —
+   the same ten hues, each taken down to clear 4.5:1 on a light theme's metal-1 and metal-2,
+   which is where stat text sits. Keyed on the suffix rather than a list so a new light theme
+   cannot ship with the dark set by forgetting to add itself here. The derived codes (--dmg-*,
+   --enh-*, --tier-*, the debuff mixes) follow on their own, since they are built from these.
+   The brand is darkened for the same reason; a light theme with a brand of its own still
+   overrides it, because the theme sheets load after this one. */
+[data-theme$='-light'] {
+  color-scheme: light;
+  --stat-damage: #c81e1e;
+  --stat-tohit: #855800;
+  --stat-defense: #8b2fd9;
+  --stat-resistance: #b03a0b;
+  --stat-heal: #146c36;
+  --stat-endurance: #2459d6;
+  --stat-movement: #0d6b64;
+  --stat-mez: #be185d;
+  --stat-ddr: #0c6a84;
+  --stat-special: #a04606;
+  --proc-damage: #0c6a84;
+  --brand: #b81fb0;
+  --support: #8b2fd9;
+}
+
+/* Touch. The density roles above are cut for a mouse on a 1920×1080 screen; two of them are
+   really statements about how big a thing has to be to hit, and a finger answers that
+   differently. Only these two move — the rest of the tier is about how much fits on a screen,
+   which a phone answers by scrolling. The per-control work is the touch layer at the foot of
+   app.css; this is the part that is one number. */
+@media (pointer: coarse) {
+  :root {
+    /* The slot is the drag target the whole slotting interaction is made of — the one thing in
+       the app that grows its INK on touch rather than just its box, because a 24px circle is a
+       target you can hit and not one you can confidently drag.
+       Six of these plus the icon and the stepper do NOT fit a 320px phone — they come to about
+       340px — and that is the case the capsule's split is built for: the cells take a second line
+       and the control stays put. An earlier note here claimed the row fit, which was arrived at
+       by counting the slots and forgetting the buttons next to them. */
+    --slot-size: 34px;
+    /* The stepper rejoins the cell diameter here, and only here: the reason it is smaller on a
+       mouse is width the card cannot spare, and the reason it is big on a finger is that it is a
+       DRAG handle. Width is the cheaper of the two to give up — the slot row's control is held
+       out of the wrapping flow (`.slot-capsule__controls`), so a row too wide for the card wraps
+       its cells underneath and leaves the handle where the thumb left it. */
+    --slot-control: var(--slot-size);
+    /* A list row is a target on touch, not just a line of text: at 3px the available-power rows
+       — the app's primary "pick this" control — drew 26px tall. */
+    --pad-row-y: 12px;
+  }
+}
+
+/* ---- base element styles (token-driven; no theme names anywhere) ---- */
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--surface-app);
+  color: var(--text);
+  font-family: var(--font-chrome);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+.mono, .data { font-family: var(--font-data); }
+
+/* ============================================================
+   The system-chrome sweep.
+
+   Left alone, the webview draws its HOST OS's controls: light rounded scrollbars,
+   a blue-and-white checkbox, a macOS popup button for every `<select>`, a system-font
+   text field. Each is a foreign object in a themed dark panel, and none of them
+   reskins with the theme.
+
+   These live at ELEMENT level, not on component classes, because the failure they
+   fix is a control that ships without a class — the attack-chain palette's rank
+   `<select>` had none, so it rendered as a raw OS popup while its four classed
+   siblings looked right. A base rule catches that one too.
+
+   Every selector is wrapped in `:where()` so it carries ZERO specificity: these are
+   the floor, and any component rule (including the ones that visually HIDE a real
+   checkbox behind a custom pill) overrides them without needing `!important`.
+   ============================================================ */
+
+/* Scrollbars. Styled on the element rather than a `.scrollbar-thin` utility, because
+   every panel body, modal and picker list owns its own `overflow-y: auto` — an opt-in
+   class is a list to keep in sync, and the one place it gets forgotten is the place
+   the OS bar reappears. Firefox takes the two standard properties; WebKit (which is
+   what the desktop webview is) needs the pseudo-elements. */
+:where(*) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--seam-raised) transparent;
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--seam-raised);
+  border-radius: 999px;
+  /* Inset via a transparent border rather than a narrower track, so the thumb thins
+     without the gutter narrowing — a 10px gutter is the touch/pointer target. */
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint); background-clip: content-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* Fields inherit the app's type instead of the UA's 13px system stack. */
+:where(input, select, textarea, button) { font-family: inherit; }
+:where(input, select, textarea) {
+  font-size: inherit;
+  color: var(--text);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--seam-raised);
+  border-radius: var(--r);
+  /* Kills iOS/WebKit's inner shadow and the OS-drawn field bevel. */
+  appearance: none;
+  -webkit-appearance: none;
+}
+:where(input, select, textarea):focus-visible {
+  outline: none;
+  border-color: var(--action-active);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--focus-ring) 40%, transparent);
+}
+:where(input, textarea)::placeholder { color: var(--text-faint); }
+
+/* The dropdown mark. A `<select>` renders no `::after` in any engine, so the caret is
+   drawn as two background triangles — in `currentColor`, so it follows the theme's ink
+   the way a pseudo-element would and a data-URI SVG would not. Component rules must set
+   `background-color`, never the `background` shorthand, or they erase it. */
+:where(select) {
+  padding-right: 26px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 14px center, right 9px center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+/* The open popup list is OS-drawn; these are the only two properties it honours, and
+   without them a dark-theme select drops a white menu. */
+:where(select) option { background-color: var(--surface-panel); color: var(--text); }
+
+/* Checkbox / radio: the box is ours, the check is a clipped square in the arc color.
+   `display: grid` + `place-content` centres the mark without a line-height guess.
+
+   Sized as a CONTROL, not off the glyph ramp: the ramp sizes a bare mark against how much ink
+   it should draw, and this is a box with a mark inside it — pinned to the ramp it would shrink
+   below a clickable target every time the marks were tightened. */
+:where(input[type="checkbox"], input[type="radio"]) {
+  display: inline-grid;
+  place-content: center;
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  cursor: pointer;
+  transition: border-color var(--ease), background-color var(--ease);
+}
+:where(input[type="radio"]) { border-radius: 50%; }
+:where(input[type="checkbox"], input[type="radio"]):hover {
+  border-color: var(--action-hover);
+}
+/* The mark's size is absolute, and it has to be. `place-content: center` sizes the grid's
+   track to its item, so a PERCENTAGE here resolves against a track whose size depends on the
+   item itself — the cycle resolves to zero, and the check computes to 0x0 and draws nothing at
+   any theme or scale. It was written as 74%/62% of the 15px box; these are those numbers. */
+:where(input[type="checkbox"], input[type="radio"])::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  background: var(--action-active-core);
+  transform: scale(0);
+  transition: transform var(--ease);
+}
+:where(input[type="checkbox"])::before {
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  width: 11px;
+  height: 11px;
+}
+:where(input[type="radio"])::before { border-radius: 50%; }
+:where(input[type="checkbox"], input[type="radio"]):checked {
+  border-color: var(--action-active);
+}
+:where(input[type="checkbox"], input[type="radio"]):checked::before {
+  transform: scale(1);
+}
+
+/* Range: the track and both thumbs are drawn per engine. WebKit needs the track styled
+   AND the thumb explicitly re-hidden; Firefox styles the progress fill separately. Held
+   here rather than under a `.slider` wrapper for the same reason as the rest of this
+   block — an unwrapped range must not fall back to the OS's solid-white control. */
+:where(input[type="range"]) {
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+:where(input[type="range"])::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 999px;
+  background: var(--surface-raised); border: 1px solid var(--seam-raised);
+}
+:where(input[type="range"])::-moz-range-track {
+  height: 4px; border-radius: 999px;
+  background: var(--surface-raised); border: 1px solid var(--seam-raised);
+}
+:where(input[type="range"])::-moz-range-progress {
+  height: 4px; border-radius: 999px; background: var(--action-active-core);
+}
+:where(input[type="range"])::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 12px; height: 12px; margin-top: -5px;
+  border: none; border-radius: 50%;
+  background: var(--action-active-core); cursor: pointer;
+}
+:where(input[type="range"])::-moz-range-thumb {
+  width: 12px; height: 12px;
+  border: none; border-radius: 50%;
+  background: var(--action-active-core); cursor: pointer;
+}
+:where(input[type="range"]):focus-visible { outline: none; box-shadow: none; }
+:where(input[type="range"]):focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 8px color-mix(in srgb, var(--focus-ring) 40%, transparent);
+}
+:where(input[type="range"]):focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 8px color-mix(in srgb, var(--focus-ring) 40%, transparent);
+}
+
+/* A range is the one native control whose target is not its box: the box is 96px of track and
+   the thing you have to land on is the thumb, which is 12px. On touch the thumb takes most of
+   the seat and the input grows a band around the track to catch the press that missed. The
+   track itself does not move — it is a 4px hairline in both, and a thicker one would read as a
+   different control. WebKit centres its thumb by margin, so that margin is re-derived here
+   rather than restated: same relationship, bigger thumb. */
+@media (pointer: coarse) {
+  :where(input[type="range"]) { height: var(--touch-seat); }
+  :where(input[type="range"])::-webkit-slider-thumb {
+    width: 20px; height: 20px; margin-top: -9px;
+  }
+  :where(input[type="range"])::-moz-range-thumb { width: 20px; height: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

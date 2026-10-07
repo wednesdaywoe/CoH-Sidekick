@@ -1,0 +1,162 @@
+{
+  "name": "EMP_Arrow",
+  "full_name": "Controller_Buff.Trick_Arrow.EMP_Arrow",
+  "short_name": "EMP_Arrow",
+  "type": "Click",
+  "display_name": "EMP Arrow",
+  "display_fullname": "Controller Buff Trick Arrow EMP Arrow",
+  "display_help": "EMP Arrow unleashes a massive pulse of electromagnetic energy on impact. Allies that enter the field will see an increase to their damage resistances against all damage except Toxic. They are also protected from status effects, knockbacks, endurance drain, recovery debuffs and recharge debuffs. Only one EMP Field can be sustained at once. This EMP will affect enemy machines adversively, and is even powerful enough to affect synaptic brain patterns. It will incapacitate all foes in its radius. Machines and robots are more likely to take high damage.<br><br><color #fcfc95>Recharge: Very Long.</color>",
+  "display_short_help": "AoE, Foe Hold, Special",
+  "icon": "trickarrow_stun.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Location",
+  "max_targets_hit": 16,
+  "radius": 35.0,
+  "arc": 0.0,
+  "range": 70.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.83,
+  "time_to_root": 1.83,
+  "recharge_time": 300.0,
+  "activate_period": 0.0,
+  "endurance_cost": 23.4,
+  "interrupt_time": 0.0,
+  "target_type": "Location",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Recovery",
+    "Hold",
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Controller Archetype Sets",
+    "Endurance Modification",
+    "Holds"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    112,
+    132
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Melee_Level",
+          "scale": 1.0,
+          "duration": "240 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "display_name": "EMP Field",
+            "priority_list": "PL_StaticObject",
+            "redirects": [
+              "Redirects.Trick_Arrow.EMP_Arrow",
+              "Redirects.Trick_Arrow.EMP_Arrow_Fx"
+            ],
+            "type": "EntCreate"
+          },
+          "flags": [
+            "IgnoreCombatMods",
+            "KeepThroughDeath",
+            "DoNotTintCostume",
+            "CopyBoosts",
+            "PseudoPet"
+          ],
+          "flags_raw": 16704,
+          "flags2_raw": 38
+        },
+        {
+          "attribs": [
+            "Execute_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Strength",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": 0.0,
+          "duration": "0 seconds",
+          "magnitude": 0.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Redirects.Trick_Arrow.EMP_Arrow_Burst"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags": [
+            "CopyBoosts"
+          ],
+          "flags_raw": 1280,
+          "flags2_raw": 4
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 29,
+  "powerset": "Controller_Buff.Trick_Arrow"
+}

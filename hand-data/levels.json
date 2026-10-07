@@ -1,0 +1,192 @@
+{
+  "_comment": "Level-progression rules the game files do not carry, plus the authored half of the four inherent Fitness powers. Shared by all four forks: only Homecoming ever authored a `levels.ts` and the other three read its tables, so one file serves every contract. `INHERENT_FITNESS_POWERS` is a SEAM, not a whole section — Swift, Hurdle, Health and Stamina are named and gated here, and `emit-contract.cjs` splices each one's calc payload (`atoms`, `stats`, `effectArea`, and `effects` if the fork carries one) off the `fitness` pool in `pipeline/<id>/power-pools-raw.json`, matched on `internalName`. Never transcribe those numbers here: a hand table is what dropped Health's `MezResist(Sleep)` atom and made the planner report no Sleep resistance at all (INHERENT-1). The rest of the contract's `levels` section is derived and is not here: `BASIC_INHERENT_POWERS` and `PRESTIGE_SPRINT_POWERS` come off `basic-inherents.json`, and the seven schedule constants off `leveling-schedule.json`. A fork that retunes anything below gets `hand-data/<id>/levels.json`, and the read in `emit-contract.cjs` grows a fallback then.",
+  "ENHANCEMENT_AVAILABILITY": {
+    "TO": {
+      "minLevel": 1,
+      "maxLevel": 15,
+      "description": "Training Origin - Basic enhancements available at level 1"
+    },
+    "DO": {
+      "minLevel": 12,
+      "maxLevel": 25,
+      "description": "Dual Origin - Available at level 12, stronger than TO"
+    },
+    "SO": {
+      "minLevel": 22,
+      "maxLevel": 50,
+      "description": "Single Origin - Available at level 22, standard endgame enhancement"
+    },
+    "IO": {
+      "minLevel": 10,
+      "maxLevel": 50,
+      "description": "Invention Origin - Craftable, never expire, available level 10+"
+    },
+    "IO_SET": {
+      "minLevel": 10,
+      "maxLevel": 50,
+      "description": "IO Sets - Set bonuses, available level 10+ (varies by set)"
+    },
+    "PURPLE": {
+      "minLevel": 50,
+      "maxLevel": 50,
+      "description": "Purple Sets - Very Rare, level 50 only, can be attuned"
+    },
+    "PVP": {
+      "minLevel": 10,
+      "maxLevel": 50,
+      "description": "PvP IO Sets - From PvP rewards"
+    },
+    "ATO": {
+      "minLevel": 1,
+      "maxLevel": 50,
+      "description": "Archetype Origin - From Super Packs, scale when attuned"
+    },
+    "WINTER": {
+      "minLevel": 1,
+      "maxLevel": 50,
+      "description": "Winter-O Sets - From Winter Event, scale when attuned"
+    }
+  },
+  "EPIC_TIER_REQUIREMENTS": {
+    "TIER_1_2": {
+      "minLevel": 35,
+      "requiredPowers": 0,
+      "description": "First two powers, available at epic pool unlock"
+    },
+    "TIER_3": {
+      "minLevel": 38,
+      "requiredPowers": 1,
+      "description": "Third power, requires level 38 and 1 power from the pool"
+    },
+    "TIER_4": {
+      "minLevel": 41,
+      "requiredPowers": 1,
+      "description": "Fourth power, requires level 41 and 1 power from the pool"
+    },
+    "TIER_5": {
+      "minLevel": 44,
+      "requiredPowers": 2,
+      "description": "Fifth power, requires level 44 and 2 powers from the pool"
+    }
+  },
+  "INCARNATE_LEVEL": 50,
+  "INCARNATE_SLOTS": {
+    "Alpha": {
+      "order": 1,
+      "description": "Level shift and stat boost",
+      "unlockMethod": "Complete Menders of Ouroboros arc or Ramiel arc"
+    },
+    "Judgment": {
+      "order": 2,
+      "description": "Powerful AoE attack",
+      "unlockMethod": "Unlock Alpha slot"
+    },
+    "Interface": {
+      "order": 3,
+      "description": "Proc effect on attacks",
+      "unlockMethod": "Unlock Judgment slot"
+    },
+    "Lore": {
+      "order": 4,
+      "description": "Summon powerful pets",
+      "unlockMethod": "Unlock Interface slot"
+    },
+    "Destiny": {
+      "order": 5,
+      "description": "Team-wide buff/debuff",
+      "unlockMethod": "Unlock Lore slot"
+    },
+    "Hybrid": {
+      "order": 6,
+      "description": "Sustained personal buff",
+      "unlockMethod": "Unlock all previous slots"
+    },
+    "Genesis": {
+      "order": 7,
+      "description": "Pet enhancement",
+      "unlockMethod": "Unlock Hybrid slot"
+    },
+    "Omega": {
+      "order": 8,
+      "description": "Additional level shift",
+      "unlockMethod": "Unlock Genesis slot"
+    }
+  },
+  "INHERENT_FITNESS_POWERS": [
+    {
+      "name": "Swift",
+      "internalName": "Swift",
+      "fullName": "Inherent.Fitness.Swift",
+      "description": "You can naturally run slightly faster than normal. This ability is always on and does not cost any Endurance.",
+      "shortHelp": "Auto: Self +Speed",
+      "icon": "fitness_quick.png",
+      "powerType": "Auto",
+      "available": -1,
+      "maxSlots": 6,
+      "allowedEnhancements": [
+        "Run Speed",
+        "Fly"
+      ],
+      "allowedSetCategories": [],
+      "isLocked": true,
+      "category": "fitness"
+    },
+    {
+      "name": "Hurdle",
+      "internalName": "Hurdle",
+      "fullName": "Inherent.Fitness.Hurdle",
+      "description": "You can naturally jump higher than normal. This ability is always on and does not cost any Endurance.",
+      "shortHelp": "Auto: Self +Jump",
+      "icon": "fitness_hurdle.png",
+      "powerType": "Auto",
+      "available": -1,
+      "maxSlots": 6,
+      "allowedEnhancements": [
+        "Jump"
+      ],
+      "allowedSetCategories": [],
+      "isLocked": true,
+      "category": "fitness"
+    },
+    {
+      "name": "Health",
+      "internalName": "Health",
+      "fullName": "Inherent.Fitness.Health",
+      "description": "You heal slightly faster than a normal person. Your improved Health also grants you resistance to Sleep. This ability is always on and does not cost any Endurance.",
+      "shortHelp": "Auto: Self +Regeneration, Res(Sleep)",
+      "icon": "fitness_health.png",
+      "powerType": "Auto",
+      "available": -1,
+      "maxSlots": 6,
+      "allowedEnhancements": [
+        "Healing"
+      ],
+      "allowedSetCategories": [
+        "Healing"
+      ],
+      "isLocked": true,
+      "category": "fitness"
+    },
+    {
+      "name": "Stamina",
+      "internalName": "Stamina",
+      "fullName": "Inherent.Fitness.Stamina",
+      "description": "You recover Endurance slightly more quickly than normal. This ability is always on and does not cost any Endurance.",
+      "shortHelp": "Auto: Self +Recovery",
+      "icon": "fitness_stamina.png",
+      "powerType": "Auto",
+      "available": -1,
+      "maxSlots": 6,
+      "allowedEnhancements": [
+        "EnduranceModification"
+      ],
+      "allowedSetCategories": [
+        "Endurance Modification"
+      ],
+      "isLocked": true,
+      "category": "fitness"
+    }
+  ],
+  "MAX_LEVEL": 50,
+  "MAX_SLOTS_PER_POWER": 6
+}

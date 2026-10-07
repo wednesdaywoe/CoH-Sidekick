@@ -1,0 +1,359 @@
+{
+  "note": [
+    "SECURITY_AUDIT.md F74 -- every panic site that survives into the SHIPPED wasm engine, with the",
+    "reading that says it cannot be reached from a door. Generated and graded by",
+    "scripts/keys/f74-wasm-panic-sites.py; `--check` fails on any site not in this file.",
+    "",
+    "WHY IT EXISTS. F74's ceiling was a list derived from the artifact and adjudicated by hand in",
+    "docs/security-audit-findings.md -- correct, and load-bearing on nothing: no check failed if a",
+    "later edit turned one of the readings false, and the census had to be re-run by whoever",
+    "remembered. This file is that reading committed, so the next engine rebuild grades itself.",
+    "",
+    "THE KEY IS (file, text), NOT (file, line). F74 carries two stale-anchor corrections in five days",
+    "and concludes that a finding should anchor on a symbol rather than a line. An unrelated edit",
+    "above a site shifts its line; a gate that reds on that is a gate somebody turns off. The text of",
+    "the expression is what was adjudicated, so an edit to the expression is what forces a re-reading.",
+    "`line` and `column` are the last observed coordinates, carried for the reader, and are not graded.",
+    "",
+    "`count` is how many Location records share one (file, text) -- two `it.next().unwrap()` on one",
+    "line are two sites, and two identically-written `group[group.len() - 1]` in one file are two.",
+    "",
+    "THE CLASSES. `invariant`: total by an invariant in its own function, a guard above it, or the",
+    "type. `loader`: total by a guarantee the dataset loader enforces and states. `rule1-const`:",
+    "deliberate Rule-1 loudness over a const compiled into the binary -- reachable by a build-time",
+    "defect, never by a caller. A site that fits none of the three is not a fourth class; it is a",
+    "finding, and F74 reopens.",
+    "",
+    "WHAT A GREEN HERE DOES NOT SAY. Most of these readings rest on a guard somewhere ELSE in the",
+    "function -- appliers/defense.rs's is a two-step argument over guards thirty lines up. Break that",
+    "guard without touching the indexing line and this file still grades clean. The floor,",
+    "crates/coh_wasm/tests/panic_freedom.rs, is what covers that direction by driving the doors with",
+    "mutated builds. Neither artifact alone is F74's argument."
+  ],
+  "adjudicated": [
+    {
+      "file": "crates/coh_data/src/atom_wire.rs",
+      "line": 69,
+      "column": 16,
+      "text": "field: ATOM_TUPLE_FIELDS[index],",
+      "count": 1,
+      "class": "invariant",
+      "why": "`err(index)` is reached from a decode that refuses `tuple.len() > ATOM_TUPLE_FIELDS.len()` first (:78); the one literal index is `len() - 1` over a non-empty const, and every other `i` comes from iterating that bounded tuple."
+    },
+    {
+      "file": "crates/coh_data/src/boost_index.rs",
+      "line": 119,
+      "column": 37,
+      "text": "Ok(spellings.into_iter().next().expect(\"one spelling\"))",
+      "count": 1,
+      "class": "invariant",
+      "why": "`by_stat.is_empty()` is refused at :94 and `spellings.len() > 1` at :103, so the set holds exactly one element when `.next()` is called."
+    },
+    {
+      "file": "crates/coh_data/src/incarnate_effects.rs",
+      "line": 345,
+      "column": 51,
+      "text": "durations.sort_by(|a, b| a.partial_cmp(b).expect(\"tier durations are finite\"));",
+      "count": 1,
+      "class": "invariant",
+      "why": "`partial_cmp` returns `None` only for NaN, and the `.filter(|&d| d > 0.0)` two lines above has already dropped every NaN."
+    },
+    {
+      "file": "crates/coh_data/src/pick_rules.rs",
+      "line": 412,
+      "column": 38,
+      "text": "let category = normalize(segments[0]);",
+      "count": 1,
+      "class": "invariant",
+      "why": "`str::split` always yields at least one segment, so `segments[0]` exists for any `path`, including the empty string."
+    },
+    {
+      "file": "crates/coh_data/src/target_classes.rs",
+      "line": 111,
+      "column": 13,
+      "text": "w[0].eq_ignore_ascii_case(TARGET_ARCH_READER)",
+      "count": 1,
+      "class": "invariant",
+      "why": "inside `tokens.windows(4)`, where every window is exactly four long by the type."
+    },
+    {
+      "file": "crates/coh_data/src/target_classes.rs",
+      "line": 112,
+      "column": 20,
+      "text": "&& w[1].eq_ignore_ascii_case(TARGET_ENTITY_READER)",
+      "count": 1,
+      "class": "invariant",
+      "why": "inside `tokens.windows(4)`, where every window is exactly four long by the type."
+    },
+    {
+      "file": "crates/coh_data/src/target_classes.rs",
+      "line": 113,
+      "column": 20,
+      "text": "&& w[3].eq_ignore_ascii_case(\"eq\")",
+      "count": 1,
+      "class": "invariant",
+      "why": "inside `tokens.windows(4)`, where every window is exactly four long by the type."
+    },
+    {
+      "file": "crates/coh_data/src/target_classes.rs",
+      "line": 115,
+      "column": 18,
+      "text": ".map(|w| w[2].to_string())",
+      "count": 1,
+      "class": "invariant",
+      "why": "inside `tokens.windows(4)`, where every window is exactly four long by the type."
+    },
+    {
+      "file": "crates/coh_math/src/appliers/damage.rs",
+      "line": 199,
+      "column": 40,
+      "text": "&mut groups.last_mut().unwrap().1",
+      "count": 1,
+      "class": "invariant",
+      "why": "the `None` arm pushes onto `groups` on the line above, so `last_mut` is `Some`."
+    },
+    {
+      "file": "crates/coh_math/src/appliers/defense.rs",
+      "line": 91,
+      "column": 20,
+      "text": "let last = base[base.len() - 1];",
+      "count": 1,
+      "class": "invariant",
+      "why": "a two-step argument, and the longest-range one in this file. The guard at :56 refuses only `base.is_empty() && gated_incr.is_empty()`, so `base` alone may be empty -- but an empty `base` makes `base_incr` empty, which leaves `increments` equal to `gated_incr`, which the same guard then forces non-empty, and the `!increments.is_empty()` branch RETURNS at :84. Reaching :91 therefore implies `base` is non-empty."
+    },
+    {
+      "file": "crates/coh_math/src/appliers/defense.rs",
+      "line": 233,
+      "column": 25,
+      "text": "let last = group[group.len() - 1];",
+      "count": 1,
+      "class": "invariant",
+      "why": "`group[group.len() - 1]` over a grouping of a list an `is_empty()` guard already refused; a group-by cannot yield an empty group."
+    },
+    {
+      "file": "crates/coh_math/src/appliers/mod.rs",
+      "line": 239,
+      "column": 53,
+      "text": ".filter(|b| b.1.map(f64::to_bits) == buckets[0].1.map(f64::to_bits))",
+      "count": 1,
+      "class": "invariant",
+      "why": "`atoms.is_empty()` returns `None` at :225, and `duration_buckets` pushes one bucket per atom, so `buckets[0]` exists."
+    },
+    {
+      "file": "crates/coh_math/src/appliers/mod.rs",
+      "line": 281,
+      "column": 16,
+      "text": "buckets[0].2[0].scale.map_or(f64::NAN, f64::abs)",
+      "count": 2,
+      "class": "invariant",
+      "why": "as :239 -- and every bucket is created as `vec![a]`, so `buckets[0].2[0]` exists too."
+    },
+    {
+      "file": "crates/coh_math/src/appliers/resistance.rs",
+      "line": 72,
+      "column": 25,
+      "text": "let last = group[group.len() - 1];",
+      "count": 2,
+      "class": "invariant",
+      "why": "`group[group.len() - 1]` over a grouping of a list an `is_empty()` guard already refused; a group-by cannot yield an empty group."
+    },
+    {
+      "file": "crates/coh_math/src/appliers/resources.rs",
+      "line": 29,
+      "column": 35,
+      "text": "let mut table: Option<&str> = atoms[0].modifier_table.as_deref();",
+      "count": 1,
+      "class": "invariant",
+      "why": "both callers refuse an empty slice first -- `mine.is_empty()` at :129 and `atoms.is_empty()` at :185, whose `refs` is one reference per atom."
+    },
+    {
+      "file": "crates/coh_math/src/effect_registry.rs",
+      "line": 184,
+      "column": 10,
+      "text": ".expect(\"contract/effect-registry.json is valid and matches EffectDisplayConfig\")",
+      "count": 1,
+      "class": "rule1-const",
+      "why": "Rule 1 over `contract/effect-registry.json`, a const compiled into the binary: reachable by a build-time defect, never by a caller, and the message says what the next person has to write down."
+    },
+    {
+      "file": "crates/coh_math/src/effective.rs",
+      "line": 466,
+      "column": 27,
+      "text": "1 => Some(entries.remove(0)),",
+      "count": 1,
+      "class": "invariant",
+      "why": "`entries.remove(0)` inside the `1 =>` arm of a `match entries.len()`."
+    },
+    {
+      "file": "crates/coh_math/src/enhancement.rs",
+      "line": 134,
+      "column": 5,
+      "text": "curve[index]",
+      "count": 1,
+      "class": "loader",
+      "why": "`handicap_curve_at`'s `.min(len) - 1` needs a non-empty curve, and the loader states and enforces that: `coh_data/src/enhancement_curves.rs:202-231` refuses an empty craft-level band, an empty strength curve on any of the four schedules, an empty boosters curve and empty exemplar limits/weights."
+    },
+    {
+      "file": "crates/coh_math/src/enhancement.rs",
+      "line": 240,
+      "column": 10,
+      "text": "Some(ladder[index])",
+      "count": 1,
+      "class": "invariant",
+      "why": "`multi_aspect_scale` is `[f64; 4]`, so `.len()` is 4 by the type, and `aspect_count < 1` is refused at :234 -- `.min(4) - 1` cannot underflow."
+    },
+    {
+      "file": "crates/coh_math/src/expr.rs",
+      "line": 654,
+      "column": 18,
+      "text": "_ => unreachable!(),",
+      "count": 2,
+      "class": "invariant",
+      "why": "an `unreachable!()` on an arm the caller cannot spell."
+    },
+    {
+      "file": "crates/coh_math/src/expr.rs",
+      "line": 810,
+      "column": 19,
+      "text": "Ok([it.next().unwrap(), it.next().unwrap()])",
+      "count": 2,
+      "class": "invariant",
+      "why": "`pop_n(stack, 2, ..)?` returned two, so the iterator yields two."
+    },
+    {
+      "file": "crates/coh_math/src/expr.rs",
+      "line": 816,
+      "column": 19,
+      "text": "Ok([it.next().unwrap(), it.next().unwrap(), it.next().unwrap()])",
+      "count": 3,
+      "class": "invariant",
+      "why": "`pop_n(stack, 3, ..)?` returned three, so the iterator yields three."
+    },
+    {
+      "file": "crates/coh_math/src/granted.rs",
+      "line": 1488,
+      "column": 49,
+      "text": "&mut enhanceable.last_mut().expect(\"just pushed\").1",
+      "count": 1,
+      "class": "invariant",
+      "why": "the `None` arm pushes onto `enhanceable` on the line above, so `last_mut` is `Some`."
+    },
+    {
+      "file": "crates/coh_math/src/granted.rs",
+      "line": 1696,
+      "column": 13,
+      "text": "serde_json::json!({ SCALE_TERMS_KEY: terms })",
+      "count": 1,
+      "class": "invariant",
+      "why": "`json!` over a `&'static str` key and a `Vec<Value>`; both conversions are infallible by the type."
+    },
+    {
+      "file": "crates/coh_math/src/granted.rs",
+      "line": 2091,
+      "column": 17,
+      "text": "unreachable!(\"an unresolvable mez pushed its row above and continued\")",
+      "count": 1,
+      "class": "invariant",
+      "why": "an `unreachable!()` on the mez arms the rows above have already resolved and continued past."
+    },
+    {
+      "file": "crates/coh_math/src/set_bonuses.rs",
+      "line": 84,
+      "column": 47,
+      "text": "serde_json::from_str(STAT_VOCAB_JSON).expect(\"set-bonus-stat-vocab.json is valid JSON\");",
+      "count": 1,
+      "class": "rule1-const",
+      "why": "Rule 1 over `set-bonus-stat-vocab.json`, a const compiled into the binary: reachable by a build-time defect, never by a caller."
+    },
+    {
+      "file": "crates/coh_math/src/set_bonuses.rs",
+      "line": 95,
+      "column": 25,
+      "text": "panic!(",
+      "count": 1,
+      "class": "rule1-const",
+      "why": "Rule 1 over `set-bonus-stat-vocab.json`, a const compiled into the binary: reachable by a build-time defect, never by a caller."
+    },
+    {
+      "file": "crates/coh_math/src/set_bonuses.rs",
+      "line": 107,
+      "column": 21,
+      "text": "panic!(\"set-bonus-stat-vocab.json: unknown internal key {k:?} for raw {raw:?}\")",
+      "count": 1,
+      "class": "rule1-const",
+      "why": "Rule 1 over `set-bonus-stat-vocab.json`, a const compiled into the binary: reachable by a build-time defect, never by a caller."
+    },
+    {
+      "file": "crates/coh_math/src/window_slots.rs",
+      "line": 529,
+      "column": 36,
+      "text": "let obj = cur.as_mut().expect(\"same_table implies a current entry\");",
+      "count": 1,
+      "class": "invariant",
+      "why": "`same_table` is `cur.is_some() && ..` at :521, so `cur.as_mut()` is `Some`."
+    },
+    {
+      "file": "crates/coh_math/src/window_slots.rs",
+      "line": 602,
+      "column": 14,
+      "text": "_ => unreachable!(\"durationVariants is only ever written as an array\"),",
+      "count": 1,
+      "class": "invariant",
+      "why": "an `unreachable!()` over a key this module is the only writer of, and it only ever writes an array."
+    },
+    {
+      "file": "crates/coh_math/src/window_slots.rs",
+      "line": 705,
+      "column": 22,
+      "text": ".expect(\"cur_is proved the entry exists\");",
+      "count": 1,
+      "class": "invariant",
+      "why": "the `Some(true) if !is` arm is only taken when `cur_is` was read as `Some(true)`, which is the entry existing."
+    },
+    {
+      "file": "crates/coh_math/src/window_slots.rs",
+      "line": 1589,
+      "column": 32,
+      "text": "while let Some(pos) = lower[start..].find(word) {",
+      "count": 1,
+      "class": "invariant",
+      "why": "byte-slicing a `String`, total because every index is a char boundary: `find` returns one, and `start` advances to `at + 1`, which is a boundary because the byte at `at` begins the sole caller's ASCII literal `\"self\"` (:1566)."
+    },
+    {
+      "file": "crates/coh_math/src/window_slots.rs",
+      "line": 1591,
+      "column": 30,
+      "text": "let before_ok = lower[..at].chars().next_back().is_none_or(|c| !is_word(c));",
+      "count": 1,
+      "class": "invariant",
+      "why": "`at` is the byte offset `find` reported, which is a char boundary."
+    },
+    {
+      "file": "crates/coh_math/src/window_slots.rs",
+      "line": 1592,
+      "column": 29,
+      "text": "let after_ok = lower[at + word.len()..]",
+      "count": 1,
+      "class": "invariant",
+      "why": "`at + word.len()` is the end of the match `find` reported, which is a char boundary."
+    },
+    {
+      "file": "crates/coh_math/src/window_slots.rs",
+      "line": 1614,
+      "column": 25,
+      "text": "let rest = lower[i + 1..].trim_start();",
+      "count": 2,
+      "class": "invariant",
+      "why": "`i` indexes a byte the loop has just tested equal to `b'+'`, so `i + 1` is a char boundary."
+    },
+    {
+      "file": "crates/coh_wasm/src/lib.rs",
+      "line": 157,
+      "column": 14,
+      "text": ".expect(\"a Vec<&str> always serializes\")",
+      "count": 1,
+      "class": "invariant",
+      "why": "serializing a `Vec<&str>` returned by a const vocabulary; `serde_json` cannot fail on it by the type."
+    }
+  ]
+}

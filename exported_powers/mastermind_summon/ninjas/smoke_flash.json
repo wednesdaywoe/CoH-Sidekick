@@ -1,0 +1,407 @@
+{
+  "name": "Smoke_Flash",
+  "full_name": "Mastermind_Summon.Ninjas.Smoke_Flash",
+  "short_name": "Smoke_Flash",
+  "type": "Click",
+  "display_name": "Smoke Flash",
+  "display_fullname": "Mastermind Summon Ninjas Smoke Flash",
+  "display_help": "You can command one of your Ninja Henchmen to throw down a Smoke Bomb. The Smoke Flash will allow the Ninja to Placate his nearby foes, and thus unable to target the Ninja. The Smoke Flash also makes all your Ninja stealthy and Hidden for 3 seconds, enabling them to perform Critical hits with their next few attacks. You can only use this power on a Ninja Henchmen.",
+  "display_short_help": "Hide Ninja",
+  "icon": "ninjas_kujikiri.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "Sphere",
+  "max_targets_hit": 1,
+  "radius": 100.0,
+  "arc": 0.0,
+  "range": 100.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.17,
+  "recharge_time": 90.0,
+  "activate_period": 0.0,
+  "endurance_cost": 15.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "MyPet"
+  ],
+  "targets_affected": [
+    "MyPet"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Range",
+    "Recharge"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [
+    "MastermindPets_Genin",
+    "target.VillainName>",
+    "MastermindPets_Jonin",
+    "target.VillainName>",
+    "||",
+    "MastermindPets_Oni",
+    "target.VillainName>",
+    "||"
+  ],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 1,
+      "templates": [
+        {
+          "attribs": [
+            "StealthRadius_PVE"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffectedAndPets",
+          "table": "Ranged_Ones",
+          "scale": 54.0,
+          "duration": "4 seconds",
+          "magnitude": 1.0,
+          "delay": 1.17,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "arch",
+            "target>",
+            "Class_Lt_Henchman",
+            "eq",
+            "arch",
+            "target>",
+            "Class_Boss_Henchman",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Minion_Henchman",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Lt",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Boss",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Minion",
+            "eq",
+            "||"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "V_COV/POWERS/NINJITSU/HIDE.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "suppress_events": [
+            {
+              "event": "Attacked",
+              "event_id": 2,
+              "duration": 15.0,
+              "always": 1
+            },
+            {
+              "event": "Damaged",
+              "event_id": 21,
+              "duration": 15.0,
+              "always": 1
+            },
+            {
+              "event": "MissionObjectClick",
+              "event_id": 38,
+              "duration": 15.0,
+              "always": 1
+            }
+          ],
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "StealthRadius_PVP"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffectedAndPets",
+          "table": "Ranged_Ones",
+          "scale": 500.0,
+          "duration": "4 seconds",
+          "magnitude": 1.0,
+          "delay": 1.17,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "arch",
+            "target>",
+            "Class_Lt_Henchman",
+            "eq",
+            "arch",
+            "target>",
+            "Class_Boss_Henchman",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Minion_Henchman",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Lt",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Boss",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Minion",
+            "eq",
+            "||"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "suppress_events": [
+            {
+              "event": "Attacked",
+              "event_id": 2,
+              "duration": 15.0,
+              "always": 1
+            },
+            {
+              "event": "Damaged",
+              "event_id": 21,
+              "duration": 15.0,
+              "always": 1
+            },
+            {
+              "event": "MissionObjectClick",
+              "event_id": 38,
+              "duration": 15.0,
+              "always": 1
+            }
+          ],
+          "flags": [
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1056
+        },
+        {
+          "attribs": [
+            "Translucency"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffectedAndPets",
+          "table": "Ranged_Ones",
+          "scale": 0.2,
+          "duration": "4 seconds",
+          "magnitude": 1.0,
+          "delay": 1.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "arch",
+            "target>",
+            "Class_Lt_Henchman",
+            "eq",
+            "arch",
+            "target>",
+            "Class_Boss_Henchman",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Minion_Henchman",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Lt",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Boss",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Minion",
+            "eq",
+            "||"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        },
+        {
+          "attribs": [
+            "Global_Chance_Mod"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffectedAndPets",
+          "table": "Melee_Ones",
+          "scale": 1.0,
+          "duration": "4 seconds",
+          "magnitude": 1.0,
+          "delay": 1.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [
+            "arch",
+            "target>",
+            "Class_Lt_Henchman",
+            "eq",
+            "arch",
+            "target>",
+            "Class_Boss_Henchman",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Minion_Henchman",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Lt",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Boss",
+            "eq",
+            "||",
+            "arch",
+            "target>",
+            "Class_Henchman_Minion",
+            "eq",
+            "||"
+          ],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "tags": [
+              "CriticalHit"
+            ],
+            "type": "EffectFilter"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        },
+        {
+          "attribs": [
+            "Grant_Power"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": 1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "power_names": [
+              "Villain_Pets.Kuji_Kiri.Smoke_Bomb"
+            ],
+            "count": 1,
+            "type": "Power"
+          },
+          "flags": [
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1072
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 17,
+  "powerset": "Mastermind_Summon.Ninjas"
+}

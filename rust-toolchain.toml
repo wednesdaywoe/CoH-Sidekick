@@ -1,0 +1,10 @@
+[toolchain]
+channel = "1.96.1"
+# The web build cross-compiles; listing the target here lets rustup provision it
+# everywhere this pin applies (CI has no separate toolchain step).
+targets = ["wasm32-unknown-unknown"]
+# Same reason as the target above: CI has no separate toolchain step, so the two gates added
+# 2026-09-26 (`fmt:rust:check` and `lint:rust`) would otherwise depend on whether a given box
+# happened to have these installed by hand. Naming them makes an unprovisioned runner fail
+# loudly at rustup rather than quietly skipping the check.
+components = ["rustfmt", "clippy"]

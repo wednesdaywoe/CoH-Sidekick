@@ -1,0 +1,90 @@
+# Publish the web build to next.coh-sidekick.com, the rebuild's public test site.
+#
+# Separate from ci.yml on purpose, and NOT gated on it: on 2026-09-29 the last green CI run on
+# main was days old -- every run since was cancelled or still queued behind the self-hosted
+# runners -- so a deploy that waited on CI would not deploy. This job builds on a hosted runner
+# with nothing but the pinned toolchain, and ships what `main` says.
+#
+# The live beta at coh-sidekick.com is a different repo (CoH-Sidekick) on GitHub Pages; nothing
+# here can reach it. `wrangler.toml` names the Worker and the one hostname it owns.
+#
+# Secrets (repo Settings -> Secrets and variables -> Actions):
+#   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID  -- required; the deploy step fails without them
+#   SIDEKICK_SUPABASE_URL, SIDEKICK_SUPABASE_ANON_KEY  -- sign-in and shared builds
+#   SIDEKICK_SENTRY_DSN  -- crash reports
+# The last three are optional: absent, the app builds and says the feature is not configured.
+name: Publish web build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One publish at a time, and a newer push supersedes an older one still building.
+concurrency:
+  group: deploy-web
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: the wasm target rust-toolchain.toml names
+        run: rustup target add wasm32-unknown-unknown
+
+      # The same pinned, digest-checked dx as ci.yml's web build -- see that step for why the
+      # digest, the staging directory and the stated mode each matter.
+      - name: dioxus-cli 0.7.9, pinned by digest
+        env:
+          DX_URL: https://github.com/DioxusLabs/dioxus/releases/download/v0.7.9/dx-x86_64-unknown-linux-gnu.tar.gz
+          DX_SHA256: 3b132551b480bc96f938f9f0d37936ee1190f994977539dcc347eaf38540d005
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/dx-bin"
+          staging="$(mktemp -d -p "$RUNNER_TEMP")"
+          curl -sSfL --retry 3 -o "$staging/dx.tar.gz" "$DX_URL"
+          printf '%s  %s\n' "$DX_SHA256" "$staging/dx.tar.gz" | sha256sum -c -
+          tar xzf "$staging/dx.tar.gz" -C "$staging" dx
+          install -m 0755 "$staging/dx" "$RUNNER_TEMP/dx-bin/dx"
+          echo "$RUNNER_TEMP/dx-bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/dx-bin/dx" --version | grep -qF 'dioxus 0.7.9'
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          cache-bin: false
+          # Its own cache key, so a release wasm build does not evict ci.yml's debug one.
+          key: deploy-web
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: web build
+        env:
+          SIDEKICK_SUPABASE_URL: ${{ secrets.SIDEKICK_SUPABASE_URL }}
+          SIDEKICK_SUPABASE_ANON_KEY: ${{ secrets.SIDEKICK_SUPABASE_ANON_KEY }}
+          SIDEKICK_SENTRY_DSN: ${{ secrets.SIDEKICK_SENTRY_DSN }}
+        # A secret that is not set arrives as an EMPTY variable, not an absent one, and
+        # `option_env!` reads an empty variable as `Some("")` -- a configured-but-blank project
+        # that fails every call with a confusing error, instead of the "not configured" the app
+        # is written to say. So each empty one is unset before the compiler sees it.
+        run: |
+          set -euo pipefail
+          for v in SIDEKICK_SUPABASE_URL SIDEKICK_SUPABASE_ANON_KEY SIDEKICK_SENTRY_DSN; do
+            if [ -z "${!v}" ]; then unset "$v"; echo "$v not set: that feature ships unconfigured"; fi
+          done
+          npm run build:web
+
+      # wrangler is pinned here rather than added to package.json: this step is its only user,
+      # and the pipeline's `npm ci` has no reason to install it.
+      - name: publish to Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx -y wrangler@4.144.0 deploy

@@ -1,0 +1,180 @@
+{
+  "name": "Crafted_Panacea_F",
+  "full_name": "Boosts.Crafted_Panacea_F.Crafted_Panacea_F",
+  "short_name": "Crafted_Panacea_F",
+  "type": "Boost",
+  "display_name": "Panacea: Chance for +Hit Points/Endurance",
+  "display_fullname": "Boosts Crafted Panacea F Crafted Panacea F",
+  "display_help": "UNIQUE -- No more than 1 enhancement of this type may be slotted by a character. Adds a chance for a healing power to heal the target of the power for a small bonus amount in a PvE zone, or will increase the regeneration rate of a target slightly in a PvP zone and also has a chance to infuse the target with a small amount of endurance. This effect will trigger roughly 3 times per minute. NOTE: This is a PvP enhancement, this type of enhancement has two groups of set bonuses. You get the set bonuses not marked \"(PvP)\" while experiencing PvE content, but you get both the PvP set bonuses and the PvE set bonuses when fighting players.",
+  "display_short_help": "Chance for +Hit Points/Endurance",
+  "icon": "e_icon_panacea.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 10.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Heal",
+    "Natural",
+    "Technology",
+    "Magic",
+    "Mutation",
+    "Science"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [
+    "Crafted_Panacea_F",
+    "BoostsSlotted>",
+    "0",
+    "<=",
+    "Attuned_Panacea_F",
+    "BoostsSlotted>",
+    "0",
+    "<=",
+    "&&"
+  ],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 3.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "target.isFriend?"
+      ],
+      "tags": [
+        "Heal"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Heal_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Melee_Heal",
+          "scale": 0.67,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You heal {PlayerDest} with {PowerName} for {Damage} health points.",
+            "display_victim_hit": "{PlayerSource} heals you with their {PowerName} for {Damage} health points.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags": [
+            "CancelOnMiss",
+            "IgnoreStrength"
+          ],
+          "flags_raw": 1300
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 3.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "target.isFriend?"
+      ],
+      "tags": [
+        "Damage"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Endurance"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": 0.075,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} granting them {Damage} points of endurance.",
+            "display_victim_hit": "{PlayerSource} hits you with their {PowerName} granting you {Damage} points of endurance.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags": [
+            "CancelOnMiss",
+            "IgnoreStrength",
+            "IgnoreResistance"
+          ],
+          "flags_raw": 1076
+        }
+      ]
+    }
+  ],
+  "available_level": 0,
+  "powerset": "Boosts.Crafted_Panacea_F"
+}

@@ -1,0 +1,2096 @@
+{
+  "name": "Brawl",
+  "full_name": "Inherent.Inherent.Brawl",
+  "short_name": "Brawl",
+  "type": "Click",
+  "display_name": "Brawl",
+  "display_fullname": "Inherent Inherent Brawl",
+  "display_help": "When all else fails, you have only your two fists to depend on, and will cause smashing damage to your target. Brawl also features a synergy with the Fighting pool. If you have trained Boxing or Kick, Brawl will also reduce the target's attack speed and chance to hit. The strength of this effect increases if both Boxing and Kick are owned. If you have trained Cross Punch, Brawl will also reduce the target's regeneration and recovery.<br><br><color #fcfc95>Damage: Minor.</color><br><color #fcfc95>Recharge: Very Fast.</color>",
+  "display_short_help": "Melee, Minor DMG(Smashing), Fighting Synergy",
+  "icon": "inherent_brawl.png",
+  "auto_issue": true,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 7.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.83,
+  "time_to_root": 0.83,
+  "recharge_time": 2.0,
+  "activate_period": 0.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "Recharge",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Melee Damage",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    108,
+    116
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Smashing_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Melee_Damage",
+          "scale": 0.36,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Smashing damage.",
+            "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Smashing damage.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags_raw": 1280
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "arch",
+        "source>",
+        "Class_Controller",
+        "eq",
+        "kTerrorized",
+        "target>",
+        "0",
+        ">",
+        "kImmobilized",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "kHeld",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "kStunned",
+        "target>",
+        "0",
+        ">",
+        "||",
+        "Sleep",
+        "target.EventTimeSince>",
+        "3",
+        "<=",
+        "||",
+        "&&"
+      ],
+      "tags": [
+        "Containment"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Smashing_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Melee_InherentDamage",
+          "scale": 0.36,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Smashing damage (CONTAINMENT).",
+            "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Smashing damage (CONTAINMENT).",
+            "display_float": "Containment",
+            "display_attrib_defense_float": null,
+            "display_info": "Only against immobilized, held, sleeping, terrified or stunned targets"
+          },
+          "flags_raw": 1280
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Pool.Fighting.Boxing",
+        "source.ownPower?",
+        "Pool.Fighting.Kick",
+        "source.ownPower?",
+        "||"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 4,
+      "templates": [
+        {
+          "attribs": [
+            "RechargeTime"
+          ],
+          "type": "Expression",
+          "application_type": "OnTick",
+          "aspect": "Strength",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": -0.1,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [
+            "@StdResult",
+            "Pool.Fighting.Kick",
+            "source.ownPowerNum?",
+            "Pool.Fighting.Boxing",
+            "source.ownPowerNum?",
+            "+",
+            "*"
+          ],
+          "application_period": 67.0,
+          "tick_chance": 0.10000000149011612,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "flags": [
+            "CancelOnMiss",
+            "IgnoreStrength"
+          ],
+          "flags_raw": 1300
+        },
+        {
+          "attribs": [
+            "ToHit"
+          ],
+          "type": "Expression",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": -0.1,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [
+            "@StdResult",
+            "Pool.Fighting.Kick",
+            "source.ownPowerNum?",
+            "Pool.Fighting.Boxing",
+            "source.ownPowerNum?",
+            "+",
+            "*"
+          ],
+          "application_period": 67.0,
+          "tick_chance": 0.10000000149011612,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "CancelOnMiss",
+            "IgnoreStrength"
+          ],
+          "flags_raw": 1300
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "Pool.Fighting.Cross_Punch",
+        "source.ownPower?"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Regeneration"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": -0.1,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 67.0,
+          "tick_chance": 0.10000000149011612,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "CancelOnMiss",
+            "IgnoreStrength"
+          ],
+          "flags_raw": 1300
+        },
+        {
+          "attribs": [
+            "Recovery"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": -0.1,
+          "duration": "10 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 67.0,
+          "tick_chance": 0.10000000149011612,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "fx": {
+            "continuing_bits": [],
+            "continuing_fx": "GENERICCONTINUING/DEBUFFEND2CONTINUING.FX",
+            "conditional_bits": [],
+            "conditional_fx": null
+          },
+          "flags": [
+            "CancelOnMiss",
+            "IgnoreStrength"
+          ],
+          "flags_raw": 1300
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "isPVPMap?",
+        "!",
+        "FourOne",
+        "source.owned?",
+        "&&"
+      ],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "UNSATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 0.8999999761581421,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": []
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [
+                    "enttype",
+                    "target>",
+                    "player",
+                    "eq"
+                  ],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "PVP_ONLY",
+                  "requires_default": "UNSATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Knockback"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 3.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "vec_start": "Source",
+                        "vec_end": "Source",
+                        "vec_adjust_pyr": [
+                          0.0,
+                          0.0,
+                          0.0
+                        ],
+                        "priority": 0,
+                        "vel": 1.0,
+                        "vel_mag": 0.0,
+                        "height": 10.0,
+                        "height_mag": 0.0,
+                        "type": "Knock"
+                      },
+                      "messages": {
+                        "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                        "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "suppress_events": [
+                        {
+                          "event": "Knocked",
+                          "event_id": 34,
+                          "duration": 10.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [
+                    "enttype",
+                    "target>",
+                    "critter",
+                    "eq"
+                  ],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "PVE_ONLY",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Knockback"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 3.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "vec_start": "Source",
+                        "vec_end": "Source",
+                        "vec_adjust_pyr": [
+                          0.0,
+                          0.0,
+                          0.0
+                        ],
+                        "priority": 0,
+                        "vel": 1.0,
+                        "vel_mag": 0.0,
+                        "height": 10.0,
+                        "height_mag": 0.0,
+                        "type": "Knock"
+                      },
+                      "messages": {
+                        "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                        "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.33000001311302185,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Knockback"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "vec_start": "Source",
+                        "vec_end": "Source",
+                        "vec_adjust_pyr": [
+                          0.0,
+                          0.0,
+                          0.0
+                        ],
+                        "priority": 1,
+                        "vel": 3.0,
+                        "vel_mag": 0.0,
+                        "height": 20.0,
+                        "height_mag": 0.0,
+                        "type": "Knock"
+                      },
+                      "messages": {
+                        "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                        "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.33000001311302185,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Knockback"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "vec_start": "Target",
+                        "vec_end": "Source",
+                        "vec_adjust_pyr": [
+                          0.0,
+                          0.0,
+                          0.0
+                        ],
+                        "priority": 1,
+                        "vel": 3.0,
+                        "vel_mag": 0.0,
+                        "height": 20.0,
+                        "height_mag": 0.0,
+                        "type": "Knock"
+                      },
+                      "messages": {
+                        "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                        "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.4000000059604645,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Knockback"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "vec_start": "Source",
+                        "vec_end": "Up",
+                        "vec_adjust_pyr": [
+                          0.0,
+                          0.0,
+                          0.0
+                        ],
+                        "priority": 1,
+                        "vel": 0.10000000149011612,
+                        "vel_mag": 0.0,
+                        "height": 20.0,
+                        "height_mag": 0.0,
+                        "type": "Knock"
+                      },
+                      "messages": {
+                        "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                        "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.25,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Knockback"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "vec_start": "Target",
+                        "vec_end": "Facing",
+                        "vec_adjust_pyr": [
+                          0.0,
+                          0.0,
+                          0.0
+                        ],
+                        "priority": 1,
+                        "vel": 2.0,
+                        "vel_mag": 0.0,
+                        "height": 10.0,
+                        "height_mag": 0.0,
+                        "type": "Knock"
+                      },
+                      "messages": {
+                        "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                        "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.25,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Knockback"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "vec_start": "Source",
+                        "vec_end": "Facing",
+                        "vec_adjust_pyr": [
+                          0.0,
+                          0.7853981852531433,
+                          0.0
+                        ],
+                        "priority": 1,
+                        "vel": 1.5,
+                        "vel_mag": 0.0,
+                        "height": 20.0,
+                        "height_mag": 0.0,
+                        "type": "Knock"
+                      },
+                      "messages": {
+                        "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                        "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.25,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Knockback"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "vec_start": "Source",
+                        "vec_end": "Facing",
+                        "vec_adjust_pyr": [
+                          0.0,
+                          5.4977874755859375,
+                          0.0
+                        ],
+                        "priority": 1,
+                        "vel": 1.5,
+                        "vel_mag": 0.0,
+                        "height": 20.0,
+                        "height_mag": 0.0,
+                        "type": "Knock"
+                      },
+                      "messages": {
+                        "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                        "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.25,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Knockback"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "vec_start": "Source",
+                        "vec_end": "Facing",
+                        "vec_adjust_pyr": [
+                          0.0,
+                          1.5707963705062866,
+                          0.0
+                        ],
+                        "priority": 1,
+                        "vel": 3.0,
+                        "vel_mag": 0.0,
+                        "height": 20.0,
+                        "height_mag": 0.0,
+                        "type": "Knock"
+                      },
+                      "messages": {
+                        "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                        "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.25,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Knockback"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "vec_start": "Source",
+                        "vec_end": "Facing",
+                        "vec_adjust_pyr": [
+                          0.0,
+                          4.71238899230957,
+                          0.0
+                        ],
+                        "priority": 1,
+                        "vel": 3.0,
+                        "vel_mag": 0.0,
+                        "height": 20.0,
+                        "height_mag": 0.0,
+                        "type": "Knock"
+                      },
+                      "messages": {
+                        "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                        "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.5,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Null"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "Self",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "1 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Replace",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": "BOOM!",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Null"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "Self",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "1 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Replace",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": "POW!",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.1111999973654747,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Execute_Power"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Strength",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "0 seconds",
+                      "magnitude": 0.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "params": {
+                        "power_names": [
+                          "Temporary_Powers.Temporary_Powers.Invention_Plasmatic_Taser"
+                        ],
+                        "count": 1,
+                        "type": "Power"
+                      },
+                      "flags": [
+                        "CopyBoosts"
+                      ],
+                      "flags_raw": 1280,
+                      "flags2_raw": 4
+                    },
+                    {
+                      "attribs": [
+                        "Null"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "Self",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "1 seconds",
+                      "magnitude": 1.0,
+                      "delay": 1.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Replace",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": "Freeeem!",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [],
+                  "child_effects": [
+                    {
+                      "chance": 0.11550000309944153,
+                      "ppm": 0.0,
+                      "delay": 0.0,
+                      "radius_inner": -1.0,
+                      "radius_outer": -1.0,
+                      "requires_expression": [],
+                      "tags": [],
+                      "flags": [],
+                      "is_pvp": "EITHER",
+                      "requires_pv": "EITHER",
+                      "requires_default": "SATISFIED",
+                      "eval_flags": 0,
+                      "templates": [
+                        {
+                          "attribs": [
+                            "Knockback"
+                          ],
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Current",
+                          "target": "Self",
+                          "table": "Melee_Ones",
+                          "scale": 100.0,
+                          "duration": "0 seconds",
+                          "magnitude": 0.0,
+                          "delay": 0.01,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "Stack",
+                          "stack_limit": 2,
+                          "stack_key": null,
+                          "params": {
+                            "vec_start": "MainTarget",
+                            "vec_end": "Source",
+                            "vec_adjust_pyr": [
+                              0.0,
+                              0.0,
+                              0.0
+                            ],
+                            "priority": 1,
+                            "vel": 3.0,
+                            "vel_mag": 0.0,
+                            "height": 3.0,
+                            "height_mag": 0.0,
+                            "type": "Knock"
+                          },
+                          "messages": {
+                            "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                            "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                            "display_float": null,
+                            "display_attrib_defense_float": null,
+                            "display_info": null
+                          },
+                          "flags": [
+                            "IgnoreStrength",
+                            "IgnoreResistance"
+                          ],
+                          "flags_raw": 1072
+                        },
+                        {
+                          "attribs": [
+                            "Null"
+                          ],
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Current",
+                          "target": "Self",
+                          "table": "Melee_Ones",
+                          "scale": 0.0,
+                          "duration": "1 seconds",
+                          "magnitude": 1.0,
+                          "delay": 0.75,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "Replace",
+                          "stack_limit": 2,
+                          "stack_key": null,
+                          "messages": {
+                            "display_attacker_hit": null,
+                            "display_victim_hit": null,
+                            "display_float": "Oops!",
+                            "display_attrib_defense_float": null,
+                            "display_info": null
+                          },
+                          "flags": [
+                            "IgnoreStrength",
+                            "IgnoreResistance"
+                          ],
+                          "flags_raw": 1072
+                        }
+                      ]
+                    },
+                    {
+                      "chance": 0.18780000507831573,
+                      "ppm": 0.0,
+                      "delay": 0.0,
+                      "radius_inner": -1.0,
+                      "radius_outer": -1.0,
+                      "requires_expression": [],
+                      "tags": [],
+                      "flags": [],
+                      "is_pvp": "EITHER",
+                      "requires_pv": "EITHER",
+                      "requires_default": "SATISFIED",
+                      "eval_flags": 0,
+                      "templates": [
+                        {
+                          "attribs": [
+                            "Execute_Power"
+                          ],
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Strength",
+                          "target": "AnyAffected",
+                          "table": "Melee_Ones",
+                          "scale": 0.0,
+                          "duration": "0 seconds",
+                          "magnitude": 0.0,
+                          "delay": 0.0,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "Stack",
+                          "stack_limit": 2,
+                          "stack_key": null,
+                          "params": {
+                            "power_names": [
+                              "Temporary_Powers.Temporary_Powers.Friendly_Fireworks"
+                            ],
+                            "count": 1,
+                            "type": "Power"
+                          },
+                          "flags": [
+                            "CopyBoosts"
+                          ],
+                          "flags_raw": 1280,
+                          "flags2_raw": 4
+                        },
+                        {
+                          "attribs": [
+                            "Null"
+                          ],
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Current",
+                          "target": "Self",
+                          "table": "Melee_Ones",
+                          "scale": 0.0,
+                          "duration": "1 seconds",
+                          "magnitude": 1.0,
+                          "delay": 0.7,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "Replace",
+                          "stack_limit": 2,
+                          "stack_key": null,
+                          "messages": {
+                            "display_attacker_hit": null,
+                            "display_victim_hit": null,
+                            "display_float": "Surprise!",
+                            "display_attrib_defense_float": null,
+                            "display_info": null
+                          },
+                          "flags": [
+                            "IgnoreStrength",
+                            "IgnoreResistance"
+                          ],
+                          "flags_raw": 1072
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Repel"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 3.0,
+              "duration": "0 seconds",
+              "magnitude": 0.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "vec_start": "Source",
+                "vec_end": "Up",
+                "vec_adjust_pyr": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "priority": 2,
+                "vel": 1.5,
+                "vel_mag": 0.0,
+                "height": 0.0,
+                "height_mag": 0.0,
+                "type": "Knock"
+              },
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Null"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 0.0,
+              "duration": "1 seconds",
+              "magnitude": 0.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "fx": {
+                "continuing_bits": [
+                  47,
+                  66
+                ],
+                "continuing_fx": null,
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Null"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 0.0,
+              "duration": "0.4 seconds",
+              "magnitude": 0.0,
+              "delay": 0.9,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "POWERS/MARTIALARTS/MARTIALARTSHITS.FX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "flags_raw": 1280
+            },
+            {
+              "attribs": [
+                "Null"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "Self",
+              "table": "Melee_Ones",
+              "scale": 0.0,
+              "duration": "0 seconds",
+              "magnitude": 0.0,
+              "delay": 1.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": "2-HIT COMBO!",
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "flags_raw": 1280
+            }
+          ],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.5,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Null"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "Self",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "1 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Replace",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": "BOOM!",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Null"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "Self",
+                      "table": "Melee_Ones",
+                      "scale": 0.0,
+                      "duration": "1 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Replace",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": null,
+                        "display_victim_hit": null,
+                        "display_float": "POW!",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 0.20000000298023224,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [
+                {
+                  "attribs": [
+                    "Execute_Power"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Strength",
+                  "target": "AnyAffected",
+                  "table": "Melee_Ones",
+                  "scale": 0.0,
+                  "duration": "0 seconds",
+                  "magnitude": 0.0,
+                  "delay": 0.0,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Stack",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "params": {
+                    "power_names": [
+                      "Temporary_Powers.Temporary_Powers.Friendly_Fireworks"
+                    ],
+                    "count": 1,
+                    "type": "Power"
+                  },
+                  "flags": [
+                    "CopyBoosts"
+                  ],
+                  "flags_raw": 1280,
+                  "flags2_raw": 4
+                },
+                {
+                  "attribs": [
+                    "Null"
+                  ],
+                  "type": "Magnitude",
+                  "application_type": "OnTick",
+                  "aspect": "Current",
+                  "target": "Self",
+                  "table": "Melee_Ones",
+                  "scale": 0.0,
+                  "duration": "1 seconds",
+                  "magnitude": 1.0,
+                  "delay": 0.45,
+                  "duration_expression": [],
+                  "magnitude_expression": [],
+                  "application_period": 0.0,
+                  "tick_chance": 1.0,
+                  "tick_mag_multiplier": 1.0,
+                  "tick_mag_additive": 0.0,
+                  "jit_requires": [],
+                  "caster_stack": "Individual",
+                  "stack": "Replace",
+                  "stack_limit": 2,
+                  "stack_key": null,
+                  "messages": {
+                    "display_attacker_hit": null,
+                    "display_victim_hit": null,
+                    "display_float": "Surprise!",
+                    "display_attrib_defense_float": null,
+                    "display_info": null
+                  },
+                  "flags": [
+                    "IgnoreStrength",
+                    "IgnoreResistance"
+                  ],
+                  "flags_raw": 1072
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "player",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVP_ONLY",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Knockback"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 3.0,
+              "duration": "0 seconds",
+              "magnitude": 0.0,
+              "delay": 1.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "vec_start": "Source",
+                "vec_end": "Down",
+                "vec_adjust_pyr": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "priority": 2,
+                "vel": 3.0,
+                "vel_mag": 0.0,
+                "height": 0.0,
+                "height_mag": 0.0,
+                "type": "Knock"
+              },
+              "messages": {
+                "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "suppress_events": [
+                {
+                  "event": "Knocked",
+                  "event_id": 34,
+                  "duration": 10.0,
+                  "always": 0
+                }
+              ],
+              "flags": [
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1296
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "critter",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVE_ONLY",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Knockback"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": 3.0,
+              "duration": "0 seconds",
+              "magnitude": 0.0,
+              "delay": 1.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "params": {
+                "vec_start": "Source",
+                "vec_end": "Down",
+                "vec_adjust_pyr": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "priority": 2,
+                "vel": 3.0,
+                "vel_mag": 0.0,
+                "height": 0.0,
+                "height_mag": 0.0,
+                "type": "Knock"
+              },
+              "messages": {
+                "display_attacker_hit": "You knock {PlayerDest} off their feet with your {PowerName}!",
+                "display_victim_hit": "{PlayerSource} knocks you off your feet with their {PowerName}!",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "flags": [
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1296
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "strengths_disallowed": [
+    "Range"
+  ],
+  "modes_disallowed": [
+    "Disable_All",
+    "Peacebringer_Blaster_Mode",
+    "Peacebringer_Tanker_Mode",
+    "Warshade_Blaster_Mode",
+    "Warshade_Tanker_Mode"
+  ],
+  "available_level": 0,
+  "powerset": "Inherent.Inherent"
+}

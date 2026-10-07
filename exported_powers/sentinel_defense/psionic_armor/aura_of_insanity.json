@@ -1,0 +1,2514 @@
+{
+  "name": "Aura_of_Insanity",
+  "full_name": "Sentinel_Defense.Psionic_Armor.Aura_of_Insanity",
+  "short_name": "Aura_of_Insanity",
+  "type": "Toggle",
+  "display_name": "Aura of Madness",
+  "display_fullname": "Sentinel Defense Psionic Armor Aura of Insanity",
+  "display_help": "You emit a powerful psychic aura that causes the minds of those around you to become weak and distracted. Foes may be stunned, held, terrified or even confused in your presence, in addition to suffering a debuff derived from the applied control effect. Those that resist these effects will see their damage reduced. This power allows you to use your own Hit Points to keep enemies near you disabled. The power costs no endurance but can be dangerous to use.<br><br><color #fcfc95>Notes: Mez enhancements on this power enhance its magnitude instead of its duration.</color>",
+  "display_short_help": "Toggle: PBAoE, Foe Confuse, Disorient, Sleep, Hold, Fear, -Damage(All), +Special",
+  "icon": "psionicarmor_worldofconfusion",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 0.8,
+  "effect_area": "Sphere",
+  "max_targets_hit": 10,
+  "radius": 8.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.67,
+  "time_to_root": 1.67,
+  "recharge_time": 10.0,
+  "activate_period": 4.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "Hold",
+    "Stun",
+    "Sleep",
+    "Recharge",
+    "Fear",
+    "Confuse",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Confuse",
+    "Fear",
+    "Holds",
+    "Sleep",
+    "Stuns"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [
+    "hold",
+    "sleep",
+    "stun"
+  ],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [
+    "Held",
+    "source.EventTimeSince>",
+    "5",
+    ">",
+    "Stunned",
+    "source.EventTimeSince>",
+    "5",
+    ">",
+    "&&",
+    "Sleep",
+    "source.EventTimeSince>",
+    "5",
+    ">",
+    "&&"
+  ],
+  "slot_requires": [],
+  "attack_types": [
+    112,
+    140
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "EITHER",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [
+            {
+              "attribs": [
+                "Special_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Absolute",
+              "target": "Self",
+              "table": "Melee_HealSelf",
+              "scale": -0.05,
+              "duration": "0 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of unresistable Special damage.",
+                "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of unresistable Special damage.",
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": null
+              },
+              "flags": [
+                "IgnoreStrength",
+                "IgnoreResistance",
+                "IgnoreCombatMods"
+              ],
+              "flags_raw": 112
+            },
+            {
+              "attribs": [
+                "Regeneration"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_Ones",
+              "scale": -0.75,
+              "duration": "4 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": "You drain the Psyche from {PlayerDest} and reduce their Regeneration and Recovery rate.",
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "For up to 4 seconds after a target was stunned"
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "GENERICCONTINUING/DEBUFFMAXHPCONTINUING.FX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "required_events": [
+                {
+                  "event": "Stunned",
+                  "event_id": 23,
+                  "duration": 4.0,
+                  "always": 0
+                }
+              ],
+              "flags": [
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1296
+            },
+            {
+              "attribs": [
+                "Smashing_Dmg",
+                "Lethal_Dmg",
+                "Fire_Dmg",
+                "Cold_Dmg",
+                "Energy_Dmg",
+                "Negative_Energy_Dmg",
+                "Psionic_Dmg",
+                "Toxic_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Resistance",
+              "target": "AnyAffected",
+              "table": "Melee_Debuff_Def",
+              "scale": 1.0,
+              "duration": "4 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "For up to 4 seconds after a target was asleep"
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "GENERICCONTINUING/DAMAGERESISTANCE/DEBUFFDAMRESCONTINUING.FX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "required_events": [
+                {
+                  "event": "Sleep",
+                  "event_id": 26,
+                  "duration": 4.0,
+                  "always": 0
+                }
+              ],
+              "flags": [
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1296
+            },
+            {
+              "attribs": [
+                "Base_Defense"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_Debuff_Def",
+              "scale": 1.0,
+              "duration": "4 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "For up to 4 seconds after a target was held"
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "required_events": [
+                {
+                  "event": "Held",
+                  "event_id": 25,
+                  "duration": 4.0,
+                  "always": 0
+                }
+              ],
+              "flags": [
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1296
+            },
+            {
+              "attribs": [
+                "ToHit"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Current",
+              "target": "AnyAffected",
+              "table": "Melee_DeBuff_ToHit",
+              "scale": 1.0,
+              "duration": "4 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Stack",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "For up to 4 seconds after a target was terrorized"
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "GENERICCONTINUING/DEBUFFTOHITCONTINUING.FX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "required_events": [
+                {
+                  "event": "Terrorized",
+                  "event_id": 27,
+                  "duration": 4.0,
+                  "always": 0
+                }
+              ],
+              "flags": [
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1296
+            },
+            {
+              "attribs": [
+                "Smashing_Dmg",
+                "Lethal_Dmg",
+                "Fire_Dmg",
+                "Cold_Dmg",
+                "Energy_Dmg",
+                "Negative_Energy_Dmg",
+                "Psionic_Dmg",
+                "Toxic_Dmg"
+              ],
+              "type": "Magnitude",
+              "application_type": "OnTick",
+              "aspect": "Strength",
+              "target": "AnyAffected",
+              "table": "Melee_Debuff_Dam",
+              "scale": 1.995,
+              "duration": "4 seconds",
+              "magnitude": 1.0,
+              "delay": 0.0,
+              "duration_expression": [],
+              "magnitude_expression": [],
+              "application_period": 0.0,
+              "tick_chance": 1.0,
+              "tick_mag_multiplier": 1.0,
+              "tick_mag_additive": 0.0,
+              "jit_requires": [],
+              "caster_stack": "Individual",
+              "stack": "Replace",
+              "stack_limit": 2,
+              "stack_key": null,
+              "messages": {
+                "display_attacker_hit": null,
+                "display_victim_hit": null,
+                "display_float": null,
+                "display_attrib_defense_float": null,
+                "display_info": "If the target is not under control effects"
+              },
+              "fx": {
+                "continuing_bits": [],
+                "continuing_fx": "PFX",
+                "conditional_bits": [],
+                "conditional_fx": null
+              },
+              "suppress_events": [
+                {
+                  "event": "Stunned",
+                  "event_id": 23,
+                  "duration": 0.5,
+                  "always": 1
+                },
+                {
+                  "event": "Held",
+                  "event_id": 25,
+                  "duration": 0.5,
+                  "always": 1
+                },
+                {
+                  "event": "Sleep",
+                  "event_id": 26,
+                  "duration": 0.5,
+                  "always": 1
+                },
+                {
+                  "event": "Terrorized",
+                  "event_id": 27,
+                  "duration": 0.5,
+                  "always": 1
+                },
+                {
+                  "event": "Confused",
+                  "event_id": 28,
+                  "duration": 0.5,
+                  "always": 1
+                }
+              ],
+              "flags": [
+                "IgnoreStrength"
+              ],
+              "flags_raw": 1296
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "critter",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVE_ONLY",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "0"
+              ],
+              "tags": [
+                "Display"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "UNSATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Confused"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.0,
+                      "duration": "4 seconds",
+                      "magnitude": 2.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Confuse {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Confuses you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/CONFUSECONTINUING.FX"
+                      },
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    },
+                    {
+                      "attribs": [
+                        "Confused"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.5,
+                      "duration": "4 seconds",
+                      "magnitude": 0.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Confuse {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Confuses you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/CONFUSECONTINUING.FX"
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Stunned"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.0,
+                      "duration": "4 seconds",
+                      "magnitude": 2.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Stun {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Stuns you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                      },
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    },
+                    {
+                      "attribs": [
+                        "Stunned"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.5,
+                      "duration": "4 seconds",
+                      "magnitude": 0.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Stun {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Stuns you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Sleep"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.0,
+                      "duration": "4 seconds",
+                      "magnitude": 2.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Sleep {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Sleeps you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                      },
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    },
+                    {
+                      "attribs": [
+                        "Sleep"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.5,
+                      "duration": "4 seconds",
+                      "magnitude": 0.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Sleep {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Sleeps you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Held"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.0,
+                      "duration": "4 seconds",
+                      "magnitude": 2.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Hold {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Holds you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [
+                          384
+                        ],
+                        "conditional_fx": null
+                      },
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    },
+                    {
+                      "attribs": [
+                        "Held"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.5,
+                      "duration": "4 seconds",
+                      "magnitude": 0.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Hold {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Holds you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [
+                          384
+                        ],
+                        "conditional_fx": null
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Terrorized"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.0,
+                      "duration": "4 seconds",
+                      "magnitude": 2.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Terrorize {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Terrorizes you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/AFRAIDCONTINUING.FX"
+                      },
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    },
+                    {
+                      "attribs": [
+                        "Terrorized"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.5,
+                      "duration": "4 seconds",
+                      "magnitude": 0.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Terrorize {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Terrorizes you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/AFRAIDCONTINUING.FX"
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Confused"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.0,
+                      "duration": "4 seconds",
+                      "magnitude": 2.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Confuse {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Confuses you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/CONFUSECONTINUING.FX"
+                      },
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    },
+                    {
+                      "attribs": [
+                        "Confused"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 0.5,
+                      "duration": "4 seconds",
+                      "magnitude": 0.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Confuse {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Confuses you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/CONFUSECONTINUING.FX"
+                      },
+                      "flags": [
+                        "IgnoreStrength",
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1072
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [],
+                  "child_effects": [
+                    {
+                      "chance": 0.25,
+                      "ppm": 0.0,
+                      "delay": 0.0,
+                      "radius_inner": -1.0,
+                      "radius_outer": -1.0,
+                      "requires_expression": [],
+                      "tags": [],
+                      "flags": [],
+                      "is_pvp": "EITHER",
+                      "requires_pv": "EITHER",
+                      "requires_default": "SATISFIED",
+                      "eval_flags": 0,
+                      "templates": [
+                        {
+                          "attribs": [
+                            "Stunned"
+                          ],
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Current",
+                          "target": "AnyAffected",
+                          "table": "Melee_Ones",
+                          "scale": 2.0,
+                          "duration": "4 seconds",
+                          "magnitude": 2.0,
+                          "delay": 0.0,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "RefreshToCount",
+                          "stack_limit": 1,
+                          "stack_key": null,
+                          "messages": {
+                            "display_attacker_hit": "You Stun {PlayerDest} with your {PowerName}.",
+                            "display_victim_hit": "{PlayerSource} Stuns you with their {PowerName}.",
+                            "display_float": null,
+                            "display_attrib_defense_float": null,
+                            "display_info": null
+                          },
+                          "fx": {
+                            "continuing_bits": [],
+                            "continuing_fx": null,
+                            "conditional_bits": [],
+                            "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                          },
+                          "flags": [
+                            "IgnoreResistance"
+                          ],
+                          "flags_raw": 1056
+                        },
+                        {
+                          "attribs": [
+                            "Stunned"
+                          ],
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Current",
+                          "target": "AnyAffected",
+                          "table": "Melee_Ones",
+                          "scale": 0.5,
+                          "duration": "4 seconds",
+                          "magnitude": 0.5,
+                          "delay": 0.0,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "RefreshToCount",
+                          "stack_limit": 1,
+                          "stack_key": null,
+                          "messages": {
+                            "display_attacker_hit": "You Stun {PlayerDest} with your {PowerName}.",
+                            "display_victim_hit": "{PlayerSource} Stuns you with their {PowerName}.",
+                            "display_float": null,
+                            "display_attrib_defense_float": null,
+                            "display_info": null
+                          },
+                          "fx": {
+                            "continuing_bits": [],
+                            "continuing_fx": null,
+                            "conditional_bits": [],
+                            "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                          },
+                          "flags": [
+                            "IgnoreStrength",
+                            "IgnoreResistance"
+                          ],
+                          "flags_raw": 1072
+                        }
+                      ]
+                    },
+                    {
+                      "chance": 1.0,
+                      "ppm": 0.0,
+                      "delay": 0.0,
+                      "radius_inner": -1.0,
+                      "radius_outer": -1.0,
+                      "requires_expression": [],
+                      "tags": [],
+                      "flags": [],
+                      "is_pvp": "EITHER",
+                      "requires_pv": "EITHER",
+                      "requires_default": "SATISFIED",
+                      "eval_flags": 0,
+                      "templates": [],
+                      "child_effects": [
+                        {
+                          "chance": 0.33329999446868896,
+                          "ppm": 0.0,
+                          "delay": 0.0,
+                          "radius_inner": -1.0,
+                          "radius_outer": -1.0,
+                          "requires_expression": [],
+                          "tags": [],
+                          "flags": [],
+                          "is_pvp": "EITHER",
+                          "requires_pv": "EITHER",
+                          "requires_default": "SATISFIED",
+                          "eval_flags": 0,
+                          "templates": [
+                            {
+                              "attribs": [
+                                "Sleep"
+                              ],
+                              "type": "Magnitude",
+                              "application_type": "OnTick",
+                              "aspect": "Current",
+                              "target": "AnyAffected",
+                              "table": "Melee_Ones",
+                              "scale": 2.0,
+                              "duration": "4 seconds",
+                              "magnitude": 2.0,
+                              "delay": 0.0,
+                              "duration_expression": [],
+                              "magnitude_expression": [],
+                              "application_period": 0.0,
+                              "tick_chance": 1.0,
+                              "tick_mag_multiplier": 1.0,
+                              "tick_mag_additive": 0.0,
+                              "jit_requires": [],
+                              "caster_stack": "Individual",
+                              "stack": "RefreshToCount",
+                              "stack_limit": 1,
+                              "stack_key": null,
+                              "messages": {
+                                "display_attacker_hit": "You Sleep {PlayerDest} with your {PowerName}.",
+                                "display_victim_hit": "{PlayerSource} Sleeps you with their {PowerName}.",
+                                "display_float": null,
+                                "display_attrib_defense_float": null,
+                                "display_info": null
+                              },
+                              "fx": {
+                                "continuing_bits": [],
+                                "continuing_fx": null,
+                                "conditional_bits": [],
+                                "conditional_fx": "GENERICCONTINUING/SLEEPCONTINUING.FX"
+                              },
+                              "flags": [
+                                "IgnoreResistance"
+                              ],
+                              "flags_raw": 1056
+                            },
+                            {
+                              "attribs": [
+                                "Sleep"
+                              ],
+                              "type": "Magnitude",
+                              "application_type": "OnTick",
+                              "aspect": "Current",
+                              "target": "AnyAffected",
+                              "table": "Melee_Ones",
+                              "scale": 0.5,
+                              "duration": "4 seconds",
+                              "magnitude": 0.5,
+                              "delay": 0.0,
+                              "duration_expression": [],
+                              "magnitude_expression": [],
+                              "application_period": 0.0,
+                              "tick_chance": 1.0,
+                              "tick_mag_multiplier": 1.0,
+                              "tick_mag_additive": 0.0,
+                              "jit_requires": [],
+                              "caster_stack": "Individual",
+                              "stack": "RefreshToCount",
+                              "stack_limit": 1,
+                              "stack_key": null,
+                              "messages": {
+                                "display_attacker_hit": "You Sleep {PlayerDest} with your {PowerName}.",
+                                "display_victim_hit": "{PlayerSource} Sleeps you with their {PowerName}.",
+                                "display_float": null,
+                                "display_attrib_defense_float": null,
+                                "display_info": null
+                              },
+                              "fx": {
+                                "continuing_bits": [],
+                                "continuing_fx": null,
+                                "conditional_bits": [],
+                                "conditional_fx": "GENERICCONTINUING/SLEEPCONTINUING.FX"
+                              },
+                              "flags": [
+                                "IgnoreStrength",
+                                "IgnoreResistance"
+                              ],
+                              "flags_raw": 1072
+                            }
+                          ]
+                        },
+                        {
+                          "chance": 1.0,
+                          "ppm": 0.0,
+                          "delay": 0.0,
+                          "radius_inner": -1.0,
+                          "radius_outer": -1.0,
+                          "requires_expression": [],
+                          "tags": [],
+                          "flags": [],
+                          "is_pvp": "EITHER",
+                          "requires_pv": "EITHER",
+                          "requires_default": "SATISFIED",
+                          "eval_flags": 0,
+                          "templates": [],
+                          "child_effects": [
+                            {
+                              "chance": 0.5,
+                              "ppm": 0.0,
+                              "delay": 0.0,
+                              "radius_inner": -1.0,
+                              "radius_outer": -1.0,
+                              "requires_expression": [],
+                              "tags": [],
+                              "flags": [],
+                              "is_pvp": "EITHER",
+                              "requires_pv": "EITHER",
+                              "requires_default": "SATISFIED",
+                              "eval_flags": 0,
+                              "templates": [
+                                {
+                                  "attribs": [
+                                    "Held"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Ones",
+                                  "scale": 2.0,
+                                  "duration": "4 seconds",
+                                  "magnitude": 2.0,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "RefreshToCount",
+                                  "stack_limit": 1,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": "You Hold {PlayerDest} with your {PowerName}.",
+                                    "display_victim_hit": "{PlayerSource} Holds you with their {PowerName}.",
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": null
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": null,
+                                    "conditional_bits": [
+                                      384
+                                    ],
+                                    "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                                  },
+                                  "flags": [
+                                    "IgnoreResistance"
+                                  ],
+                                  "flags_raw": 1056
+                                },
+                                {
+                                  "attribs": [
+                                    "Held"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Ones",
+                                  "scale": 0.5,
+                                  "duration": "4 seconds",
+                                  "magnitude": 0.5,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "RefreshToCount",
+                                  "stack_limit": 1,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": "You Hold {PlayerDest} with your {PowerName}.",
+                                    "display_victim_hit": "{PlayerSource} Holds you with their {PowerName}.",
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": null
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": null,
+                                    "conditional_bits": [
+                                      384
+                                    ],
+                                    "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                                  },
+                                  "flags": [
+                                    "IgnoreStrength",
+                                    "IgnoreResistance"
+                                  ],
+                                  "flags_raw": 1072
+                                }
+                              ]
+                            },
+                            {
+                              "chance": 1.0,
+                              "ppm": 0.0,
+                              "delay": 0.0,
+                              "radius_inner": -1.0,
+                              "radius_outer": -1.0,
+                              "requires_expression": [],
+                              "tags": [],
+                              "flags": [],
+                              "is_pvp": "EITHER",
+                              "requires_pv": "EITHER",
+                              "requires_default": "SATISFIED",
+                              "eval_flags": 0,
+                              "templates": [
+                                {
+                                  "attribs": [
+                                    "Terrorized"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Ones",
+                                  "scale": 2.0,
+                                  "duration": "4 seconds",
+                                  "magnitude": 2.0,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "RefreshToCount",
+                                  "stack_limit": 1,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": "You Terrorize {PlayerDest} with your {PowerName}.",
+                                    "display_victim_hit": "{PlayerSource} Terrorizes you with their {PowerName}.",
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": null
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": null,
+                                    "conditional_bits": [],
+                                    "conditional_fx": "GENERICCONTINUING/AFRAIDCONTINUING.FX"
+                                  },
+                                  "flags": [
+                                    "IgnoreResistance"
+                                  ],
+                                  "flags_raw": 1056
+                                },
+                                {
+                                  "attribs": [
+                                    "Terrorized"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Ones",
+                                  "scale": 0.5,
+                                  "duration": "4 seconds",
+                                  "magnitude": 1.25,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "RefreshToCount",
+                                  "stack_limit": 1,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": "You Terrorize {PlayerDest} with your {PowerName}.",
+                                    "display_victim_hit": "{PlayerSource} Terrorizes you with their {PowerName}.",
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": null
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": null,
+                                    "conditional_bits": [],
+                                    "conditional_fx": "GENERICCONTINUING/AFRAIDCONTINUING.FX"
+                                  },
+                                  "flags": [
+                                    "IgnoreStrength",
+                                    "IgnoreResistance"
+                                  ],
+                                  "flags_raw": 1072
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "player",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVP_ONLY",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [
+                "0"
+              ],
+              "tags": [
+                "Display"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "UNSATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Confused"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.5,
+                      "duration": "4 seconds",
+                      "magnitude": 2.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Confuse {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Confuses you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/CONFUSECONTINUING.FX"
+                      },
+                      "suppress_events": [
+                        {
+                          "event": "Confused",
+                          "event_id": 28,
+                          "duration": 15.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Stunned"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.5,
+                      "duration": "4 seconds",
+                      "magnitude": 2.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Stun {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Stuns you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                      },
+                      "suppress_events": [
+                        {
+                          "event": "Helped",
+                          "event_id": 4,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Immobilized",
+                          "event_id": 24,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Terrorized",
+                          "event_id": 27,
+                          "duration": 15.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Sleep"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.5,
+                      "duration": "4 seconds",
+                      "magnitude": 2.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Sleep {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Sleeps you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                      },
+                      "suppress_events": [
+                        {
+                          "event": "Helped",
+                          "event_id": 4,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Immobilized",
+                          "event_id": 24,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Terrorized",
+                          "event_id": 27,
+                          "duration": 15.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Held"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.5,
+                      "duration": "4 seconds",
+                      "magnitude": 2.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Hold {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Holds you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [
+                          384
+                        ],
+                        "conditional_fx": null
+                      },
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Terrorized"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.5,
+                      "duration": "4 seconds",
+                      "magnitude": 2.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "RefreshToCount",
+                      "stack_limit": 1,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Terrorize {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Terrorizes you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/AFRAIDCONTINUING.FX"
+                      },
+                      "suppress_events": [
+                        {
+                          "event": "Helped",
+                          "event_id": 4,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Stunned",
+                          "event_id": 23,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Immobilized",
+                          "event_id": 24,
+                          "duration": 15.0,
+                          "always": 0
+                        },
+                        {
+                          "event": "Terrorized",
+                          "event_id": 27,
+                          "duration": 15.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.20000000298023224,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Confused"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Melee_Ones",
+                      "scale": 2.5,
+                      "duration": "4 seconds",
+                      "magnitude": 2.5,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You Confuse {PlayerDest} with your {PowerName}.",
+                        "display_victim_hit": "{PlayerSource} Confuses you with their {PowerName}.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": null,
+                        "conditional_bits": [],
+                        "conditional_fx": "GENERICCONTINUING/CONFUSECONTINUING.FX"
+                      },
+                      "suppress_events": [
+                        {
+                          "event": "Confused",
+                          "event_id": 28,
+                          "duration": 15.0,
+                          "always": 0
+                        }
+                      ],
+                      "flags": [
+                        "IgnoreResistance"
+                      ],
+                      "flags_raw": 1056
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [],
+                  "child_effects": [
+                    {
+                      "chance": 0.25,
+                      "ppm": 0.0,
+                      "delay": 0.0,
+                      "radius_inner": -1.0,
+                      "radius_outer": -1.0,
+                      "requires_expression": [],
+                      "tags": [],
+                      "flags": [],
+                      "is_pvp": "EITHER",
+                      "requires_pv": "EITHER",
+                      "requires_default": "SATISFIED",
+                      "eval_flags": 0,
+                      "templates": [
+                        {
+                          "attribs": [
+                            "Stunned"
+                          ],
+                          "type": "Magnitude",
+                          "application_type": "OnTick",
+                          "aspect": "Current",
+                          "target": "AnyAffected",
+                          "table": "Melee_Ones",
+                          "scale": 2.5,
+                          "duration": "4 seconds",
+                          "magnitude": 2.5,
+                          "delay": 0.0,
+                          "duration_expression": [],
+                          "magnitude_expression": [],
+                          "application_period": 0.0,
+                          "tick_chance": 1.0,
+                          "tick_mag_multiplier": 1.0,
+                          "tick_mag_additive": 0.0,
+                          "jit_requires": [],
+                          "caster_stack": "Individual",
+                          "stack": "Stack",
+                          "stack_limit": 2,
+                          "stack_key": null,
+                          "messages": {
+                            "display_attacker_hit": "You Stun {PlayerDest} with your {PowerName}.",
+                            "display_victim_hit": "{PlayerSource} Stuns you with their {PowerName}.",
+                            "display_float": null,
+                            "display_attrib_defense_float": null,
+                            "display_info": null
+                          },
+                          "fx": {
+                            "continuing_bits": [],
+                            "continuing_fx": null,
+                            "conditional_bits": [],
+                            "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                          },
+                          "suppress_events": [
+                            {
+                              "event": "Stunned",
+                              "event_id": 23,
+                              "duration": 15.0,
+                              "always": 0
+                            },
+                            {
+                              "event": "Immobilized",
+                              "event_id": 24,
+                              "duration": 15.0,
+                              "always": 0
+                            },
+                            {
+                              "event": "Held",
+                              "event_id": 25,
+                              "duration": 15.0,
+                              "always": 0
+                            },
+                            {
+                              "event": "Sleep",
+                              "event_id": 26,
+                              "duration": 15.0,
+                              "always": 0
+                            },
+                            {
+                              "event": "Terrorized",
+                              "event_id": 27,
+                              "duration": 15.0,
+                              "always": 0
+                            }
+                          ],
+                          "flags": [
+                            "IgnoreResistance"
+                          ],
+                          "flags_raw": 1056
+                        }
+                      ]
+                    },
+                    {
+                      "chance": 1.0,
+                      "ppm": 0.0,
+                      "delay": 0.0,
+                      "radius_inner": -1.0,
+                      "radius_outer": -1.0,
+                      "requires_expression": [],
+                      "tags": [],
+                      "flags": [],
+                      "is_pvp": "EITHER",
+                      "requires_pv": "EITHER",
+                      "requires_default": "SATISFIED",
+                      "eval_flags": 0,
+                      "templates": [],
+                      "child_effects": [
+                        {
+                          "chance": 0.33329999446868896,
+                          "ppm": 0.0,
+                          "delay": 0.0,
+                          "radius_inner": -1.0,
+                          "radius_outer": -1.0,
+                          "requires_expression": [],
+                          "tags": [],
+                          "flags": [],
+                          "is_pvp": "EITHER",
+                          "requires_pv": "EITHER",
+                          "requires_default": "SATISFIED",
+                          "eval_flags": 0,
+                          "templates": [
+                            {
+                              "attribs": [
+                                "Sleep"
+                              ],
+                              "type": "Magnitude",
+                              "application_type": "OnTick",
+                              "aspect": "Current",
+                              "target": "AnyAffected",
+                              "table": "Melee_Ones",
+                              "scale": 2.5,
+                              "duration": "4 seconds",
+                              "magnitude": 2.5,
+                              "delay": 0.0,
+                              "duration_expression": [],
+                              "magnitude_expression": [],
+                              "application_period": 0.0,
+                              "tick_chance": 1.0,
+                              "tick_mag_multiplier": 1.0,
+                              "tick_mag_additive": 0.0,
+                              "jit_requires": [],
+                              "caster_stack": "Individual",
+                              "stack": "Stack",
+                              "stack_limit": 2,
+                              "stack_key": null,
+                              "messages": {
+                                "display_attacker_hit": "You Sleep {PlayerDest} with your {PowerName}.",
+                                "display_victim_hit": "{PlayerSource} Sleeps you with their {PowerName}.",
+                                "display_float": null,
+                                "display_attrib_defense_float": null,
+                                "display_info": null
+                              },
+                              "fx": {
+                                "continuing_bits": [],
+                                "continuing_fx": null,
+                                "conditional_bits": [],
+                                "conditional_fx": "GENERICCONTINUING/SLEEPCONTINUING.FX"
+                              },
+                              "suppress_events": [
+                                {
+                                  "event": "Stunned",
+                                  "event_id": 23,
+                                  "duration": 15.0,
+                                  "always": 0
+                                },
+                                {
+                                  "event": "Immobilized",
+                                  "event_id": 24,
+                                  "duration": 15.0,
+                                  "always": 0
+                                },
+                                {
+                                  "event": "Held",
+                                  "event_id": 25,
+                                  "duration": 15.0,
+                                  "always": 0
+                                },
+                                {
+                                  "event": "Sleep",
+                                  "event_id": 26,
+                                  "duration": 15.0,
+                                  "always": 0
+                                },
+                                {
+                                  "event": "Terrorized",
+                                  "event_id": 27,
+                                  "duration": 15.0,
+                                  "always": 0
+                                }
+                              ],
+                              "flags": [
+                                "IgnoreResistance"
+                              ],
+                              "flags_raw": 1056
+                            }
+                          ]
+                        },
+                        {
+                          "chance": 1.0,
+                          "ppm": 0.0,
+                          "delay": 0.0,
+                          "radius_inner": -1.0,
+                          "radius_outer": -1.0,
+                          "requires_expression": [],
+                          "tags": [],
+                          "flags": [],
+                          "is_pvp": "EITHER",
+                          "requires_pv": "EITHER",
+                          "requires_default": "SATISFIED",
+                          "eval_flags": 0,
+                          "templates": [],
+                          "child_effects": [
+                            {
+                              "chance": 0.5,
+                              "ppm": 0.0,
+                              "delay": 0.0,
+                              "radius_inner": -1.0,
+                              "radius_outer": -1.0,
+                              "requires_expression": [],
+                              "tags": [],
+                              "flags": [],
+                              "is_pvp": "EITHER",
+                              "requires_pv": "EITHER",
+                              "requires_default": "SATISFIED",
+                              "eval_flags": 0,
+                              "templates": [
+                                {
+                                  "attribs": [
+                                    "Held"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Ones",
+                                  "scale": 2.5,
+                                  "duration": "4 seconds",
+                                  "magnitude": 2.5,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "Stack",
+                                  "stack_limit": 2,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": "You Hold {PlayerDest} with your {PowerName}.",
+                                    "display_victim_hit": "{PlayerSource} Holds you with their {PowerName}.",
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": null
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": null,
+                                    "conditional_bits": [
+                                      384
+                                    ],
+                                    "conditional_fx": "GENERICCONTINUING/STUNCONTINUING.FX"
+                                  },
+                                  "suppress_events": [
+                                    {
+                                      "event": "Stunned",
+                                      "event_id": 23,
+                                      "duration": 15.0,
+                                      "always": 0
+                                    },
+                                    {
+                                      "event": "Immobilized",
+                                      "event_id": 24,
+                                      "duration": 15.0,
+                                      "always": 0
+                                    },
+                                    {
+                                      "event": "Held",
+                                      "event_id": 25,
+                                      "duration": 15.0,
+                                      "always": 0
+                                    },
+                                    {
+                                      "event": "Sleep",
+                                      "event_id": 26,
+                                      "duration": 15.0,
+                                      "always": 0
+                                    },
+                                    {
+                                      "event": "Terrorized",
+                                      "event_id": 27,
+                                      "duration": 15.0,
+                                      "always": 0
+                                    }
+                                  ],
+                                  "flags": [
+                                    "IgnoreResistance"
+                                  ],
+                                  "flags_raw": 1056
+                                }
+                              ]
+                            },
+                            {
+                              "chance": 1.0,
+                              "ppm": 0.0,
+                              "delay": 0.0,
+                              "radius_inner": -1.0,
+                              "radius_outer": -1.0,
+                              "requires_expression": [],
+                              "tags": [],
+                              "flags": [],
+                              "is_pvp": "EITHER",
+                              "requires_pv": "EITHER",
+                              "requires_default": "SATISFIED",
+                              "eval_flags": 0,
+                              "templates": [
+                                {
+                                  "attribs": [
+                                    "Terrorized"
+                                  ],
+                                  "type": "Magnitude",
+                                  "application_type": "OnTick",
+                                  "aspect": "Current",
+                                  "target": "AnyAffected",
+                                  "table": "Melee_Ones",
+                                  "scale": 2.5,
+                                  "duration": "4 seconds",
+                                  "magnitude": 2.5,
+                                  "delay": 0.0,
+                                  "duration_expression": [],
+                                  "magnitude_expression": [],
+                                  "application_period": 0.0,
+                                  "tick_chance": 1.0,
+                                  "tick_mag_multiplier": 1.0,
+                                  "tick_mag_additive": 0.0,
+                                  "jit_requires": [],
+                                  "caster_stack": "Individual",
+                                  "stack": "Stack",
+                                  "stack_limit": 2,
+                                  "stack_key": null,
+                                  "messages": {
+                                    "display_attacker_hit": "You Terrorize {PlayerDest} with your {PowerName}.",
+                                    "display_victim_hit": "{PlayerSource} Terrorizes you with their {PowerName}.",
+                                    "display_float": null,
+                                    "display_attrib_defense_float": null,
+                                    "display_info": null
+                                  },
+                                  "fx": {
+                                    "continuing_bits": [],
+                                    "continuing_fx": null,
+                                    "conditional_bits": [],
+                                    "conditional_fx": "GENERICCONTINUING/AFRAIDCONTINUING.FX"
+                                  },
+                                  "suppress_events": [
+                                    {
+                                      "event": "Stunned",
+                                      "event_id": 23,
+                                      "duration": 15.0,
+                                      "always": 0
+                                    },
+                                    {
+                                      "event": "Immobilized",
+                                      "event_id": 24,
+                                      "duration": 15.0,
+                                      "always": 0
+                                    },
+                                    {
+                                      "event": "Held",
+                                      "event_id": 25,
+                                      "duration": 15.0,
+                                      "always": 0
+                                    },
+                                    {
+                                      "event": "Sleep",
+                                      "event_id": 26,
+                                      "duration": 15.0,
+                                      "always": 0
+                                    },
+                                    {
+                                      "event": "Terrorized",
+                                      "event_id": 27,
+                                      "duration": 15.0,
+                                      "always": 0
+                                    }
+                                  ],
+                                  "flags": [
+                                    "IgnoreResistance"
+                                  ],
+                                  "flags_raw": 1056
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "over_cap_trigger": 1,
+  "over_cap_multiplier": 0.9,
+  "over_cap_exponential": true,
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 27,
+  "powerset": "Sentinel_Defense.Psionic_Armor"
+}

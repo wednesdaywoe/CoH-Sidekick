@@ -1,0 +1,102 @@
+{
+  "name": "Time_Bomb",
+  "full_name": "Blaster_Support.Gadgets.Time_Bomb",
+  "short_name": "Time_Bomb",
+  "type": "Click",
+  "display_name": "Remote Bomb",
+  "display_fullname": "Blaster Support Gadgets Time Bomb",
+  "display_help": "You can place a Remote Bomb on the ground. The Remote Bomb will detonate once the power is activated a second time, resulting in a massive explosion that can devastate all nearby foes and send them flying. If used while targeting an enemy in melee range, you can attach the Remote Bomb to them instead!<br><br>The Remote Bomb is small, and almost impossible to detect.<br><br><color #fcfc95>Damage: Extreme.</color><br><color #fcfc95>Recharge: Very Long.</color>",
+  "display_short_help": "Place Bomb: PBAoE, Extreme DMG(Lethal/Fire), Foe Knockback",
+  "icon": "gadgets_remotebomb.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 2.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 0.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Anything",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "None"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Recharge",
+    "Knockback",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Blaster Archetype Sets",
+    "Knockback",
+    "Melee AoE Damage",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [],
+  "redirect": [
+    {
+      "name": "Redirects.Gadgets.Remote_Bomb_Target",
+      "condition_expression": [
+        "kRemoteBomb",
+        "Source.Mode?",
+        "!",
+        "target.isFriend?",
+        "!",
+        "&&"
+      ],
+      "show_in_info": true
+    },
+    {
+      "name": "Redirects.Gadgets.Remote_Bomb_Self",
+      "condition_expression": [
+        "kRemoteBomb",
+        "Source.Mode?",
+        "!"
+      ],
+      "show_in_info": true
+    },
+    {
+      "name": "Redirects.Gadgets.Time_Bomb",
+      "condition_expression": [
+        "kRemoteBomb",
+        "Source.Mode?"
+      ],
+      "show_in_info": true
+    },
+    {
+      "name": "Redirects.Gadgets.Remote_Bomb_Blaster_Info",
+      "condition_expression": [
+        "0"
+      ],
+      "show_in_info": true
+    }
+  ],
+  "strengths_disallowed": [
+    "Range"
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 27,
+  "powerset": "Blaster_Support.Gadgets"
+}

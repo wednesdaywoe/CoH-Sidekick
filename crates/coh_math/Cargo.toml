@@ -1,0 +1,76 @@
+[package]
+name = "coh_math"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Pure CoH build calculation over the atom dataset — no UI, no IO"
+
+[dependencies]
+coh_data = { path = "../coh_data" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# NO [dev-dependencies] HERE ON PURPOSE. This crate had one until 2026-09-26, holding the
+# workspace `serde_json` and `flate2` that nothing in src/ or examples/ imports. They were there
+# for the test suite in `coh-sidekick-1.0`, which has never been ported into this repository --
+# its crates/coh_math/tests/ uses serde_json in 51 files and flate2 in 5, and coh_wasm's
+# tests/panic_freedom.rs needs flate2. Removed by decision, on the ground that a dependency kept
+# for absent code is indistinguishable from one kept by accident, and the suite is not coming
+# without a deliberate port that would add them back in the same breath. Both are ordinary
+# `[dependencies]` of coh_data, so the lockfile is unchanged either way.
+
+[features]
+# Opt-in for the measurement targets below; carries no code itself. Same flag name as
+# `coh_data`'s, so one switch turns the whole workspace's measurement half on at once.
+census-probe = []
+
+# The census and probe targets. Each prints a table or writes a file for a person to read and
+# asserts nothing that can fail, so a regression cannot turn one red — they are investigation
+# tools that live in the test harness because there was nowhere else to put them. Gating them
+# keeps ~2,950 lines out of every `cargo test`/`clippy` build; `required-features` excludes them
+# from COMPILATION, which `#[ignore]` does not. Run one by name:
+#   cargo run -p coh_math --release --features census-probe --example <name>
+#   cargo test -p coh_math --features census-probe --test <name> -- --nocapture --ignored
+
+[[example]]
+name = "bag_removal_census"
+required-features = ["census-probe"]
+
+[[example]]
+name = "conditional_key_census"
+required-features = ["census-probe"]
+
+[[example]]
+name = "conditional_value_census"
+required-features = ["census-probe"]
+
+[[example]]
+name = "display_key_census"
+required-features = ["census-probe"]
+
+[[example]]
+name = "display_residual_probe"
+required-features = ["census-probe"]
+
+[[example]]
+name = "display_value_census"
+required-features = ["census-probe"]
+
+[[example]]
+name = "movement_bag_probe"
+required-features = ["census-probe"]
+
+[[example]]
+name = "perma_eligibility_census"
+required-features = ["census-probe"]
+
+[[example]]
+name = "pet_ability_key_census"
+required-features = ["census-probe"]
+
+[[example]]
+name = "resource_recipient_census"
+required-features = ["census-probe"]
+
+[lints]
+workspace = true

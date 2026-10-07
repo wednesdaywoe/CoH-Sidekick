@@ -1,0 +1,279 @@
+{
+  "name": "Team_Transporter",
+  "full_name": "Inherent.Inherent.Team_Transporter",
+  "short_name": "Team_Transporter",
+  "type": "Click",
+  "display_name": "Team Transporter",
+  "display_fullname": "Inherent Inherent Team Transporter",
+  "display_help": "Activating this power will summon a vehicle that will allow your party to teleport to the active mission.  This power cannot be activated while on a PvP or mission map.",
+  "display_short_help": "Summon Team Transport Vehicle",
+  "icon": "inherent_teamtransport.png",
+  "auto_issue": true,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "Location",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 60.0,
+  "range_secondary": 0.0,
+  "activation_time": 6.03,
+  "recharge_time": 1800.0,
+  "activate_period": 0.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 4.0,
+  "target_type": "Location",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [
+    "DefeatStatesman",
+    "Owned?",
+    "STFVictory",
+    "Owned?",
+    "||"
+  ],
+  "activate_requires": [
+    "isPVPMap?",
+    "!",
+    "isMissionMap?",
+    "!",
+    "&&"
+  ],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "AllyID",
+        "source>",
+        "hero",
+        "eq",
+        "praetorianprogress",
+        "source>",
+        "normal",
+        "eq",
+        "praetorianprogress",
+        "source>",
+        "Earth",
+        "eq",
+        "||",
+        "&&"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": -1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "entity_def": "Pets_Team_Transporter_Hero",
+            "priority_list": "Pet(DoNotMove(1),NoTeleport(1))",
+            "type": "EntCreate"
+          },
+          "flags": [
+            "NearGround",
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "CopyBoosts"
+          ],
+          "flags_raw": 1080,
+          "flags2_raw": 4
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "AllyID",
+        "source>",
+        "villain",
+        "eq",
+        "praetorianprogress",
+        "source>",
+        "normal",
+        "eq",
+        "praetorianprogress",
+        "source>",
+        "Earth",
+        "eq",
+        "||",
+        "&&"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": -1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "entity_def": "Pets_Team_Transporter_Villain",
+            "priority_list": "Pet(DoNotMove(1),NoTeleport(1))",
+            "type": "EntCreate"
+          },
+          "flags": [
+            "NearGround",
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "CopyBoosts"
+          ],
+          "flags_raw": 1080,
+          "flags2_raw": 4
+        }
+      ]
+    },
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "praetorianprogress",
+        "source>",
+        "praetoria",
+        "eq",
+        "praetorianprogress",
+        "source>",
+        "tutorial",
+        "eq",
+        "||"
+      ],
+      "tags": [
+        "Ones"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Create_Entity"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Ranged_Ones",
+          "scale": -1.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Ignore",
+          "stack_limit": 2,
+          "stack_key": null,
+          "params": {
+            "entity_def": "Pets_Team_Transporter_Praetorian",
+            "priority_list": "Pet(DoNotMove(1),NoTeleport(1))",
+            "type": "EntCreate"
+          },
+          "flags": [
+            "NearGround",
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "CopyBoosts"
+          ],
+          "flags_raw": 1080,
+          "flags2_raw": 4
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "strengths_disallowed": [
+    "RechargeTime"
+  ],
+  "show_in_manage": false,
+  "modes_disallowed": [
+    "Disable_Temp",
+    "Disable_Travel",
+    "Disable_All",
+    "CoOpTeam"
+  ],
+  "available_level": 5,
+  "powerset": "Inherent.Inherent"
+}

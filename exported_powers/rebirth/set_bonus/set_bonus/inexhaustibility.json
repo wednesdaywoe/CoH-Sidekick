@@ -1,0 +1,247 @@
+{
+  "name": "Inexhaustibility",
+  "full_name": "Set_Bonus.Set_Bonus.Inexhaustibility",
+  "short_name": "Inexhaustibility",
+  "type": "Auto",
+  "display_name": "Inexhaustibility: Out of Combat +Hit Points/Endurance",
+  "display_fullname": "Set Bonus Set Bonus Inexhaustibility",
+  "display_help": "UNIQUE -- No more than 1 enhancement of this type may be slotted by a character.  Slotting this enhancement into Rest will give the user a chance to recover Hit Points and Endurance at a rapid rate if they've been out of combat for 30 seconds or more.  In a PvP zone the player will gain a chance to receive a dramatic boost to regeneration instead of the healing effect triggered by this power.  NOTE: Inexhaustibility can only be slotted into Rest and rest does not need to be activated for this power's effect to be triggered.",
+  "display_short_help": "Out of Combat +Hit Points/Endurance",
+  "icon": "e_icon_inexhaustibility.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 10.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 5,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 0.5,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [
+        "Heal"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Heal_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "AnyAffected",
+          "table": "Melee_Heal",
+          "scale": 2.0,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [
+            "isPVPMap?",
+            "!"
+          ],
+          "application_period": 0.0,
+          "tick_chance": 0.5,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "suppress_events": [
+            {
+              "event": "Attacked",
+              "event_id": 2,
+              "duration": 30.0,
+              "always": 1
+            },
+            {
+              "event": "HitByFoe",
+              "event_id": 13,
+              "duration": 30.0,
+              "always": 1
+            }
+          ],
+          "flags": [
+            "IgnoreStrength",
+            "StackExactPower"
+          ],
+          "flags_raw": 525584
+        }
+      ]
+    },
+    {
+      "chance": 0.5,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [
+        "End"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Endurance"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "AnyAffected",
+          "table": "Melee_Ones",
+          "scale": 0.1,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 0.5,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Stack",
+          "stack_limit": 2,
+          "stack_key": null,
+          "suppress_events": [
+            {
+              "event": "Attacked",
+              "event_id": 2,
+              "duration": 30.0,
+              "always": 1
+            },
+            {
+              "event": "HitByFoe",
+              "event_id": 13,
+              "duration": 30.0,
+              "always": 1
+            }
+          ],
+          "flags": [
+            "CancelOnMiss",
+            "IgnoreStrength",
+            "IgnoreResistance",
+            "StackExactPower"
+          ],
+          "flags_raw": 525364
+        }
+      ]
+    },
+    {
+      "chance": 0.5,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [
+        "Regen"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Regeneration"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Current",
+          "target": "Self",
+          "table": "Melee_Ones",
+          "scale": 2.0,
+          "duration": "10.25 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [
+            "isPVPMap?"
+          ],
+          "application_period": 0.0,
+          "tick_chance": 0.5,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "suppress_events": [
+            {
+              "event": "Attacked",
+              "event_id": 2,
+              "duration": 30.0,
+              "always": 1
+            },
+            {
+              "event": "HitByFoe",
+              "event_id": 13,
+              "duration": 30.0,
+              "always": 1
+            }
+          ],
+          "flags": [
+            "IgnoreResistance",
+            "StackExactPower"
+          ],
+          "flags_raw": 525344
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "show_in_inventory": "Never",
+  "show_in_manage": false,
+  "modes_disallowed": [
+    "Disable_SetBonus"
+  ],
+  "available_level": 0,
+  "powerset": "Set_Bonus.Set_Bonus"
+}

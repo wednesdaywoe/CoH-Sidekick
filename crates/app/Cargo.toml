@@ -1,0 +1,207 @@
+[package]
+name = "app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "CoH Sidekick planner UI — one Dioxus codebase for desktop and web"
+
+# The binary's name is what a tester sees: dx 0.7.9 takes the bundle's product name from the
+# cargo target, not from `dioxus.toml` (both `app_name` and the correctly-spelled `name` were
+# measured and changed nothing), so without this the app installs as "App" — the package name,
+# capitalised. The PACKAGE stays `app` deliberately: eleven files and the CI workflows say
+# `-p app`, and renaming it to fix a display string would be a wide change for a narrow reason.
+[[bin]]
+name = "Sidekick"
+path = "src/main.rs"
+
+[dependencies]
+dioxus = { version = "=0.7.9" }
+coh_data = { path = "../coh_data" }
+coh_math = { path = "../coh_math" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+image = { workspace = true }
+chrono = { workspace = true }
+# The embedded build lives in a PNG text chunk. `image`'s `PngEncoder` exposes no text-chunk
+# API, but the `png` crate it wraps does (`add_itxt_chunk` / `read_header_info`); the version
+# is pinned to the one `image` already locks so there is one `png` in the graph, not two.
+png = { version = "0.18" }
+# The power icons the renderer draws, embedded at compile time (see the workspace note).
+include_dir = { workspace = true }
+# The cloud transport (`cloud`). ONE declaration, not two, and that is the point of the choice:
+# reqwest is `fetch` on wasm and hyper on native, and it gates every TLS and hyper dependency
+# behind `cfg(not(target_arch = "wasm32"))` in its own manifest — so `rustls-tls` means TLS on
+# the desktop build and resolves to nothing at all on the web one. A client declared per target
+# is how the cloud layer would have grown a `cfg` seam on line one, which is the shape RB4 exists
+# to avoid. Default features off drops native-tls (and with it OpenSSL on Linux) and the proxy
+# and charset machinery this client has no use for; 0.12 is the version already in the lock.
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+# The wall clock the session's expiry rule reads (`cloud::session`). `std::time::SystemTime::now()`
+# PANICS on wasm32-unknown-unknown — that target's std has no clock — so this is not a nicety: the
+# same reqwest bargain, one unconditional line whose target split lives in the dependency's own
+# manifest (`Date.now()` on wasm, a re-export of std everywhere else) rather than in this crate.
+web-time = { version = "1.1" }
+# The Unicode properties the author line's sigil rule reads (`cloud::profile::author_identity`).
+# std can say `is_alphanumeric` and `is_whitespace` and neither one separates U+3164 HANGUL
+# FILLER — a LETTER that renders as nothing — from the Hangul syllable next to it in the block,
+# which is precisely the distinction F69 turned on. Not a new crate in the graph: `reqwest` ->
+# `url` -> `idna` -> `idna_adapter` already pulls this exact version on BOTH targets (checked
+# with `cargo tree --target wasm32-unknown-unknown`), so this adds a direct edge to something
+# already compiled rather than weight to the wasm bundle. `compiled_data` is what `idna_adapter`
+# turns on too; the alternative is hand-copying DerivedCoreProperties.txt into this repo, which
+# is the enumeration the fix exists to stop writing.
+icu_properties = { version = "2.2", features = ["compiled_data"] }
+# The lock the shell's one `SessionManager` sits behind (`cloud::account`). `SessionManager::client`
+# takes `&mut self` and awaits inside it, which is what makes the pre-refresh unskippable and what
+# a `Signal` cannot hold: its write guard is a RefCell borrow, so a second call in flight panics on
+# it. An async mutex also serialises the refresh itself, which a GoTrue refresh token being
+# single-use makes necessary rather than tidy. Already in the graph under dioxus; `std` is the one
+# feature `lock` needs, and default features off keeps the rest of the kitchen sink out.
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
+# The quick-share fingerprint (`cloud::shared_builds::fingerprint_build`) — SHA-256 of the build
+# object, so an unchanged build re-copies its short link without a network call. Same hash and
+# same truncation the beta uses, because a field named `fingerprint` that is not the hash its
+# name claims is a trap for whoever compares the two implementations next. Pure Rust with no
+# platform backend, so it needs no target split; 0.10 is the version already in the lock (tao
+# pulls it on the desktop side), so this adds a direct edge rather than a new crate.
+sha2 = { version = "0.10", default-features = false }
+# The desktop sign-in's PKCE challenge (`cloud::oauth::pkce_challenge`) — `BASE64URL(SHA256(v))`,
+# unpadded. Declared unconditionally rather than per target because it is pure Rust with no
+# platform backend, and because the function it serves lives in `cloud`, whose rule is that no
+# target is named inside it. The exact encoding is the reason this is a crate and not fifteen
+# lines here: GoTrue compares against Go's `base64.RawURLEncoding` and refuses any challenge
+# containing `+`, `/` or `=` (`internal/api/pkce.go`), so the alphabet and the absent padding are
+# both load-bearing, and RFC 7636's own test vector grades them. Already in the lock with eight
+# dependents, so this adds an edge rather than a crate.
+base64 = { version = "0.22", default-features = false, features = ["std"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# The save dialog (`build_file::write_file`). The browser downloads a blob and the desktop
+# webview cannot — `wry` registers a download handler only when the app supplies one, and
+# `dioxus-desktop` supplies none — so the native half needs a real dialog. Same version and
+# same feature set `dioxus-desktop` already asks for, so this unifies into the one rfd build
+# the file INPUT is already going through rather than adding a second backend; `xdg-portal`
+# with default features off keeps it pure-Rust (ashpd/zbus) and links no GTK.
+rfd = { version = "0.17.2", default-features = false, features = ["xdg-portal"] }
+# The crash reporter's transport on this target (`crash::deliver`). A features-only line on the
+# client already declared above, not a second client: `blocking` is what lets the panic hook wait
+# for the report to leave on a thread of its own, which the async client cannot do from inside a
+# hook that is already unwinding. The web arm needs nothing here — a beacon is the browser's.
+reqwest = { version = "0.12", default-features = false, features = ["blocking"] }
+# One timer, for the debounce on saving a popped-out window's position
+# (`panel_popout::PoppedWindows`) — `Moved` fires per pixel of a window drag. Not needed on wasm:
+# there are no OS windows there to move.
+# One timer for that debounce, and — since RB5 — the loopback listener a desktop sign-in comes
+# back through (`desktop_signin`). Features on a crate the graph already has, for the reason the
+# `blocking` line above gives: `net` and `io-util` are an async TcpListener and the two traits
+# that read a request off it, not a second runtime. `dioxus-desktop` is already inside a
+# multi-thread tokio, so the listener is a task rather than a thread with a channel back.
+#
+# `rt` and `macros` arrived with F64's fix and are named here rather than inherited: the listener
+# serves each connection on its own `JoinSet` task and picks between accepting and collecting with
+# `select!`. Both features are already on in the binary through `dioxus-desktop`, which is exactly
+# why they have to be declared — a feature this crate uses and does not ask for compiles until the
+# day the crate that did ask stops.
+tokio = { version = "1", features = ["time", "net", "io-util", "rt", "macros"] }
+# The desktop sign-in's redirect secret and PKCE verifier (`desktop_signin::random_hex`).
+# A direct read of the platform CSPRNG, replacing the `RandomState`/`DefaultHasher` pair that stood
+# there — SipHash-1-3 at 64 bits, which std documents as neither cryptographically secure nor
+# stable across releases, under a value the whole F02 fix depends on being unguessable. Already in
+# the lock with four dependents, so this adds an edge rather than a crate.
+#
+# **Declared per target rather than unconditionally**, which is the opposite of the reqwest and
+# web-time bargain above and for a reason those two do not have: `getrandom` on
+# wasm32-unknown-unknown compiles only when the build names a backend, so an unconditional line
+# would make the web build's success depend on a cfg flag set outside this manifest. Nothing on
+# that target reaches this code — `desktop_signin` is `cfg(not(target_arch = "wasm32"))` end to end.
+getrandom = { version = "0.4" }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+gloo-net = "0.6"
+# The browser's console, which is where `granted_powers::warn` puts a gate the evaluator could
+# not read (the native build has stderr for the same job). Nothing else here reaches for
+# `web-sys`: a DOM call that only one of the two platforms can make is a feature only one of
+# them gets, which is how the slot drag came to be dead on the desktop webview — the app talks
+# to the DOM through `document::eval` instead. Versions match the ones dioxus-web already
+# locks, so no duplicate is pulled.
+#
+# `Navigator` is the one exception the rule above allows for, and `crash` states the case: a
+# panic hook cannot await, so the crash report has to be complete from this side the instant it
+# is made, and `sendBeacon` is the only browser API that promises that. `document::eval` would
+# queue the call against a renderer the panic has already taken down.
+web-sys = { version = "0.3", features = ["console", "Navigator", "Window"] }
+# The stack a Rust panic does not have on this target. `wasm32-unknown-unknown` has no backtrace,
+# so the crash reporter reads a fresh `Error`'s stack the way `console_error_panic_hook` does.
+# Already in the graph under dioxus-web, and the version dioxus-web locks.
+js-sys = "0.3"
+
+[features]
+default = []
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
+# Opt-in for the probe examples below; carries no code itself. Combined with `desktop`,
+# because every probe drives a real webview:
+#   cargo run -p app --release --features desktop,census-probe --example <name>
+census-probe = []
+
+# The POP* window spikes and the security probes, ~2,250 lines. Each opens a webview, drives
+# itself on a timer so its transcript is reproducible rather than clicked, and prints what the
+# runtime did — a measurement of the platform, not a claim about this app, so none of them can
+# fail and none is a guard. `required-features` keeps them out of the default build, which
+# `#[ignore]` cannot do because it excludes a test from the RUN and not from COMPILATION.
+# They use the same `tokio` the app depends on above.
+
+[[example]]
+name = "asset_scope_probe"
+required-features = ["census-probe"]
+
+[[example]]
+name = "csp_probe"
+required-features = ["census-probe"]
+
+[[example]]
+name = "handler_panic_probe"
+required-features = ["census-probe"]
+
+[[example]]
+name = "percent_decode_abort_probe"
+required-features = ["census-probe"]
+
+[[example]]
+name = "pop1_spike"
+required-features = ["census-probe"]
+
+[[example]]
+name = "pop2_close_order"
+required-features = ["census-probe"]
+
+[[example]]
+name = "pop2_head_probe"
+required-features = ["census-probe"]
+
+[[example]]
+name = "pop3_owner_doc"
+required-features = ["census-probe"]
+
+[[example]]
+name = "pop3_storage_origin"
+required-features = ["census-probe"]
+
+[[example]]
+name = "pop4_close_doors"
+required-features = ["census-probe"]
+
+[[example]]
+name = "pop4_event_reach"
+required-features = ["census-probe"]
+
+[[example]]
+name = "pop4_reaper"
+required-features = ["census-probe"]
+
+[[example]]
+name = "pop4_spawn_cancel"
+required-features = ["census-probe"]
+
+[lints]
+workspace = true

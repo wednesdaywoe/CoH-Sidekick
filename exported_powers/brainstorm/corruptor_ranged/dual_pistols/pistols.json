@@ -1,0 +1,1680 @@
+{
+  "name": "Pistols",
+  "full_name": "Corruptor_Ranged.Dual_Pistols.Pistols",
+  "short_name": "Pistols",
+  "type": "Click",
+  "display_name": "Pistols",
+  "display_fullname": "Corruptor Ranged Dual Pistols Pistols",
+  "display_help": "Quickly fires a round from one of your heavy automatic pistols. Damage is average, but the fire rate is very fast. If standard ammo is used, Pistols will also reduce the target's Defense.<br><br>Changing your ammo type with the 'Swap Ammo' power will change your secondary damage from lethal to cold, fire or toxic.<br><br>Additionally, changing your ammunition type will also change the secondary effect of this attack from -Defense to:<br><br><color #9bfafa>*A -minor attack speed and movement speed debuff if 'Cryo Ammo' is loaded.</color><br><color #fac39b>*A -minor damage over time effect if 'Incendiary Ammo' is loaded.</color><br><color #9efa9b>*A -damage debuff effect if 'Chemical Ammo' is loaded.</color><br>",
+  "display_short_help": "Ranged, DMG(Lethal/Special)",
+  "icon": "dualpistols_pistols.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": false,
+  "accuracy": 1.1,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 80.0,
+  "range_secondary": 0.0,
+  "activation_time": 1.0,
+  "time_to_root": 1.0,
+  "recharge_time": 4.0,
+  "activate_period": 0.0,
+  "endurance_cost": 5.2,
+  "interrupt_time": 0.0,
+  "target_type": "Foe",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "None"
+  ],
+  "targets_affected": [
+    "Foe"
+  ],
+  "boosts_allowed": [
+    "EnduranceDiscount",
+    "Range",
+    "Recharge",
+    "Debuff_Defense",
+    "Damage",
+    "Accuracy"
+  ],
+  "allowed_set_categories": [
+    "Accurate Defense Debuff",
+    "Corruptor Archetype Sets",
+    "Defense Debuff",
+    "Ranged Damage",
+    "Universal Damage Sets"
+  ],
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [
+    104,
+    120
+  ],
+  "effects": [
+    {
+      "chance": 1.0,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [],
+      "tags": [],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "SATISFIED",
+      "eval_flags": 0,
+      "templates": [],
+      "child_effects": [
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "critter",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVE_ONLY",
+          "requires_default": "SATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [
+                "Lethal"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [
+                    "Lethal"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Lethal_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Damage",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Lethal damage.",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Lethal damage.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    },
+                    {
+                      "attribs": [
+                        "Base_Defense"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "8 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [
+                    "kHitPoints%",
+                    "target>",
+                    "10",
+                    "-",
+                    "100",
+                    "*",
+                    "50",
+                    "10",
+                    "-",
+                    "/",
+                    "0",
+                    "100",
+                    "minmax",
+                    "rand",
+                    "100",
+                    "*",
+                    "<",
+                    "enttype",
+                    "target>",
+                    "critter",
+                    "eq",
+                    "&&"
+                  ],
+                  "tags": [
+                    "Lethal"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "PVE_ONLY",
+                  "requires_default": "INDETERMINATE",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Lethal_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_InherentDamage",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Lethal damage (SCOURGE).",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Lethal damage (SCOURGE).",
+                        "display_float": "Scourge",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 0.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [
+                "FireDamage"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [
+                    "FireDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Fire_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Damage",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage.",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [
+                    "FireDamageDoT"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Fire_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Damage",
+                      "scale": 0.113,
+                      "duration": "2.1 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.5,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 1.0,
+                      "tick_chance": 0.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage over time.",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage over time.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "POWERS/FIRECONTROL/CINDERSHIT.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "flags": [
+                        "CancelOnMiss"
+                      ],
+                      "flags_raw": 1284
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [
+                    "kHitPoints%",
+                    "target>",
+                    "10",
+                    "-",
+                    "100",
+                    "*",
+                    "50",
+                    "10",
+                    "-",
+                    "/",
+                    "0",
+                    "100",
+                    "minmax",
+                    "rand",
+                    "100",
+                    "*",
+                    "<",
+                    "enttype",
+                    "target>",
+                    "critter",
+                    "eq",
+                    "&&"
+                  ],
+                  "tags": [
+                    "FireDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "PVE_ONLY",
+                  "requires_default": "INDETERMINATE",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Fire_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_InherentDamage",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage (SCOURGE).",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage (SCOURGE).",
+                        "display_float": "Scourge",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 0.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [
+                "ColdDamage"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [
+                    "ColdDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Cold_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Damage",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Cold damage.",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Cold damage.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    },
+                    {
+                      "attribs": [
+                        "RunningSpeed",
+                        "FlyingSpeed",
+                        "JumpingSpeed"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Slow",
+                      "scale": 0.12,
+                      "duration": "8 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "flags_raw": 1280
+                    },
+                    {
+                      "attribs": [
+                        "JumpHeight",
+                        "RechargeTime"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Strength",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Slow",
+                      "scale": 0.12,
+                      "duration": "8 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [
+                    "kHitPoints%",
+                    "target>",
+                    "10",
+                    "-",
+                    "100",
+                    "*",
+                    "50",
+                    "10",
+                    "-",
+                    "/",
+                    "0",
+                    "100",
+                    "minmax",
+                    "rand",
+                    "100",
+                    "*",
+                    "<",
+                    "enttype",
+                    "target>",
+                    "critter",
+                    "eq",
+                    "&&"
+                  ],
+                  "tags": [
+                    "ColdDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "PVE_ONLY",
+                  "requires_default": "INDETERMINATE",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Cold_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_InherentDamage",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Cold damage (SCOURGE).",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Cold damage (SCOURGE).",
+                        "display_float": "Scourge",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 0.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [
+                "ToxicDamage"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [
+                    "ToxicDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Damage",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Toxic damage.",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Toxic damage.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    },
+                    {
+                      "attribs": [
+                        "Smashing_Dmg",
+                        "Lethal_Dmg",
+                        "Fire_Dmg",
+                        "Cold_Dmg",
+                        "Energy_Dmg",
+                        "Negative_Energy_Dmg",
+                        "Psionic_Dmg",
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Strength",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Debuff_Dam",
+                      "scale": 0.8,
+                      "duration": "5 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Replace",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFDAMAGECONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [
+                    "kHitPoints%",
+                    "target>",
+                    "10",
+                    "-",
+                    "100",
+                    "*",
+                    "50",
+                    "10",
+                    "-",
+                    "/",
+                    "0",
+                    "100",
+                    "minmax",
+                    "rand",
+                    "100",
+                    "*",
+                    "<",
+                    "enttype",
+                    "target>",
+                    "critter",
+                    "eq",
+                    "&&"
+                  ],
+                  "tags": [
+                    "ToxicDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "PVE_ONLY",
+                  "requires_default": "INDETERMINATE",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_InherentDamage",
+                      "scale": 1.0,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Toxic damage (SCOURGE).",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Toxic damage (SCOURGE).",
+                        "display_float": "Scourge",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chance": 1.0,
+          "ppm": 0.0,
+          "delay": 0.0,
+          "radius_inner": -1.0,
+          "radius_outer": -1.0,
+          "requires_expression": [
+            "enttype",
+            "target>",
+            "player",
+            "eq"
+          ],
+          "tags": [],
+          "flags": [],
+          "is_pvp": "EITHER",
+          "requires_pv": "PVP_ONLY",
+          "requires_default": "UNSATISFIED",
+          "eval_flags": 0,
+          "templates": [],
+          "child_effects": [
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": []
+            },
+            {
+              "chance": 1.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [
+                "Lethal"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [
+                    "Lethal"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Lethal_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_PvPDamage",
+                      "scale": 1.26,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Lethal damage.",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Lethal damage.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    },
+                    {
+                      "attribs": [
+                        "Base_Defense"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Debuff_Def",
+                      "scale": 1.0,
+                      "duration": "8 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFDEFCONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [
+                    "kHitPoints%",
+                    "target>",
+                    "10",
+                    "-",
+                    "100",
+                    "*",
+                    "50",
+                    "10",
+                    "-",
+                    "/",
+                    "0",
+                    "100",
+                    "minmax",
+                    "rand",
+                    "100",
+                    "*",
+                    "<",
+                    "enttype",
+                    "target>",
+                    "player",
+                    "eq",
+                    "&&"
+                  ],
+                  "tags": [
+                    "Lethal"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "PVP_ONLY",
+                  "requires_default": "UNSATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Lethal_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_PvPDamage",
+                      "scale": 1.26,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Lethal damage (SCOURGE).",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Lethal damage (SCOURGE).",
+                        "display_float": "Scourge",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 0.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [
+                "FireDamage"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [
+                    "FireDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Fire_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_PvPDamage",
+                      "scale": 1.26,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage.",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [
+                    "FireDamageDoT"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Fire_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_PvPDamage",
+                      "scale": 0.0919,
+                      "duration": "2.1 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.5,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 1.0,
+                      "tick_chance": 0.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage over time.",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage over time.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "POWERS/FIRECONTROL/CINDERSHIT.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "flags": [
+                        "CancelOnMiss"
+                      ],
+                      "flags_raw": 1284
+                    }
+                  ]
+                },
+                {
+                  "chance": 1.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [
+                    "kHitPoints%",
+                    "target>",
+                    "10",
+                    "-",
+                    "100",
+                    "*",
+                    "50",
+                    "10",
+                    "-",
+                    "/",
+                    "0",
+                    "100",
+                    "minmax",
+                    "rand",
+                    "100",
+                    "*",
+                    "<",
+                    "enttype",
+                    "target>",
+                    "player",
+                    "eq",
+                    "&&"
+                  ],
+                  "tags": [
+                    "FireDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "PVP_ONLY",
+                  "requires_default": "UNSATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Fire_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_PvPDamage",
+                      "scale": 1.26,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Fire damage (SCOURGE).",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Fire damage (SCOURGE).",
+                        "display_float": "Scourge",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 0.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [
+                "ColdDamage"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [
+                    "ColdDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Cold_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_PvPDamage",
+                      "scale": 1.26,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Cold damage.",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Cold damage.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    },
+                    {
+                      "attribs": [
+                        "RunningSpeed",
+                        "FlyingSpeed",
+                        "JumpingSpeed"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Current",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Slow",
+                      "scale": 0.12,
+                      "duration": "8 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "flags_raw": 1280
+                    },
+                    {
+                      "attribs": [
+                        "JumpHeight",
+                        "RechargeTime"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Strength",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Slow",
+                      "scale": 0.12,
+                      "duration": "8 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [
+                    "kHitPoints%",
+                    "target>",
+                    "10",
+                    "-",
+                    "100",
+                    "*",
+                    "50",
+                    "10",
+                    "-",
+                    "/",
+                    "0",
+                    "100",
+                    "minmax",
+                    "rand",
+                    "100",
+                    "*",
+                    "<",
+                    "enttype",
+                    "target>",
+                    "player",
+                    "eq",
+                    "&&"
+                  ],
+                  "tags": [
+                    "ColdDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "PVP_ONLY",
+                  "requires_default": "UNSATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Cold_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_PvPDamage",
+                      "scale": 1.26,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Cold damage (SCOURGE).",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Cold damage (SCOURGE).",
+                        "display_float": "Scourge",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "chance": 0.0,
+              "ppm": 0.0,
+              "delay": 0.0,
+              "radius_inner": -1.0,
+              "radius_outer": -1.0,
+              "requires_expression": [],
+              "tags": [
+                "ToxicDamage"
+              ],
+              "flags": [],
+              "is_pvp": "EITHER",
+              "requires_pv": "EITHER",
+              "requires_default": "SATISFIED",
+              "eval_flags": 0,
+              "templates": [],
+              "child_effects": [
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [],
+                  "tags": [
+                    "ToxicDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "EITHER",
+                  "requires_default": "SATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_PvPDamage",
+                      "scale": 1.26,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Toxic damage.",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Toxic damage.",
+                        "display_float": null,
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    },
+                    {
+                      "attribs": [
+                        "Smashing_Dmg",
+                        "Lethal_Dmg",
+                        "Fire_Dmg",
+                        "Cold_Dmg",
+                        "Energy_Dmg",
+                        "Negative_Energy_Dmg",
+                        "Psionic_Dmg",
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Strength",
+                      "target": "AnyAffected",
+                      "table": "Ranged_Debuff_Dam",
+                      "scale": 0.8,
+                      "duration": "5 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Replace",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "fx": {
+                        "continuing_bits": [],
+                        "continuing_fx": "GENERICCONTINUING/DEBUFFDAMAGECONTINUING.FX",
+                        "conditional_bits": [],
+                        "conditional_fx": null
+                      },
+                      "flags": [
+                        "IgnoreStrength"
+                      ],
+                      "flags_raw": 1296
+                    }
+                  ]
+                },
+                {
+                  "chance": 0.0,
+                  "ppm": 0.0,
+                  "delay": 0.0,
+                  "radius_inner": -1.0,
+                  "radius_outer": -1.0,
+                  "requires_expression": [
+                    "kHitPoints%",
+                    "target>",
+                    "10",
+                    "-",
+                    "100",
+                    "*",
+                    "50",
+                    "10",
+                    "-",
+                    "/",
+                    "0",
+                    "100",
+                    "minmax",
+                    "rand",
+                    "100",
+                    "*",
+                    "<",
+                    "enttype",
+                    "target>",
+                    "player",
+                    "eq",
+                    "&&"
+                  ],
+                  "tags": [
+                    "ToxicDamage"
+                  ],
+                  "flags": [],
+                  "is_pvp": "EITHER",
+                  "requires_pv": "PVP_ONLY",
+                  "requires_default": "UNSATISFIED",
+                  "eval_flags": 0,
+                  "templates": [
+                    {
+                      "attribs": [
+                        "Toxic_Dmg"
+                      ],
+                      "type": "Magnitude",
+                      "application_type": "OnTick",
+                      "aspect": "Absolute",
+                      "target": "AnyAffected",
+                      "table": "Ranged_PvPDamage",
+                      "scale": 1.26,
+                      "duration": "0 seconds",
+                      "magnitude": 1.0,
+                      "delay": 0.0,
+                      "duration_expression": [],
+                      "magnitude_expression": [],
+                      "application_period": 0.0,
+                      "tick_chance": 1.0,
+                      "tick_mag_multiplier": 1.0,
+                      "tick_mag_additive": 0.0,
+                      "jit_requires": [],
+                      "caster_stack": "Individual",
+                      "stack": "Stack",
+                      "stack_limit": 2,
+                      "stack_key": null,
+                      "messages": {
+                        "display_attacker_hit": "You hit {PlayerDest} with your {PowerName} for {Damage} points of Toxic damage (SCOURGE).",
+                        "display_victim_hit": "{PlayerSource} hits you with their {PowerName} for {Damage} points of Toxic damage (SCOURGE).",
+                        "display_float": "Scourge",
+                        "display_attrib_defense_float": null,
+                        "display_info": null
+                      },
+                      "flags_raw": 1280
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "modes_disallowed": [
+    "Disable_All"
+  ],
+  "available_level": 0,
+  "powerset": "Corruptor_Ranged.Dual_Pistols"
+}

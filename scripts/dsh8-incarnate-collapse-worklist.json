@@ -1,0 +1,23 @@
+{
+  "schema": "dsh8-incarnate-collapse-worklist/1",
+  "dataset": "brainstorm",
+  "scope": {
+    "slots": "Hybrid (passive/frontLoaded/perTarget) + Destiny (flat stat map) — the multi-type buff slots feeding caster totals. Alpha/Genesis (single-aspect enhancement) + Interface/Judgement/Lore (proc/nuke/pet) are structurally collapse-free here and tracked as coverage, not swept.",
+    "gate": "class-present, sibling-missing: an input effectType represented somewhere in the output but a specific subType absent (the multi-type explosion). DamageBuff/Accuracy/scalars are folded to presence; Defense/Resistance/Mez-protection/Movement are checked per-subType. Fold-all output keys (defenseAll/resistanceAll/mezProtection/damage) cover any subType.",
+    "byDesignDrops": "Enhancement (aspect=Str mez/by-type strength), Heal/team-heal, Damage (direct — Judgement/Interface), non-routed Strength amplifiers in slot context (Destiny keeps only recharge/recovery/regeneration at Str; Hybrid keeps only damage/accuracy/enduranceDiscount), GrantPower/pets/engine markers, scale-0, Expression, explicit pvMode=PvP, PvP-map-only gates (`isPVPMap?` requires — the Parse6/tspy form of the same twin), non-core-mez MezResist (Repel/Taunt/Placate — projected to scalar `debuffResistance`), and Ageless-style `*_ArchVillain_Res` bundles (projected to `debuffResistance`, not `resistanceAll`). NO isPvpVariant drop — `player eq` is the leaguemate buff (kept, routed by polarity), the bridge-convergence invariant."
+  },
+  "coverage": {
+    "powersTotal": 81,
+    "powersChecked": 81,
+    "genMissing": 0,
+    "atomsChecked": 429
+  },
+  "summary": {
+    "highConfidenceCollapses": 0,
+    "distinctCollapseGroups": 0,
+    "classAbsent": 0
+  },
+  "collapseGroups": [],
+  "classAbsentGroups": [],
+  "collapses": []
+}

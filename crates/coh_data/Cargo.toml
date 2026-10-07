@@ -1,0 +1,44 @@
+[package]
+name = "coh_data"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "CoH Sidekick dataset contract: atom types, wire decode, and bundle loading"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+flate2 = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+# Opt-in for the atom_confirmation census probe below; carries no code itself.
+census-probe = []
+
+# The ATOMIC-STATE-AUDIT census probe: a manual measurement tool the migration
+# design docs cite as their reproduction hook, not part of the product. The
+# feature gate keeps its ~1,800 lines out of every `cargo test`/`clippy` build:
+#   cargo run -q -p coh_data --features census-probe --example atom_confirmation -- <family>
+[[example]]
+name = "atom_confirmation"
+required-features = ["census-probe"]
+
+# The `.mbd`/`.mxd` corpus sweeps and the name census, on the same terms as
+# `atom_confirmation`: each reads a directory of real posted files and prints what it found.
+# The readers themselves are gated against the fixtures this repo owns; these are the wide
+# net run by hand during an investigation, so nothing here can go red.
+#   cargo run -p coh_data --release --features census-probe --example mxd_corpus_sweep -- <dir>
+[[example]]
+name = "mbd_corpus_sweep"
+required-features = ["census-probe"]
+
+[[example]]
+name = "mxd_corpus_sweep"
+required-features = ["census-probe"]
+
+[[example]]
+name = "mxd_name_census"
+required-features = ["census-probe"]
+
+[lints]
+workspace = true

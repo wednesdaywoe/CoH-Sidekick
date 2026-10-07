@@ -1,0 +1,45 @@
+[application]
+# `app_name` is not a key dx 0.7.9 reads — the schema calls it `name` (`dx config schema`,
+# ApplicationConfig), so this line has been inert for as long as it has been here. Corrected below
+# rather than renamed in place, because MEASURING it showed `name` does not do what the misspelling
+# suggested either: setting `name = "Sidekick"` changed neither the bundle's product name nor the
+# output directory. **dx 0.7.9 takes the product name from the cargo package**, which is why the
+# first RC bundle came out as `App.app`. The fix is `[[bin]] name` in `crates/app/Cargo.toml`.
+app_name = "coh-sidekick"
+# `input` and `default_platform` sat here and were inert for the same reason as `app_name`:
+# neither is in ApplicationConfig's thirteen properties (`dx config schema`, dx 0.7.9), and
+# neither is a top-level DioxusConfig key. Removed 2026-09-26 rather than annotated, because
+# unlike `app_name` they carry no lesson -- nothing was ever built on a belief about them, and
+# every `dx` call names its platform outright anyway (ci.yml:722, rc-bundle.yml:197, :357,
+# :499). `out_dir` below IS read.
+out_dir = "target/dx"
+
+# Required by `dx bundle` — the Linux leg of `rc-bundle.yml` failed on its absence, and the
+# macOS leg would have failed the same way (Windows does not, because that job runs `dx build`
+# and produces a portable folder rather than an installer).
+#
+# Reverse-DNS on the domain the app actually serves from, `coh-sidekick.com`. **This string is a
+# durable identity, not a label**: macOS keys the app's preferences, keychain entries and
+# Gatekeeper/notarization records on it, and changing it later makes an installed app a different
+# app to the OS. Chosen once, here, rather than per-platform.
+[bundle]
+identifier = "com.coh-sidekick.planner"
+publisher = "CoH Sidekick"
+copyright = "AGPL-3.0-or-later"
+category = "Utility"
+short_description = "A City of Heroes build planner"
+
+# The web build's `index.html`. Without this the tab reads dx's placeholder, "dioxus | ⛺", for as
+# long as the wasm takes to download — seconds, on an 8MB module — before `document::Title` in
+# `main.rs` replaces it.
+[web.app]
+title = "CoH Sidekick"
+
+# The release WEB build is `npm run build:web`, and its wasm-opt flags live on that command line,
+# not in a `[web.wasm_opt]` table here. Measured 2026-09-29: dx 0.7.9's `--debug-symbols` defaults
+# to TRUE and overrides `[web.wasm_opt] debug = false`, so the table is inert for the one setting
+# that matters. With debug symbols on, dx passes `--debuginfo` to binaryen-129's wasm-opt, which
+# aborts on rustc 1.96's DWARF ("compile unit size was incorrect", SIGABRT); dx logs that, ships
+# the unoptimised module and still reports success. `--debug-symbols false` lets the pass run
+# (8.5MB -> 6.2MB, 1.6MB brotli). `--keep-names` keeps the name section, so `crash`'s wasm stack
+# traces still carry function names.

@@ -1,0 +1,724 @@
+{
+  "_comment": "The authored half of an archetype: display metadata, the inherent blurb, the five hand-curated scalars, and the primary/secondary roster. NOT here, and deliberately: the binary-derived stats (HP and cap curves, threat, damage cap, the movement and attribute ceilings). Those come from classes.bin via convert-archetypes.cjs and are merged in by convert-archetype-registry.cjs on every regen, so they cannot go stale here. The roster IS authored and is not reproducible from the powerset tree: Homecoming orders its lists for display rather than alphabetically, and the Kheldian/VEAT sets sit under epic/ where a primary/secondary directory walk finds nothing. archetypeOrder is the registry order and is its own field because the two id lists do not imply it: Thunderspy counts primalist among the standard archetypes but places it last in the registry. Archetype ids are sorted so a diff stays readable; field order inside an archetype is authored, and branches depends on it.",
+  "archetypeOrder": [
+    "blaster",
+    "controller",
+    "defender",
+    "scrapper",
+    "tanker",
+    "guardian",
+    "brute",
+    "corruptor",
+    "dominator",
+    "mastermind",
+    "stalker",
+    "peacebringer",
+    "warshade",
+    "arachnos-soldier",
+    "arachnos-widow"
+  ],
+  "archetypes": {
+    "arachnos-soldier": {
+      "name": "Arachnos Soldier",
+      "side": "villain",
+      "description": "Versatile soldier with branching power choices. Can specialize as a Crab Spider (pets/support) or Bane Spider (stealth/melee).",
+      "inherent": {
+        "name": "Conditioning",
+        "description": "Increased maximum HP and inherent resistance to status effects."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.75,
+          "ranged": 0.75,
+          "aoe": 0.65
+        },
+        "buffDebuffModifier": 1,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "arachnos-soldier/arachnos-soldier"
+      ],
+      "secondarySets": [
+        "arachnos-soldier/training-and-gadgets"
+      ],
+      "branches": {
+        "bane-spider": {
+          "name": "Bane Spider",
+          "primarySet": "arachnos-soldier/bane-spider-soldier",
+          "secondarySet": "arachnos-soldier/bane-spider-training"
+        },
+        "crab-spider": {
+          "name": "Crab Spider",
+          "primarySet": "arachnos-soldier/crab-spider-soldier",
+          "secondarySet": "arachnos-soldier/crab-spider-training"
+        }
+      }
+    },
+    "arachnos-widow": {
+      "name": "Arachnos Widow",
+      "side": "villain",
+      "description": "Versatile operative with branching power choices. Can specialize as a Fortunata (psychic powers) or Night Widow (melee assassin).",
+      "inherent": {
+        "name": "Conditioning",
+        "description": "Increased maximum HP and inherent resistance to status effects."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.85,
+          "ranged": 0.65,
+          "aoe": 0.7
+        },
+        "buffDebuffModifier": 1,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "arachnos-widow/widow-training"
+      ],
+      "secondarySets": [
+        "arachnos-widow/teamwork"
+      ],
+      "branches": {
+        "night-widow": {
+          "name": "Night Widow",
+          "primarySet": "arachnos-widow/night-widow-training",
+          "secondarySet": "arachnos-widow/widow-teamwork"
+        },
+        "fortunata": {
+          "name": "Fortunata",
+          "primarySet": "arachnos-widow/fortunata-training",
+          "secondarySet": "arachnos-widow/fortunata-teamwork"
+        }
+      }
+    },
+    "blaster": {
+      "name": "Blaster",
+      "side": "hero",
+      "description": "Ranged damage specialist with high offensive power but low defenses",
+      "inherent": {
+        "name": "Defiance",
+        "description": "Attacking grants stacking damage bonus. First two Primary and first Secondary power usable while mezzed."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.5,
+          "ranged": 1.125,
+          "aoe": 1
+        },
+        "buffDebuffModifier": 0.625,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "blaster/archery",
+        "blaster/assault-rifle",
+        "blaster/beam-rifle",
+        "blaster/dark-blast",
+        "blaster/dual-pistols",
+        "blaster/electrical-blast",
+        "blaster/energy-blast",
+        "blaster/fire-blast",
+        "blaster/ice-blast",
+        "blaster/psychic-blast",
+        "blaster/radiation-blast",
+        "blaster/sonic-attack",
+        "blaster/water-blast"
+      ],
+      "secondarySets": [
+        "blaster/darkness-manipulation",
+        "blaster/devices",
+        "blaster/electricity-manipulation",
+        "blaster/energy-manipulation",
+        "blaster/fire-manipulation",
+        "blaster/ice-manipulation",
+        "blaster/martial-combat",
+        "blaster/mental-manipulation"
+      ]
+    },
+    "brute": {
+      "name": "Brute",
+      "side": "villain",
+      "description": "High damage melee fighter that builds fury through combat",
+      "inherent": {
+        "name": "Fury",
+        "description": "Build fury (0-100) by attacking and being attacked. Each fury point grants +2% damage, up to +200% at max fury."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.75,
+          "ranged": 0.75,
+          "aoe": 0.65
+        },
+        "buffDebuffModifier": 1,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "brute/battle-axe",
+        "brute/broad-sword",
+        "brute/claws",
+        "brute/dark-melee",
+        "brute/dual-blades",
+        "brute/electrical-melee",
+        "brute/energy-melee",
+        "brute/fiery-melee",
+        "brute/katana",
+        "brute/kinetic-melee",
+        "brute/psionic-melee",
+        "brute/radiation-melee",
+        "brute/savage-melee",
+        "brute/staff-fighting",
+        "brute/stone-melee",
+        "brute/street-justice",
+        "brute/super-strength",
+        "brute/titan-weapons",
+        "brute/war-mace"
+      ],
+      "secondarySets": [
+        "brute/bio-armor",
+        "brute/dark-armor",
+        "brute/electric-armor",
+        "brute/energy-aura",
+        "brute/fiery-aura",
+        "brute/invulnerability",
+        "brute/radiation-armor",
+        "brute/regeneration",
+        "brute/shield-defense",
+        "brute/stone-armor",
+        "brute/super-reflexes",
+        "brute/willpower"
+      ]
+    },
+    "controller": {
+      "name": "Controller",
+      "side": "hero",
+      "description": "Mezzes enemies and buffs/debuffs with strong team support",
+      "inherent": {
+        "name": "Containment",
+        "description": "Double damage vs Held, Immobilized, Slept, or Disoriented targets. Applied after enhancements."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.55,
+          "ranged": 0.55,
+          "aoe": 0.5
+        },
+        "buffDebuffModifier": 1,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "controller/darkness-control",
+        "controller/earth-control",
+        "controller/electric-control",
+        "controller/fire-control",
+        "controller/gravity-control",
+        "controller/ice-control",
+        "controller/illusion-control",
+        "controller/mind-control",
+        "controller/plant-control",
+        "controller/water-control",
+        "controller/wind-control"
+      ],
+      "secondarySets": [
+        "controller/cold-domination",
+        "controller/darkness-affinity",
+        "controller/empathy",
+        "controller/force-field",
+        "controller/kinetics",
+        "controller/nature-affinity",
+        "controller/poison",
+        "controller/radiation-emission",
+        "controller/sonic-resonance",
+        "controller/storm-summoning",
+        "controller/thermal-radiation",
+        "controller/time-manipulation",
+        "controller/trick-arrow"
+      ]
+    },
+    "corruptor": {
+      "name": "Corruptor",
+      "side": "villain",
+      "description": "Ranged damage dealer with debuffs and support abilities",
+      "inherent": {
+        "name": "Scourge",
+        "description": "Chance for double damage when enemies are below 50% HP. 2.5% per 1% below 50%, guaranteed at 10% HP. ~30% avg damage bonus."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.55,
+          "ranged": 0.75,
+          "aoe": 0.6
+        },
+        "buffDebuffModifier": 0.75,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "corruptor/archery",
+        "corruptor/assault-rifle",
+        "corruptor/beam-rifle",
+        "corruptor/dark-blast",
+        "corruptor/dual-pistols",
+        "corruptor/electrical-blast",
+        "corruptor/energy-blast",
+        "corruptor/fire-blast",
+        "corruptor/ice-blast",
+        "corruptor/psychic-blast",
+        "corruptor/radiation-blast",
+        "corruptor/sonic-attacks",
+        "corruptor/water-blast"
+      ],
+      "secondarySets": [
+        "corruptor/cold-domination",
+        "corruptor/dark-miasma",
+        "corruptor/force-field",
+        "corruptor/kinetics",
+        "corruptor/nature-affinity",
+        "corruptor/pain-domination",
+        "corruptor/poison",
+        "corruptor/radiation-emission",
+        "corruptor/sonic-resonance",
+        "corruptor/storm-summoning",
+        "corruptor/thermal-radiation",
+        "corruptor/time-manipulation",
+        "corruptor/traps",
+        "corruptor/trick-arrow"
+      ]
+    },
+    "defender": {
+      "name": "Defender",
+      "side": "hero",
+      "description": "Support specialist with powerful buffs, debuffs, and healing",
+      "inherent": {
+        "name": "Vigilance",
+        "description": "Solo/small teams: +6-30% damage (scales with level). Endurance discount when teammates are injured. 3+ teammates = no damage bonus."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.55,
+          "ranged": 0.65,
+          "aoe": 0.5
+        },
+        "buffDebuffModifier": 1.25,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "defender/cold-domination",
+        "defender/dark-miasma",
+        "defender/empathy",
+        "defender/force-field",
+        "defender/kinetics",
+        "defender/nature-affinity",
+        "defender/radiation-emission",
+        "defender/sonic-resonance",
+        "defender/storm-summoning",
+        "defender/thermal-radiation",
+        "defender/time-manipulation",
+        "defender/traps",
+        "defender/trick-arrow"
+      ],
+      "secondarySets": [
+        "defender/archery",
+        "defender/assault-rifle",
+        "defender/beam-rifle",
+        "defender/dark-blast",
+        "defender/dual-pistols",
+        "defender/electrical-blast",
+        "defender/energy-blast",
+        "defender/fire-blast",
+        "defender/ice-blast",
+        "defender/psychic-blast",
+        "defender/radiation-blast",
+        "defender/sonic-attack",
+        "defender/water-blast"
+      ]
+    },
+    "dominator": {
+      "name": "Dominator",
+      "side": "villain",
+      "description": "Control specialist with strong offensive capabilities",
+      "inherent": {
+        "name": "Domination",
+        "description": "Build meter by attacking, activate at 90%+ for 2× mez magnitude, 1.5× mez duration, mez protection, and full endurance. Lasts 90s.",
+        "powerType": "Click"
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.75,
+          "ranged": 0.75,
+          "aoe": 0.65
+        },
+        "buffDebuffModifier": 0.9,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "dominator/darkness-control",
+        "dominator/earth-control",
+        "dominator/electric-control",
+        "dominator/fire-control",
+        "dominator/gravity-control",
+        "dominator/ice-control",
+        "dominator/mind-control",
+        "dominator/plant-control",
+        "dominator/water-control",
+        "dominator/wind-control"
+      ],
+      "secondarySets": [
+        "dominator/dark-assault",
+        "dominator/earth-assault",
+        "dominator/electricity-assault",
+        "dominator/energy-assault",
+        "dominator/fiery-assault",
+        "dominator/icy-assault",
+        "dominator/kinetic-assault",
+        "dominator/martial-assault",
+        "dominator/military-assault",
+        "dominator/ninja-assault",
+        "dominator/psionic-assault",
+        "dominator/thorny-assault"
+      ]
+    },
+    "guardian": {
+      "name": "Guardian",
+      "side": "hero",
+      "description": "Rebirth exclusive: Assault primary with armor/utility Composition secondary. Defeat-driven Resolve grants stacking absorb + status protection to nearby allies.",
+      "inherent": {
+        "name": "Resolve",
+        "description": "When an enemy is defeated, nearby Guardians and allies gain a stack of Resolve for 15s: +5% Absorb plus protection from Disorient, Hold, Sleep, Immobilize, Fear, and Confuse. Stacks up to 3 outside PvP. In PvP, defeating a player grants 20% Absorb (no stacking)."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.95,
+          "ranged": 0.95,
+          "aoe": 0.85
+        },
+        "buffDebuffModifier": 0.85,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "guardian/dark-assault",
+        "guardian/earth-assault",
+        "guardian/electricity-assault",
+        "guardian/energy-assault",
+        "guardian/fiery-assault",
+        "guardian/gun-fu",
+        "guardian/hellfire-assault",
+        "guardian/icy-assault",
+        "guardian/kinetic-assault",
+        "guardian/luminous-assault",
+        "guardian/mace-assault",
+        "guardian/martial-assault",
+        "guardian/military-assault",
+        "guardian/ninja-assault",
+        "guardian/psionic-assault",
+        "guardian/radiation-assault",
+        "guardian/thorny-assault",
+        "guardian/umbral-assault"
+      ],
+      "secondarySets": [
+        "guardian/atmospheric-composition",
+        "guardian/dark-composition",
+        "guardian/energy-composition",
+        "guardian/fiery-composition",
+        "guardian/force-composition",
+        "guardian/ice-composition",
+        "guardian/infiltrator-training",
+        "guardian/organic-composition",
+        "guardian/pain-focusing",
+        "guardian/radiation-composition",
+        "guardian/reconstructive-healing",
+        "guardian/stone-composition",
+        "guardian/temporal-reaction"
+      ]
+    },
+    "mastermind": {
+      "name": "Mastermind",
+      "side": "villain",
+      "description": "Pet commander with support abilities for minions",
+      "inherent": {
+        "name": "Supremacy",
+        "description": "Henchmen within 60ft gain +25% Damage and +10% ToHit. Bodyguard Mode (Defensive/Follow) splits damage: 66% to you, 33% to pets."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.55,
+          "ranged": 0.55,
+          "aoe": 0.5
+        },
+        "buffDebuffModifier": 0.75,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "mastermind/beast-mastery",
+        "mastermind/demon-summoning",
+        "mastermind/mercenaries",
+        "mastermind/necromancy",
+        "mastermind/ninjas",
+        "mastermind/robotics",
+        "mastermind/thugs"
+      ],
+      "secondarySets": [
+        "mastermind/cold-domination",
+        "mastermind/dark-miasma",
+        "mastermind/force-field",
+        "mastermind/nature-affinity",
+        "mastermind/pain-domination",
+        "mastermind/poison",
+        "mastermind/sonic-resonance",
+        "mastermind/storm-summoning",
+        "mastermind/thermal-radiation",
+        "mastermind/time-manipulation",
+        "mastermind/traps",
+        "mastermind/trick-arrow"
+      ]
+    },
+    "peacebringer": {
+      "name": "Peacebringer",
+      "side": "hero",
+      "description": "Kheldian shapeshifter with access to multiple forms. Can transform between human, nova (ranged), and dwarf (melee/tank) forms.",
+      "inherent": {
+        "name": "Cosmic Balance",
+        "description": "Peacebringers bring balance to their team. Damage increases per nearby Tanker/Mastermind/Corruptor/Defender. Damage Resistance increases per nearby Scrapper/Brute/Stalker/Blaster. Control protection per nearby Controller/Dominator. Slow resistance per nearby Kheldian/Arachnos teammate."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.85,
+          "ranged": 0.8,
+          "aoe": 0.7
+        },
+        "buffDebuffModifier": 1,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "peacebringer/luminous-blast"
+      ],
+      "secondarySets": [
+        "peacebringer/luminous-aura"
+      ]
+    },
+    "scrapper": {
+      "name": "Scrapper",
+      "side": "hero",
+      "description": "Melee damage dealer with good survivability through defense/resistance",
+      "inherent": {
+        "name": "Critical Hit",
+        "description": "5% crit chance vs minions (double damage), 10% vs lieutenants/bosses. Average +5-10% damage bonus."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 1.125,
+          "ranged": 0.5,
+          "aoe": 0.8
+        },
+        "buffDebuffModifier": 1,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "scrapper/battle-axe",
+        "scrapper/broad-sword",
+        "scrapper/claws",
+        "scrapper/dark-melee",
+        "scrapper/dual-blades",
+        "scrapper/electrical-melee",
+        "scrapper/fiery-melee",
+        "scrapper/ice-melee",
+        "scrapper/katana",
+        "scrapper/kinetic-melee",
+        "scrapper/martial-arts",
+        "scrapper/psionic-melee",
+        "scrapper/radiation-melee",
+        "scrapper/savage-melee",
+        "scrapper/spines",
+        "scrapper/staff-fighting",
+        "scrapper/street-justice",
+        "scrapper/titan-weapons",
+        "scrapper/war-mace"
+      ],
+      "secondarySets": [
+        "scrapper/bio-armor",
+        "scrapper/dark-armor",
+        "scrapper/electric-armor",
+        "scrapper/energy-aura",
+        "scrapper/fiery-aura",
+        "scrapper/ice-armor",
+        "scrapper/invulnerability",
+        "scrapper/radiation-armor",
+        "scrapper/regeneration",
+        "scrapper/shield-defense",
+        "scrapper/super-reflexes",
+        "scrapper/willpower"
+      ]
+    },
+    "stalker": {
+      "name": "Stalker",
+      "side": "villain",
+      "description": "Stealthy assassin with critical strikes from hide",
+      "inherent": {
+        "name": "Assassination",
+        "description": "From Hide: 100% critical (double damage). Outside: 10% base + 3% per teammate. Assassin's Focus grants up to +100% crit for Assassin's Strike."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 1,
+          "ranged": 0.6,
+          "aoe": 0.7
+        },
+        "buffDebuffModifier": 1,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "stalker/broad-sword",
+        "stalker/claws",
+        "stalker/dark-melee",
+        "stalker/dual-blades",
+        "stalker/electrical-melee",
+        "stalker/energy-melee",
+        "stalker/ice-melee",
+        "stalker/kinetic-melee",
+        "stalker/martial-arts",
+        "stalker/ninja-blade",
+        "stalker/psionic-melee",
+        "stalker/radiation-melee",
+        "stalker/savage-melee",
+        "stalker/spines",
+        "stalker/staff-fighting",
+        "stalker/street-justice"
+      ],
+      "secondarySets": [
+        "stalker/bio-armor",
+        "stalker/dark-armor",
+        "stalker/electric-armor",
+        "stalker/energy-aura",
+        "stalker/ice-armor",
+        "stalker/ninjitsu",
+        "stalker/radiation-armor",
+        "stalker/regeneration",
+        "stalker/super-reflexes",
+        "stalker/willpower"
+      ]
+    },
+    "tanker": {
+      "name": "Tanker",
+      "side": "hero",
+      "description": "Extremely tough with highest HP and strong defensive powers",
+      "inherent": {
+        "name": "Gauntlet",
+        "description": "PunchVoke: ST attacks taunt target + 4 nearby, AoE taunts all. +50% AoE radius/range, +50% cone arc. PBAoE hits bonus targets at 33% damage."
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.8,
+          "ranged": 0.5,
+          "aoe": 0.7
+        },
+        "buffDebuffModifier": 1,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "tanker/bio-armor",
+        "tanker/dark-armor",
+        "tanker/electric-armor",
+        "tanker/fiery-aura",
+        "tanker/ice-armor",
+        "tanker/invulnerability",
+        "tanker/radiation-armor",
+        "tanker/shield-defense",
+        "tanker/stone-armor",
+        "tanker/super-reflexes",
+        "tanker/willpower"
+      ],
+      "secondarySets": [
+        "tanker/battle-axe",
+        "tanker/broad-sword",
+        "tanker/dark-melee",
+        "tanker/dual-blades",
+        "tanker/electrical-melee",
+        "tanker/energy-melee",
+        "tanker/fiery-melee",
+        "tanker/ice-melee",
+        "tanker/katana",
+        "tanker/kinetic-melee",
+        "tanker/martial-arts",
+        "tanker/psionic-melee",
+        "tanker/radiation-melee",
+        "tanker/savage-melee",
+        "tanker/staff-fighting",
+        "tanker/stone-melee",
+        "tanker/street-justice",
+        "tanker/super-strength",
+        "tanker/titan-weapons",
+        "tanker/war-mace"
+      ]
+    },
+    "warshade": {
+      "name": "Warshade",
+      "side": "hero",
+      "description": "Kheldian shapeshifter that feeds on defeated enemies. Can summon pets from fallen foes and transform between forms.",
+      "inherent": {
+        "name": "Dark Sustenance",
+        "description": "Warshades draw on the power of their teammates. Damage Resistance increases per nearby Tanker/Mastermind/Corruptor/Defender. Damage increases per nearby Scrapper/Stalker/Brute/Blaster. Control protection per nearby Controller/Dominator. Slow resistance per nearby Kheldian/Arachnos teammate.",
+        "icon": "inherent_peacebringer_interspaciallink.png"
+      },
+      "stats": {
+        "baseEndurance": 100,
+        "baseRecovery": 1.67,
+        "damageModifier": {
+          "melee": 0.85,
+          "ranged": 0.8,
+          "aoe": 0.7
+        },
+        "buffDebuffModifier": 1,
+        "defenseCap": 0.45
+      },
+      "primarySets": [
+        "warshade/umbral-blast"
+      ],
+      "secondarySets": [
+        "warshade/umbral-aura"
+      ]
+    }
+  },
+  "epicArchetypeIds": [
+    "peacebringer",
+    "warshade",
+    "arachnos-soldier",
+    "arachnos-widow"
+  ],
+  "standardArchetypeIds": [
+    "blaster",
+    "controller",
+    "defender",
+    "scrapper",
+    "tanker",
+    "guardian",
+    "brute",
+    "corruptor",
+    "dominator",
+    "mastermind",
+    "stalker"
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "name": "Superior_Essence_Transfer",
+  "full_name": "Set_Bonus.Global_Bonus.Superior_Essence_Transfer",
+  "short_name": "Superior_Essence_Transfer",
+  "type": "GlobalBoost",
+  "display_name": "Superior Essence Transfer",
+  "display_fullname": "Set Bonus Global Bonus Superior Essence Transfer",
+  "display_help": "Your attacks have a 18% chance to heal you for a minor amount.",
+  "display_short_help": "Self, Moderate Heal",
+  "icon": "temporary_medkit.png",
+  "auto_issue": false,
+  "auto_issue_keeps_level": false,
+  "free": true,
+  "accuracy": 1.0,
+  "effect_area": "SingleTarget",
+  "max_targets_hit": 0,
+  "radius": 0.0,
+  "arc": 0.0,
+  "range": 0.0,
+  "range_secondary": 0.0,
+  "activation_time": 0.0,
+  "recharge_time": 0.0,
+  "activate_period": 10.0,
+  "endurance_cost": 0.0,
+  "interrupt_time": 0.0,
+  "target_type": "Self",
+  "target_type_secondary": "None",
+  "targets_autohit": [
+    "Self"
+  ],
+  "targets_affected": [
+    "Self"
+  ],
+  "boosts_allowed": [
+    "Damage",
+    "Natural",
+    "Technology",
+    "Magic",
+    "Mutation",
+    "Science"
+  ],
+  "allowed_set_categories": null,
+  "cast_through": [],
+  "toggle_ignore": [],
+  "num_allowed": 1,
+  "requires": [],
+  "activate_requires": [],
+  "target_requires": [],
+  "slot_requires": [],
+  "attack_types": [],
+  "effects": [
+    {
+      "chance": 0.18000000715255737,
+      "ppm": 0.0,
+      "delay": 0.0,
+      "radius_inner": -1.0,
+      "radius_outer": -1.0,
+      "requires_expression": [
+        "enttype",
+        "source>",
+        "player",
+        "eq",
+        "activateperiod",
+        "power.base>",
+        "activatetime",
+        "power.base>",
+        "+",
+        "0",
+        ">",
+        "&&"
+      ],
+      "tags": [
+        "HealSelf"
+      ],
+      "flags": [],
+      "is_pvp": "EITHER",
+      "requires_pv": "EITHER",
+      "requires_default": "INDETERMINATE",
+      "eval_flags": 0,
+      "templates": [
+        {
+          "attribs": [
+            "Heal_Dmg"
+          ],
+          "type": "Magnitude",
+          "application_type": "OnTick",
+          "aspect": "Absolute",
+          "target": "Self",
+          "table": "Melee_HealSelf",
+          "scale": 0.65,
+          "duration": "0 seconds",
+          "magnitude": 1.0,
+          "delay": 0.0,
+          "duration_expression": [],
+          "magnitude_expression": [],
+          "application_period": 0.0,
+          "tick_chance": 1.0,
+          "tick_mag_multiplier": 1.0,
+          "tick_mag_additive": 0.0,
+          "jit_requires": [],
+          "caster_stack": "Individual",
+          "stack": "Replace",
+          "stack_limit": 2,
+          "stack_key": null,
+          "messages": {
+            "display_attacker_hit": null,
+            "display_victim_hit": "You are healed by your {PowerName} for {Damage} health points.",
+            "display_float": null,
+            "display_attrib_defense_float": null,
+            "display_info": null
+          },
+          "flags": [
+            "CancelOnMiss",
+            "IgnoreStrength",
+            "IgnoreCombatMods"
+          ],
+          "flags_raw": 340
+        }
+      ]
+    }
+  ],
+  "max_boosts": 0,
+  "modes_disallowed": [
+    "Disable_SetBonus"
+  ],
+  "available_level": 0,
+  "powerset": "Set_Bonus.Global_Bonus"
+}

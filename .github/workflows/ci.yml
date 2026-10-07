@@ -1,0 +1,1002 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # mutants runs nightly (and on-demand) instead of every push — mutation testing
+  # runs the whole suite once per mutant, so it was the 2h/run cost sink.
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+# No job a FORK can reach runs on a personal machine. That is F03 and it is
+# the whole reason this file changed: every PR-reachable job was self-hosted on three personal
+# machines, `pull_request` carries no branch filter, and a public repository would therefore
+# have handed any GitHub user code execution on them. F03 was filed as latent-until-public and
+# it is -- this repository is private today -- but the exposure is one settings toggle away,
+# and the beta next door is already public.
+#
+# SEVEN of the eight are on hosted runners. SIX went outright; `web` went on the second pass,
+# once its costing was re-measured rather than re-read -- see the job for what the old line got
+# wrong. Same tree, PR #25 self-hosted against PR #26 hosted:
+#
+#               desktop-build   1m40s ->  2m31-2m56s   1.6-1.8x
+#                    pipeline  15m54s ->  25m30-34m21s   1.6-2.2x
+#       beta-engine-staleness     10s ->     43-47s   4.3-4.7x
+#     shared-manifest-surface     10s ->     52-56s   5.2-5.6x
+#                        rust   9m32s ->      60m+     6.3x    <-- stayed
+#     shared-pipeline-surface   2m03s -> 15m12-15m19s   7.4x
+#   engine-rebuild-reproduces     31s ->   4m55-5m06s   9.5-9.9x
+#                         web   1m23s ->     21m25s    15.6x    <-- now ~4m10s, pinned `dx`
+#
+# WHICH RUN EACH COLUMN COMES FROM, because this block used to name the wrong ones. The six
+# ranged rows are runs 35791114942 and 35796564757 -- but those are HYBRID runs, in which `rust`
+# was already back on the mac and `web` on jpc, so they cannot be anybody's hosted column for
+# those two. `rust` and `web` come from 35754322494, the ONE all-hosted run on that branch,
+# and that is the real reason they are the only two rows without a range: a single run is all
+# there ever was for them. The old block asserted the range/no-range split and explained it by
+# the two unfinished jobs below, which is true of `pipeline` and not of these.
+#
+# It is a RANGE because a single sample was wrong twice over. First, two rows
+# were read off jobs that never completed -- `pipeline` at 18m50s, which is where the OOM
+# below killed it rather than where it finishes, and `shared-pipeline-surface` at 19m30s, off
+# the run that failed downstream of that kill. A duration from a job that did not finish is
+# not a duration. Then `pipeline` came back 25m30s on the next run against 34m21s on the
+# first: same work, nine minutes apart, so even a COMPLETE hosted sample is not a measurement.
+# Note which column is stable -- `rust` ran 8m58s and 9m03s on the mac, five seconds apart.
+# A dedicated box tells you something when it slows down; a hosted runner mostly tells you
+# which machine you drew, and that is a second argument for the one that stayed.
+#
+# THE TWO COSTINGS THAT KEPT A BOX, AND WHY ONLY ONE OF THEM SURVIVED BEING CHECKED:
+#
+#   rust  is core-bound, so no setting in this file recovers it. 9m32s on the mac's 12 cores is
+#         114 core-minutes; a 2-core hosted runner predicts 57 and measured 60.3 before it was
+#         cancelled in step 8 of 9. A public repo's 4-core runner would still be ~29 min, 3x
+#         the mac. There is no `--maxWorkers` here to unset -- it is arithmetic. STILL TRUE:
+#         re-read against the run, the 57 minutes is the test step itself, and the only slack
+#         beside it is the 6m21s `cargo install cargo-nextest` (nextest publishes prebuilt
+#         binaries too, so that part is buyable) -- 6 off 64 leaves 57. This one holds.
+#   web   spent 17m15s of its 21m25s building dioxus-cli from source, and the old line here said
+#         buying that back "needs a prebuilt `dx`, which is the restored-binary shape F14 exists
+#         to forbid". WRONG, and it cost `web` a personal box for a day. Upstream publishes a
+#         prebuilt `dx` for the exact 0.7.9 this repo pins, at an immutable tag, with a .sha256:
+#         0.87s to fetch and verify, and it builds this tree cold, exit 0, nothing downloaded at
+#         build time. F14 forbids a MUTABLE CACHE handing over an executable; a digest-pinned
+#         release asset is what F15 LANDED. So `web` is hosted, ~5 billed minutes -- 4m10s
+#         of that 21m25s job was everything EXCEPT the install, and billing rounds up.
+#
+# The lesson is the one road-to-1.0 item 7 states about this whole audit and had already been
+# taught once by F13: a costing written once and re-read thereafter is not a measurement. Both
+# of these lines read as settled fact for a day. One was.
+#
+# `rust` therefore keeps its box AND carries a fork guard:
+#
+#     github.event.pull_request.head.repo.full_name == github.repository
+#
+# which is what makes this a closure and not a deferral. A fork PR cannot start it. A push or
+# a same-repo PR can, and that is someone who can already push here. The residual is named
+# rather than left implied: a same-repo PR still executes on the mac. Not on jpc any more, and
+# that was the half worth buying first -- jpc is the desktop with a human at the keyboard, the
+# mac mini is a box that does nothing else.
+#
+# EXIT CONDITION -- `rust` moves to a hosted runner when this repository goes public, because
+# that is when hosted minutes become free and the only argument for keeping it goes away.
+# F03's row stays OPEN until then and says why: "seven of the eight moved" is not the finding
+# closed.
+#
+# ONE more job stays self-hosted, and it is safe for a reason rather than by luck:
+#
+#   mutants   espresso, the Geekom A6. `mutants-diff` only, and that job is
+#             `schedule` + `workflow_dispatch` — no `pull_request` arm, so no
+#             fork can start it. It is also the one job that could not move
+#             affordably: it budgets 60 minutes a night and runs the whole suite
+#             once per mutant. See the preamble further down for why it is sized
+#             by RAM rather than by cores.
+#
+# What this file costs, stated because "be mindful of the minutes" was the constraint it was
+# decided under: 55-63 billed minutes a run measured across the two all-green hybrid runs, plus
+# ~5 for `web` since it moved, and free once this repository is public -- so it is cheapest in
+# exactly the situation F03 fires in. Where they go is the part worth knowing: `pipeline` (26-35)
+# and `shared-pipeline-surface` (16) are 42-51 of them, and the other five hosted jobs total ~14
+# and never moved by more than a minute. Moving the cheap six is not what saved the money;
+# keeping `rust` off hosted runners is, and `pipeline`'s own spread is larger than four of the
+# six put together. Full-hosted would be ~145 a run and `rust` alone is 40% of that.
+#
+# BOTH TABLES ABOVE STILL NAME `shared-manifest-surface` AND `shared-pipeline-surface`, which
+# were deleted on 2026-09-25, and the rows are left because a measurement is a record of a
+# comparison taken on a day, not an inventory of what runs now. What the deletion changes is
+# the live number: `shared-pipeline-surface` was 16 of the 42-51 billed minutes, so a run is
+# ~16 minutes cheaper than the split above reads, and `pipeline` is now the whole of the
+# expensive half. They went because the manifest they graded describes
+# `coh-sidekick-1.0`, not this repo: 249 of its entries match that tree exactly, and 172 of
+# them never described this one. See `git log --diff-filter=D -- scripts/sync-manifest.json`.
+#
+# Two mitigations rather than one. `concurrency:` below cancels a superseded push, and every job
+# names `timeout-minutes`: the GitHub default is 360, and a hung job that used to cost a
+# slot on an otherwise idle box now costs six hours of billing.
+#
+# The history is kept because it explains the shapes that remain. `cargo test
+# --workspace` linking 122 binaries at -j 32 peaked at 37.6 GB and the kernel OOM
+# killer took jpc's runner unit down with it (2026-08-27); that is why `rust`
+# uses nextest, and why `rust`, the one job that kept a personal box, also kept the cap that
+# box needs -- the ceiling on a link step is RAM, not cores. `web` shed its cap with jpc. The desktop link wants
+# gtk/webkit/xdo, which is why `desktop-build` installs them rather than
+# inheriting them from a box somebody had configured by hand.
+#
+# No toolchain-install action: rustup honors rust-toolchain.toml (channel + wasm
+# target), so CI runs exactly the pinned 1.96.1 — an action like
+# dtolnay/rust-toolchain@stable would export RUSTUP_TOOLCHAIN and silently
+# override the repo pin. Hosted runners ship rustup, so that still holds; what
+# they do NOT ship is the wasm target, and the mac only carries its own because somebody
+# installed it by hand. So both jobs that need it name it rather than assume it -- `rust`
+# on the mac, which already had it, and `web` on a hosted runner, which never does.
+
+permissions:
+  # Least privilege, stated rather than inherited: with no block the job
+  # takes the repository's default, which is a setting in the web UI that can be changed to
+  # read/write for the whole repository without touching a workflow file or leaving a trace in
+  # this history. Nothing in these three jobs writes -- no release is cut, nothing is pushed, no
+  # package is published, and `actions/upload-artifact` uses the runtime token rather than this
+  # one. The beta's four workflows have carried exactly this block since they were written; these
+  # three are the ones that never got it.
+  contents: read
+
+# F03's move to hosted runners made a queued run cost money rather than a slot on a box that was
+# idle anyway. Superseded pushes are cancelled: `gh pr checks` only ever shows the latest run, so
+# every earlier one was already invisible AND still billing. `main` is excluded by group key --
+# a push there is the thing being deployed and graded, and cancelling it would leave the branch
+# with no verdict at all.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  # The pipeline reproduces the committed datasets, contract, and fixtures exactly —
+  # the shadow gates run inside regen-all, and a dirty tree means a stale commit.
+  #
+  # On the mac, verified before moving rather than after: regen was run on
+  # BOTH boxes from the same HEAD and every one of the 117,511 tracked files
+  # hashed identical -- so the 57 unsorted `readdirSync` sites in scripts/ do not
+  # reach emitted key order, and APFS vs btrfs directory order does not matter.
+  # (The gzip OS byte that used to bite here stays pinned at 0x13 on macOS too.)
+  # The vitest guards were likewise run on both and fail the SAME 5 of 1722.
+  #
+  # This job and `rust` shared the mac's two runners so they would not queue behind each other.
+  # Only this one left, so the pairing is gone in the useful direction: `rust` has the mac to
+  # itself, and this job gets a machine that is not contending with it at all.
+  pipeline:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    # 18m50s measured; the cap is a hang, not a slow day. Without it the default is 360.
+    timeout-minutes: 45
+    steps:
+      # `fetch-depth: 0` outlived its reason and is kept unmeasured, which is worth saying rather
+      # than leaving as a setting nobody can account for. The reason it gave was that this job ran
+      # the fork-9 head cases, which derive a graded head from history, and `gradedHead` refuses on
+      # a shallow clone rather than answering HEAD. That was already untrue when the cross-repo
+      # machinery was retired on 2026-09-25: no step below invokes a fork-9 case, and `fork9`
+      # appears nowhere else in this file. The probes are unwired, and the script they drove
+      # (`verify-shared-tests`) is deleted. Nothing `regen-all.cjs` runs shells out to git either,
+      # measured the day of the cut, so no step here is known to want the history. Dropping it is
+      # a separate change and wants its own run to prove it; it is cheap to hold.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      # The bin-crawler step below and the def-fidelity / attrib-completeness
+      # audits all just call `python3`. The parser uses PEP 604 (`bytes |
+      # memoryview`), so any host below 3.10 fails ALL ten test files at import.
+      # That is not hypothetical: it is what the mac did with Apple's bundled
+      # 3.9.6, while jpc happened to carry 3.14.7.
+      #
+      # No actions/setup-python, and the reason has changed with the runner. It
+      # used to be that actions/python-versions' darwin builds are not
+      # relocatable — the tarball's setup.sh installs to a hardcoded
+      # /Users/runner/hostedtoolcache/Python, so the mkdir needed root on a box
+      # whose runner user was not `runner`. That pin, added 2026-08-27, failed at
+      # step 4 of 10 on every push and PR run for eleven days and took
+      # `shared-pipeline-surface` (needs: pipeline) with it, so FORK-5's roster
+      # gate never started. A hosted Ubuntu runner has no such problem and the
+      # pin would now work — it is simply not needed, because the image ships
+      # 3.12 and the assertion below proves it rather than trusting it.
+      #
+      # So: the host's python, the same trust this file already places in the host's rustup — but
+      # ASSERTED, not assumed, because the failure it guards against is silent. macOS ships 3.9.6
+      # and the bin-crawler parser uses PEP 604 (`bytes | memoryview`), which fails at IMPORT, so
+      # a wrong interpreter arrives as ten broken test files rather than as one wrong version.
+      # >= 3.10 is the real requirement; the version is echoed so a host drifting under the
+      # runners is visible rather than inferred.
+      - name: the host's python is new enough for the parser
+        run: |
+          v=$(python3 -c 'import sys; print("%d.%d.%d" % sys.version_info[:3])')
+          if ! python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
+            echo "::error::python3 is $v; the bin-crawler parser needs >= 3.10 for PEP 604. Install it for the runner user, then re-run the runner's config.sh so the new PATH lands in .path — a non-interactive shell does not source the login profile."
+            exit 1
+          fi
+          echo "host python3: $v ($(command -v python3))"
+      # `npm ci` alone, and the `|| npm install` that was here is F43.
+      # `npm ci` refuses when package-lock.json and package.json disagree; `npm install` resolves
+      # whatever satisfies the ranges instead and rewrites the lockfile on its way past. So the
+      # fallback turned "the lockfile is stale, stop" into "install something nobody reviewed,
+      # quietly" — and it sat in the job whose `npm run regen` + `git diff --exit-code` is the
+      # authority for every committed dataset here. A regen-diff passing under a drifted tree
+      # does not fail to catch something; it certifies the data. Measured before removal: run
+      # 35464084784 emitted no npm error, so the fallback was dead code, not load-bearing.
+      - run: npm ci
+      # The JavaScript half of the lint gate, added 2026-09-26. The Rust half landed the day
+      # before and said in its own commit that it did not cover this side: 73 `.cjs` files and
+      # 33,940 lines of converters, gates and emitters, checked by nothing.
+      #
+      # BEFORE the regen, deliberately. A script with an undefined name or a dropped variable
+      # should be named in two seconds rather than found partway through a regen, and a red here
+      # makes the regen-diff below unreadable anyway.
+      #
+      # Correctness rules only -- `js.configs.recommended`, no formatting preset. The reasoning
+      # is in eslint.config.mjs next to the rule list. Measured on its first run over this tree:
+      # 63 problems, of which 13 were in the dead `scripts/attic/`, 11 were browser globals in
+      # the one script that drives a real browser, and 8 were the `_` discard convention. The
+      # remaining 28 were real and are fixed in the same commit, except two that are findings
+      # rather than defects and are marked at the site with `eslint-disable-next-line` and a
+      # paragraph saying why.
+      - name: eslint (the converters, gates and emitters)
+        run: npm run lint:js
+      # The Python third, added 2026-09-26, and the last of the three
+      # languages here to get a checker. 78 `.py` files, 29,738 lines, nothing had read one of
+      # them -- and this is not peripheral code: `npm run regen` below shells out to `python3`
+      # five times, three of those are gates it refuses to continue past, and the other two
+      # write committed data. `tools/bin-crawler/` underneath them is the parser that turns the
+      # game's binary files into `exported_powers/`, which every converter treats as truth.
+      #
+      # A venv rather than the runner's `pip`, which PEP 668 marks externally-managed on these
+      # images, and an exact version because `ruff.toml` names rule GROUPS -- a group grows when
+      # the tool does, so an unpinned ruff can turn this gate red against code nobody touched.
+      # `required-version` in ruff.toml asserts the same number from the other side, so a
+      # mismatch is refused rather than silently tolerated. Same shape as the rust job's
+      # `cargo nextest --version | grep -qF '0.9.143'`.
+      - name: the pinned ruff
+        run: |
+          python3 -m venv /tmp/ruff-venv
+          /tmp/ruff-venv/bin/pip install --disable-pip-version-check --quiet 'ruff==0.16.1'
+          echo /tmp/ruff-venv/bin >> "$GITHUB_PATH"
+      # BEFORE the regen, for the same reason eslint is: a gate script that dies on an
+      # undefined name should be named in a second, not found four minutes into a six-minute
+      # run. Measured on its first pass over this tree: 62 findings under the selected rules.
+      # Three of them were unused variables that could not be deleted -- each was a read from a
+      # sequential binary stream, so the name is unused and the LINE is load-bearing, and the
+      # obvious fix would have shifted every field after it and produced an export that looked
+      # right. Two more are findings rather than defects and are marked at the site with
+      # `noqa` and a paragraph. The rest are fixed in the same commit.
+      - name: ruff (the parser, the extractors and the python gates)
+        run: npm run lint:py
+      # No nice/ionice: a hosted runner is a dedicated machine with nobody at the
+      # keyboard, so there is no contest to lose.
+      - run: npm run regen
+      - name: regen-diff (datasets + contract + fixtures must be clean)
+        run: git diff --exit-code --stat
+      # THIS JOB'S GATE IS THE STEP ABOVE. Everything that used to follow it was a test step with
+      # no subject in this repository, and both had been failing since the first commit.
+      #
+      #   `data guards (vitest)` ran `npm test`. `package.json` has never carried a `test` script --
+      #   checked at `d4eaf49ae` and at every commit since -- and `vitest` has never been a
+      #   dependency here. `Missing script: "test"`, every run. The ~130 guards it names were the
+      #   beta's; they came with this file, not with a suite.
+      #
+      #   `bin-crawler parser tests` looped `tools/bin-crawler/tests/test_*.py`. That directory has
+      #   never existed here. An unmatched glob is passed through unchanged, so the loop ran
+      #   `python3 tools/bin-crawler/tests/test_*.py` once and failed on the literal name.
+      #
+      # The first had no `continue-on-error`, so it killed the job and the second never ran. Neither
+      # could have passed: this repository has no test files in any language, and the only two
+      # `#[test]` hits under `crates/` are inside doc comments.
+      #
+      # They are replaced by a step that SAYS so and exits 0, rather than deleted silently. A job
+      # red on every push cannot distinguish a real failure from the standing one, which is
+      # `stated-skip-beats-silent-skip` (see the beta-ref steps below) turned on this file itself.
+      # The slot stays visible so that wiring a suite is an obvious edit here rather than an
+      # archaeology problem.
+      #
+      # The `vitest-canonical` artifact upload went with them. It existed for
+      # `shared-pipeline-surface`, which was deleted on 2026-09-25 with the cross-repo machinery,
+      # and `npm test` never produced the file it uploaded.
+      - name: no test suite in this repo, stated rather than skipped
+        run: |
+          echo "::notice::no tests exist in this repository. No npm 'test' script, and there never has been one. No vitest. No tools/bin-crawler/tests/. The two #[test] mentions under crates/ are doc comments. The regen-diff step above is this job's gate."
+          echo "Add a suite and replace this step -- that is what it is here for."
+
+
+  # The longest job here, and the one that OOM-killed jpc's runner (37.6 GB peak
+  # linking 122 integration binaries at -j 32, 2026-08-27). It has now moved
+  # twice: off jpc to the mac for that reason, and off the mac to a hosted runner
+  # for F03's.
+  #
+  # Measured before the move rather than assumed, because this repo pins
+  # serde_json `float_roundtrip` for exact f64 parity and aarch64 reaches a
+  # different libm. `+ - * /` are bit-identical across arch; `powf` is not, and
+  # there are three sites (damage.rs:207, expr.rs:672, chain.rs:60). The whole
+  # workspace was run on the mac against HEAD: 1542 passed, 0 failed -- the same
+  # 1542 jpc runs. No ULP divergence, so the concern is retired by measurement.
+  #
+  # Wall-clock, measured on the boxes this job has lived on: 192s of test time on
+  # jpc (32 cores), 375s on the mac (12). A hosted runner has fewer of both, so
+  # this is the job where the move is felt; the number it actually lands at is
+  # recorded against F03 rather than guessed at here. Note also a floor no thread count beats --
+  # `pet_effect_routes::the_reach_check_is_reading_the_pet_table` alone takes
+  # 123s on the mac and 71s on jpc.
+  rust:
+    # The fork guard rather than a bare `pull_request`: this job runs on the mac, so "who can
+    # start it" IS F03. A fork PR skips it. A push or a same-repo PR runs it, and that is
+    # someone who can already push to this repository. See the header for why it stayed.
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: [self-hosted, macmini]
+    # Not the 360-minute default. The hosted attempt was still running the suite at 60 minutes,
+    # which is the shape this bounds: a job that is not going to finish should say so.
+    timeout-minutes: 30
+    env:
+      # 8 of 12. The cap was headroom for `pipeline` on the mac's second runner and `pipeline`
+      # is hosted now, so the box is this job's alone and 12 are free. Left at 8 anyway: the
+      # ceiling on the link step is RAM rather than cores -- that is what the 37.6 GB -j32 OOM
+      # on jpc measured -- and this file's rule for that shape is espresso's, stated at length
+      # further down. Raise it against a measured run, not against the arithmetic.
+      NEXTEST_TEST_THREADS: '8'
+    steps:
+      - uses: actions/checkout@v4
+      # No rust-cache: the mac's target/ and registry persist between runs, so the action would
+      # add an upload and a download to restore a cache that is already on the disk. It is the
+      # hosted jobs that start empty and need it.
+      #
+      # The toolchain is named anyway, though this box has it. The mac carried nextest 0.9.143
+      # and the wasm target installed by hand in July, and "inherited" is the state where a
+      # result differing from this file's history could mean the tool rather than the code.
+      # `rustup target add` is genuinely a no-op at the matching version. `cargo install` is
+      # NOT: it exits 101 with "binary `cargo-nextest` already exists in destination" whenever
+      # the binary is there, which on a box that keeps its $CARGO_HOME is every run. That is
+      # what took this job down in 11 seconds the first time it came back to the mac.
+      #
+      # So the version is asserted and the install is the fallback. `command -v cargo-nextest`,
+      # which is what `mutants-diff` uses below, would not do here: it passes on whatever
+      # nextest the box happens to carry, and an unnamed tool version is the exact state the
+      # paragraph above exists to rule out. --force is reached only when the assert fails, so
+      # a matching box never pays the rebuild.
+      - name: the pinned nextest, and the target rust-toolchain.toml names
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo nextest --version 2>/dev/null | grep -qF '0.9.143' ||
+            cargo install cargo-nextest --locked --version 0.9.143 --force
+      # rustup honors rust-toolchain.toml (1.96.1 + wasm32) on this box as it always did.
+      # What the mac and jpc ALSO carried was nextest 0.9.143, installed by hand; the step
+      # above names that version so a result differing from this file's history means the
+      # code, not the tool.
+      #
+      # nextest rather than `cargo test`, for three reasons the sweep job below
+      # already knew and this one didn't:
+      #   1. The workspace has 122 integration binaries and cargo runs them one
+      #      after another. The mutation preamble measured that path at 445s
+      #      against nextest's 125s -- on FEWER cores, and over 91 binaries.
+      #   2. `cargo test` fail-fasts across targets, so one red guard hides every
+      #      later one. That is the TSPY-8 trap: fixing a presence guard
+      #      "revealed" its value sibling and read as a regression it wasn't.
+      #      --no-fail-fast plus per-binary concurrency retires it structurally.
+      #   3. Doctests are the one thing nextest drops, and there are none to drop
+      #      -- all three fenced blocks in the crates are ```text, not ```rust.
+      #
+      # No `nice`/`ionice` on this job, unlike the jpc ones: the mac is a dedicated runner with
+      # nobody sitting at it, so there is no contest to lose. `ionice` would in any case fail --
+      # it is a Linux tool and macOS does not ship it.
+      # Cheap, and first, because what it guards is what cuts releases. It grades itself with
+      # --self-test rather than only running: a check that has never been seen to refuse
+      # anything is a wish, and this one is green against a correct tree by construction. F14.
+      - name: every build input comes from a pinned source
+        env:
+          # Rule 11 reads this, and it is the firing mechanism behind F03's
+          # ACCEPTED status: `rust` is the one PR-reachable self-hosted job
+          # left, and it is acceptable only while this repository is private.
+          # The day that flips, this check reds and names the job. Passed in
+          # rather than looked up because a file in the repository cannot know
+          # its own visibility, and a check that assumed one would be a claim.
+          REPO_IS_PRIVATE: ${{ github.event.repository.private }}
+        run: |
+          python3 scripts/keys/workflow-supply-chain.py --self-test
+          python3 scripts/keys/workflow-supply-chain.py
+      # Same family, same reason, one file over: the security audit's header claims to be derived
+      # from its own table and was not. It ran one Low too many for five commits, because each
+      # session decremented the number it found. Counting is cheap; believing a count nobody
+      # recomputed is what cost. Next to the check above because both answer "does this file
+      # still say what it says it says".
+      - name: the audit's header count is the audit's table, counted
+        run: |
+          python3 scripts/keys/audit-counts.py --self-test
+          python3 scripts/keys/audit-counts.py
+      # F87, and the third of the same family. `.gitignore`'s `/target/` is
+      # anchored on purpose -- unanchored it eats the pet exports -- and every non-root crate
+      # therefore has a `target/` git will happily take. `dx bundle` copies its finished bundle
+      # into one of them, because dx resolves `dioxus.toml`'s `out_dir` against the crate
+      # directory. That is how a 41.6 MB unsigned Mach-O reached the tree, and the reason this
+      # runs on every push is that nothing about it is one-off: adding a sixth crate re-opens it.
+      - name: no crate's target/ is tracked, and every one of them is ignored
+        run: |
+          python3 scripts/keys/no-crate-target-tracked.py --self-test
+          python3 scripts/keys/no-crate-target-tracked.py
+      # FORMATTING AND LINTS, added 2026-09-26. Until this commit not one of the four workflow
+      # files ran either -- no `clippy`, no `fmt --check`, no `-D warnings` anywhere -- which
+      # recorded in the commit that added these steps and acted on nothing before it. Both tools
+      # were run BY HAND, which in
+      # practice means they were run on the file someone was editing and on nothing else.
+      #
+      # What that had cost, measured the day these steps were written: 57 of our 200-odd source
+      # files unformatted across 298 hunks, and 46 clippy warnings. Both are zero in the same
+      # commit that adds these steps, so this starts green and every red after it is new. A gate
+      # landed red is the failure this file has now catalogued four times.
+      #
+      # `--check` rather than a rewrite, on purpose: a gate that edits the tree to pass reports
+      # nothing. `npm run fmt:rust` is the rewrite, for a person to run and read the diff of.
+      - name: rustfmt --check
+        run: cargo fmt -p coh_data -p coh_math -p coh_wasm -p app -- --check
+      # `vendor/dioxus-asset-resolver` is EXCLUDED from both steps and that is not an oversight.
+      # It is upstream 0.7.9 with a single marked patch (F86, see the root Cargo.toml) and its
+      # value is that it stays diffable against the crates.io release; reformatting it or
+      # "fixing" its one deprecation warning would destroy exactly that. `--no-deps` keeps
+      # clippy's own lints off it, and naming packages with `-p` keeps `-D warnings` off it too,
+      # since flags after `--` reach only the named packages. Its warning still PRINTS, which is
+      # the right outcome: visible, attributed upstream, and not this repository's to fix.
+      #
+      # The two lints this workspace declines -- `too_many_arguments` and `type_complexity` --
+      # are allowed in the root Cargo.toml with the reasoning, not silenced here. That way
+      # `cargo clippy` run by hand gives a person the same answer this step gives, which is the
+      # property the hand-run era did not have.
+      - name: clippy -D warnings
+        run: cargo clippy --no-deps -p coh_data -p coh_math -p coh_wasm -p app --all-targets -- -D warnings
+      # `--no-tests=pass` stood here from 2026-09-25 to 2026-09-26 as a stated absence rather
+      # than a fix: the workspace had ZERO `#[test]` functions, so nextest exited 4 on "no tests
+      # to run" on every push, and a job red on every push hides the first real failure. The
+      # "1542 passed, 0 failed" in this job's header was measured on 2026-08-27 and describes a
+      # suite that has never been ported here; it is the record of that run, not a claim about
+      # this one.
+      #
+      # The flag is GONE because the condition it described is gone. `crates/coh_math/tests/
+      # oracle.rs` grades the atom appliers against the frozen `fixtures/oracle/` records --
+      # one `#[test]` per fork, because the frozen key expires per fork -- and it holds the
+      # first `#[test]`s in this workspace. Keeping the flag now would mean deleting every test
+      # and still going green, which is the exact shape of soft-wrong this file spends most of
+      # its comments on.
+      #
+      # The step name said "the movement arm of the oracle gate" until 2026-09-26, with a comment
+      # here listing six recorded appliers and the 143 whole builds as still ungraded. All seven
+      # of those are graded now -- `oracle.rs` wires all 14 recorded appliers, and
+      # `totals_replay.rs` grades the 143 whole builds -- so the name understated what ran by
+      # as much as its predecessor overstated it. A name that is wrong in EITHER direction is
+      # how a green tick comes to mean less than it says.
+      #
+      # It names the two KINDS rather than an inventory, deliberately, because an inventory in a
+      # comment is a number nobody recomputes -- the failure the two steps above this one exist
+      # to catch. The frozen half grades this port against the deleted TypeScript calculator and
+      # expires the day a fork patches; the living half (`totals_baseline.rs`) grades it against
+      # its own committed answers and is what survives that day. `oracle.rs` holds the
+      # inventory of the frozen corpus and the order it is spent in.
+      - name: tests (the frozen oracle, and the living baseline)
+        run: cargo nextest run --workspace --no-fail-fast
+      # The one thing the nextest switch WOULD have dropped. `cargo test` compiles
+      # examples as part of the test profile; `cargo nextest run` builds test
+      # targets only. The examples under coh_math/, coh_data/ and app/ are the census
+      # and probe tools (bag_removal_census, display_key_census, atom_confirmation,
+      # …) -- run by hand during a gap investigation, so nothing else would notice
+      # them rotting against an API change until someone needed one.
+      #
+      # Every one of them is behind `census-probe` now, so the features have to be named
+      # or this step builds nothing and passes -- which is the failure mode it exists to
+      # prevent, wearing a green tick.
+      #
+      # NOT `app/desktop`, deliberately: `rfd` is asked for `xdg-portal` and the
+      # desktop link is `desktop-build`'s job, which installs the gtk/webkit
+      # libraries this one does not. Without it the POP*
+      # probes compile as the empty shells their `cfg(feature = "desktop")` bodies leave
+      # behind -- which is exactly what this step covered before they were gated, so the
+      # reach is unchanged. Their real bodies are checked by running them, by hand.
+      #
+      # Two more lines sat here, naming `owned_powers_census` and
+      # `zz_mezprot_discriminator_census` as `cargo build -p coh_math --test` targets.
+      # Removed 2026-09-26: neither test has ever existed in this repository. Those two names
+      # appeared in exactly one place in the whole tree -- that command -- and they arrived with
+      # the init commit, so this half of the step has failed on every push since d4eaf49ae:
+      # `error: no test target named 'owned_powers_census' in 'coh_math'`, exit 101. `cargo
+      # metadata` gives coh_math one lib and ten examples, no target of kind `test`, and no
+      # crates/*/tests/ directory exists anywhere in the workspace or in its history.
+      #
+      # Both tests are real, in `coh-sidekick-1.0`: crates/coh_math/tests/ holds 104 files there,
+      # 144 across its four crates carrying 1512 `#[test]`s. That is also what the deleted note's
+      # "all 122 test binaries nextest just built" was counting -- the sibling's, not ours. So this
+      # workflow was inherited from a repo with a suite and the suite never came with it. That
+      # absence is no longer total -- `tests/oracle.rs` landed 2026-09-26 and the step above
+      # now names it -- but one test against 26,544 lines of `coh_math/src` is a start and not a
+      # suite. Whether to port those 144 files is still a real question and this removal does
+      # not answer it; the `--workspace --examples` build below is the whole of what this step
+      # can check here, and it passes.
+      - name: the census and probe tools still compile
+        run: |
+          cargo build --workspace --examples \
+            --features coh_data/census-probe,coh_math/census-probe,app/census-probe
+
+  # The half of the old `rust` job that pinned it to a Linux box: the desktop
+  # build links against webkit2gtk4.1/gtk3/libxdo. That made it jpc's, because
+  # jpc was the Linux machine with them installed. A hosted Ubuntu runner is a
+  # Linux machine too -- it just has to be told, which is the apt step below.
+  #
+  # Splitting it out is what let the suite leave jpc at all -- as one job the
+  # tests were pinned to whichever box could do the desktop link.
+  desktop-build:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    # 4m43s measured; the cap is a hang, not a slow day. Without it the default is 360.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      # The reason this job could not leave jpc is the reason these four lines exist: the desktop
+      # link wants webkit2gtk4.1, gtk3 and libxdo. jpc had them installed; a hosted runner does
+      # not, so the dependency is declared instead of inherited.
+      - name: the libraries the desktop link needs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libxdo-dev libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev pkg-config
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          cache-bin: false
+      # No `nice`/`ionice` and no job cap: both existed because a human was sitting at jpc.
+      - name: desktop build
+        run: cargo build -p app --features desktop
+
+  # The beta (wednesdaywoe/coh-sidekick-beta) ships this engine as COMMITTED build output —
+  # src/engine/wasm*/ plus public/engine/contract/ — because a GitHub-hosted runner has no
+  # Rust and this repo is private, so the beta's own CI cannot build it. That makes the beta
+  # self-sufficient and leaves exactly one hazard: change coh_math here, forget to re-run
+  # `npm run build:engine` there, and the beta stays green while shipping a stale engine.
+  #
+  # The check has to live HERE, not there: the beta cannot see this repo, but this repo can
+  # see the beta — it is PUBLIC, so the checkout below needs no secret. The hash itself is
+  # computed by the beta's own scripts/engine-fingerprint.mjs, run against THIS tree, so the
+  # writer and the verifier can never compute it differently.
+  beta-engine-staleness:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    # 45s measured; the cap is a hang, not a slow day. Without it the default is 360.
+    timeout-minutes: 15
+    steps:
+      # The beta checkout carried no `ref`, so it took that repo's DEFAULT branch. Both repos work
+      # on same-named branches, and on 2026-09-07 that meant a canonical PR on
+      # `bport2-perma-atom-port` would have graded beta `main` — 35 commits behind — against a
+      # roster stamped at the branch head. Every claim below would have measured a tree nobody was
+      # working on, and the population check would have reported the difference as regressions.
+      # Match the branch when the beta has one, fall back to its default, and SAY which: a silent
+      # fallback is the same blind spot one level down (`stated-skip-beats-silent-skip`).
+      - name: pick the beta ref this run should grade
+        id: betaref
+        run: |
+          want='${{ github.head_ref || github.ref_name }}'
+          if git ls-remote --exit-code --heads https://github.com/wednesdaywoe/coh-sidekick-beta.git "$want" >/dev/null 2>&1; then
+            echo "ref=$want" >> "$GITHUB_OUTPUT"
+            echo "::notice::grading beta at $want (branch matched)"
+          else
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+            echo "::notice::beta has no branch '$want' — grading beta at main"
+          fi
+      - uses: actions/checkout@v4
+        with:
+          path: rebuild
+      - uses: actions/checkout@v4
+        with:
+          repository: wednesdaywoe/coh-sidekick-beta
+          ref: ${{ steps.betaref.outputs.ref }}
+          path: beta
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: beta's committed engine must match this rebuild
+        run: node beta/scripts/engine-fingerprint.mjs --rebuild-dir rebuild --compare beta/src/engine/_engine_manifest.json
+      # F74's CEILING, made mechanical. That row's argument is two artifacts: a floor that drives
+      # the doors with mutated builds (in `rust`), and a
+      # ceiling that reads the surviving `core::panic::Location` records straight out of the
+      # SHIPPED `coh_wasm_bg.wasm` and adjudicates each one. The ceiling was prose: a list derived
+      # from the artifact, read correctly, and load-bearing on nothing -- no check failed when a
+      # later edit turned one of those readings false, and it had to be re-run by whoever
+      # remembered. `scripts/keys/f74-panic-sites-baseline.json` is that reading committed, and
+      # this step grades the artifact against it.
+      #
+      # It belongs in THIS job and not in `rust`, because it needs both trees: the beta's
+      # committed .wasm to read, and canonical's source to resolve what each site says. This is
+      # the only job holding both cheaply. It runs AFTER the fingerprint compare on purpose -- a
+      # stale engine names lines that mean nothing in this tree, and the step above is the one
+      # that diagnoses that; the check reports SKEW rather than pretending to a reading.
+      #
+      # `--self-test` first, for the reason `audit-counts.py` states: a check nobody has seen fail
+      # is a wish. It grades the checker against the four faults it must red on.
+      - name: F74 - every panic site in the shipped engine is adjudicated
+        run: |
+          python3 rebuild/scripts/keys/f74-wasm-panic-sites.py --self-test
+          python3 rebuild/scripts/keys/f74-wasm-panic-sites.py --check beta/src/engine/wasm/coh_wasm_bg.wasm
+
+  # STALE-3 -- rebuild the engine and compare the bytes, on a machine that did not write them.
+  #
+  # `beta-engine-staleness` above hashes files, and every hash it grades was written by one run of
+  # `build-engine.mjs` on one machine: the manifest agrees with the tree it was written beside by
+  # construction. That catches the two drifting apart afterwards and is structurally silent on
+  # whether the build REPRODUCES -- which is the question, because the artifacts are committed
+  # binaries nobody downstream can rebuild to check. STALE-2 is the row where the gap shipped: a
+  # manifest certifying two .wasm with none of their bytes in it, green for as long as it existed.
+  #
+  # The only thing that closes it is a second build somewhere else, so WHERE this job runs is
+  # the whole point. The manifest is written by hand on `jpc`; a `jpc` job would re-measure the
+  # writer and STALE-3's own Done-when refuses it.
+  #
+  # That requirement survives the move to a hosted runner, and is if anything better served by
+  # it: a fresh VM shares nothing with the writer, where espresso at least shared an owner and a
+  # configuration history. What matters is the ONE axis this gate cannot cross, and it does not
+  # cross it -- ubuntu-latest is x86_64 Linux, the same triple as jpc.
+  #
+  # The boundary was measured rather than chosen, and the measurement is why the mac is not the
+  # answer. A different OS and CPU architecture would have been the widest claim available, and
+  # it does not reproduce -- not for a reason a remap can reach. Cargo's `-C metadata` hash takes
+  # in rustc's VERBOSE version, which names the host triple, so the mangled symbol hashes differ
+  # (`libcoh_data-0806471e...` on jpc, `18a107c2...` on the mac), and that reorders codegen: the
+  # code, data and type sections all shift. There is no stable knob that removes it -- a second
+  # `-C metadata` accumulates rather than replaces. So the claim this gate can make is bounded at
+  # the host triple, and every box it has ever run on is inside that bound. Widening it past that
+  # boundary means building in a pinned image, writer included.
+  #
+  # It does NOT share `beta-engine-staleness`'s job, though it repeats that job's ref-picking
+  # step. Two reasons, both paid for already: they cannot share a runner, and a cheap file hash
+  # should not be able to go dark because a cargo build or a `cargo install` broke -- the `needs:`
+  # lesson three jobs down, where eleven days of the only cross-repo gate were reported as
+  # `skipped`.
+  #
+  # A red here is one of three things and the output says which: DOES NOT REPRODUCE (the .wasm
+  # carries something host-specific -- the two remapped prefixes are asserted absent, so look for
+  # a third family), manifest desync (bookkeeping, not the compiler), or INCONCLUSIVE, which means
+  # the beta's engine is stale against this tree and the job above is the one to read.
+  engine-rebuild-reproduces:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    # 5m05s measured; the cap is a hang, not a slow day. Without it the default is 360.
+    timeout-minutes: 20
+    env:
+      # espresso is sized by RAM, not cores (see the mutation preamble below), and its runner
+      # unit carries MemoryMax=6G. Three crates and their deps is a small build, but it is not
+      # worth finding the ceiling on a box whose failure mode is the job being killed.
+      CARGO_BUILD_JOBS: '4'
+    steps:
+      - name: pick the beta ref this run should grade
+        id: betaref
+        run: |
+          want='${{ github.head_ref || github.ref_name }}'
+          if git ls-remote --exit-code --heads https://github.com/wednesdaywoe/coh-sidekick-beta.git "$want" >/dev/null 2>&1; then
+            echo "ref=$want" >> "$GITHUB_OUTPUT"
+            echo "::notice::grading beta at $want (branch matched)"
+          else
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+            echo "::notice::beta has no branch '$want' -- grading beta at main"
+          fi
+      - uses: actions/checkout@v4
+        with:
+          path: rebuild
+      - uses: actions/checkout@v4
+        with:
+          repository: wednesdaywoe/coh-sidekick-beta
+          ref: ${{ steps.betaref.outputs.ref }}
+          path: beta
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      # The runner unit on this box sets only TMPDIR, and the job's PATH is /usr/local/bin:/usr/bin.
+      # The runner's own .path file does list ~/.cargo/bin, but the job never receives it: the
+      # first run of this gate installed wasm-bindgen and then could not exec it one step later.
+      # Two names break without this, and only one of them loudly. A bare `wasm-bindgen` is simply
+      # unreachable however many times the step below installs it. A bare `cargo` is worse -- it
+      # finds Fedora's at /usr/bin, which is not a rustup proxy, so rust-toolchain.toml is never
+      # read at all. `cargo mutants` in the jobs further down survives this only because cargo
+      # searches $CARGO_HOME/bin for SUBCOMMANDS by itself; a plain binary gets no such help.
+      - name: put rustup's shims and cargo-installed binaries on PATH
+        run: echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+      # The CLI and the linked lib must be the same version or the glue is incompatible;
+      # build-engine.mjs reads the required version out of the rebuild's Cargo.lock and dies on a
+      # skew, so this step only has to make SOME wasm-bindgen present. Version-qualified so a box
+      # carrying a different one is corrected rather than failing the run forever.
+      #
+      # `--locked` is load-bearing and was paid for: without it, two installs of the SAME
+      # wasm-bindgen 0.2.126 resolve different walrus patch versions, and wasm-bindgen writes
+      # walrus's version into the .wasm `producers` section. jpc had 0.26.4 and this box 0.26.5,
+      # which made the two artifacts differ by one byte with everything else identical -- the
+      # first thing this gate ever caught. The CLI version check inside build-engine.mjs cannot
+      # see it, because both CLIs correctly report 0.2.126.
+      - name: install the pinned wasm-bindgen CLI (skip if already correct)
+        run: |
+          want=$(sed -n '/^name = "wasm-bindgen"$/{n;s/^version = "\(.*\)"$/\1/p;q;}' rebuild/Cargo.lock)
+          [ -n "$want" ] || { echo "could not read the wasm-bindgen version from Cargo.lock"; exit 1; }
+          have=$(wasm-bindgen --version 2>/dev/null | sed 's/^wasm-bindgen //')
+          [ "$have" = "$want" ] || cargo install -f wasm-bindgen-cli --version "$want" --locked
+      # Still no toolchain step -- rustup honors rust-toolchain.toml and that pin is an input to
+      # the fingerprint -- but "the box's rustup" is an assumption, and on this box it was false
+      # until the PATH step above. It is asserted here rather than assumed, because the failure
+      # was silent in the only direction that matters. Fedora's rustc and the pinned one BOTH
+      # report 1.96.1 and share a commit-hash, so the remap that build-engine.mjs derives from
+      # `rustc -vV` cannot separate them either; they differ in LLVM (22.1.2 vs 22.1.8) and in
+      # the verbose version string, which is an input to cargo's -C metadata. That is the mac's
+      # failure mode arriving through a second door: the run would have reported DOES NOT
+      # REPRODUCE, and the bytes would have been read as the .wasm carrying something
+      # host-specific rather than as the job having used a different compiler.
+      #
+      # The sysroot is the discriminator, not the version: a distro rustc answers /usr, a rustup
+      # one answers under ~/.rustup/toolchains. Checking the version alone would have passed here.
+      - name: the toolchain is rustup's pinned one, not whatever the box ships
+        run: |
+          want=$(sed -n 's/^channel = "\(.*\)"$/\1/p' rebuild/rust-toolchain.toml)
+          [ -n "$want" ] || { echo "could not read the channel from rust-toolchain.toml"; exit 1; }
+          sysroot=$(cd rebuild && rustc --print sysroot)
+          case "$sysroot" in
+            "$HOME"/.rustup/toolchains/*) : ;;
+            *) echo "rustc is not a rustup toolchain, so rust-toolchain.toml was never read (sysroot: $sysroot)"; exit 1 ;;
+          esac
+          have=$(cd rebuild && rustc -vV | sed -n 's/^release: //p')
+          [ "$have" = "$want" ] || { echo "rust-toolchain.toml pins $want, rustc resolves $have"; exit 1; }
+          echo "::notice::building with $(cd rebuild && rustc -vV | head -1)"
+      - name: the engine rebuilt here is byte-identical to the one the beta ships
+        run: node beta/scripts/build-engine.mjs --verify --rebuild-dir rebuild --engine-dir beta/src/engine
+
+  # This job was the other half of F03's residual and it is off jpc now. No fork guard, because
+  # there is no personal box left to guard: `pull_request` unqualified, so a fork PR gets the
+  # wasm build graded instead of skipped. Coverage the guard was costing, recovered by not
+  # needing it.
+  #
+  # What moved it was a re-measured costing, not a new argument. The header's old `web` line said
+  # the 17 minutes of `cargo install dioxus-cli` could only be bought back with a prebuilt `dx`,
+  # "which is the restored-binary shape F14 exists to forbid". That conflated two different
+  # things. F14 forbids a MUTABLE CACHE restoring an executable -- its own words are "a cache is
+  # not a supply chain: no lockfile, no version, no provenance". A digest-pinned upstream release
+  # asset has all three, and pinning it is not a workaround for F15, it is the fix F15 LANDED for
+  # linuxdeploy one workflow over. The doctrine cost was zero; the clause was just wrong.
+  web:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    # 3m02s for the cold build plus about a minute of setup, and since the viewport gate below
+    # about three minutes more: `npm ci`, chromium with its apt dependencies, and a 22-step drive
+    # of a real window. The cap is a hang, not a slow day.
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      # Hosted runners ship rustup and not the target. The self-hosted boxes only ever had it
+      # because somebody added it by hand in July, which is the state this line exists to end.
+      - name: the wasm target rust-toolchain.toml names
+        run: rustup target add wasm32-unknown-unknown
+      # THE PREBUILT `dx`, PINNED BY DIGEST. 0.87s to fetch and verify against 17m15s to build
+      # from source -- measured off run 35754322494, the only all-hosted run, where `install
+      # dioxus-cli` was 17m15s of the job's 21m25s and the cold wasm build was the other 3m02s.
+      #
+      # Three properties, in the order that matters:
+      #
+      #   the DIGEST is the pin. The version in the URL only says which asset to ask for; this
+      #   hash is what says the bytes did not change under it. F15 measured a "fixed" release
+      #   URL whose asset was replaced two years after publication, so an unhashed download is
+      #   a mutable input wearing a version number. Verify happens BEFORE anything is written
+      #   where the build will run it: the download lands in a staging directory and is only
+      #   installed at $RUNNER_TEMP/dx-bin once `sha256sum -c` passes, so an interrupted or
+      #   substituted fetch cannot leave a runnable partial at the path the build calls. F15's
+      #   shape, and the reason staging sits under $RUNNER_TEMP rather than /tmp.
+      #
+      #   `install -m 0755`, exactly. The mode is STATED rather than inherited from whatever
+      #   the tarball carries, which is F15's lesson generalised rather than its exact case --
+      #   there the staging file came from `mkstemp` at 0600 and OR-ing execute bits onto it
+      #   gave 0711: runnable, and not the mode the tool would have had. Naming the mode is how
+      #   that stops being a thing anybody has to notice.
+      #
+      #   the version is ASSERTED AND RECORDED. F42's finding on the release legs was that
+      #   `command -v dx ||` short-circuited the pin and no step ever printed `dx --version`, so
+      #   the box's hand-built copy cut the artifact and nothing said which one it was. That was
+      #   true here too and the exemption this job used to claim -- "a wasm test build nobody
+      #   installs" -- was about the consequence, not the mechanism: jpc carries
+      #   `dioxus 0.7.9 (bfcc111)` and the released 0.7.9 is `(3e43ffa)`. Two different binaries
+      #   answering to the pinned version, and which one graded a PR was whichever the box had.
+      - name: dioxus-cli 0.7.9, pinned by digest
+        env:
+          DX_URL: https://github.com/DioxusLabs/dioxus/releases/download/v0.7.9/dx-x86_64-unknown-linux-gnu.tar.gz
+          DX_SHA256: 3b132551b480bc96f938f9f0d37936ee1190f994977539dcc347eaf38540d005
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/dx-bin"
+          # Beside the target, not in /tmp: `install` is then a same-filesystem operation rather
+          # than a cross-device copy, which is the difference F15's staging rule turns on.
+          staging="$(mktemp -d -p "$RUNNER_TEMP")"
+          curl -sSfL --retry 3 -o "$staging/dx.tar.gz" "$DX_URL"
+          printf '%s  %s\n' "$DX_SHA256" "$staging/dx.tar.gz" | sha256sum -c -
+          tar xzf "$staging/dx.tar.gz" -C "$staging" dx
+          install -m 0755 "$staging/dx" "$RUNNER_TEMP/dx-bin/dx"
+          echo "$RUNNER_TEMP/dx-bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/dx-bin/dx" --version
+          "$RUNNER_TEMP/dx-bin/dx" --version | grep -qF 'dioxus 0.7.9'
+      # `cache-bin: false` is F14's rule and the reason this job can have a cache at all: it
+      # caches target/ and not $CARGO_HOME/bin, so nothing executable is restored. The one
+      # all-hosted run logged `No cache found.` and still compiled 254/254 in 3m02s, so that
+      # figure is a cold floor rather than a cache-assisted one.
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          cache-bin: false
+      # No `nice`/`ionice` and no CARGO_BUILD_JOBS cap: all three existed because a human was
+      # sitting at jpc, the same way `desktop-build` shed them when it left.
+      - name: web build
+        run: cd crates/app && dx build --platform web
+
+      # THE FIRST BROWSER GATE THIS REPOSITORY HAS EVER RUN. `scripts/audit-grid-viewport-fit.cjs`
+      # was written, went red, and then sat in no workflow at all: item 30 measured that it had not
+      # been run since the day it was written, and `playwright.yml` is a notice standing in for a
+      # suite that never existed. So this is not a job moving — it is an instrument being plugged
+      # in for the first time.
+      #
+      # It was HELD OUT deliberately until 2026-09-27, and the reason is worth keeping: the gate
+      # was red. At a window height of 1000px it measured 26px of unused window on the way down and
+      # 134px on the way back up, and wiring a red gate in would have made a sixth permanently-red
+      # job in a repository that spent three commits removing five. Item 31 fixed the defect — the
+      # re-fit's guard compared Info's height, which is authored three rows taller than its
+      # siblings, against a column height — and the gate reads 26px in both directions now, over
+      # three consecutive runs. It goes in green or not at all.
+      #
+      # It drives the DEBUG bundle the step above already built, rather than asking for a release
+      # one. Measured both here: identical numbers at every one of the 22 steps, so a second full
+      # wasm compile would buy a figure that does not change. `--profile debug` is named rather
+      # than left to the script's release-first default, so this step cannot quietly drive a
+      # release bundle left behind by an earlier job on a self-hosted box.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      # `npm ci` and no fallback, for F43's reason — see the `pipeline` job. `@playwright/test` is
+      # already a devDependency and already in package-lock.json; nothing new is installed here.
+      - run: npm ci
+      # `--with-deps` is the apt half, and it is why this names one browser instead of all three.
+      # The gate launches chromium and only chromium (`chromium.launch`), because CDP
+      # `Browser.setWindowBounds` is what makes it able to resize a real OS window — the whole
+      # reason it exists. Firefox and WebKit would be two downloads nothing opens.
+      - name: chromium, for the one gate that drives a real window
+        run: npx playwright install --with-deps chromium
+      - name: grid viewport fit (a real OS window, stepped through 22 sizes)
+        run: node scripts/audit-grid-viewport-fit.cjs --gate --profile debug --verbose
+
+  # Mutation coverage is ONE pass: grade the code that moved, the day it moved.
+  # It automates the practice, it does not replace it -- the hand-applied semantic
+  # list is still where the real work happens.
+  #
+  # There used to be a second job, `mutants-sweep`, grinding the whole corpus a
+  # shard a night. Retired 2026-09-21, for three reasons in ascending order of
+  # importance:
+  #
+  #   1. It never finished. coh_math grows ~5 mutants a day; by September the
+  #      corpus was 5507, and a shard small enough for the SLOWEST observed night
+  #      put a full cycle at 43 nights. Throughput on espresso varies 2.8x night to
+  #      night for near-identical work (192 mutants in 2h22 on a quiet box, 196 in
+  #      4h55 on a busy one), so the cycle length is set by the worst draw, not the
+  #      typical one. Between 2026-08-14 and 2026-09-21, 23 of 39 nights were cut
+  #      at the timeout.
+  #
+  #   2. Nothing consumed it. Output went to an expiring artifact and a step
+  #      summary, on a `continue-on-error` job that was therefore always green.
+  #      There was no committed baseline and no key in scripts/keys/, so a NEW
+  #      survivor was indistinguishable from the ~200 standing ones. The sweep
+  #      reported a survivor in `proc_recharge_window` on 2026-08-25; PPM-5 was
+  #      found in that same function four weeks later, by a user bug report.
+  #
+  #   3. It is blind to this project's dominant bug class, which is the real
+  #      reason. Mutation testing grades the TESTS against the IMPLEMENTATION, so
+  #      when both agree on the wrong thing -- FLAGS-2, FORK-7, PPM-5 -- every
+  #      mutant is caught and the defect scores as well-defended. PPM-5 is the
+  #      exact case: the tests asserted base*(1+g)/(1+g+l) and the code computed
+  #      it, so the mutant that DELETED the global term (the one that FIXES the
+  #      bug) turns those tests red and is scored `caught`. Five machine-hours a
+  #      night bought a nightly re-confirmation of that agreement. The same
+  #      blindness shows up one layer down: a parse bug does not fail a gate, it
+  #      becomes authoritative data.
+  #
+  # What survives is the pair that earns its keep: this diff pass, scoped to lines
+  # that just changed and bounded at 60 minutes, and targeted mutation applied by
+  # hand while writing a guard -- cheap, and judged while the author still has the
+  # context to say WHY a mutant survived. The hand-written entries are the
+  # thing an automated sweep can never produce: survivors adjudicated
+  # "corpus-vacuous" rather than counted.
+  #
+  # espresso is sized by MEMORY, not cores: 8C/16T but only ~6.8 GB free beside a
+  # desktop, immich and llama work, so --jobs drops 3 -> 1 and --jobserver-tasks
+  # 12 -> 6. Its runner unit also carries Nice=19, IOSchedulingClass=idle and
+  # MemoryHigh=5G/MemoryMax=6G, so the pass loses every contest for CPU, disk and
+  # memory rather than winning one. Raise --jobs only against a measured run: the
+  # ceiling here is RAM, and exceeding MemoryMax fails the job rather than slowing
+  # it.
+
+  # --in-diff restricts mutants to lines the diff touched, which turns a sweep into
+  # a handful. The commit that ported PAR2 into the engine yields five mutants, not
+  # the 5,507 the whole crate now generates -- so the change that shipped that day
+  # gets graded that day, by a job that finishes.
+  mutants-diff:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, mutants]
+    continue-on-error: true
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # --in-diff needs history to diff against; the default depth-1 checkout
+          # has nothing to compare to.
+          fetch-depth: 0
+      - name: install cargo-mutants and nextest (skip if already present)
+        run: |
+          command -v cargo-mutants >/dev/null 2>&1 || cargo install cargo-mutants --locked
+          command -v cargo-nextest >/dev/null 2>&1 || cargo install cargo-nextest --locked
+      - name: diff the last day
+        id: diff
+        run: |
+          base=$(git rev-list -1 --before='24 hours ago' HEAD)
+          # A repo with nothing older than a day, or a first run, still has a
+          # parent to compare against.
+          [ -n "$base" ] || base=$(git rev-parse HEAD~1)
+          git diff "$base" HEAD -- crates/ > day.diff
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          # An empty diff is the normal case on a quiet day, not a failure.
+          [ -s day.diff ] && echo "any=1" >> "$GITHUB_OUTPUT" || echo "any=0" >> "$GITHUB_OUTPUT"
+      - name: mutate the diff
+        if: steps.diff.outputs.any == '1'
+        env:
+          NEXTEST_TEST_THREADS: '8'
+          TMPDIR: ${{ runner.temp }}
+        run: |
+          nice -n 19 cargo mutants -p coh_math \
+            --test-tool=nextest \
+            --in-diff day.diff \
+            --timeout 900 \
+            --jobs 1 \
+            --jobserver-tasks 6 || true
+      # A sweep that grades nothing reports success: the run above ends in `|| true`
+      # and the job is continue-on-error, both deliberately, so a bad night cannot
+      # break CI. That combination hid a real failure for a full night on
+      # 2026-08-26 -- the baseline timed out at 600s, no mutant was ever tested, and
+      # the job was green. Silence is the bug; say it out loud in the summary.
+      - name: did the run actually grade anything
+        if: always()
+        run: |
+          graded=0
+          for f in caught missed timeout unviable; do
+            [ -f "mutants.out/$f.txt" ] && graded=$(( graded + $(wc -l < "mutants.out/$f.txt") ))
+          done
+          if [ "$graded" -eq 0 ]; then
+            echo "::warning title=Mutation run graded nothing::0 mutants were tested. \
+          The baseline almost certainly failed or timed out -- check mutants.out/debug.log. \
+          This is not '0% done', it is 'the run did no work'."
+            {
+              echo "## :warning: This mutation run graded nothing"
+              echo
+              echo "Zero mutants were tested, so the green tick above means only that the"
+              echo "step was allowed to fail quietly. The usual cause is the baseline"
+              echo "exceeding \`--timeout\` in an unmutated tree."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "graded $graded mutants"
+          fi
+      - name: report survivors
+        if: steps.diff.outputs.any == '1'
+        run: |
+          {
+            echo "## Mutants surviving in the last day's changes"
+            echo
+            echo "Diffed against \`${{ steps.diff.outputs.base }}\`."
+            echo
+            if [ -s mutants.out/missed.txt ]; then
+              echo '```'
+              cat mutants.out/missed.txt
+              echo '```'
+            else
+              echo "None. Every mutant in the changed lines was caught."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: steps.diff.outputs.any == '1'
+        with:
+          name: mutants-diff-report
+          path: mutants.out

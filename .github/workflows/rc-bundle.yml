@@ -1,0 +1,525 @@
+# Cut a release candidate: one artifact per platform, on demand.
+#
+# Manual only (`workflow_dispatch`). An RC is a deliberate act, not something every push should
+# pay for, and the Windows leg runs on GitHub's meter.
+#
+# ---------------------------------------------------------------------------------------------
+# Why the Windows leg is hosted when the rest of this repo's CI is not
+# ---------------------------------------------------------------------------------------------
+# `ci.yml` moved to self-hosted runners in 3712188368 (2026-07-17) because this repo ran out of
+# GitHub Actions hours, not because hosted runners were unsuitable. So this is a return to
+# something that worked, not a precedent being set. The reason it has to be hosted is narrower
+# and permanent: **there is no Windows machine in this project any more**, and an NSIS installer
+# or a Windows binary is built by running the toolchain ON Windows. macOS and Linux have their
+# own boxes and stay on them.
+#
+# Windows minutes bill at 2x on GitHub's meter. That is the whole argument for `workflow_dispatch`
+# and for the sparse checkout below.
+#
+# ---------------------------------------------------------------------------------------------
+# The sparse checkout, which is what makes the Windows leg practical at all
+# ---------------------------------------------------------------------------------------------
+# HEAD is 765 MB across 82,646 files. Checking that out on a Windows runner is slow enough to
+# dominate the job. It is also unnecessary: the app crate embeds everything it needs from
+# `crates/app/assets` (21 MB — the gzipped contract bundles and the power icons) plus the single
+# file `contract/schema-version.json` and the hand-authored JSON under `hand-data/`.
+# `exported_powers/` (532 MB) and the per-fork `contract/` trees (151 MB) are build-time
+# irrelevant — they feed the parser and the regen, neither of which runs here. (`src/data/`
+# was listed here at 108 MB until `src/` was deleted in `6caffef34`.)
+#
+# So the checkout is `crates/` (25 MB, 3,721 files), the workspace manifests, the top-level
+# `contract/*.json` (4 KB, one file) and `hand-data/*.json` (107 KB). **Non-cone mode**, because
+# cone mode takes directories only and two of the entries are file patterns.
+#
+# **This list went stale on its first run, and the guard below is why it cannot again.** The first
+# dispatch carried only `contract/schema-version.json`, missing the two files `coh_math` embeds —
+# `effect-registry.json` and `set-bonus-stat-vocab.json` — and the build died on them **614
+# seconds in**, as a rustc error at the tail of a release compile. The pattern is now
+# `/contract/*.json` rather than three named files, so a new top-level contract file is carried
+# automatically, and `rc-sparse-checkout-covers-includes.py` runs immediately after checkout and
+# fails in under a second when something outside the list is embedded anyway.
+#
+# **It went stale a second time, in a shape that guard could not see.** F86's close vendored
+# `dioxus-asset-resolver` into `vendor/` and made it a workspace MEMBER, which is not an
+# `include_str!` and so was invisible to a script that derives embeds. `cargo metadata` reads
+# every member's manifest before compiling anything, so `rc2` died in one second on `failed to
+# load manifest for workspace member`. The list now carries `/vendor/` (44 KB), and the guard
+# derives workspace members and `[patch]` path dependencies as well as embeds -- the lesson being
+# that "derive it from the source" is only as wide as the kinds of dependency it knows to look for.
+name: RC bundle
+
+on:
+  workflow_dispatch:
+    inputs:
+      label:
+        description: "What to call this candidate (e.g. rc1)"
+        required: true
+        default: rc1
+
+permissions:
+  # Least privilege, stated rather than inherited: with no block the job
+  # takes the repository's default, which is a setting in the web UI that can be changed to
+  # read/write for the whole repository without touching a workflow file or leaving a trace in
+  # this history. Nothing in these three jobs writes -- no release is cut, nothing is pushed, no
+  # package is published, and `actions/upload-artifact` uses the runtime token rather than this
+  # one. The beta's four workflows have carried exactly this block since they were written; these
+  # three are the ones that never got it.
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /Cargo.toml
+            /Cargo.lock
+            /rust-toolchain.toml
+            /dioxus.toml
+            /crates/
+            /contract/*.json
+            # The two files `coh_math` embeds moved to `hand-data/` (they are hand-authored and
+            # `contract/` is becoming build output). Same pattern shape as the line above, so a
+            # new top-level hand-data file is carried automatically; the per-fork `hand-data/<id>/`
+            # trees are pipeline input and stay out. 24 KB.
+            /hand-data/*.json
+            # F86's close vendored `dioxus-asset-resolver` and made it a WORKSPACE MEMBER, and
+            # this list did not follow. `cargo metadata` reads every member's manifest before it
+            # compiles a line, so the leg died in ONE second on `failed to load manifest for
+            # workspace member .../vendor/dioxus-asset-resolver` -- the same rot as the 614-second
+            # failure, in the one shape the guard below could not see, because a workspace member
+            # is not an `include_str!`. 44 KB. The guard now derives members and path patches too.
+            /vendor/
+            # The guard below lives here, and leaving it out is how the SECOND dispatch failed:
+            # the check on the sparse list was excluded by the sparse list. It failed in two
+            # seconds rather than 614, which was the point of it, aimed at the wrong thing.
+            /scripts/keys/
+
+      # Before anything expensive. A missing embedded file is a rustc error ten minutes into a
+      # release compile; this makes it a one-second failure that names the file and the line.
+      - name: the sparse checkout carries every file the crates embed
+        shell: bash
+        # `--self-test` first, the way `rc-checksums.py` and `rc-linuxdeploy.py` are run below.
+        # This script was the one that carried a self-test nobody invoked, which is the weaker
+        # half of the same problem it exists for: against a full checkout it is VACUOUSLY green,
+        # so the only evidence it can still go red is the self-test, and it was not being asked.
+        run: |
+          python3 scripts/keys/rc-sparse-checkout-covers-includes.py --self-test
+          python3 scripts/keys/rc-sparse-checkout-covers-includes.py
+
+      # No toolchain action: `rust-toolchain.toml` pins 1.96.1 and rustup honours it on first
+      # invocation, which is the same reasoning `ci.yml` states for having no toolchain step.
+      - name: toolchain is the pin, not the runner's default
+        shell: bash
+        run: rustc --version && cargo --version
+
+      # F14, both halves of it.
+      #
+      # Pinned to the commit `v2.9.2` resolved to on 2026-09-19 rather than to `v2`, because a
+      # tag is a mutable pointer and this is the only action in either repository not published
+      # by GitHub itself. Whoever can move that tag would choose what runs on the machine that
+      # produces the binary testers install. The `actions/*` steps stay on their tags on purpose:
+      # their trust root is the runner already executing them, so pinning them protects against
+      # nothing that is not already total. `scripts/keys/workflow-supply-chain.py` enforces exactly
+      # that distinction, so this comment is checkable rather than aspirational.
+      #
+      # `cache-bin: false` is the half that had already happened. rust-cache caches
+      # `${CARGO_HOME}/bin` by default; a successful Windows run wrote a 452 MB cache on
+      # `refs/heads/main` whose path list includes that directory, so the next dispatch restores
+      # it, `command -v dx` below finds the restored binary, and the release is cut by a build
+      # tool that came out of a cache rather than out of the `cargo install` this file names. A
+      # cache has no lockfile, no version and no provenance, so it is not a supply chain.
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: rc-windows
+          cache-bin: false
+
+      # `dx` is what produces a Windows binary that knows about its assets. NOT cached: see the
+      # step above. This costs one dioxus-cli build per RC cut, and buys the property that the
+      # tool which produced the artifact is the version this file names.
+      #
+      # **Unconditional.** What stood here was
+      # `command -v dx >/dev/null 2>&1 || cargo install ...`, which reads as a pin and behaves as
+      # "use the pin unless the box already has something". The comment above it even said so,
+      # and had the runner wrong: THIS leg is `windows-latest` and ephemeral, so with the cache
+      # no longer restoring a `dx` the guard here was skipping nothing. The same line stood on
+      # the two SELF-HOSTED legs, where it skips to whatever binary is on the box — so the pin
+      # never fired there, and no step recorded which CLI had built the artifact. One shape on
+      # all three legs is what makes that checkable at all.
+      #
+      # **`--features no-downloads`** is inert on this leg — nothing here
+      # bundles an AppImage — and is set anyway so all three legs install one CLI that
+      # `workflow-supply-chain.py` can compare as a single string. The Linux leg says what it does.
+      #
+      # `dx --version` to the summary because F42's second clause is that nothing recorded it.
+      - name: dioxus-cli
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo install dioxus-cli --locked --version 0.7.9 --features no-downloads
+          dx --version | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # A PORTABLE ZIP, not an installer, and that is a choice for round one rather than a
+      # shortfall. What an NSIS installer buys over a zip is bootstrapping the WebView2 runtime,
+      # which ships with Windows 11 and recent Windows 10 — so for an RC audience the gap is
+      # small, and what the zip buys is that a tester unzips a folder and deletes it afterwards.
+      # Neither is signed: an unsigned installer and an unsigned exe both meet SmartScreen, so
+      # the installer would not have bought its way past that either. Switch to
+      # `dx bundle --package-types nsis` when RC1's answer is "we want a real installer".
+      - name: build
+        shell: bash
+        working-directory: crates/app
+        env:
+          # The cloud client reads these through `option_env!` at COMPILE time, because a browser
+          # tab has no process environment to read at runtime. **A bundle built without them is a
+          # silently cloud-less app, not a broken one** — every cloud call answers
+          # `CloudError::NotConfigured` and the UI reports it per call. That is the failure mode
+          # this line exists to prevent, and it is why the step below refuses rather than warns.
+          SIDEKICK_SUPABASE_URL: ${{ secrets.SIDEKICK_SUPABASE_URL }}
+          SIDEKICK_SUPABASE_ANON_KEY: ${{ secrets.SIDEKICK_SUPABASE_ANON_KEY }}
+          # The feedback worker's desktop door (F35). Same compile-time reason, and a stronger
+          # case for refusing: an RC exists to collect reports, and a bundle without this one
+          # cannot send any. It must match the worker's `DESKTOP_CLIENT_TOKEN` secret.
+          SIDEKICK_FEEDBACK_TOKEN: ${{ secrets.SIDEKICK_FEEDBACK_TOKEN }}
+          # Crash reporting (F55). RB4h built the whole path and the bundle carried no key, so the
+          # one build whose job is to reveal crashes was the one reporting none. The beta's own
+          # project: the envelope already separates the two by `platform`, `release` and a
+          # `target` tag, so a second project would buy a split that the tags already give.
+          SIDEKICK_SENTRY_DSN: ${{ secrets.SIDEKICK_SENTRY_DSN }}
+        run: |
+          set -euo pipefail
+          test -n "${SIDEKICK_SUPABASE_URL:-}" || { echo "::error::SIDEKICK_SUPABASE_URL is not set — this bundle would ship with no cloud at all"; exit 1; }
+          test -n "${SIDEKICK_SUPABASE_ANON_KEY:-}" || { echo "::error::SIDEKICK_SUPABASE_ANON_KEY is not set — this bundle would ship with no cloud at all"; exit 1; }
+          test -n "${SIDEKICK_FEEDBACK_TOKEN:-}" || { echo "::error::SIDEKICK_FEEDBACK_TOKEN is not set — this bundle could not send a single report back"; exit 1; }
+          test -n "${SIDEKICK_SENTRY_DSN:-}" || { echo "::error::SIDEKICK_SENTRY_DSN is not set — this bundle would report no crash to anyone"; exit 1; }
+          dx build --platform windows --release
+
+      - name: collect
+        shell: bash
+        run: |
+          set -euo pipefail
+          # dx 0.7.9 lays this out as `target/dx/<cargo target>/<profile>/<platform>/`. Keyed on
+          # the cargo TARGET, measured rather than assumed: neither `dioxus.toml`'s `app_name` nor
+          # its correctly-spelled `name` changes it, and naming the bin `Sidekick` moved the whole
+          # tree from `target/dx/app/` to `target/dx/Sidekick/`. Found rather than hardcoded, since
+          # a CLI upgrade can move it again; scoped to the platform directory rather than to
+          # `release`, so a cached runner holding a previous web build cannot be swept into the
+          # artifact.
+          find target/dx -maxdepth 4 -type d || true
+          out=$(find target/dx -type d -path "*release/windows" -print -quit)
+          test -n "$out" || { echo "::error::no windows release output under target/dx — see the tree above"; exit 1; }
+          echo "collected from $out"
+          ls -R "$out"
+          mkdir -p dist && cp -R "$out"/. dist/
+
+      # A checksum is not a signature and is not offered as one — it is
+      # the one of that row's four asks that can be met without a certificate somebody has to
+      # buy. It lets a tester tell whether the bundle they hold is the bundle this run built.
+      # The digests also go to the run's summary, which is the copy that does not travel inside
+      # the zip it describes.
+      - name: checksum
+        shell: bash
+        run: |
+          python3 scripts/keys/rc-checksums.py --self-test
+          python3 scripts/keys/rc-checksums.py dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sidekick-${{ inputs.label }}-windows-x86_64
+          path: dist/
+          if-no-files-found: error
+
+  macos:
+    # Self-hosted, because the machine exists. **arm64 only** — the mac mini is Apple Silicon, so
+    # this artifact does not run on an Intel Mac. Named here rather than discovered by a tester:
+    # a universal build is its own step and nobody has asked for one yet.
+    runs-on: [self-hosted, macmini]
+    # F13, the two cheap clauses, and the Windows leg deliberately gets neither.
+    #
+    # Without this the release build reads and writes the checkout's `target/`, which `ci.yml`
+    # writes on every push — so the last thing to touch an object file before a release compile
+    # is ordinary CI. A job-local target directory costs a full rebuild, which a release wants
+    # anyway, and takes the shared `target/` off the list of things the RC's provenance rests on.
+    #
+    # `$CARGO_HOME` is the second clause and it is the sharper one, landed 2026-09-23 after the
+    # measurement below. It does NOT touch rustup's toolchains, the runner agent or the OS:
+    # F13's entry says which residuals remain and why none of THOSE is closable by editing this
+    # file — including the toolchain, which was measured, costed and refused rather than skipped.
+    #
+    # **Why a shared `$CARGO_HOME` was a code-execution vector and not a tidiness complaint.**
+    # Measured on jpc, cargo 1.96.1 — the pin this repo builds under:
+    #
+    #   * A registry source directory is extracted ONCE and trusted forever after. Modern cargo
+    #     writes no `.cargo-checksum.json` at all — just `.cargo-ok`, containing `{"v":1}` — so
+    #     there is not even a per-file hash to disagree with. Source edited in place under
+    #     `registry/src/` compiled with a clean exit and put the attacker's string in the output
+    #     binary, and the job-local `CARGO_TARGET_DIR` above did nothing about it, because the
+    #     poison is upstream of the target directory.
+    #   * Verification is DOWNLOAD-TIME ONLY. A `.crate` repackaged with tampered source, whose
+    #     sha256 does not match `Cargo.lock`, was extracted and compiled `--offline` without a
+    #     word. The checksum in the lockfile guards the fetch, not the cache.
+    #   * An EMPTY `$CARGO_HOME` refuses: pointed at a lockfile carrying a wrong checksum it
+    #     stops with "unable to verify that `itoa v1.0.11` is the same as when the lockfile was
+    #     generated".
+    #
+    # That last point is the whole argument. A job-local `$CARGO_HOME` has nothing in it, so every
+    # crate is fetched and checked against `Cargo.lock` — which lives in the repository, not on the
+    # box. The trust root moves from "whoever can write this machine's home directory" to "whoever
+    # can push", which is F03's question rather than this one's. Cost, measured on jpc: **6.5 s and
+    # 923 MB of `$RUNNER_TEMP`** for all 624 packages, against 515 GiB free on the mac and 398 GiB
+    # here. Cheaper than the target-directory clause it sits beside, which buys a full rebuild.
+    #
+    # **Measured on jpc before it was written, because F13 refused to land it unmeasured.**
+    # `dx bundle --platform linux --package-types appimage --release` under a redirected
+    # `CARGO_TARGET_DIR`, twice. dx 0.7.9 takes the cargo target directory from the environment
+    # first (`src/build/request.rs:835`) and builds everything under `<that>/dx`
+    # (`internal_out_dir`, :2615) — so the whole tree moves, the repo's `target/dx` is untouched,
+    # and **`find target/dx` in the collect step below would have found nothing.** Landing this
+    # without the `--out-dir` and collect changes underneath it would have traded a shared
+    # `target/` for a release cut that fails after it has finished building.
+    #
+    # Windows keeps the workspace target on purpose: `windows-latest` is ephemeral, so there is
+    # no shared `target/` to get out of, and `Swatinem/rust-cache` keys its cache on that path.
+    steps:
+      - uses: actions/checkout@v4
+      # Set through `$GITHUB_ENV` rather than a job-level `env:` block, which was the first
+      # spelling here and is silently wrong. **The `runner` context is not available in
+      # `jobs.<id>.env`** — GitHub's context-availability table allows `github`, `needs`,
+      # `strategy`, `matrix`, `vars`, `secrets` and `inputs` there, and admits `runner` only
+      # from `jobs.<id>.steps.env` downwards. `${{ runner.temp }}/rc-target` would have expanded
+      # to `/rc-target`: an absolute path at the filesystem root, on a box where the runner
+      # cannot create one. `$RUNNER_TEMP` is the shell's copy of the same value and is defined
+      # in every `run:`, which is how the `--root` and `$GITHUB_PATH` lines below already reach
+      # it. Caught by reading the table, not by running this — see F13 on why that matters here.
+      - name: build from a job-local cargo home and target directory
+        run: |
+          set -euo pipefail
+          echo "CARGO_TARGET_DIR=$RUNNER_TEMP/rc-target" >> "$GITHUB_ENV"
+          echo "CARGO_HOME=$RUNNER_TEMP/rc-cargo" >> "$GITHUB_ENV"
+      # The Windows leg carries the
+      # reasoning for the first two; `--root` is what is different here, and it is F13's half.
+      #
+      # **This box is persistent and it already has a `dx`**, so on this leg `command -v dx ||`
+      # was not skipping nothing — it skipped the pin every time, and the RC was cut by whatever
+      # binary happened to be on the machine. Measured 2026-09-20: jpc's is from Jul 16, which
+      # predates this workflow, and the mac mini's is from Sep 17 14:21, the day of the only
+      # successful RC cut — so that one is the conditional install firing ONCE on an empty box
+      # and then never again. Both are `dioxus 0.7.9 (bfcc111)` today, which is the pin, and
+      # nothing here makes them so: **bump the version in this file and two of the three legs
+      # would keep building with the old binary, silently.** Installing into the job's own
+      # `$RUNNER_TEMP` and putting that in front of `PATH` makes the pin unconditional WITHOUT
+      # replacing the box's own `dx`, which `ci.yml` uses on every push and which is not this
+      # workflow's to overwrite. The cost is one dioxus-cli build per RC cut: the cost
+      # `cache-bin: false` already accepted on the Windows leg, for exactly this property.
+      #
+      # `$GITHUB_PATH` takes effect from the NEXT step, so this one calls `dx` by its full path.
+      - name: dioxus-cli
+        run: |
+          set -euo pipefail
+          cargo install dioxus-cli --locked --version 0.7.9 --features no-downloads --root "$RUNNER_TEMP/dx-cli"
+          echo "$RUNNER_TEMP/dx-cli/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/dx-cli/bin/dx" --version | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: build
+        working-directory: crates/app
+        env:
+          SIDEKICK_SUPABASE_URL: ${{ secrets.SIDEKICK_SUPABASE_URL }}
+          SIDEKICK_SUPABASE_ANON_KEY: ${{ secrets.SIDEKICK_SUPABASE_ANON_KEY }}
+          # The feedback worker's desktop door (F35). Same compile-time reason, and a stronger
+          # case for refusing: an RC exists to collect reports, and a bundle without this one
+          # cannot send any. It must match the worker's `DESKTOP_CLIENT_TOKEN` secret.
+          SIDEKICK_FEEDBACK_TOKEN: ${{ secrets.SIDEKICK_FEEDBACK_TOKEN }}
+          # Crash reporting (F55). RB4h built the whole path and the bundle carried no key, so the
+          # one build whose job is to reveal crashes was the one reporting none. The beta's own
+          # project: the envelope already separates the two by `platform`, `release` and a
+          # `target` tag, so a second project would buy a split that the tags already give.
+          SIDEKICK_SENTRY_DSN: ${{ secrets.SIDEKICK_SENTRY_DSN }}
+        run: |
+          set -euo pipefail
+          test -n "${SIDEKICK_SUPABASE_URL:-}" || { echo "::error::SIDEKICK_SUPABASE_URL is not set — this bundle would ship with no cloud at all"; exit 1; }
+          test -n "${SIDEKICK_SUPABASE_ANON_KEY:-}" || { echo "::error::SIDEKICK_SUPABASE_ANON_KEY is not set — this bundle would ship with no cloud at all"; exit 1; }
+          test -n "${SIDEKICK_FEEDBACK_TOKEN:-}" || { echo "::error::SIDEKICK_FEEDBACK_TOKEN is not set — this bundle could not send a single report back"; exit 1; }
+          test -n "${SIDEKICK_SENTRY_DSN:-}" || { echo "::error::SIDEKICK_SENTRY_DSN is not set — this bundle would report no crash to anyone"; exit 1; }
+          # A `.app`, zipped by the upload step. Not a `.dmg`: a dmg is the nicer handover and it
+          # is also the one that makes an UNSIGNED app look most like something went wrong, since
+          # Gatekeeper refuses it after the ceremony rather than before. Round one hands over a
+          # folder with a note; revisit when there is a Developer ID to notarize with.
+          #
+          # `--out-dir` is not cosmetic and it is not only about
+          # where collect looks. Without it `dx bundle` copies the finished bundle to the path
+          # `dioxus.toml` names, which dx resolves **against the crate directory**
+          # (`src/cli/bundle.rs:95`, `crate_out_dir()`) — so the default destination is
+          # `crates/app/target/dx`, inside the checkout. That is F87: on this persistent box the
+          # copy accumulates in the working tree between cuts, and on somebody's laptop it is
+          # what put a 41.6 MB Mach-O into a commit. Measured on jpc: with `--out-dir` the
+          # bundle lands in the named directory and the source tree gains nothing.
+          nice -n 19 dx bundle --platform macos --package-types macos --release \
+            --out-dir "$RUNNER_TEMP/rc-out"
+      - name: collect
+        run: |
+          set -euo pipefail
+          # Read straight out of the directory the bundler was TOLD to write to, rather than
+          # searching a tree for something that looks like output. The old `find target/dx` was
+          # a guess that happened to be right; with the target directory now job-local it would
+          # have been a guess that was wrong, and wrong ten minutes into a release build.
+          #
+          # It also closes a hazard the old shape carried on these two boxes, which is the part
+          # worth having in writing. `find ... -print -quit` takes the FIRST match, and the
+          # checkout on a persistent runner is not emptied between cuts — so a `target/dx`
+          # holding a previous run's bundle could have been collected and shipped as this one,
+          # with every step green. `$RUNNER_TEMP` is emptied by the runner at the start of each
+          # job (checked on jpc: `_work/_temp` is empty between jobs), so the only thing in
+          # `rc-out` is what this run put there.
+          ls -la "$RUNNER_TEMP/rc-out" || true
+          # `Sidekick.app` since the bin was named; matched by extension rather than by that
+          # literal so a rename does not silently upload nothing.
+          out=$(find "$RUNNER_TEMP/rc-out" -maxdepth 1 -type d -name "*.app" -print -quit)
+          test -n "$out" || { echo "::error::no .app in $RUNNER_TEMP/rc-out — see the listing above"; exit 1; }
+          echo "collected $out"
+          mkdir -p dist && cp -R "$out" dist/
+      # A checksum is not a signature and is not offered as one — it is
+      # the one of that row's four asks that can be met without a certificate somebody has to
+      # buy. It lets a tester tell whether the bundle they hold is the bundle this run built.
+      # The digests also go to the run's summary, which is the copy that does not travel inside
+      # the zip it describes.
+      - name: checksum
+        shell: bash
+        run: |
+          python3 scripts/keys/rc-checksums.py --self-test
+          python3 scripts/keys/rc-checksums.py dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sidekick-${{ inputs.label }}-macos-arm64
+          path: dist/
+          if-no-files-found: error
+
+  linux:
+    runs-on: [self-hosted, jpc]
+    # The macOS leg carries the reasoning and the measurement — which was
+    # taken on THIS box, with this leg's exact command — and the note on why this is a
+    # `$GITHUB_ENV` line rather than a job-level `env:` block.
+    #
+    # **`CARGO_BUILD_JOBS` is here and is not on the mac, and the asymmetry is load-bearing.**
+    # Isolating `$CARGO_HOME` also isolates this leg from `~/.cargo/config.toml`, and on THIS box
+    # that file is not decoration: it caps `[build] jobs = 20` because a workspace build at the
+    # default `-j 32` peaked at 37.6 GB and the kernel OOM killer took the runner unit down —
+    # and the unit is `Restart=no`, so push CI then sat dead for hours with runs stuck queued.
+    # Measured 2026-09-23: a job-local `$CARGO_HOME` has no `config.toml`, and cargo reads the
+    # cap from nowhere else, so the clause above would hand a release cut the uncapped build that
+    # killed this machine once already. `CARGO_BUILD_JOBS` is the environment spelling of the same
+    # setting and cargo validates it (`jobs may not be 0`, measured), so the cap survives the
+    # isolation. The mac has no `~/.cargo/config.toml` at all — checked, not assumed — so there is
+    # nothing there to carry forward and no line here for it.
+    #
+    # The number lives in two places now, which is a real cost and the smaller one: the box config
+    # binds every cargo this user runs, including the ones no workflow knows about, so it stays.
+    # Copying that file into the job-local home instead was considered and refused — `rustflags`
+    # and `linker` in a box-writable `config.toml` reach the compiler, measured the same day, so
+    # importing it would re-open exactly the door this clause closes.
+    steps:
+      - uses: actions/checkout@v4
+      - name: build from a job-local cargo home and target directory
+        run: |
+          set -euo pipefail
+          echo "CARGO_TARGET_DIR=$RUNNER_TEMP/rc-target" >> "$GITHUB_ENV"
+          echo "CARGO_HOME=$RUNNER_TEMP/rc-cargo" >> "$GITHUB_ENV"
+          echo "CARGO_BUILD_JOBS=20" >> "$GITHUB_ENV"
+      # The Windows leg carries the
+      # reasoning for the first two; `--root` is what is different here, and it is F13's half.
+      #
+      # **This box is persistent and it already has a `dx`**, so on this leg `command -v dx ||`
+      # was not skipping nothing — it skipped the pin every time, and the RC was cut by whatever
+      # binary happened to be on the machine. Measured 2026-09-20: jpc's is from Jul 16, which
+      # predates this workflow, and the mac mini's is from Sep 17 14:21, the day of the only
+      # successful RC cut — so that one is the conditional install firing ONCE on an empty box
+      # and then never again. Both are `dioxus 0.7.9 (bfcc111)` today, which is the pin, and
+      # nothing here makes them so: **bump the version in this file and two of the three legs
+      # would keep building with the old binary, silently.** Installing into the job's own
+      # `$RUNNER_TEMP` and putting that in front of `PATH` makes the pin unconditional WITHOUT
+      # replacing the box's own `dx`, which `ci.yml` uses on every push and which is not this
+      # workflow's to overwrite. The cost is one dioxus-cli build per RC cut: the cost
+      # `cache-bin: false` already accepted on the Windows leg, for exactly this property.
+      #
+      # `$GITHUB_PATH` takes effect from the NEXT step, so this one calls `dx` by its full path.
+      - name: dioxus-cli
+        run: |
+          set -euo pipefail
+          cargo install dioxus-cli --locked --version 0.7.9 --features no-downloads --root "$RUNNER_TEMP/dx-cli"
+          echo "$RUNNER_TEMP/dx-cli/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/dx-cli/bin/dx" --version | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # `dx bundle --package-types appimage` does not build an AppImage
+      # itself — it runs `linuxdeploy`, which dioxus-cli downloads from a MUTABLE release tag,
+      # with no hash, writes 0755 and caches forever, while the NSIS and WiX paths ten lines away
+      # in the same file go through `download_and_verify`. This step puts a digest-verified
+      # linuxdeploy where dx looks, so `ensure_linuxdeploy` finds one and never fetches.
+      #
+      # **It is the `--features no-downloads` above that makes this load-bearing rather than
+      # merely helpful**: without the feature, a run where this step seeded the wrong directory
+      # would silently fall back to the unverified download and nobody would know. With it, dx
+      # bails. This is the seed; that is the refusal.
+      #
+      # And it re-verifies a cache that is ALREADY on this box — the jpc runner's copy predates
+      # the script by three days — which is the half of F15 a fresh download alone leaves open.
+      - name: linuxdeploy, by digest
+        run: |
+          set -euo pipefail
+          python3 scripts/keys/rc-linuxdeploy.py --self-test
+          python3 scripts/keys/rc-linuxdeploy.py
+
+      - name: build
+        working-directory: crates/app
+        env:
+          SIDEKICK_SUPABASE_URL: ${{ secrets.SIDEKICK_SUPABASE_URL }}
+          SIDEKICK_SUPABASE_ANON_KEY: ${{ secrets.SIDEKICK_SUPABASE_ANON_KEY }}
+          # The feedback worker's desktop door (F35). Same compile-time reason, and a stronger
+          # case for refusing: an RC exists to collect reports, and a bundle without this one
+          # cannot send any. It must match the worker's `DESKTOP_CLIENT_TOKEN` secret.
+          SIDEKICK_FEEDBACK_TOKEN: ${{ secrets.SIDEKICK_FEEDBACK_TOKEN }}
+          # Crash reporting (F55). RB4h built the whole path and the bundle carried no key, so the
+          # one build whose job is to reveal crashes was the one reporting none. The beta's own
+          # project: the envelope already separates the two by `platform`, `release` and a
+          # `target` tag, so a second project would buy a split that the tags already give.
+          SIDEKICK_SENTRY_DSN: ${{ secrets.SIDEKICK_SENTRY_DSN }}
+        run: |
+          set -euo pipefail
+          test -n "${SIDEKICK_SUPABASE_URL:-}" || { echo "::error::SIDEKICK_SUPABASE_URL is not set — this bundle would ship with no cloud at all"; exit 1; }
+          test -n "${SIDEKICK_SUPABASE_ANON_KEY:-}" || { echo "::error::SIDEKICK_SUPABASE_ANON_KEY is not set — this bundle would ship with no cloud at all"; exit 1; }
+          test -n "${SIDEKICK_FEEDBACK_TOKEN:-}" || { echo "::error::SIDEKICK_FEEDBACK_TOKEN is not set — this bundle could not send a single report back"; exit 1; }
+          test -n "${SIDEKICK_SENTRY_DSN:-}" || { echo "::error::SIDEKICK_SENTRY_DSN is not set — this bundle would report no crash to anyone"; exit 1; }
+          # AppImage rather than deb or rpm: one file a tester runs, no package manager and no
+          # assumption about which distribution they are on. `nice`/`ionice` for `ci.yml`'s
+          # reason — this box runs the test suite too.
+          #
+          # F13 and F87; the macOS leg states what `--out-dir` is for. This is
+          # the command the measurement was taken with, and the run that measured it deposited a
+          # 150 MB AppImage in `crates/app/target/dx` when the flag was left off.
+          nice -n 19 ionice -c3 dx bundle --platform linux --package-types appimage --release \
+            --out-dir "$RUNNER_TEMP/rc-out"
+      - name: collect
+        run: |
+          set -euo pipefail
+          ls -la "$RUNNER_TEMP/rc-out" || true
+          out=$(find "$RUNNER_TEMP/rc-out" -maxdepth 1 -name "*.AppImage" -print -quit)
+          test -n "$out" || { echo "::error::no .AppImage in $RUNNER_TEMP/rc-out — see the listing above"; exit 1; }
+          echo "collected $out"
+          mkdir -p dist && cp "$out" dist/
+      # A checksum is not a signature and is not offered as one — it is
+      # the one of that row's four asks that can be met without a certificate somebody has to
+      # buy. It lets a tester tell whether the bundle they hold is the bundle this run built.
+      # The digests also go to the run's summary, which is the copy that does not travel inside
+      # the zip it describes.
+      - name: checksum
+        shell: bash
+        run: |
+          python3 scripts/keys/rc-checksums.py --self-test
+          python3 scripts/keys/rc-checksums.py dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sidekick-${{ inputs.label }}-linux-x86_64
+          path: dist/
+          if-no-files-found: error
