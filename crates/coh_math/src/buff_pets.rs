@@ -31,15 +31,24 @@
 //! folds — so the opt-in is offered exactly where there is something to fold, and it can name
 //! the totals it will move.
 //!
-//! Values are base — no enhancement multiplier and no strength. The beta passes
-//! `emptyStrengthBuffs()` and slot-less synthetic powers for exactly this reason: the aura is
-//! the pet's own power, not the summoner's, and the summoner's slotting does not reach it. The AT
-//! table is read at the PET's own character class where the entity states one and at the build's
-//! archetype where it does not, which is not a choice about tidiness: `Res_Boolean` differs enough
-//! between the two that Force Field Generator's mag-20 hold protection is 6.92 on `minion_pets`
-//! and 8.65 read as a Defender (ENT-10).
+//! Values take the summoning power's enhancement when the summon is `CopyBoosts`, which every
+//! buff-pet on Homecoming is (Force Field Generator, Triage Beacon, Faraday Cage, Spirit Tree,
+//! Prismatic Shield): the game hands the pet the summoner's slotting, so three Defense IOs in
+//! Prismatic Shield raise the shield's defense. The beta resolved these base with slot-less
+//! synthetic powers, and so did this pass until Prismatic Shield was reported ignoring its
+//! enhancements. Each row is enhanced by the aspect the parent route uses for the same row
+//! (see [`enh_multiplier`]). No strength: `CopyCreatorMods` would carry it, and it is not modelled
+//! here.
+//!
+//! The AT table is read at the PET's own character class where the entity states one and at the
+//! build's archetype where it does not, which is not a choice about tidiness: `Res_Boolean`
+//! differs enough between the two that Force Field Generator's mag-20 hold protection is 6.92 on
+//! `minion_pets` and 8.65 read as a Defender (ENT-10).
 
+use crate::apply::{defense_enh, power_enhancement};
+use crate::enhancement::EnhancementBonuses;
 use crate::granted::{faced_route, FacedFamily, FacedRoute};
+use crate::incarnates::AlphaEnhancement;
 use crate::scaled::resolve_scaled_effect_for;
 use crate::totals::{route_closed, CalcError, GlobalBonuses, TypeRoute};
 use coh_data::{CharacterState, Power, PowerDatabase, TableScope};
@@ -81,6 +90,7 @@ pub struct BuffPetBreakdownSource {
 pub fn apply_buff_pet_auras(
     state: &CharacterState,
     db: &PowerDatabase,
+    alpha: &AlphaEnhancement,
     g: &mut GlobalBonuses,
     errors: &mut Vec<CalcError>,
 ) -> Vec<BuffPetBreakdownSource> {
@@ -97,6 +107,26 @@ pub fn apply_buff_pet_auras(
             crate::gather::resolve_power(db, &selection.powerset, &selection.internal_name)
         else {
             continue;
+        };
+        // The summoner's slotting reaches the pet only through `CopyBoosts`; without it the pet's
+        // aura runs on nothing but its own base.
+        let copies_boosts = power
+            .summon()
+            .and_then(|summon| summon.get("copyBoosts"))
+            .and_then(Value::as_bool)
+            == Some(true);
+        let enh = if copies_boosts {
+            power_enhancement(
+                &selection.slots,
+                power,
+                alpha,
+                level,
+                &state.combat,
+                db,
+                errors,
+            )
+        } else {
+            EnhancementBonuses::default()
         };
 
         // Knockback and knockup protection are one stat granted as a pair, so they fold to `max`
@@ -119,7 +149,8 @@ pub fn apply_buff_pet_auras(
             let scope = scope(pet_class, archetype);
             let kind = effect.get("type").and_then(Value::as_str);
             if let Some(faced) = kind.and_then(faced_route) {
-                let value = faced_value(faced.family, effect, scope, level, db, errors);
+                let value = faced_value(faced.family, effect, scope, level, db, errors)
+                    * enh_multiplier(effect, Some(faced), &enh);
                 if value == 0.0 {
                     return;
                 }
@@ -134,7 +165,8 @@ pub fn apply_buff_pet_auras(
                 }
                 return;
             }
-            let value = aura_value(effect, scope, level, db, errors);
+            let value =
+                aura_value(effect, scope, level, db, errors) * enh_multiplier(effect, None, &enh);
             if value == 0.0 {
                 return;
             }
@@ -199,11 +231,7 @@ fn route_faced(
 /// ([`crate::apply`] Pass 2b), so a pet's protection and a power's own are the same kind of number
 /// in the same slot.
 ///
-/// **No enhancement multiplier**, unlike the parent route's `1 + enh.get(type)` for mez resistance
-/// and `1 + enh.get("defense")` for defense-debuff resistance: the row is the PET's own power and the
-/// summoner's slotting does not reach it, which is the same reason [`aura_value`] resolves base. On
-/// the unslotted corpus the parent's multipliers are 1.0, so the two agree there and part only where
-/// a build slots the matching enhancement — where the pet is right to stay flat.
+/// Base only; the caller applies [`enh_multiplier`].
 ///
 /// **The scale is read as stated, not `|scale|`.** Both converters normalize a face to a positive
 /// scale (0 of the corpus's 920 faced rows is negative) because a NEGATIVE resistance-aspect row is
@@ -233,6 +261,39 @@ fn faced_value(
         FacedFamily::Protection => resolved,
         FacedFamily::MezResistance | FacedFamily::DebuffResistance => resolved * 100.0,
     }
+}
+
+/// The enhancement multiplier on one folded row: the aspect the parent power route enhances the
+/// same row by ([`crate::apply`]), so a slotted buff-pet and a slotted armor agree on what a
+/// Defense IO does. `enh` is empty unless the summon is `CopyBoosts`, and an `ignoreStrength` row
+/// stays flat as it does on the parent.
+///
+/// Protection is unenhanced, as the parent's `Res_Boolean` armor protection is. Recharge buffs are
+/// unenhanced, as the parent reads them scale-directly. Of the debuff resistances only defense
+/// takes an enhancement, by Defense, and taunt/placate resistance takes none (both as the parent).
+fn enh_multiplier(effect: &Value, faced: Option<FacedRoute>, enh: &EnhancementBonuses) -> f64 {
+    if effect.get("ignoreStrength").and_then(Value::as_bool) == Some(true) {
+        return 1.0;
+    }
+    let bonus = match faced {
+        Some(faced) => match (faced.family, faced.type_key) {
+            (FacedFamily::Protection, _) => 0.0,
+            (FacedFamily::MezResistance, "taunt" | "placate") => 0.0,
+            (FacedFamily::MezResistance, ty) => enh.get(ty),
+            (FacedFamily::DebuffResistance, "defense") => enh.get("defense"),
+            (FacedFamily::DebuffResistance, _) => 0.0,
+        },
+        None => match effect.get("type").and_then(Value::as_str) {
+            Some("DefenseBuff") => defense_enh(enh),
+            Some("ResistanceBuff") => enh.get("resistance"),
+            Some("RegenBuff") => enh.get("heal"),
+            Some("RecoveryBuff") => enh.get("enduranceMod"),
+            Some("ToHitBuff") => enh.get("tohit"),
+            Some("Absorb") => enh.get("absorb"),
+            _ => 0.0,
+        },
+    };
+    1.0 + bonus
 }
 
 /// One buff-pet `power` summons, and the totals its ally buffs reach.

@@ -273,7 +273,7 @@ pub fn recalculate_in_cast_context(
     // (and before the movement/stealth commits), matching where the beta folds it in.
     let mut buff_pet_errors = Vec::new();
     let buff_pet_breakdown =
-        buff_pets::apply_buff_pet_auras(state, db, &mut g, &mut buff_pet_errors);
+        buff_pets::apply_buff_pet_auras(state, db, &alpha, &mut g, &mut buff_pet_errors);
     g.errors.extend(buff_pet_errors);
 
     // Pass 7 — commit the gathered travel buffs (per axis: suppress-group max + additive sum, minus

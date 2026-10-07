@@ -147,7 +147,7 @@ use coh_data::{CombatContext, EffectType, Enhancement, Level, Power, PowerDataba
 /// The beta's per-power defense enhancement term `enhBonuses.defense || enhBonuses.defenseBuff`:
 /// the `defenseBuff` fraction only when `defense` is zero (JS truthiness). Shared by the
 /// Defense, Elusivity, and defense-debuff-resistance seams.
-fn defense_enh(enh: &EnhancementBonuses) -> f64 {
+pub(crate) fn defense_enh(enh: &EnhancementBonuses) -> f64 {
     let defense = enh.get("defense");
     if defense != 0.0 {
         defense
