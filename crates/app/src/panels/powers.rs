@@ -162,34 +162,53 @@ pub struct PowerMenu(pub Signal<Option<PowerMenuTarget>>);
 
 /// Pull an open ⋮ menu back inside the window. It hangs leftward from the button, so on a
 /// narrow screen the card at the left edge or the bottom row is the case this exists for.
+///
+/// Placed in window pixels, then written back through the UI scale's `zoom` on `<html>`
+/// ([`crate::ui_scale`]): the anchor and every rect are window pixels, but `left`/`top` and a
+/// translate inside the zoomed root are multiplied by it, so at 120% an unconverted menu hung
+/// a fifth of the way across the window from its button.
 const KEEP_POWER_MENU_ON_SCREEN: &str = "\
 document.querySelectorAll('.power-menu').forEach(function (menu) {\
-  menu.style.translate = '';\
+  var z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;\
   var rect = menu.getBoundingClientRect();\
+  var ax = parseFloat(menu.style.left), ay = parseFloat(menu.style.top);\
   var margin = 8;\
-  var dx = 0, dy = 0;\
-  if (rect.left < margin) { dx = margin - rect.left; }\
-  if (rect.right + dx > window.innerWidth - margin) { dx = window.innerWidth - margin - rect.right; }\
-  if (rect.bottom > window.innerHeight - margin) { dy = window.innerHeight - margin - rect.bottom; }\
-  if (dx !== 0 || dy !== 0) { menu.style.translate = dx + 'px ' + dy + 'px'; }\
+  var x = ax - rect.width, y = ay + 4;\
+  if (x < margin) { x = margin; }\
+  if (x + rect.width > window.innerWidth - margin) { x = window.innerWidth - margin - rect.width; }\
+  if (y + rect.height > window.innerHeight - margin) { y = window.innerHeight - margin - rect.height; }\
+  menu.style.transform = 'translate(' + (x / z - ax) + 'px, ' + (y / z - ay) + 'px)';\
 });";
 
 /// Flip the slot tooltip to the other side of the cursor when it would run past the window's
 /// right or bottom edge, and pin it inside an 8px margin when neither side fits. Flipping rather
 /// than sliding keeps the card off the pointer, which would otherwise sit on top of its text.
-/// The 14px is the CSS default offset, cleared before measuring so the anchor is recoverable.
+///
+/// The cursor anchor is the inline `left`/`top`, in window pixels. Like the ⋮ menu above, the
+/// card is placed in window pixels and divided by the UI scale's `zoom` on the way out; without
+/// that, every flip at 120% overshot by a fifth and the card's foot ran off the bottom.
+///
+/// A set piece's card runs to about 480px at 100% scale, past a laptop window's height at 150%.
+/// The card ignores the pointer, so it can't scroll; when it won't fit, its set part moves
+/// beside the rest (`is-split`), which costs width the window has and saves about a third of
+/// the height. The class is cleared first because the host reuses one card element per hover.
 const KEEP_SLOT_TOOLTIP_ON_SCREEN: &str = "\
 document.querySelectorAll('.slot-tooltip').forEach(function (tip) {\
-  tip.style.transform = '';\
+  var z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;\
+  tip.classList.remove('is-split');\
   var rect = tip.getBoundingClientRect();\
+  if (rect.height > window.innerHeight - 16 && tip.querySelector('.slot-tooltip-set-part')) {\
+    tip.classList.add('is-split');\
+    rect = tip.getBoundingClientRect();\
+  }\
+  var ax = parseFloat(tip.style.left), ay = parseFloat(tip.style.top);\
   var offset = 14, margin = 8;\
-  var ax = rect.left - offset, ay = rect.top - offset;\
-  var x = rect.left, y = rect.top;\
+  var x = ax + offset, y = ay + offset;\
   if (x + rect.width > window.innerWidth - margin) { x = ax - offset - rect.width; }\
   if (x < margin) { x = Math.max(margin, window.innerWidth - margin - rect.width); }\
   if (y + rect.height > window.innerHeight - margin) { y = ay - offset - rect.height; }\
   if (y < margin) { y = Math.max(margin, window.innerHeight - margin - rect.height); }\
-  tip.style.transform = 'translate(' + (x - ax) + 'px, ' + (y - ay) + 'px)';\
+  tip.style.transform = 'translate(' + (x / z - ax) + 'px, ' + (y / z - ay) + 'px)';\
 });";
 
 /// The pin on a picked power's card: one click locks the Info panel to this power, a second
@@ -658,6 +677,9 @@ pub fn SlotTooltipHost(database: Db) -> Element {
         div {
             class: "slot-tooltip",
             style: "left: {target.anchor_x}px; top: {target.anchor_y}px;",
+            // Two parts so a card too tall for the window can stand them side by side
+            // (`KEEP_SLOT_TOOLTIP_ON_SCREEN`): this piece, then its set.
+            div { class: "slot-tooltip-main",
             div { class: "slot-tooltip-name", "{crate::naming::enhancement_name(enh)}" }
             if let coh_data::EnhancementKind::IoSet { set_name, piece_num, .. } = &enh.kind {
                 div { class: "slot-tooltip-set",
@@ -709,7 +731,9 @@ pub fn SlotTooltipHost(database: Db) -> Element {
                     }
                 }
             }
+            }
             if let Some((block, pieces)) = &set_details {
+                div { class: "slot-tooltip-set-part",
                 div { class: "slot-tooltip-piecelist",
                     div { class: "slot-tooltip-bonuses-head",
                         "Set Pieces ({block.slotted}/{block.total_pieces} slotted)"
@@ -725,6 +749,7 @@ pub fn SlotTooltipHost(database: Db) -> Element {
                 div { class: "slot-tooltip-bonuses",
                     div { class: "slot-tooltip-bonuses-head", "Set Bonuses" }
                     SetBonusTierList { tiers: block.tiers.clone() }
+                }
                 }
             }
             div { class: "slot-tooltip-hint", "{target.hint}" }

@@ -9,7 +9,7 @@
 //! locked auto-grants: the beta's `isAutoGranted` exclusion).
 
 use crate::build_session::BuildSession;
-use crate::level_control::{LevelControl, LevelUpControl};
+use crate::level_control::{LevelControl, LevelUpControl, LevelUpMode, MIN_LEVEL};
 use crate::panels::powers::BuildBudget;
 use crate::shell::{Db, UndoRedo};
 use dioxus::prelude::*;
@@ -18,17 +18,27 @@ use dioxus::prelude::*;
 pub fn BuildBar(database: Option<Db>) -> Element {
     let session = use_context::<BuildSession>();
     let slot_budget = use_context::<BuildBudget>().0;
+    let level_up_mode = use_context::<LevelUpMode>().0;
 
     // Everything is read before the markup, so the borrow of the build ends here. A dataset
     // without a schedule has no budget to compare against — the same fail-loud branch the
     // level control and the slot budget take: a dash, not an invented 0/0.
-    let (picks, pick_budget, slots) = {
+    let (picks, pick_budget, slots, next_pick) = {
         let build = session.build.read();
-        let pick_budget = database
+        let schedule = database
             .as_ref()
-            .and_then(|database| database.leveling_schedule.as_ref())
-            .map(|schedule| schedule.total_power_picks_at_level(build.level));
-        (build.picked_powers().count(), pick_budget, slot_budget())
+            .and_then(|database| database.leveling_schedule.as_ref());
+        let pick_budget = schedule.map(|schedule| schedule.total_power_picks_at_level(build.level));
+        // The header's next-pick readout, by the same rule (see `LevelUpControl`).
+        let taken_levels: Vec<u8> = build.picked_powers().map(|power| power.level).collect();
+        let next_pick =
+            schedule.and_then(|schedule| schedule.next_pick_level(&taken_levels, MIN_LEVEL));
+        (
+            build.picked_powers().count(),
+            pick_budget,
+            slot_budget(),
+            next_pick,
+        )
     };
 
     rsx! {
@@ -45,6 +55,17 @@ pub fn BuildBar(database: Option<Db>) -> Element {
                     available: budget,
                     low_at: 3,
                     title: "Power picks made",
+                }
+                // A phone has no hover text to read a pick's level from, so the bar says it.
+                // Gone once every pick is made (the Pwr count already says so) and while Level
+                // Up mode is on, as in the header: the mode's cluster names the level it owes.
+                if let Some(level) = next_pick.filter(|_| !level_up_mode()) {
+                    div {
+                        class: "build-bar__budget",
+                        title: "Your next power pick fills the level {level} slot",
+                        span { class: "build-bar__label", "Next" }
+                        span { class: "build-bar__value mono", "Lvl {level}" }
+                    }
                 }
                 BudgetCounter {
                     label: "Slot",

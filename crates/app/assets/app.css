@@ -337,6 +337,21 @@
   .level-up__label { display: none; }
 }
 
+/* The level the next power pick fills, beside Level Up while the mode is off. A statement, not
+   a control, so it has no frame: the number is set in the readout's own active color. */
+.next-pick {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px;
+  font-family: var(--font-chrome);
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+.next-pick__label { font-weight: 600; letter-spacing: 0.02em; }
+.next-pick__value { color: var(--action-active); font-variant-numeric: tabular-nums; }
+/* Not in the phone bar: it already wraps to two rows, its own Pwr counter speaks for picks, and
+   a third row would come out of the space the build scrolls in. */
+.build-bar .next-pick { display: none; }
+
 /* ---- header popovers (build identity, combat, options) ----
    Anchored to their trigger, which is safe ONLY because the header sits outside the free
    grid — a surface's `transform` would contain and clip an absolutely-positioned child
@@ -2433,6 +2448,22 @@
   line-height: 1.4;
 }
 .slot-tooltip-name { font-weight: 600; color: var(--text); }
+/* Too tall for the window: the set part stands beside the piece's own lines, and the hint
+   stays under them. Set by `KEEP_SLOT_TOOLTIP_ON_SCREEN`. */
+.slot-tooltip.is-split {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas: "main set" "hint set";
+  align-items: start;
+  column-gap: 14px;
+  max-width: 560px;
+}
+.slot-tooltip.is-split > * { max-width: 260px; }
+.slot-tooltip.is-split .slot-tooltip-main { grid-area: main; }
+.slot-tooltip.is-split .slot-tooltip-set-part { grid-area: set; }
+.slot-tooltip.is-split .slot-tooltip-hint { grid-area: hint; align-self: end; }
+.slot-tooltip.is-split .slot-tooltip-piecelist { margin-top: 0; padding-top: 0; border-top: 0; }
+
 .slot-tooltip-set { color: var(--enh-io-set); font-size: 11px; }
 .slot-tooltip-pieces { color: var(--text-faint); font-size: 10px; }
 .slot-tooltip-meta {

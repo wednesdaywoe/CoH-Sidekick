@@ -43,15 +43,20 @@ pub struct PopoverInline(pub Signal<bool>);
 /// Every open panel rather than one by id: the backdrop lets one popover be open at a time, and
 /// the correction is idempotent — `translate` is cleared before measuring, so a panel that
 /// already fits is left exactly where the CSS put it.
+///
+/// The shift is measured in window pixels and divided by the UI scale's `zoom` on `<html>`
+/// ([`crate::ui_scale`]) on the way out, since a translate inside the zoomed root is multiplied
+/// by it: at 150% an unconverted Help panel overshot its 8px margin by 187px.
 const KEEP_PANEL_ON_SCREEN: &str = "\
 document.querySelectorAll('.popover-panel').forEach(function (panel) {\
+  var z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;\
   panel.style.translate = '';\
   var rect = panel.getBoundingClientRect();\
   var margin = 8;\
   var shift = 0;\
   if (rect.right > window.innerWidth - margin) { shift = window.innerWidth - margin - rect.right; }\
   if (rect.left + shift < margin) { shift = margin - rect.left; }\
-  if (shift !== 0) { panel.style.translate = shift + 'px 0'; }\
+  if (shift !== 0) { panel.style.translate = (shift / z) + 'px 0'; }\
 });";
 
 /// A popover. The caller owns nothing: open/closed is local state, since a popover is
