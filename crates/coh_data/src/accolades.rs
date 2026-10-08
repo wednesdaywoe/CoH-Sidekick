@@ -85,6 +85,14 @@ impl PowerDatabase {
     pub fn accolade_toggles(&self) -> Vec<AccoladeToggle<'_>> {
         self.accolade_powers()
             .filter(|power| is_stat_toggle(power))
+            // Present in the exported set but awarded by no badge, so unobtainable in-game yet
+            // matching the stat-toggle shape. Dropped so the picker lists only what a player can
+            // actually earn (reported as unobtainable accolades). Verified against the Unofficial
+            // Homecoming Wiki: neither appears in the hero/villain accolade badge lists, and
+            // neither is granted through any inherent, prestige, or leveling path in any
+            // dataset's `levels.json`. Structural-derivation blind spot, so a fork that later
+            // activates one needs only remove it from this set.
+            .filter(|power| !is_unobtainable_toggle(power))
             .map(|power| AccoladeToggle {
                 power,
                 id: power.ident().to_ascii_lowercase(),
@@ -98,6 +106,19 @@ impl PowerDatabase {
 /// A stat toggle is an `Auto` member carrying a permanent +Max HP / +Max End atom. The
 /// non-stat `Auto` members this drops carry no `Max`-aspect atom at all (Portable
 /// Workbench grants a crafting table; the legacy Vanguard challenge is a flag).
+/// The accolade powers present in the exported set but awarded by no badge and granted
+/// through no inherent/prestige/leveling path in any dataset — unobtainable in-game despite
+/// carrying a permanent +Max HP / +Max End buff. Their internal names, matched exactly as the
+/// game writes them.
+fn unobtainable_accolade_names() -> [&'static str; 2] {
+    ["Super_Patriot", "Iron_Man"]
+}
+
+/// True when `power` is one of the unobtainable accolades [`unobtainable_accolade_names`].
+fn is_unobtainable_toggle(power: &Power) -> bool {
+    unobtainable_accolade_names().contains(&power.ident())
+}
+
 fn is_stat_toggle(power: &Power) -> bool {
     is_auto(power)
         && power.atoms.iter().any(|atom| {
