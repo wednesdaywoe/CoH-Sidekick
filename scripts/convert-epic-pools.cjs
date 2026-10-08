@@ -162,6 +162,11 @@ function convertEpicPower(rawJson, rank, availableLevel) {
   // See the field doc on `Power.procsOnlyOnMainTarget`.
   if (rawJson.procs_only_on_main_target) power.procsOnlyOnMainTarget = true;
 
+  // HC field 41b: an authored PPM area factor that replaces the one computed from
+  // geometry, and a multiplier on the PPM of procs rolled here. Sparse, as exported.
+  if (rawJson.area_factor_override) power.areaFactorOverride = rawJson.area_factor_override;
+  if (rawJson.ppm_mod) power.ppmMod = rawJson.ppm_mod;
+
   // ProcAllowed kNone — the game fires no proc in this power. Sparse-false, mirroring
   // the export: absent means procs fire. See the field doc on `Power.procsAllowed`.
   if (rawJson.procs_allowed === false) power.procsAllowed = false;

@@ -230,6 +230,12 @@ class PowerRecord:
     # powers.
     chain_delay: float = 0.0
 
+    # HC field 41b (2026 patch, HC layout only). `area_factor_override` replaces
+    # the PPM area factor computed from geometry when nonzero; `ppm_mod`
+    # multiplies the PPM of procs rolled in this power.
+    area_factor_override: float = 0.0
+    ppm_mod: float = 1.0
+
     # OverCap block (HC-added fields 38b-d, right after MaxTargetsExpr): when a
     # spherical AoE catches more than `over_cap_trigger` targets, per-target
     # effect scale is multiplied by `over_cap_multiplier` (exponentially per

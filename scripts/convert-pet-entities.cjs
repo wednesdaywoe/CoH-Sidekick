@@ -1431,6 +1431,8 @@ function processPetPower(powerFilePath, powerData) {
     range: powerData.range > 0 ? powerData.range : undefined,
     radius: powerData.radius > 0 ? powerData.radius : undefined,
     maxTargets: powerData.max_targets_hit > 0 ? powerData.max_targets_hit : undefined,
+    areaFactorOverride: powerData.area_factor_override || undefined,
+    ppmMod: powerData.ppm_mod || undefined,
     // bin-crawler currently exports attack_types as raw enum integers; the
     // PetAbility type expects string tags ("Lethal", "Area", "Incarnate", …).
     // Drop numeric entries until the enum mapping is added to export_powers.
@@ -2011,6 +2013,8 @@ function abilityRecord(ability) {
   if (ability.range) out.range = ability.range;
   if (ability.radius) out.radius = ability.radius;
   if (ability.maxTargets) out.maxTargets = ability.maxTargets;
+  if (ability.areaFactorOverride) out.areaFactorOverride = ability.areaFactorOverride;
+  if (ability.ppmMod) out.ppmMod = ability.ppmMod;
   if (ability.attackTypes) out.attackTypes = ability.attackTypes;
   if (ability.rechargeUnaffected) out.rechargeUnaffected = true;
   return out;
@@ -2100,6 +2104,9 @@ function abilityRecord(ability) {
 //   range?: number;
 //   radius?: number;
 //   maxTargets?: number;
+//   /** HC field 41b: authored PPM area factor (replaces the geometric one) and PPM multiplier. */
+//   areaFactorOverride?: number;
+//   ppmMod?: number;
 //   attackTypes?: string[];
 //   rechargeUnaffected?: boolean;
 // }

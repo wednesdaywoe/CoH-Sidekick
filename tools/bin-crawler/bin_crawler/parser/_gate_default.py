@@ -109,6 +109,9 @@ class _Situation(NamedTuple):
 
     player_classes: frozenset | None
     source_class: str | None
+    # True for a power whose only affected target is the caster, where the
+    # default recipient is the caster rather than "somebody else".
+    recipient_is_caster: bool = False
 
 
 # ---------------------------------------------------------------- attributes
@@ -435,7 +438,10 @@ def _identity_eq(node, sit):
         # planner's default recipient is somebody else; an effect that really
         # does skip the caster carries that as `not_on_caster`, a discriminator
         # of its own, so this clause is not what decides the base case.
-        return FALSE, True
+        # Except on a power that affects only the caster: there the recipient
+        # cannot be anyone else, and reading FALSE gated Sonic Aura's Sonic_Boom
+        # (`TargetsAffected Self`, every group behind this clause) down to nothing.
+        return (TRUE if sit.recipient_is_caster else FALSE), True
     if attr == "arch":
         # `arch` is one attribute asking three different questions, and only the
         # CLASS IT NAMES tells them apart — the selector does not, because both
@@ -610,13 +616,17 @@ def _names_caster_archetype(node) -> bool:
     return any(_names_caster_archetype(k) for k in node.kids)
 
 
-def evaluate(tokens: list[str], *, player_classes=()) -> GateVerdict:
+def evaluate(tokens: list[str], *, player_classes=(),
+             recipient_is_caster=False) -> GateVerdict:
     """Whether a group's `Requires` holds in the default situation.
 
     `UNPARSED` when the RPN does not reduce, `UNCLASSIFIED` when it reduces but
     names a clause with no reading — both explicit, never folded into a verdict,
     so a vocabulary gap surfaces instead of silently becoming a base effect.
     Both are at zero corpus-wide and gated there.
+
+    `recipient_is_caster` binds the target to the caster, for a power whose
+    only affected target is Self.
 
     `player_classes` is the dataset's own player archetypes, as `parse_classes`
     names them. Every `arch` clause needs it: on the target to tell an archetype
@@ -632,7 +642,8 @@ def evaluate(tokens: list[str], *, player_classes=()) -> GateVerdict:
         return GateVerdict(UNPARSED)
 
     catalogue = frozenset(name.lower() for name in player_classes) or None
-    unbound = _Situation(catalogue, source_class=None)
+    unbound = _Situation(catalogue, source_class=None,
+                         recipient_is_caster=recipient_is_caster)
     if catalogue is None or not _names_caster_archetype(tree):
         return GateVerdict(_verdict_of(tree, unbound))
 
@@ -641,7 +652,8 @@ def evaluate(tokens: list[str], *, player_classes=()) -> GateVerdict:
     # cosmetic (a gate naming a critter class holds for no build at all); a split
     # is the real thing, and the SATISFIED side of it is the answer.
     per_archetype = {
-        name: _verdict_of(tree, _Situation(catalogue, name.lower()))
+        name: _verdict_of(tree, _Situation(catalogue, name.lower(),
+                                           recipient_is_caster))
         for name in player_classes
     }
     distinct = set(per_archetype.values())

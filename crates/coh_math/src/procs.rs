@@ -57,6 +57,15 @@ pub(crate) struct ProcArea {
     /// `BasePower.bUseNonBoostTemplatesOnMainTarget`: the power's non-boost templates apply to
     /// the main target only, so its procs take no area penalty however wide it is.
     pub only_main_target: bool,
+    /// The target cap of a `Chain` power, which scores its area off radius × targets instead of
+    /// a sphere. `None` for every other shape.
+    pub chain_max_targets: Option<f64>,
+    /// HC's authored area factor (field 41b), standing in for the one the geometry gives.
+    pub area_factor_override: Option<f64>,
+    /// HC's `PPMMod` (field 41b): multiplies the PPM of every proc rolled here. 1.0 nearly
+    /// everywhere; the Sonic Aura Sonic Boom pseudo-pet authors 2.0. Carried with the area
+    /// because both are properties of the power the roll happens IN.
+    pub ppm_mod: f64,
 }
 
 impl ProcArea {
@@ -66,6 +75,9 @@ impl ProcArea {
             radius: 0.0,
             arc_degrees: 360.0,
             only_main_target: false,
+            chain_max_targets: None,
+            area_factor_override: None,
+            ppm_mod: 1.0,
         }
     }
 }
@@ -81,11 +93,22 @@ impl ProcArea {
 /// radius at all. Passing a zero radius instead would land on the same number today and lie
 /// about why. The power still has its radius, and a later reader of that argument would be
 /// reading a fabricated geometry.
+///
+/// An authored override replaces the geometric factor outright and goes through the same
+/// `0.25 + 0.75 × AF` conversion. A `Chain` power's factor is `1 + 0.15 × radius × targets / 10`
+/// (HC's 2026 change, from the bug report that found the engine scoring chains as spheres), the
+/// radius being the jump distance.
 fn ppm_area_denominator(area: ProcArea) -> f64 {
-    if area.only_main_target || area.radius <= 0.0 {
+    if area.only_main_target {
         return 1.0;
     }
-    0.25 + 0.75 * (1.0 + area.radius * (11.0 * area.arc_degrees + 540.0) / 30000.0)
+    let factor = match (area.area_factor_override, area.chain_max_targets) {
+        (Some(af), _) => af,
+        _ if area.radius <= 0.0 => return 1.0,
+        (None, Some(targets)) => 1.0 + 0.15 * area.radius * targets / 10.0,
+        (None, None) => 1.0 + area.radius * (11.0 * area.arc_degrees + 540.0) / 30000.0,
+    };
+    0.25 + 0.75 * factor
 }
 
 /// Convert a raw arc (radians when ≤ 2π, else already degrees) to degrees.
@@ -154,7 +177,11 @@ fn proc_recharge_window(
 /// `recharge_window` is [`proc_recharge_window`], not the power's base recharge. Which POWER's
 /// recharge it comes off was HC-4, and it's settled: the host's own, not the child of an
 /// `ExecutePower` wrapper it delegates to. Measured in game 2026-08-02.
+///
+/// `ppm` is the piece's own; `area.ppm_mod` is applied here, so the minimum clamp sees the
+/// modified rate too.
 fn calculate_proc_chance(ppm: f64, recharge_window: f64, cast_time: f64, area: ProcArea) -> f64 {
+    let ppm = ppm * area.ppm_mod;
     let area_denom = ppm_area_denominator(area);
     let raw = (ppm * (recharge_window + cast_time)) / (60.0 * area_denom);
     clamp_proc_chance(raw, ppm)
@@ -169,6 +196,7 @@ fn calculate_proc_chance(ppm: f64, recharge_window: f64, cast_time: f64, area: P
 /// the BOOST's own power, which the host toggle only borrows templates from
 /// (`character_combat.c:2932`).
 fn calculate_auto_toggle_proc_chance(ppm: f64, activate_period: f64, area: ProcArea) -> f64 {
+    let ppm = ppm * area.ppm_mod;
     let area_denom = ppm_area_denominator(area);
     let raw = (ppm * activate_period) / (60.0 * area_denom);
     clamp_proc_chance(raw, ppm)
@@ -325,6 +353,14 @@ pub(crate) struct ProcRollSite {
     pub arc: f64,
     #[serde(default)]
     pub procs_only_on_main_target: bool,
+    #[serde(default)]
+    pub effect_area: Option<String>,
+    #[serde(default)]
+    pub max_targets: Option<f64>,
+    #[serde(default)]
+    pub area_factor_override: Option<f64>,
+    #[serde(default)]
+    pub ppm_mod: Option<f64>,
 }
 
 /// A power's roll sites, or an empty list when it rolls its own window.
@@ -454,6 +490,9 @@ fn roll_area(site: Option<&ProcRollSite>, own: ProcArea) -> ProcArea {
             },
             arc_degrees: arc_to_degrees(s.arc).max(0.0).min(360.0),
             only_main_target: s.procs_only_on_main_target,
+            chain_max_targets: chain_targets(s.effect_area.as_deref(), s.max_targets),
+            area_factor_override: s.area_factor_override,
+            ppm_mod: s.ppm_mod.unwrap_or(1.0),
         },
         None => own,
     }
@@ -667,13 +706,65 @@ fn proc_roll_schedule(
     })
 }
 
+/// `Some(targets)` when a power of this shape scores its area as a chain.
+fn chain_targets(effect_area: Option<&str>, max_targets: Option<f64>) -> Option<f64> {
+    match effect_area {
+        Some("Chain") => max_targets.filter(|t| *t > 0.0),
+        _ => None,
+    }
+}
+
+/// A positive number, or `None` for anything else, absent included.
+fn positive(v: Option<&Value>) -> Option<f64> {
+    v.and_then(Value::as_f64).filter(|x| *x > 0.0)
+}
+
+/// The summoned ability whose footprint is widest: the one [`pseudo_pet_proc_radius`] reads.
+fn widest_pseudo_pet_ability<'a>(def: &'a Power, db: &'a PowerDatabase) -> Option<&'a Value> {
+    pseudo_pet_abilities(def, db)
+        .into_iter()
+        .filter_map(|a| ability_footprint(a).map(|r| (a, r)))
+        .fold(None, |best: Option<(&Value, f64)>, (a, r)| match best {
+            Some((_, br)) if br >= r => best,
+            _ => Some((a, r)),
+        })
+        .map(|(a, _)| a)
+}
+
 /// The power's PPM geometry as the contract states it, falling back to the summoned patch's
 /// footprint when the parent carries none (see [`pseudo_pet_proc_radius`]).
+///
+/// Which power the roll happens IN decides whose authored area factor and `PPMMod` apply. A
+/// patch (see [`proc_patch_duration`]) rolls on its pulsing ability, so the area is wholly that
+/// ability's: Sonic Boom's parent authors an override of 3.25 and its pseudo-pet a `PPMMod` of 2,
+/// and the pet's are the ones a damage proc sees. Anything else rolls in the power itself, with
+/// its own override and modifier; the summon only lends a radius when the power has none.
 ///
 /// `procsOnlyOnMainTarget` is emitted sparse-true (the converters write the key only when the
 /// binary's `ProcMainTargetOnly` bool is set), so an absent key is the authored `false` and not a
 /// dropped read. That's the emitter's own encoding, not a guess at an unstated axis.
 fn proc_area(def: &Power, db: &PowerDatabase) -> ProcArea {
+    let only_main_target = def
+        .extra
+        .get("procsOnlyOnMainTarget")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    if proc_patch_duration(def, db).is_some() {
+        if let Some(ability) = widest_pseudo_pet_ability(def, db) {
+            return ProcArea {
+                radius: positive(ability.get("radius")).unwrap_or(0.0),
+                // The bin stores no arc on a pseudo-pet ability; every footprint is a sphere.
+                arc_degrees: 360.0,
+                only_main_target,
+                chain_max_targets: chain_targets(
+                    ability.get("effectArea").and_then(Value::as_str),
+                    positive(ability.get("maxTargets")),
+                ),
+                area_factor_override: positive(ability.get("areaFactorOverride")),
+                ppm_mod: positive(ability.get("ppmMod")).unwrap_or(1.0),
+            };
+        }
+    }
     let own_radius = stat_or_default(def, "radius", 0.0);
     // The parent's arc describes the parent's own footprint. A borrowed patch footprint is a
     // sphere and takes no arc from the shell it was summoned by; reading one across would apply a
@@ -694,11 +785,16 @@ fn proc_area(def: &Power, db: &PowerDatabase) -> ProcArea {
     ProcArea {
         radius,
         arc_degrees,
-        only_main_target: def
-            .extra
-            .get("procsOnlyOnMainTarget")
-            .and_then(Value::as_bool)
-            .unwrap_or(false),
+        only_main_target,
+        chain_max_targets: match own_radius > 0.0 {
+            true => chain_targets(
+                def.extra.get("effectArea").and_then(Value::as_str),
+                def_num(def, "stats", "maxTargets"),
+            ),
+            false => None,
+        },
+        area_factor_override: positive(def.extra.get("areaFactorOverride")),
+        ppm_mod: positive(def.extra.get("ppmMod")).unwrap_or(1.0),
     }
 }
 
@@ -1443,6 +1539,8 @@ pub struct ChanceWorking {
     pub cast_time: f64,
     /// The AoE denominator; 1.0 for single target.
     pub area_factor: f64,
+    /// The rolling power's `PPMMod`, which multiplies the piece's PPM before anything else.
+    pub ppm_mod: f64,
 }
 
 /// Score one slotted piece in its host power. See [`ProcRoll`].
@@ -1532,6 +1630,7 @@ fn proc_roll(
             window,
             cast_time: schedule.cast_time,
             area_factor: ppm_area_denominator(area),
+            ppm_mod: area.ppm_mod,
         },
     }
 }

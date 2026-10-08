@@ -11,9 +11,9 @@ HC added 6 extra fields not present in Parse6:
 Parse6 retains fields 53-56 (confirm dialog fields) in all records.
 Parse6 has 8 bytes of box data (2×f4) instead of Parse7's 24 bytes (2×f4×3).
 
-Post-2026 HC experimental patch added 8 bytes after chain_delay (field 41b):
-  - 41b: 2×u4 (likely f4 + u4, often (1.0f, 0))
-Auto-detected via _detect_field_41b.
+Post-2026 HC patch added 8 bytes before chain_delay (field 41b):
+  - 41b: AreaFactor override (f4, 0 = none) + PPMMod (f4, default 1.0)
+Auto-detected via _detect_format.
 """
 
 import struct
@@ -321,7 +321,7 @@ def parse_powers(bin_path_or_data, *, player_classes=()) -> list[PowerRecord]:
         # Auto-detect HC format version by testing the first few records.
         # Two known post-release additions that shift subsequent field offsets:
         #   - field 45b (u4 between box_size and range) added in a past HC patch
-        #   - field 41b (8 bytes after chain_delay) added in 2026 experimental patch
+        #   - field 41b (8 bytes before chain_delay) added in a 2026 patch
         # Wrong layout produces implausible values (negative range, huge recharge).
         has_41b, has_45b, is_thunderspy, is_veracity = _detect_format(r)
         if is_thunderspy:
@@ -447,7 +447,35 @@ def parse_powers(bin_path_or_data, *, player_classes=()) -> list[PowerRecord]:
     if not (is_parse6 or is_thunderspy or is_veracity):
         recalibrate_event_names(records)
 
+    _resolve_self_only_gates(records, player_classes)
+
     return records
+
+
+def _resolve_self_only_gates(records, player_classes) -> None:
+    """Re-read `entref target> entref source> eq` gates on Self-only powers.
+
+    A group's verdict is taken without the power around it, so the gate
+    evaluator assumes the recipient is not the caster. That is wrong exactly
+    when the power affects nobody else: there the clause always holds.
+
+    Boosts are excluded. A boost's templates land on whatever its host power
+    affects, so its own `TargetsAffected Self` says nothing about the recipient
+    (Power Transfer's self-heal gate is the case that shows it).
+    """
+    for rec in records:
+        if rec.full_name.lower().startswith("boosts."):
+            continue
+        affected = [rec.target_type_table.get(v) for v in rec.targets_affected]
+        if affected != ["Self"]:
+            continue
+        for g in _iter_groups(list(rec.effects) + list(rec.activation_effects)):
+            if "entref" not in [t.lower() for t in g.requires_expression]:
+                continue
+            gate = gate_evaluate(g.requires_expression, player_classes=player_classes,
+                                 recipient_is_caster=True)
+            g.requires_default = gate.verdict
+            g.requires_archetypes = list(gate.archetypes)
 
 
 def _iter_groups(groups):
@@ -2099,10 +2127,19 @@ def _parse_power(r: BinReader, *, has_field_45b: bool = True, has_field_41b: boo
     arc = r.read_f4()
     # 41. chain_delay (f4) — per-jump delay on chain powers (Tesla_Cage 0.5,
     # Chain_Lightning 0.3; matches the `.powers` ChainDelay oracle).
-    chain_delay = r.read_f4()
-    # 41b. HC experimental 2026: 8 bytes (likely f4 + u4, often (1.0f, 0))
+    # 41b. The 2026 HC patch inserted two f4s BEFORE ChainDelay, not after it:
+    # an area-factor override (0 = compute from geometry; Sonic_Boom 3.25,
+    # Hypnotizing_Lights 1.0, Traps Trip_Mine 2.8) and PPMMod, a multiplier on
+    # the PPM of procs rolled in this power (1.0 everywhere but the Sonic Aura
+    # Sonic_Boom pseudo-pet's 2.0). Reading ChainDelay first labelled the
+    # override as the delay and skipped the real one: on the live bin the third
+    # word is the one carrying Chain_Lightning 0.3 / Tesla_Cage 0.5.
+    area_factor_override = 0.0
+    ppm_mod = 1.0
     if has_field_41b:
-        r.skip(8)
+        area_factor_override = r.read_f4()
+        ppm_mod = r.read_f4()
+    chain_delay = r.read_f4()
     # 42. ChainEff (string_array) — per-jump chain-continue chance expression.
     # VERIFIED on Veracity/Parse6: `@ChainJump`/`minmax` content resolves here.
     chain_eff_expr = r.read_string_array()
@@ -2335,6 +2372,8 @@ def _parse_power(r: BinReader, *, has_field_45b: bool = True, has_field_41b: boo
         max_targets_expression=max_targets_expr,
         castable_after_death=castable_after_death,
         chain_delay=chain_delay,
+        area_factor_override=area_factor_override,
+        ppm_mod=ppm_mod,
         over_cap_trigger=over_cap_trigger,
         over_cap_multiplier=over_cap_multiplier,
         over_cap_exponential=over_cap_exponential,

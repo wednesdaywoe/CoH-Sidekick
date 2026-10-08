@@ -467,6 +467,11 @@ def power_to_dict(pw, msgs=None, set_cats_index=None, mode_table=None,
             pw.castable_after_death, f'Unknown({pw.castable_after_death})')
     if pw.chain_delay:
         d['chain_delay'] = round(pw.chain_delay, 4)
+    # PPM inputs from HC field 41b, sparse against their parse defaults.
+    if pw.area_factor_override:
+        d['area_factor_override'] = round(pw.area_factor_override, 4)
+    if pw.ppm_mod != 1.0:
+        d['ppm_mod'] = round(pw.ppm_mod, 4)
     if pw.over_cap_trigger or pw.over_cap_multiplier != 1.0 or pw.over_cap_exponential:
         d['over_cap_trigger'] = pw.over_cap_trigger
         d['over_cap_multiplier'] = round(pw.over_cap_multiplier, 6)

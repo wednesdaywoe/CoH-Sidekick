@@ -870,6 +870,10 @@ function collectProcRollSites(powerJson) {
         // it through the same arcToDegrees.
         arc: child.arc,
         ...(child.procs_only_on_main_target ? { procsOnlyOnMainTarget: true } : {}),
+        ...(child.effect_area ? { effectArea: child.effect_area } : {}),
+        ...(child.max_targets_hit > 0 ? { maxTargets: child.max_targets_hit } : {}),
+        ...(child.area_factor_override ? { areaFactorOverride: child.area_factor_override } : {}),
+        ...(child.ppm_mod ? { ppmMod: child.ppm_mod } : {}),
       });
     }
   }
@@ -2874,6 +2878,8 @@ function resolveSummonRedirects(redirectNames) {
         ? { targetsAffected: json.targets_affected } : {}),
       ...(json.radius > 0 ? { radius: json.radius } : {}),
       ...(json.max_targets_hit > 0 ? { maxTargets: json.max_targets_hit } : {}),
+      ...(json.area_factor_override ? { areaFactorOverride: json.area_factor_override } : {}),
+      ...(json.ppm_mod ? { ppmMod: json.ppm_mod } : {}),
     });
   }
 
@@ -9227,6 +9233,11 @@ function convertPower(powerJson, availableLevel, archetypeId, powerType, provena
   // ProcMainTargetOnly — procs roll single-target here regardless of radius.
   // See the field doc on `Power.procsOnlyOnMainTarget`.
   if (powerJson.procs_only_on_main_target) power.procsOnlyOnMainTarget = true;
+
+  // HC field 41b: an authored PPM area factor that replaces the one computed from
+  // geometry, and a multiplier on the PPM of procs rolled here. Sparse, as exported.
+  if (powerJson.area_factor_override) power.areaFactorOverride = powerJson.area_factor_override;
+  if (powerJson.ppm_mod) power.ppmMod = powerJson.ppm_mod;
 
   // ProcAllowed kNone — the game fires no proc in this power. Sparse-false, mirroring
   // the export: absent means procs fire. See the field doc on `Power.procsAllowed`.

@@ -205,8 +205,19 @@ fn chance_working(
         window,
         cast_time,
         area_factor,
+        ppm_mod,
     } = working;
     let mut lines = vec![format!("{ppm} PPM")];
+    let ppm = match ppm_mod == 1.0 {
+        true => ppm,
+        false => {
+            lines.push(format!(
+                "× {ppm_mod} PPM modifier on the power that rolls = {} PPM",
+                ppm * ppm_mod
+            ));
+            ppm * ppm_mod
+        }
+    };
     lines.push(match fixed_period {
         true => format!(
             "Window: {start:.2}s, the piece's own period. The summoned patch rolls every {start:.0}s \
