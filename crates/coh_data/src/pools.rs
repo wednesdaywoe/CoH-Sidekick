@@ -53,6 +53,12 @@ pub struct PoolDef {
     pub icon: String,
     /// The epic wire's `minLevel`; `None` on standard pools.
     pub min_level: Option<u8>,
+    /// Whether this aggregate is dormant — present in the bins but not released on this
+    /// server. Dormant pools are dropped from the catalog at load (see `is_dormant`), so this
+    /// field is only ever read during that filter and is `None` on the epic wire, which carries
+    /// no such flag. Kept explicit rather than inferred so a future reader can tell a released
+    /// pool from a dormant one without re-reading the raw wire.
+    pub dormant: Option<bool>,
     /// The aggregate's powers by [`Power::ident`](crate::Power::ident), in wire order.
     pub power_idents: Vec<String>,
 }
@@ -95,10 +101,20 @@ fn read_registry(section: &Value, label: &str) -> Result<Vec<PoolDef>, String> {
     };
     let mut defs: Vec<PoolDef> = registry
         .iter()
+        .filter(|(_, value)| !is_dormant(value))
         .map(|(key, value)| read_pool(key, value, label))
         .collect::<Result<_, _>>()?;
     defs.sort_by(|a, b| a.name.cmp(&b.name));
     Ok(defs)
+}
+
+/// A pool the server hasn't released carries `dormant: true` — its powers sit behind a
+/// dev-only `accesslevel > 0` gate the client can't use. The game hides such a set, so the
+/// catalog drops it too: a picker that listed Gadgetry or Utility Belt on Homecoming would
+// offer pools the build can never take. Absent means released (the epic wire carries no flag),
+// so only an explicit `true` filters, and a released pool with no flag survives.
+fn is_dormant(value: &Value) -> bool {
+    value.get("dormant").and_then(Value::as_bool) == Some(true)
 }
 
 fn read_pool(key: &str, value: &Value, label: &str) -> Result<PoolDef, String> {
@@ -141,6 +157,7 @@ fn read_pool(key: &str, value: &Value, label: &str) -> Result<PoolDef, String> {
             .get("minLevel")
             .and_then(Value::as_u64)
             .map(|level| level as u8),
+        dormant: map.get("dormant").and_then(Value::as_bool),
         power_idents: powers.iter().map(power_ident).collect(),
     })
 }
