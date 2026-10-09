@@ -365,6 +365,24 @@ export interface AtomicEffect {
   redirectBase?: number;
 
   /**
+   * The character class of the spawned entity whose power this atom is, when the row is a
+   * helper's rather than the player's: `minion_pets` for Rebirth's Fulcrum Shift, whose whole
+   * +damage comes from two `Create_Entity` spawns. Absent on every atom the player applies.
+   *
+   * A spawned entity is a second character with its own class row, so the atom's
+   * {@link modifierTable} is read through THIS class, not the caster's archetype. The values
+   * differ: `Melee_Buff_Dmg` is 0.1 on `minion_pets` and 0.085 on a Corruptor at 50, and the
+   * pet reading is the one that reproduces Homecoming's per-archetype Fulcrum Shift (Rebirth
+   * ships separate `_Controller` and Defender pets whose scales land on Homecoming's numbers
+   * only through 0.1). It also turns the recipient question around: the helper's `Friend`
+   * includes its summoner.
+   *
+   * STAMPED BY THE CONVERTER for {@link redirectBase}'s reason: the class lives on the entity
+   * def the spawning row names, two files away from the row itself.
+   */
+  petClass?: string;
+
+  /**
    * True when this atom is combat-SUPPRESSED — the game turns it off while the
    * caster is in combat (Hide's +Def, Stealth/Cloaking Device's +Def, and every
    * travel-power speed/cap buff), and the planner's In-Combat toggle removes it
@@ -751,6 +769,10 @@ export const ATOM_TUPLE_FIELDS = [
   // Execute_Power redirect branch's BASE arm claims carry one (Homecoming's Kinetics family,
   // 8 slot values corpus-wide), so every other atom's encoding stays byte-identical.
   'redirectBase',
+  // `petClass` appends last on the same trailing-null economics: only the rows a spawned
+  // helper applies to its summoner carry one (Rebirth and Thunderspy's Kinetics family), so
+  // every other atom's encoding stays byte-identical.
+  'petClass',
 ] as const satisfies ReadonlyArray<keyof AtomicEffect>;
 
 /** One atom, positionally encoded. A `null` at position `i` means the field

@@ -57,6 +57,7 @@
 //!     (so skipping the sibling changes nothing here), and a marker row is approximated
 //!     per-atom (`Str` aspect, zero scale, zero magnitude).
 
+use crate::granted::{PET_CLASS_KEY, SCALE_TERMS_KEY};
 use coh_data::{
     expression_text, lands_on_caster, Aspect, AtomicEffect, AttribType, DatasetId, EffectType,
     Power, PvMode, Stacking, SubType, ToWho,
@@ -1127,6 +1128,45 @@ impl State {
             if stamped.is_empty() && redirect_base.is_empty() {
                 continue;
             }
+            // A helper's atoms resolve under the helper's class (`AtomicEffect::pet_class`), so a
+            // slot whose increments come from two classes is two values, not one. Thunderspy's
+            // Fulcrum Shift is the case: its +5 base runs as the player, its 1.6 per foe as
+            // `minion_pets`.
+            let mut classes: Vec<Option<&str>> = Vec::new();
+            for a in stamped.iter().chain(redirect_base.iter()) {
+                if !classes.contains(&a.pet_class.as_deref()) {
+                    classes.push(a.pet_class.as_deref());
+                }
+            }
+            if classes.len() > 1 {
+                let terms = classes
+                    .iter()
+                    .map(|class| {
+                        let of_class = |a: &&&AtomicEffect| a.pet_class.as_deref() == *class;
+                        let stamped: Vec<&AtomicEffect> =
+                            stamped.iter().filter(of_class).copied().collect();
+                        let redirect_base: Vec<&AtomicEffect> =
+                            redirect_base.iter().filter(of_class).copied().collect();
+                        let (scale, table, per_target) =
+                            redirect_patch(power, &stamped, &redirect_base);
+                        let mut term = rebuilt(scale, table, per_target);
+                        if let (Some(class), Value::Object(obj)) = (class, &mut term) {
+                            obj.insert(PET_CLASS_KEY.into(), Value::String((*class).to_owned()));
+                        }
+                        term
+                    })
+                    .collect();
+                let mut value = Obj::new();
+                value.insert(SCALE_TERMS_KEY.into(), Value::Array(terms));
+                match sub.as_deref() {
+                    Some(sub) => self.slot_sub_raw(key, sub, Value::Object(value)),
+                    None => {
+                        self.present.insert(key);
+                        self.bag.insert(key.to_owned(), Value::Object(value));
+                    }
+                }
+                continue;
+            }
             let table = stamped
                 .iter()
                 .chain(redirect_base.iter())
@@ -1197,6 +1237,15 @@ impl State {
             };
 
             self.apply_patch(key, sub.as_deref(), scale, table.as_deref(), per_target);
+            if let Some(Some(class)) = classes.first() {
+                let slot = match sub.as_deref() {
+                    Some(sub) => self.bag.get_mut(key).and_then(|v| v.get_mut(sub)),
+                    None => self.bag.get_mut(key),
+                };
+                if let Some(Value::Object(obj)) = slot {
+                    obj.insert(PET_CLASS_KEY.into(), Value::String((*class).to_owned()));
+                }
+            }
         }
 
         self.absorb_fraction_per_target(&selected, aoe);
@@ -1427,6 +1476,37 @@ const PATCH_SUB_KEYED: &[&str] = &["resistance", "defenseBuff", "movement"];
 
 /// `{ scale, table, perTarget }` — the object a patch rebuilds its slot as, in the converter's
 /// own key order.
+/// The redirect branch's `{scale, table, perTarget}` from its two arms, the same sums
+/// [`State::per_foe_patches`] takes for a single-class slot: `scale` is the base arm plus the
+/// increments that reach the caster at one foe.
+fn redirect_patch<'a>(
+    power: &Power,
+    stamped: &[&'a AtomicEffect],
+    redirect_base: &[&'a AtomicEffect],
+) -> (f64, Option<&'a str>, f64) {
+    let distinct = |atoms: &[&'a AtomicEffect], value: fn(&AtomicEffect) -> Option<f64>| {
+        sum_distinct(
+            atoms
+                .iter()
+                .map(|a| (value(a).unwrap_or(0.0).abs(), a.modifier_table.as_deref())),
+        )
+    };
+    let reaching: Vec<&AtomicEffect> = stamped
+        .iter()
+        .copied()
+        .filter(|a| coh_data::atom::reaches_caster(a, power))
+        .collect();
+    let table = stamped
+        .iter()
+        .chain(redirect_base.iter())
+        .find_map(|a| a.modifier_table.as_deref());
+    (
+        distinct(redirect_base, |a| a.redirect_base) + distinct(&reaching, |a| a.per_target),
+        table,
+        distinct(stamped, |a| a.per_target),
+    )
+}
+
 fn rebuilt(scale: f64, table: Option<&str>, per_target: f64) -> Value {
     let mut obj = Obj::new();
     obj.insert("scale".into(), num(scale));

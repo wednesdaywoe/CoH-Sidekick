@@ -102,7 +102,10 @@ use crate::appliers::{
         states_max_hp_fraction,
     },
     accuracy::accuracy_buff_value,
-    damage::{damage_buff_is_defiance_only, damage_buff_value, self_damage_debuff_value},
+    damage::{
+        damage_buff_is_defiance_only, damage_buff_value, helper_damage_buff_values,
+        self_damage_debuff_value,
+    },
     debuff_resistance::debuff_resistance_value,
     defense::{defense_buff_suppressible_value, defense_buff_value, defense_self_debuff_value},
     endurance_discount::endurance_discount_value,
@@ -136,13 +139,15 @@ use crate::enhancement::{
 use crate::gather::{ActivePower, PowerSourceKind};
 use crate::incarnates::AlphaEnhancement;
 use crate::movement::{MovementCapContribution, MovementContribution, MovementStat};
-use crate::scaled::resolve_scaled_effect;
+use crate::scaled::{resolve_scaled_effect, resolve_scaled_effect_for};
 use crate::stacking::{adjust_for_stacking, Half, StackFamily};
 use crate::stealth::StealthContribution;
 use crate::strength::StrengthBuffs;
 use crate::totals::{route_closed, CalcError, GlobalBonuses, TypeRoute};
 use coh_data::slot_value::Scaled;
-use coh_data::{CombatContext, EffectType, Enhancement, Level, Power, PowerDatabase, SubType};
+use coh_data::{
+    CombatContext, EffectType, Enhancement, Level, Power, PowerDatabase, SubType, TableScope,
+};
 
 /// The beta's per-power defense enhancement term `enhBonuses.defense || enhBonuses.defenseBuff`:
 /// the `defenseBuff` fraction only when `defense` is zero (JS truthiness). Shared by the
@@ -689,25 +694,62 @@ impl<'a, 'b> WalkCtx<'a, 'b> {
         // empty atom read is indistinguishable from the atom-less legacy case the fallback
         // serves — so the rejection has to be spoken here too or it is undone one line later
         // (`damage_buff_is_defiance_only`).
-        let damage_buff_percent = (!damage_buff_is_defiance_only(self.power))
-            .then(|| damage_buff_value(self.power).map(|__tbs| self.to_scaled(__tbs)))
-            .flatten()
-            .map(|s| {
-                self.stack(
-                    s,
-                    StackFamily::Buff(EffectType::DamageBuff, Half::Either, None),
+        //
+        // A spawned helper's share is its own value, read under the helper's class
+        // (`AtomicEffect::pet_class`): Rebirth's Fulcrum Shift is nothing else. One value is
+        // stacked then resolved, as always. Several — Thunderspy's Fulcrum Shift, whose +5 base
+        // runs as the player and whose 1.6 per foe runs as `minion_pets` — are each resolved
+        // through their own table first and stacked as one, because the per-foe count belongs
+        // to the power and a second cast brings the base along whichever class reads it. The
+        // stacking is linear in both scale and increment, so the order changes no number.
+        let family = StackFamily::Buff(EffectType::DamageBuff, Half::Either, None);
+        let mut parts: Vec<(TableScope<'_>, Scaled)> = Vec::new();
+        if !damage_buff_is_defiance_only(self.power) {
+            if let Some(value) = damage_buff_value(self.power) {
+                parts.push((TableScope::Archetype(self.archetype), self.to_scaled(value)));
+            }
+        }
+        for (class, value) in helper_damage_buff_values(self.power) {
+            parts.push((TableScope::Pet(class), self.to_scaled(value)));
+        }
+        let damage_buff_percent = match parts.as_slice() {
+            [] => None,
+            [(scope, value)] => {
+                let s = self.stack(value.clone(), family);
+                Some(
+                    resolve_scaled_effect_for(
+                        s.scale,
+                        s.table.as_deref(),
+                        *scope,
+                        self.level,
+                        self.db,
+                        self.errors,
+                    ) * 100.0,
                 )
-            })
-            .map(|s| {
-                resolve_scaled_effect(
-                    s.scale,
-                    s.table.as_deref(),
-                    self.archetype,
-                    self.level,
-                    self.db,
-                    self.errors,
-                ) * 100.0
-            });
+            }
+            _ => {
+                let mut combined = Scaled {
+                    scale: 0.0,
+                    table: None,
+                    per_target: None,
+                };
+                for (scope, value) in &parts {
+                    let rate = resolve_scaled_effect_for(
+                        1.0,
+                        value.table.as_deref(),
+                        *scope,
+                        self.level,
+                        self.db,
+                        self.errors,
+                    );
+                    combined.scale += value.scale * rate;
+                    if let Some(increment) = value.per_target.filter(|p| *p != 0.0) {
+                        *combined.per_target.get_or_insert(0.0) += increment * rate;
+                    }
+                }
+                Some(self.stack(combined, family).scale * 100.0)
+            }
+        };
         if let Some(percent) = damage_buff_percent {
             g.damage += percent;
         }

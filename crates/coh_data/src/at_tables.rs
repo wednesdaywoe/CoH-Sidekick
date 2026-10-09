@@ -91,6 +91,11 @@ impl AtTables {
         }
     }
 
+    /// The player archetypes the tables carry, in no particular order.
+    pub fn archetype_names(&self) -> impl Iterator<Item = &str> {
+        self.archetypes.keys().map(String::as_str)
+    }
+
     /// The pet-class modifier value for `(pet_class, table_name, level)`, resolved by the same
     /// normalization as [`AtTables::get_table_value`] — the beta `getPetTableValue` reads the
     /// pet tables through the same name rules.

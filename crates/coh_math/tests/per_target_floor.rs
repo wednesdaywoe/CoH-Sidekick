@@ -72,10 +72,11 @@ const NOT_AN_AOE_COUNT: &[&str] = &[
 ///
 /// Idents rather than `dataset/powerset/ident`, with the placement count pinned beside them: the
 /// same power is floored under up to seventeen archetype/fork pairs and the list is here to be
-/// read, not to enumerate. 16 of the 26 reach a displayed field; the rest carry an `Endurance`
+/// read, not to enumerate. 17 of the 28 reach a displayed field; the rest carry an `Endurance`
 /// magnitude at duration 0, a `Meta` combat marker, or an increment the base pass drops as gated,
 /// and float on the predicate without moving a number (the same way PERFOE-3's Phoenix Awakening
-/// and Rejuvenate do). Cross Punch left the list when its never-true `0` group stopped minting a
+/// and Rejuvenate do). Heat Loss joined on Rebirth and Thunderspy when its helper's per-foe
+/// `Endurance` grant reached the atoms (`AtomicEffect::pet_class`). Cross Punch left the list when its never-true `0` group stopped minting a
 /// conditional, the only thing that stamped a per-foe increment on it.
 const AIM_FLOORED: &[&str] = &[
     "Aging_Touch",
@@ -86,9 +87,11 @@ const AIM_FLOORED: &[&str] = &[
     "Devour_Psyche",
     "Electric_Fence",
     "Follow_Up",
+    "Fulcrum_Flip",
     "Fulcrum_Shift",
     "Guarded_Spin",
     "Havoc_Punch",
+    "Heat_Loss",
     "High_Low",
     "Keening_Winds",
     "Kinetic_Transfer",
@@ -107,7 +110,7 @@ const AIM_FLOORED: &[&str] = &[
 ];
 
 /// How many `dataset/powerset/ident` rows the list above stands for.
-const AIM_FLOORED_ROWS: usize = 80;
+const AIM_FLOORED_ROWS: usize = 96;
 
 /// Every spelling of `targetType` the four contracts carry. [`Power::aim_requires_an_entity`]
 /// answers from a declared vocabulary, and an unrecognised spelling would take its `false` arm

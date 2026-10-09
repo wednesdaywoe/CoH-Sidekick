@@ -139,11 +139,39 @@ fn bits(v: f64) -> u64 {
     }
 }
 
+/// The player's own `damageBuff` — every atom but the ones a spawned helper applies, which
+/// [`helper_damage_buff_values`] reads under the helper's class.
 pub fn damage_buff_value(power: &Power) -> Option<TypedValue> {
+    damage_buff_value_of(power, None)
+}
+
+/// One `damageBuff` per spawned helper class among the power's atoms, in first-seen order.
+///
+/// A helper's atoms are a separate value rather than more members of the player's, because
+/// their table is read under another class and a value carries one table. Thunderspy's Fulcrum
+/// Shift is the case that needs both at once: its +5 base runs as the player
+/// (`Pets.KineticsPlayer.KineticTransferPLAYER`, executed, not spawned) and its 1.6 per foe as
+/// `minion_pets`, both on `Melee_Buff_Dmg`.
+pub fn helper_damage_buff_values(power: &Power) -> Vec<(&str, TypedValue)> {
+    let mut classes: Vec<&str> = Vec::new();
+    for class in power.atoms.iter().filter_map(|a| a.pet_class.as_deref()) {
+        if !classes.contains(&class) {
+            classes.push(class);
+        }
+    }
+    classes
+        .into_iter()
+        .filter_map(|class| damage_buff_value_of(power, Some(class)).map(|v| (class, v)))
+        .collect()
+}
+
+fn damage_buff_value_of(power: &Power, pet_class: Option<&str>) -> Option<TypedValue> {
     let atoms: Vec<&AtomicEffect> = power
         .atoms
         .iter()
-        .filter(|a| is_damage_buff_atom(a) && !is_defiance(a))
+        .filter(|a| {
+            is_damage_buff_atom(a) && !is_defiance(a) && a.pet_class.as_deref() == pet_class
+        })
         .collect();
     if atoms.is_empty() {
         return None;

@@ -6098,6 +6098,9 @@ function encodeAtomsForEmit(templates, baseTemplates, powerName) {
     // from a walk into another power's file, so nothing on this power's atom can re-derive it
     // (AtomicEffect.redirectBase, PERFOE-2).
     if (src && src._redirectBaseIncrement) patch.redirectBase = src._redirectBaseIncrement;
+    // The class of the spawned entity whose power this row is, stamped by the same walk: the
+    // entity def that names the class is two files away from the row (AtomicEffect.petClass).
+    if (src && src._petClass) patch.petClass = src._petClass;
     if (src && src._summonWindow > 0) patch.summonWindow = src._summonWindow;
     // Combat-suppression (Hide +Def, travel buffs). Mirrors the routing's
     // `isCombatSuppressed`: an `ActivateAttackClick`-family suppress event OR an
@@ -7908,21 +7911,98 @@ function classifyTemplateForStacking(template, { treatAsCaster = false } = {}) {
 }
 
 /**
- * Recursively walk an Execute_Power redirect chain (e.g. Fulcrum Shift →
- * Redirects.Kinetics.KineticTransfer → KineticTransferBuffSelf) and collect
- * Stack templates that contribute to caster-side per-target buffs.
- *
- * Returns { templates, maxStacks }. Templates may target Self (direct caster
- * buff) or AnyAffected when the leaf is a Sphere/AoE pseudo-pet centered on
- * the caster — both behave as caster self-buffs in-game.
+ * How many entities one power record counts as separate targets: its `max_targets_hit` when it
+ * is a sphere or cone with a bounded cap, 1 otherwise. 255 is the export's "everyone in radius"
+ * sentinel — a recipient list, not a count anybody could move.
  */
-function collectRedirectStackingTemplates(redirectName, visited = new Set(), depth = 0) {
+function boundedTargetCount(json) {
+  const area = EFFECT_AREA_MAP[json.effect_area] ?? json.effect_area;
+  const max = json.max_targets_hit ?? 0;
+  if ((area === 'AoE' || area === 'Cone') && max > 1 && max !== 255) return max;
+  return 1;
+}
+
+/** Where a handed-off power's file lives: `Redirects.*` and `*_Aux.*` the way the deep collector finds them, anything else by its plain path. */
+function _handoffPowerPath(powerName) {
+  if (powerName.toLowerCase().startsWith('redirects.')) return resolveRedirectPath(powerName);
+  return resolveAuxRedirectPath(powerName) || resolveRedirectPath(powerName);
+}
+
+/** An entity def from the export's `entities/` table, or null when the export holds none. */
+function _loadEntityDef(entityName) {
+  const p = path.join(RAW_DATA_PATH, 'entities', entityName.toLowerCase() + '.json');
+  if (!fs.existsSync(p)) return null;
+  try { return JSON.parse(fs.readFileSync(p, 'utf-8')); } catch { return null; }
+}
+
+/**
+ * The powers one row hands off to, and who runs them. Null when the row hands off nothing.
+ *
+ * `Execute_Power` runs its named powers as whoever runs the row, so `petClass` carries through.
+ * `Create_Entity` with an `entity_def` spawns a second character that runs its own power list
+ * under its own class row: Rebirth's Fulcrum Shift is two such spawns and nothing else, and its
+ * +4 rides `Melee_Buff_Dmg` read through `minion_pets`, not the caster's table. A commandable
+ * entity is a real pet the player directs, not a helper that fires once and expires, so its
+ * powers are left to the pet fold.
+ *
+ * `inAtoms` says whether `collectTemplatesDeep` already brings the target's templates into this
+ * power's own list. It follows `Redirects.*` and `*_Aux.*` Execute_Power and nothing else, so a
+ * leaf reached through any other hop is missing from the atoms unless the caller adds it.
+ */
+function _handoffPowers(template, petClass) {
+  const attrib = template.attribs?.[0]?.toLowerCase();
+  const params = template.params || {};
+  if (attrib === 'execute_power') {
+    return (params.power_names || []).map((name) => ({
+      name,
+      petClass,
+      inAtoms: name.toLowerCase().startsWith('redirects.') || resolveAuxRedirectPath(name) !== null,
+    }));
+  }
+  if (attrib === 'create_entity') {
+    if (!params.entity_def) return [];
+    const entity = _loadEntityDef(params.entity_def);
+    if (!entity || entity.commandable_pet) return [];
+    const defaults = entity.defaults || {};
+    return (defaults.power_full_names || []).map((name) => ({
+      name,
+      petClass: defaults.character_class_name || null,
+      inAtoms: false,
+    }));
+  }
+  return null;
+}
+
+// The `targets_affected` tokens that include a pet's summoner. A pet's `Self` is the pet; the
+// player is on its side, so `Friend` reaches him. Same reading as the engine's `reaches_summoner`.
+const _SUMMONER_SIDE = new Set(['Friend', 'Teammate', 'MyOwner', 'Any']);
+
+/**
+ * Recursively walk a handed-off power chain (Fulcrum Shift → Redirects.Kinetics.KineticTransfer
+ * → KineticTransferBuff on Homecoming; Fulcrum Shift → Pets_KineticTransferDebuff_Controller →
+ * Pets_KineticTransferBuff_Controller on Rebirth) and collect the Stack templates that land on
+ * the caster.
+ *
+ * Returns { templates, maxStacks }. Each template comes back with where it was reached:
+ * - `treatAsCaster`: an `AnyAffected` row in a sphere around the caster, rather than a `Self` row.
+ * - `petClass`: the class of the spawned entity running it, or null for the caster.
+ * - `fan`: how many times one cast runs it. A node multiplies the count only when it hands off
+ *   through `AnyAffected`, once per target it hit; a leaf's own sphere is its recipients, not a
+ *   count. Homecoming's 10-target `KineticTransfer` makes every `KineticTransferBuff` row a 10.
+ * - `inAtoms`: see `_handoffPowers`. `ownerJson` is the power the row lives on.
+ *
+ * A pet's `Self` row buffs the pet, so under a pet only `AnyAffected` rows count, and only when
+ * the pet's power reaches its summoner's side.
+ */
+function collectRedirectStackingTemplates(
+  redirectName, visited = new Set(), depth = 0, via = { petClass: null, fan: 1, inAtoms: true },
+) {
   if (depth > 5) return { templates: [], maxStacks: null };
   const key = redirectName.toLowerCase();
   if (visited.has(key)) return { templates: [], maxStacks: null };
   visited.add(key);
 
-  const redirectPath = resolveRedirectPath(redirectName);
+  const redirectPath = _handoffPowerPath(redirectName);
   if (!fs.existsSync(redirectPath)) return { templates: [], maxStacks: null };
 
   let redirectJson;
@@ -7936,74 +8016,35 @@ function collectRedirectStackingTemplates(redirectName, visited = new Set(), dep
   // accept them as caster-side at and below this depth.
   const isPseudoPetAoE = (redirectJson.effect_area === 'Sphere' || redirectJson.effect_area === 'AoE')
     && (redirectJson.max_targets_hit === 255 || (redirectJson.max_targets_hit ?? 0) >= 1);
+  const reachesCaster = via.petClass === null
+    || (redirectJson.targets_affected || []).some((t) => _SUMMONER_SIDE.has(t));
 
   const templates = collectTemplatesWithMeta(redirectJson.effects);
   for (const { template: rt } of templates) {
     if (rt.stack !== 'Stack') continue;
 
-    const attrib = rt.attribs?.[0]?.toLowerCase();
-    if (attrib === 'execute_power') {
-      const childNames = (rt.params && rt.params.power_names) || [];
-      for (const cn of childNames) {
-        if (!cn.toLowerCase().startsWith('redirects.')) continue;
-        const child = collectRedirectStackingTemplates(cn, visited, depth + 1);
+    const hops = _handoffPowers(rt, via.petClass);
+    if (hops) {
+      const fan = rt.target === 'AnyAffected' ? via.fan * boundedTargetCount(redirectJson) : via.fan;
+      for (const hop of hops) {
+        const child = collectRedirectStackingTemplates(hop.name, visited, depth + 1, {
+          petClass: hop.petClass, fan, inAtoms: via.inAtoms && hop.inAtoms,
+        });
         collected.push(...child.templates);
         if (child.maxStacks && (!maxStacks || child.maxStacks > maxStacks)) maxStacks = child.maxStacks;
       }
       continue;
     }
 
-    if (rt.target === 'Self') {
-      collected.push({ template: rt, treatAsCaster: false });
-    } else if (rt.target === 'AnyAffected' && isPseudoPetAoE) {
-      collected.push({ template: rt, treatAsCaster: true });
+    const leaf = { template: rt, ...via, ownerJson: redirectJson };
+    if (rt.target === 'Self' && via.petClass === null) {
+      collected.push({ ...leaf, treatAsCaster: false });
+    } else if (rt.target === 'AnyAffected' && isPseudoPetAoE && reachesCaster) {
+      collected.push({ ...leaf, treatAsCaster: true });
     }
   }
 
   return { templates: collected, maxStacks };
-}
-
-/**
- * How many entities one power record counts as separate targets: its `max_targets_hit` when it
- * is a sphere or cone with a bounded cap, 1 otherwise. 255 is the export's "everyone in radius"
- * sentinel — a recipient list, not a count anybody could move.
- */
-function boundedTargetCount(json) {
-  const area = EFFECT_AREA_MAP[json.effect_area] ?? json.effect_area;
-  const max = json.max_targets_hit ?? 0;
-  if ((area === 'AoE' || area === 'Cone') && max > 1 && max !== 255) return max;
-  return 1;
-}
-
-/**
- * How many times one cast runs the leaf of an `AnyAffected` Execute_Power chain — the per-foe
- * count's ceiling when the foes are counted by a REDIRECT's sphere rather than the power's own.
- *
- * Fulcrum Shift is the shape: a single-target shell executes `KineticTransfer` on its foe, that
- * 10-target sphere executes `KineticTransferBuff` once per foe it hits, and the leaf's own
- * 255-target sphere is who each of those buffs lands on. So a node multiplies the count only
- * when it fans out to a deeper node through `AnyAffected`; a leaf's sphere is its recipients.
- * Only `Stack` rows are walked, as `collectRedirectStackingTemplates` walks them.
- */
-function redirectFanOut(redirectName, visited = new Set(), depth = 0) {
-  if (depth > 5) return 1;
-  const key = redirectName.toLowerCase();
-  if (visited.has(key)) return 1;
-  visited.add(key);
-  const redirectPath = resolveRedirectPath(redirectName);
-  if (!fs.existsSync(redirectPath)) return 1;
-  let redirectJson;
-  try { redirectJson = _readPowerFile(redirectPath); } catch { return 1; }
-  let child = null;
-  for (const { template: rt } of collectTemplatesWithMeta(redirectJson.effects || [])) {
-    if (rt.stack !== 'Stack' || rt.target !== 'AnyAffected') continue;
-    if (rt.attribs?.[0]?.toLowerCase() !== 'execute_power') continue;
-    for (const cn of (rt.params && rt.params.power_names) || []) {
-      if (!cn.toLowerCase().startsWith('redirects.')) continue;
-      child = Math.max(child ?? 1, redirectFanOut(cn, visited, depth + 1));
-    }
-  }
-  return child === null ? 1 : boundedTargetCount(redirectJson) * child;
 }
 
 /**
@@ -8413,41 +8454,51 @@ function detectStackingEffects(rawJson) {
   // `allTemplates` by the caller exactly as `redirectPerTargetSigs` is; the two never match the
   // same template, because a per-foe increment and a base one-shot differ in scale.
   const redirectBaseSigs = [];
+
+  // Leaves the deep collector never reaches, already stamped, for the caller to add to the
+  // power's atoms. A signature replay has nothing to land on for these: Rebirth's Fulcrum Shift
+  // is two `Create_Entity` rows and no buff row at all, and Thunderspy's base comes from an
+  // `Execute_Power` into `Pets.*`, which the deep collector does not follow.
+  const handoffTemplates = [];
   let redirectFanOutMax = null;
 
-  // === Execute_Power redirect stacking (multi-level) ===
+  // === Handed-off power stacking (multi-level) ===
   // Handles two patterns under one rule:
   //   (1) Reactive-Regeneration: outer Self → redirect with number_allowed > 1
   //       (multi-stack pseudo-pet) → contributions are perTarget.
-  //   (2) Fulcrum-Shift: outer AnyAffected → redirect chain executed once per
-  //       enemy hit → contributions are perTarget. Plus an outer Self →
-  //       one-shot caster buff (KineticTransferBuffSelf) → contributions are
-  //       BASE (scale).
+  //   (2) Fulcrum-Shift: a chain that runs once per enemy hit → contributions are
+  //       perTarget. Plus an outer Self → one-shot caster buff (KineticTransferBuffSelf)
+  //       → contributions are BASE (scale).
   //
-  // Rule: kind is 'perTarget' when the outer Execute_Power targets AnyAffected
-  // OR the redirect declares number_allowed > 1; otherwise 'base'.
+  // Rule: kind is 'perTarget' when the redirect declares number_allowed > 1, or when the chain
+  // runs once per foe. For a leaf the deep collector already brings into this power's atoms
+  // (`Redirects.*` all the way), "once per foe" is read as before: the outer row targets
+  // `AnyAffected`. For a leaf reached through a helper or a `Pets.*` hand-off it is the leaf's
+  // own `fan` — how many times one cast runs it, counted from the shell's targets through every
+  // `AnyAffected` hand-off. Thunderspy needs the count: its Fulcrum Shift runs
+  // `KineticTransferPLAYER` on its one foe through `AnyAffected`, once a cast, and that +5 is the
+  // base. The older reading is kept where it already shipped because the redirect rows it marks
+  // per-foe are not all buffs a total should count — Instant Regeneration's event-gated regen is
+  // kept out of the totals by that mark.
   for (const { template } of baseTemplatesWithMeta) {
-    const attrib = template.attribs && template.attribs[0] ? template.attribs[0].toLowerCase() : null;
-    if (attrib !== 'execute_power') continue;
-    if (template.stack !== 'Stack') continue;
+    const hops = _handoffPowers(template, null);
+    if (!hops) continue;
+    const shellFan = template.target === 'AnyAffected' ? boundedTargetCount(rawJson) : 1;
 
-    const powerNames = (template.params && template.params.power_names) || [];
-    for (const pName of powerNames) {
-      if (!pName.toLowerCase().startsWith('redirects.')) continue;
-
-      const { templates: chainTemplates, maxStacks: chainMax } = collectRedirectStackingTemplates(pName);
-      const isPerTarget = template.target === 'AnyAffected' || (chainMax !== null && chainMax > 1);
+    for (const hop of hops) {
+      const { templates: chainTemplates, maxStacks: chainMax } = collectRedirectStackingTemplates(
+        hop.name, new Set(), 0, { petClass: hop.petClass, fan: shellFan, inAtoms: hop.inAtoms },
+      );
       if (chainMax && (maxStacks === null || chainMax > maxStacks)) maxStacks = chainMax;
-      // The foe count this branch's increments grow with, when a redirect's sphere does the
-      // counting (see `redirectFanOut`). The shell's own count is the first factor: its
-      // `AnyAffected` row runs the chain once per target the shell itself hit.
-      if (template.target === 'AnyAffected' && chainTemplates.length) {
-        const fan = boundedTargetCount(rawJson) * redirectFanOut(pName);
-        if (fan > (redirectFanOutMax ?? 1)) redirectFanOutMax = fan;
-      }
 
-      for (const { template: rt, treatAsCaster } of chainTemplates) {
+      for (const leaf of chainTemplates) {
+        const { template: rt, treatAsCaster } = leaf;
+        const isPerTarget = (chainMax !== null && chainMax > 1)
+          || (leaf.inAtoms ? template.target === 'AnyAffected' : leaf.fan > 1);
         const classifications = classifyTemplateForStacking(rt, { treatAsCaster });
+        if (classifications.length && isPerTarget && leaf.fan > (redirectFanOutMax ?? 1)) {
+          redirectFanOutMax = leaf.fan;
+        }
         for (const cls of classifications) {
           const scale = Math.abs(rt.scale || 0);
 
@@ -8469,12 +8520,19 @@ function detectStackingEffects(rawJson) {
 
           if (isPerTarget) {
             entry.perTarget = (entry.perTarget || 0) + scale;
-            if (scale > 0 && rt.table) redirectPerTargetSigs.push({ scale, table: rt.table });
+            if (scale > 0 && rt.table && leaf.inAtoms) redirectPerTargetSigs.push({ scale, table: rt.table });
           } else {
             entry.scale = (entry.scale || 0) + scale;
-            if (scale > 0 && rt.table) redirectBaseSigs.push({ scale, table: rt.table });
+            if (scale > 0 && rt.table && leaf.inAtoms) redirectBaseSigs.push({ scale, table: rt.table });
           }
           if (!entry.table) entry.table = rt.table;
+        }
+        if (classifications.length && !leaf.inAtoms && rt.scale) {
+          if (isPerTarget) rt._perTargetIncrement = Math.abs(rt.scale);
+          else rt._redirectBaseIncrement = Math.abs(rt.scale);
+          if (leaf.petClass) rt._petClass = leaf.petClass;
+          _stampOwnerScalars([rt], leaf.ownerJson);
+          if (!handoffTemplates.includes(rt)) handoffTemplates.push(rt);
         }
       }
     }
@@ -8506,11 +8564,10 @@ function detectStackingEffects(rawJson) {
   if (Object.keys(patches).length === 0 && maxStacks === null && !stacksLinear) return null;
   // Stamped only where a redirect widens the count past what the power's own geometry states;
   // a bounded AoE shell whose chain does not fan out already carries the count as `maxTargets`.
-  const perTargetMaxTargets = redirectPerTargetSigs.length
-    && redirectFanOutMax > boundedTargetCount(rawJson) ? redirectFanOutMax : null;
+  const perTargetMaxTargets = redirectFanOutMax > boundedTargetCount(rawJson) ? redirectFanOutMax : null;
   return {
     patches, maxStacks, stacksLinear, stackCaps,
-    redirectPerTargetSigs, redirectBaseSigs, aoePerTargetSigs, perTargetMaxTargets,
+    redirectPerTargetSigs, redirectBaseSigs, aoePerTargetSigs, perTargetMaxTargets, handoffTemplates,
   };
 }
 
@@ -9533,6 +9590,12 @@ function convertPower(powerJson, availableLevel, archetypeId, powerType, provena
             t._redirectBaseIncrement = sig.scale;
           }
         }
+      }
+      // Leaves the deep collector never followed arrive already stamped; without them the
+      // power has no atom carrying the buff. Added after `extractEffects` on purpose: the bag
+      // already took their value through the patch merge above.
+      for (const t of stackingResult.handoffTemplates || []) {
+        if (!allTemplates.includes(t)) allTemplates.push(t);
       }
       // The per-foe count's ceiling for one cast when a redirect's sphere counts the foes —
       // Fulcrum Shift's single-target shell states no `maxTargets`, and its 10 lives in

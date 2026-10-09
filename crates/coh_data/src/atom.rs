@@ -378,21 +378,32 @@ pub fn excludes_caster(a: &AtomicEffect) -> bool {
 /// Not every site wants this question. A reader rebuilding what a power GRANTS (the defense
 /// a team buff hands its targets, shown on the power card) is not asking about the caster,
 /// and the ally-buff powers are exactly where the two questions come apart.
+///
+/// A helper's row ([`AtomicEffect::pet_class`]) turns the recipients around: its `Self` is the
+/// helper, and the player is on its side, so its `Friend` reaches him.
 #[must_use]
 pub fn reaches_caster(a: &AtomicEffect, power: &Power) -> bool {
     match a.to_who {
         Some(ToWho::Target | ToWho::TargetOnly) => {
             affects_caster(a, power) && !gate_excludes_caster(a)
         }
+        _ if a.pet_class.is_some() => false,
         other => other.is_some_and(ToWho::lands_on_caster),
     }
 }
 
-/// Is `Self` among the targets of the power this atom lives on?
+/// Is the caster among the targets of the power this atom lives on? `Self` on the player's own
+/// power; on a helper's, any token that includes the summoner — the game's comments on
+/// `TargetType` (`Common/entity/powers.h:287`): `Friend` is everyone on the caster's side but the
+/// caster, `Teammate` likewise, `MyOwner` the summoner exactly, `Any` everybody.
 fn affects_caster(a: &AtomicEffect, power: &Power) -> bool {
+    let caster_token = |t: &str| match a.pet_class {
+        Some(_) => matches!(t, "Friend" | "Teammate" | "MyOwner" | "Any"),
+        None => t == "Self",
+    };
     match a.owner_targets.as_deref() {
-        Some(targets) => targets.iter().any(|t| &**t == "Self"),
-        None => power.affects_caster(),
+        Some(targets) => targets.iter().any(|t| caster_token(t)),
+        None => a.pet_class.is_none() && power.affects_caster(),
     }
 }
 
@@ -738,6 +749,21 @@ pub struct AtomicEffect {
     /// A consumer rebuilding the patched slot sums the DISTINCT stamps, the way it sums
     /// `per_target`.
     pub redirect_base: Option<f64>,
+    /// The character class of the spawned entity whose power this atom is, when the row is a
+    /// helper's rather than the player's — `minion_pets` for Rebirth's Fulcrum Shift, whose
+    /// whole +damage comes from two `Create_Entity` spawns. `None` on every atom the player
+    /// applies.
+    ///
+    /// Two readings change with it. The [`modifier_table`](Self::modifier_table) is read
+    /// through this class ([`crate::TableScope::Pet`]), not the build's archetype:
+    /// `Melee_Buff_Dmg` is 0.1 on `minion_pets` and 0.085 on a Corruptor at 50, and only the
+    /// pet reading reproduces Homecoming's per-archetype Fulcrum Shift. And the recipients in
+    /// [`owner_targets`](Self::owner_targets) are the helper's, whose `Friend` is the summoner
+    /// (see [`reaches_caster`]).
+    ///
+    /// STAMPED BY THE CONVERTER for [`redirect_base`](Self::redirect_base)'s reason: the class
+    /// lives on the entity def the spawning row names, two files away from the row.
+    pub pet_class: Option<Box<str>>,
 }
 
 impl AtomicEffect {

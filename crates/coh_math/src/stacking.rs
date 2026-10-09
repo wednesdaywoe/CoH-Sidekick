@@ -865,6 +865,37 @@ fn adjust_display_value(
         }
         return;
     }
+    // A value summed from terms of different classes (`crate::granted::SCALE_TERMS_KEY`) grows
+    // term by term. Once any term counts foes, every term takes the per-foe path, a base-only
+    // term with a zero increment: a second cast brings its own base whichever class reads it,
+    // and the arithmetic is linear, so the terms add up to what the totals compute.
+    if let Some(Value::Array(terms)) = object.get_mut(crate::granted::SCALE_TERMS_KEY) {
+        let increment = |term: &Value| term.get("perTarget").and_then(Value::as_f64);
+        if terms
+            .iter()
+            .any(|term| increment(term).is_some_and(|p| p != 0.0))
+        {
+            for term in terms.iter_mut() {
+                let Some(scale) = term.get("scale").and_then(Value::as_f64) else {
+                    continue;
+                };
+                let leaf = Scaled {
+                    scale,
+                    table: None,
+                    per_target: increment(term),
+                };
+                let per_target = leaf.per_target.unwrap_or(0.0);
+                let adjusted =
+                    adjust_for_per_target(&leaf, per_target, Some(count), target_count(power));
+                if let (Some(number), Value::Object(term)) =
+                    (serde_json::Number::from_f64(adjusted.scale), term)
+                {
+                    term.insert("scale".to_string(), Value::Number(number));
+                }
+            }
+            return;
+        }
+    }
     let Some(scale) = object.get("scale").and_then(Value::as_f64) else {
         for (child_key, nested) in object.iter_mut() {
             // A per-type child re-resolves its own family instead of inheriting the parent's
