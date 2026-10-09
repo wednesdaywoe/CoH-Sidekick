@@ -134,6 +134,7 @@ fn PreferenceEntries() -> Element {
         div { class: "options-group",
             span { class: "field-label", "Alerts" }
             RuleOfFiveAlertToggle {}
+            HitChanceAlertToggle {}
         }
         div { class: "options-group",
             span { class: "field-label", "Powers" }
@@ -705,6 +706,22 @@ fn RuleOfFiveAlertToggle() -> Element {
                 onchange: move |evt| enabled.set(evt.checked()),
             }
             "Warn when a set bonus is over the Rule of 5"
+        }
+    }
+}
+
+/// Badge every picked power under the 95% hit cap at the combat panel's target level.
+#[component]
+fn HitChanceAlertToggle() -> Element {
+    let mut enabled = use_context::<crate::panels::powers::HitChanceAlert>().0;
+    rsx! {
+        label { class: "options-check",
+            input {
+                r#type: "checkbox",
+                checked: enabled(),
+                onchange: move |evt| enabled.set(evt.checked()),
+            }
+            "Mark powers under 95% to hit the target level"
         }
     }
 }

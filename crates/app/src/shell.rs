@@ -470,6 +470,25 @@ pub fn Shell() -> Element {
         }
         crate::slot_level_store::persist(shown);
     });
+    // Whether picked powers under the 95% hit cap are badged — an Options preference, off by
+    // default.
+    let hit_chance_alert = use_signal(|| false);
+    use_context_provider(|| panels::powers::HitChanceAlert(hit_chance_alert));
+    let mut hit_chance_alert_restored = use_signal(|| false);
+    use_future(move || async move {
+        let mut enabled = hit_chance_alert;
+        if let Some(saved) = crate::hit_chance_alert_store::load().await {
+            enabled.set(saved);
+        }
+        hit_chance_alert_restored.set(true);
+    });
+    use_effect(move || {
+        let enabled = *hit_chance_alert.read();
+        if !*hit_chance_alert_restored.read() {
+            return;
+        }
+        crate::hit_chance_alert_store::persist(enabled);
+    });
     // Every slot's level, solved once per build change for all the cards to read, while the
     // option to show them is on.
     let slot_levels = use_memo(move || {

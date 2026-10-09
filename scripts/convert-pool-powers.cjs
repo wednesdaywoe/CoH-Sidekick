@@ -193,6 +193,11 @@ function convertPoolPower(rawJson, rank, availableLevel) {
   if (Array.isArray(rawJson.targets_affected) && rawJson.targets_affected.length) {
     power.targetsAffected = rawJson.targets_affected;
   }
+  // EntsAutoHit — whom the power lands on without rolling to hit (`['None']` or an
+  // authored `[]` when every affected target rolls; Blazing Aura carries `[]`).
+  if (Array.isArray(rawJson.targets_autohit)) {
+    power.targetsAutoHit = rawJson.targets_autohit;
+  }
 
   power.rank = rank;
   power.available = availableLevel;

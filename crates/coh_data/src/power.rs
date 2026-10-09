@@ -334,6 +334,22 @@ pub fn targets_name_foe<S: AsRef<str>>(targets: &[S]) -> bool {
     targets.iter().any(|t| FOE.contains(&t.as_ref()))
 }
 
+fn string_list(value: &Value) -> Option<Vec<&str>> {
+    Some(value.as_array()?.iter().filter_map(Value::as_str).collect())
+}
+
+/// One EntsAffected / EntsAutoHit pair: a foe among the affected that the auto-hit list does
+/// not cover rolls to hit.
+fn targets_roll(affected: Option<Vec<&str>>, auto_hit: Option<Vec<&str>>) -> bool {
+    let (Some(affected), Some(auto_hit)) = (affected, auto_hit) else {
+        return false;
+    };
+    if auto_hit.contains(&"Any") || auto_hit.contains(&"Foe") {
+        return false;
+    }
+    affected.iter().any(|t| matches!(*t, "Foe" | "Any"))
+}
+
 impl Power {
     pub fn from_value(value: Value) -> Result<Self, String> {
         let wire: PowerWire = serde_json::from_value(value).map_err(|e| e.to_string())?;
@@ -431,6 +447,37 @@ impl Power {
     pub fn affects_foe(&self) -> bool {
         self.targets_affected()
             .is_some_and(|targets| targets_name_foe(&targets))
+    }
+
+    /// EntsAutoHit — whom this power lands on without a to-hit roll, as the export states it.
+    /// `["None"]` or an authored `[]` (Blazing Aura) means every target in
+    /// [`targets_affected`](Self::targets_affected) rolls.
+    /// `None` when the wire omits it.
+    pub fn targets_auto_hit(&self) -> Option<Vec<&str>> {
+        string_list(self.extra.get("targetsAutoHit")?)
+    }
+
+    /// Does this power roll to hit a foe — itself, or through a child it executes with the
+    /// caster's slotting (`procRollSites`)? Spring Attack's own power only teleports the
+    /// caster; the attack that rolls is its child.
+    ///
+    /// Accuracy cannot answer this: self toggles and auto-hit patches carry one too. A foe the
+    /// power affects but does not auto-hit is a foe it rolls against. `false` when either list
+    /// is absent — unknown is not "rolls".
+    pub fn rolls_to_hit_foe(&self) -> bool {
+        let own = targets_roll(self.targets_affected(), self.targets_auto_hit());
+        own || self
+            .extra
+            .get("procRollSites")
+            .and_then(Value::as_array)
+            .is_some_and(|sites| {
+                sites.iter().any(|site| {
+                    targets_roll(
+                        site.get("targetsAffected").and_then(string_list),
+                        site.get("targetsAutoHit").and_then(string_list),
+                    )
+                })
+            })
     }
 
     /// The character level at which this power unlocks — the level badge the picker's

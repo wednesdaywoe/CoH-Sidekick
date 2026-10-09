@@ -602,7 +602,7 @@ fn execution_rows(projection: &PowerProjection) -> Vec<EffectRow> {
 }
 
 /// The target's level relative to the caster, as a player says it: `+4`, `−1`, `even`.
-fn level_gap_label(level_diff: i32) -> String {
+pub(crate) fn level_gap_label(level_diff: i32) -> String {
     match level_diff {
         0 => "even".to_string(),
         diff if diff > 0 => format!("+{diff}"),

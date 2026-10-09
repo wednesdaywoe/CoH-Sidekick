@@ -58,6 +58,12 @@ pub struct SlotLevelsView(pub Memo<Option<std::rc::Rc<coh_data::slot_levels::Slo
 #[derive(Clone, Copy)]
 pub struct ShowSlotLevels(pub Signal<bool>);
 
+/// The "Hit Chance Alert" option — whether a picked power that rolls to hit and lands under the
+/// 95% cap against the combat panel's target is badged with its chance. Saved by
+/// [`crate::hit_chance_alert_store`].
+#[derive(Clone, Copy)]
+pub struct HitChanceAlert(pub Signal<bool>);
+
 /// What one slot's level badge says.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum SlotLevelBadge {
@@ -2492,6 +2498,23 @@ pub fn PickedPowerCard(
             )
         });
 
+    // Hit Chance Alert — the engine's own per-power hit chance against the combat panel's
+    // target, shown only on a power that rolls to hit a foe (accuracy alone can't say: self
+    // toggles carry one too) and only under the 95% cap. The totals are read only while the
+    // option is on, so an off option wakes no card on a build edit.
+    let hit_alert_on = *use_context::<HitChanceAlert>().0.read();
+    let hit_alert = if hit_alert_on && power_def.is_some_and(coh_data::Power::rolls_to_hit_foe) {
+        build_totals
+            .read()
+            .power_projection
+            .iter()
+            .find(|p| p.power_set == powerset_id && p.power_internal_name == power_id)
+            .and_then(|p| p.hit_chance)
+            .filter(|hit| hit.chance < HIT_CAP - 1e-9)
+    } else {
+        None
+    };
+
     // The stance this pick heads, if it heads one — derived from the export the same way the
     // Combat popover derives its list ([`coh_data::caster_state`]), so no set is named here.
     let stance =
@@ -2562,6 +2585,14 @@ pub fn PickedPowerCard(
                     span { class: "power-level", "L{power.level}" }
                 }
                 span { class: "power-name", "{power_def.map(|p| p.name.as_str()).unwrap_or(&power_id)}" }
+                if let Some(hit) = hit_alert {
+                    span {
+                        class: "hit-alert",
+                        title: "{hit_alert_title(hit)}",
+                        // Floored, so 94.9% never reads as the cap it is short of.
+                        "{(hit.chance * 100.0).floor()}%"
+                    }
+                }
 
                 // ON/OFF pill — rendered only for powers that buff the caster (beta
                 // `shouldShowToggle`). The real checkbox stays for accessibility and the
@@ -4783,6 +4814,17 @@ fn granted_title(database: &Db, powerset_id: &str, power_def: Option<&coh_data::
 /// The perma ring's hover text — the beta `PermaRing` tooltip distilled to a native `title`:
 /// whether the power is perma, its enhanced recharge against its duration, and (when short) the
 /// +recharge in hand versus the +recharge needed to close the gap.
+/// The game's hit-chance ceiling.
+const HIT_CAP: f64 = 0.95;
+
+fn hit_alert_title(hit: coh_math::projection::HitChance) -> String {
+    format!(
+        "{}% chance to hit a {} target, under the 95% cap. More Accuracy or ToHit raises it.",
+        format_precision(hit.chance * 100.0, 1),
+        crate::view::power_view::level_gap_label(hit.level_diff),
+    )
+}
+
 fn perma_title(info: &coh_math::perma::PermaInfo) -> String {
     let effective = format_precision(info.effective_recharge, 1);
     let duration = format_precision(info.duration, 1);

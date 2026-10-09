@@ -29,6 +29,7 @@ mod granted_powers;
 mod grid;
 mod help;
 mod history;
+mod hit_chance_alert_store;
 mod inherents;
 mod layout_store;
 mod layout_sync;
