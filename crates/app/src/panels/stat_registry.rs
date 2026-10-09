@@ -368,6 +368,8 @@ pub enum StatCap {
     ResistanceCap,
     /// The per-level absolute HP ceiling, a real clamp.
     MaxHpCap,
+    /// The per-level endurance-pool ceiling, a real clamp.
+    MaxEnduranceCap,
     /// The per-level absorb ceiling, a real clamp.
     AbsorbCap,
     /// The travel ceiling for one axis — the class's own per-level row plus whatever the build's
@@ -386,6 +388,7 @@ impl StatCap {
             StatCap::DefenseSoftcap => totals.stats.defense_softcap,
             StatCap::ResistanceCap => totals.stats.resistance_cap,
             StatCap::MaxHpCap => totals.stats.max_hp_cap,
+            StatCap::MaxEnduranceCap => totals.stats.max_endurance_cap,
             StatCap::AbsorbCap => totals.stats.absorb_cap,
             StatCap::TravelCap(stat) => match stat {
                 MovementStat::RunSpeed => totals.stats.run_speed.cap,
@@ -1187,11 +1190,11 @@ pub static ALL: &[StatDef] = &[
         family: StatFamily::Endurance,
         section: StatSection::Survival,
         format: StatFormat::Points,
-        cap: StatCap::None,
+        cap: StatCap::MaxEnduranceCap,
         breakdown_keys: &["maxEndurance"],
         ledger_keys: &["maxEndurance"],
         ledger_format: StatFormat::Points,
-        read: |t| t.stats.max_end,
+        read: |t| t.stats.max_endurance_absolute,
         annotate: None,
     },
     StatDef {
