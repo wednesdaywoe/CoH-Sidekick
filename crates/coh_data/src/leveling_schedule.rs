@@ -205,6 +205,25 @@ impl LevelingSchedule {
             }
         })
     }
+
+    /// [`next_pick_level`](Self::next_pick_level), steered toward a chosen pick level: the
+    /// `target` level when one of its picks is still unspent and it is at or above `min_level`,
+    /// otherwise the earliest pick the power could take, as before.
+    ///
+    /// This is the guided planner's clicked empty slot (Mids' behaviour): the click names
+    /// where the next pick should go, and a power that cannot legally go there falls back to
+    /// the earliest slot it can rather than being refused.
+    pub fn pick_level_toward(&self, taken: &[u8], min_level: u8, target: Option<u8>) -> Option<u8> {
+        let target_open = |level: u8| {
+            let granted = self.pick_levels().iter().filter(|&&l| l == level).count();
+            let spent = taken.iter().filter(|&&t| t == level).count();
+            level >= min_level && granted > spent
+        };
+        match target {
+            Some(level) if target_open(level) => Some(level),
+            _ => self.next_pick_level(taken, min_level),
+        }
+    }
 }
 
 /// Placeable enhancement slots the build has spent — the beta

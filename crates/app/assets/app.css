@@ -225,6 +225,13 @@
   color: var(--action-active-core);
 }
 .level-control__slider input[type="range"] { width: 96px; max-width: 96px; }
+/* The working level: the pick slot the guided planner is filling next, in brackets after the
+   character's level. Secondary to it, so dimmer and lighter. */
+.level-control__working {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
 /* A dataset with no leveling schedule has no range to offer. The seat still draws, reading
    an em dash — a control that vanished would be indistinguishable from one that was never
    there, and the level is still whatever the build holds. */
@@ -345,20 +352,6 @@
   .level-up__label { display: none; }
 }
 
-/* The level the next power pick fills, beside Level Up while the mode is off. A statement, not
-   a control, so it has no frame: the number is set in the readout's own active color. */
-.next-pick {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 12px;
-  font-family: var(--font-chrome);
-  color: var(--text-faint);
-  white-space: nowrap;
-}
-.next-pick__label { font-weight: 600; letter-spacing: 0.02em; }
-.next-pick__value { color: var(--action-active); font-variant-numeric: tabular-nums; }
-/* Not in the phone bar: it already wraps to two rows, its own Pwr counter speaks for picks, and
-   a third row would come out of the space the build scrolls in. */
-.build-bar .next-pick { display: none; }
 
 /* ---- header popovers (build identity, combat, options) ----
    Anchored to their trigger, which is safe ONLY because the header sits outside the free
@@ -1772,6 +1765,20 @@
   color: var(--text-faint);
 }
 .power-pick-hint { font-size: 11px; font-style: italic; }
+/* Free-form makes the placeholder a button: a click aims the next pick at it. The aimed slot —
+   the clicked one, or the earliest empty — is the current cell, drawn in the action colour so
+   the grid says where the next power will go before anything is taken. */
+button.power-pick--empty {
+  width: 100%; background: none; font: inherit; text-align: left; cursor: pointer;
+}
+/* Mouse only: on touch a tapped cell would keep the hover look after the tap. */
+@media (hover: hover) {
+  button.power-pick--empty:hover { border-color: var(--action-hover); color: var(--text-dim); }
+}
+.power-pick--empty.is-working {
+  border-style: solid; border-color: var(--action-active); color: var(--action-active);
+  background: color-mix(in srgb, var(--action-active) 10%, transparent);
+}
 
 /* Moving a pick (by-level only): the level badge is the handle. Mid-drag the source cell fades,
    every cell a drop would be legal on wears a dashed outline, the one under the pointer fills,
@@ -1977,14 +1984,14 @@
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-/* Locked: unlocks above the build's current level — still pickable (you plan ahead), which is
-   exactly why it cannot be dimmed. A pickable row is one a reader is choosing between, so its
-   name and its level hold the word bar, and there is no headroom above that bar to spend on
-   opacity. The state moves to channels that aren't the ink: the badge warms to amber, which is
-   the precise statement ("not until this level" — with the number), and the fill recesses one
-   ramp step, which reads as not-yet-on-the-list without taking anything off it. Hover lifts it
-   back out with the rest. */
-.power-row.is-locked { background: var(--surface-panel); }
+/* Locked: unlocks above the level being picked for — in free-form the working level, the next
+   empty pick. Still pickable (you plan ahead), but dimmed as a whole row, the way Mids darkens
+   what the current pick can't take: the list is read at a glance for "what can I take now",
+   and that read needs the out-of-reach rows to fall back. The badge keeps its amber, the one
+   precise statement ("not until this level", with the number). Hover lifts the row back to
+   full ink, because hovering is how a planner reads the power it is about to take early. */
+.power-row.is-locked { background: var(--surface-panel); opacity: 0.5; }
+.power-row.is-locked:hover { opacity: 1; }
 .power-row.is-locked .power-row__level { color: var(--action-hover); }
 
 /* Unpickable: the build has no power pick left this power could take. Unlike `is-locked`
@@ -2001,6 +2008,14 @@
   border-style: dashed;
 }
 .power-row.is-gated:hover { border-color: var(--seam); background: var(--surface-raised); color: var(--text-dim); }
+
+/* Needs an earlier pick: closed only because nothing from its own set is taken below it (Tough
+   before Boxing or Kick). Free-form takes it anyway and flags the build, so it reads as out of
+   reach like a gated row but keeps the pointer — the click works. */
+.power-row.is-needs-earlier {
+  opacity: 0.5;
+  border-style: dashed;
+}
 
 /* Picked: the build already holds this power. It keeps its row because the rail shows a
    POWERSET, not a shopping list — a set you have taken six powers out of should still read as
@@ -2054,6 +2069,19 @@
 
 /* Faulted: the power's prerequisite expression could not be read, so the picker refuses to
    guess which way it would have gone. Marked, not hidden (CLAUDE.md Rule 1). */
+/* Out of order: held without its prerequisite at a lower level (Tough before Boxing or Kick).
+   Red italic, as Mids draws it — the build is still valid to plan, so the row keeps its picked
+   look and only the name changes. The tooltip says what is missing. */
+.power-row.is-out-of-order .power-row__name { color: var(--action-danger); font-style: italic; }
+
+/* The same state on the picked card: one small mark after the name, so the card's slots and
+   chrome are untouched. */
+.power-order-mark {
+  flex: none; margin-left: 4px;
+  font-size: 11px; font-weight: 700; line-height: 1;
+  color: var(--action-danger); cursor: help;
+}
+
 .power-row.is-faulted {
   border-color: var(--action-danger);
   color: var(--text-dim);

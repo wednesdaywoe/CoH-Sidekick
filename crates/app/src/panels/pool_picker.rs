@@ -291,12 +291,24 @@ fn pool_entries(
         .iter()
         .map(|pool| {
             let catalogued = powers_of_set(database, &pool.id, mode.origin());
+            let idents: Vec<&str> = catalogued.iter().map(coh_data::Power::ident).collect();
             let powers: Vec<(coh_data::Power, PickGate)> = catalogued
                 .iter()
                 .filter(|power| !picked.contains(&power.ident()))
                 .map(|power| {
-                    let gate =
-                        pick_gate(power, state, archetype_id.as_deref(), &database.set_paths);
+                    let siblings: Vec<&str> = idents
+                        .iter()
+                        .copied()
+                        .filter(|i| *i != power.ident())
+                        .collect();
+                    let gate = pick_gate(
+                        power,
+                        &pool.id,
+                        &siblings,
+                        state,
+                        archetype_id.as_deref(),
+                        &database.set_paths,
+                    );
                     (power.clone(), gate)
                 })
                 // A power the game grants is never picked, so it is not part of what this pool
@@ -305,7 +317,7 @@ fn pool_entries(
                 .collect();
             let open_count = powers
                 .iter()
-                .filter(|(_, gate)| *gate == PickGate::Open)
+                .filter(|(_, gate)| matches!(gate, PickGate::Open | PickGate::NeedsEarlier))
                 .count();
             let held = holds(&pool.id);
             PoolEntry {
@@ -359,6 +371,7 @@ fn PoolPickerModal(database: Db, mode: PoolPickerMode, on_close: EventHandler<()
     });
 
     let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+    let target_slot = use_context::<crate::level_control::TargetSlot>();
     // A click on a power row takes it when it can be taken, and otherwise leaves it in the
     // preview, where the pane says why not. Same verdict as the Take button: both read
     // `take_check`.
@@ -373,6 +386,7 @@ fn PoolPickerModal(database: Db, mode: PoolPickerMode, on_close: EventHandler<()
                 &set_id,
                 &ident,
                 level_up_mode(),
+                target_slot.steering(level_up_mode()),
             );
             let Some(TakeCheck {
                 pool_name,
@@ -391,6 +405,7 @@ fn PoolPickerModal(database: Db, mode: PoolPickerMode, on_close: EventHandler<()
                 ident,
                 pool_name,
                 level,
+                target_slot,
             );
             on_close.call(());
         }
@@ -488,6 +503,8 @@ struct CommitInputs<'a> {
     pick_level: Option<u8>,
     pool_room: bool,
     level_gated_pick: Option<u8>,
+    /// Level Up mode refuses a [`PickGate::NeedsEarlier`] power; free-form takes it.
+    level_up_mode: bool,
 }
 
 /// Why the Take button cannot commit this pick, or `None` if it can.
@@ -511,6 +528,7 @@ fn commit_blocker(inputs: CommitInputs<'_>) -> Option<String> {
         pick_level,
         pool_room,
         level_gated_pick,
+        level_up_mode,
     } = inputs;
 
     let set_blocker = match set_verdict {
@@ -523,6 +541,9 @@ fn commit_blocker(inputs: CommitInputs<'_>) -> Option<String> {
         (PickGate::Closed, _, _, _) => Some(format!(
             "{power_name} needs prerequisites this build hasn't taken"
         )),
+        (PickGate::NeedsEarlier, _, _, _) if level_up_mode => Some(format!(
+            "{power_name} needs prerequisites this build hasn't taken"
+        )),
         (PickGate::Granted, _, _, _) => Some(format!("{power_name} is granted, not picked")),
         (_, _, false, _) => Some("Every power pool slot is taken".to_string()),
         (_, None, _, _) => Some(format!(
@@ -532,7 +553,7 @@ fn commit_blocker(inputs: CommitInputs<'_>) -> Option<String> {
             "This pick belongs to level {level}, which this character hasn't reached \
              (Level Up mode)"
         )),
-        (PickGate::Open, Some(_), true, None) => None,
+        (PickGate::Open | PickGate::NeedsEarlier, Some(_), true, None) => None,
     })
 }
 
@@ -560,10 +581,19 @@ fn take_check(
     set_id: &str,
     power_ident: &str,
     level_up_mode: bool,
+    target: Option<u8>,
 ) -> Option<TakeCheck> {
     let power = resolve_power_def(database, set_id, power_ident)?;
+    let set_powers = powers_of_set(database, set_id, mode.origin());
+    let siblings: Vec<&str> = set_powers
+        .iter()
+        .map(coh_data::Power::ident)
+        .filter(|i| *i != power_ident)
+        .collect();
     let gate = pick_gate(
         power,
+        set_id,
+        &siblings,
         state,
         state.archetype.id.as_deref(),
         &database.set_paths,
@@ -592,7 +622,7 @@ fn take_check(
     let pick_level = database
         .leveling_schedule
         .as_ref()
-        .and_then(|schedule| schedule.next_pick_level(&taken_levels, unlock_level));
+        .and_then(|schedule| schedule.pick_level_toward(&taken_levels, unlock_level, target));
 
     let pool_name = database
         .pool_catalog
@@ -615,6 +645,7 @@ fn take_check(
         pick_level,
         pool_room,
         level_gated_pick,
+        level_up_mode,
     });
 
     Some(TakeCheck {
@@ -639,12 +670,15 @@ fn take_power(
     power_ident: String,
     pool_name: String,
     level: u8,
+    target_slot: crate::level_control::TargetSlot,
 ) {
     session.commit(move |state| {
         mode.add_to(state, &set_id, &pool_name);
         add_power(state, &set_id, &power_ident, level, None);
         crate::granted_powers::sync(state, &database);
     });
+    // A clicked slot steers one pick, as on the Available rows.
+    target_slot.clear();
 }
 
 /// The commit control under the preview: takes the power (and its pool), and — for a pool the
@@ -659,6 +693,7 @@ fn PoolPickerCommit(
 ) -> Element {
     let session = use_context::<BuildSession>();
     let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+    let target_slot = use_context::<crate::level_control::TargetSlot>();
 
     let Some(check) = take_check(
         &database,
@@ -667,6 +702,7 @@ fn PoolPickerCommit(
         &set_id,
         &power_ident,
         level_up_mode(),
+        target_slot.steering(level_up_mode()),
     ) else {
         return rsx! {};
     };
@@ -710,6 +746,7 @@ fn PoolPickerCommit(
                                 power_ident.clone(),
                                 pool_name.clone(),
                                 level,
+                                target_slot,
                             );
                             on_committed.call(());
                         }
@@ -739,6 +776,18 @@ fn PoolRow(
 ) -> Element {
     let session = use_context::<BuildSession>();
     let blocked = entry.blocked_reason();
+    // The level the pool's powers dim against, by the Available rows' own rule, so a power
+    // reads as out of reach here exactly when it will on the rail it lands in.
+    let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+    let target_slot = use_context::<crate::level_control::TargetSlot>();
+    let target_slot = move || target_slot.steering(level_up_mode());
+    let reach_level = {
+        let build = session.build.read();
+        let working_level = database.leveling_schedule.as_ref().and_then(|schedule| {
+            crate::level_control::working_level(schedule, &build, target_slot())
+        });
+        crate::level_control::reach_level(level_up_mode(), working_level, build.level)
+    };
 
     let mut classes = vec!["pool-row", mode.accent_class()];
     if is_expanded {
@@ -798,6 +847,7 @@ fn PoolRow(
                                 power: power.clone(),
                                 gate: gate.clone(),
                                 unlock_floor: entry.unlock_floor,
+                                reach_level,
                                 is_previewing: previewing.as_ref().is_some_and(|(set, ident)| {
                                     set == &entry.id && ident == power.ident()
                                 }),
@@ -863,6 +913,9 @@ fn PoolPowerRow(
     power: coh_data::Power,
     gate: PickGate,
     unlock_floor: u8,
+    /// The level being picked for ([`crate::level_control::reach_level`]): an open power
+    /// unlocking above it dims, and stays takeable.
+    reach_level: u8,
     is_previewing: bool,
     on_preview: EventHandler<()>,
     on_take: EventHandler<()>,
@@ -885,12 +938,20 @@ fn PoolPowerRow(
     // a build gets planned toward it — so only the styling and the title differ.
     let (state_class, title) = match &gate {
         PickGate::Open => (
-            "",
+            if unlock_level > reach_level {
+                " is-locked"
+            } else {
+                ""
+            },
             format!("{power_name} — unlocks at level {unlock_level}"),
         ),
         PickGate::Closed => (
             " is-gated",
             format!("{power_name} needs prerequisites this build hasn't taken yet"),
+        ),
+        PickGate::NeedsEarlier => (
+            " is-needs-earlier",
+            format!("{power_name} needs an earlier pick from this pool — add one before it"),
         ),
         PickGate::Granted => (
             " is-unpickable",
@@ -931,5 +992,42 @@ fn PoolPowerRow(
             }
             span { class: "power-row__name", "{power_name}" }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn blocker(gate: &PickGate, level_up_mode: bool) -> Option<String> {
+        let open = Ok(coh_data::SetGate::Open);
+        commit_blocker(CommitInputs {
+            set_id: "fighting",
+            pool_name: "Fighting",
+            power_name: "Tough",
+            unlock_level: 14,
+            set_verdict: Some(&open),
+            gate,
+            pick_level: Some(14),
+            pool_room: true,
+            level_gated_pick: None,
+            level_up_mode,
+        })
+    }
+
+    #[test]
+    fn free_form_takes_a_pool_power_that_needs_an_earlier_pick() {
+        assert_eq!(blocker(&PickGate::NeedsEarlier, false), None);
+    }
+
+    #[test]
+    fn level_up_mode_refuses_a_pool_power_that_needs_an_earlier_pick() {
+        assert!(blocker(&PickGate::NeedsEarlier, true).is_some());
+    }
+
+    #[test]
+    fn a_closed_pool_power_is_refused_in_both_modes() {
+        assert!(blocker(&PickGate::Closed, false).is_some());
+        assert!(blocker(&PickGate::Closed, true).is_some());
     }
 }

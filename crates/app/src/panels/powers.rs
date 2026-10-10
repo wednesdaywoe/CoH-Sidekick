@@ -1457,8 +1457,13 @@ pub enum PickGate {
     Open,
     /// The game grants this power; it is never picked.
     Granted,
-    /// A prerequisite the build does not meet.
+    /// A prerequisite the build does not meet, and adding earlier picks would not meet it: a
+    /// mutual-exclusion lock or an archetype gate.
     Closed,
+    /// A prerequisite the build does not meet YET — an earlier pick from the power's own set
+    /// would open it ([`coh_data::requires_met_with_set`]). Free-form takes it and flags the
+    /// build as out of order; Level Up mode refuses it, as the game would.
+    NeedsEarlier,
     /// The expression could not be read — a visible fault, never a silent yes or no.
     Unreadable(String),
 }
@@ -1466,8 +1471,13 @@ pub enum PickGate {
 /// Read a power's `requires` against the build (see [`coh_data::pick_rules`]). This is the
 /// whole of the prerequisite logic: intra-set prior-pick counts, mutual-exclusion locks and
 /// archetype gates all live in that one expression, per power, per fork.
+///
+/// `set_id` and `siblings` (the set's other powers) are what separate
+/// [`PickGate::NeedsEarlier`] from [`PickGate::Closed`].
 pub fn pick_gate(
     power: &coh_data::Power,
+    set_id: &str,
+    siblings: &[&str],
     state: &coh_data::CharacterState,
     archetype_id: Option<&str>,
     sets: &coh_data::SetPaths,
@@ -1506,8 +1516,102 @@ pub fn pick_gate(
     }
     match coh_data::requires_met(&expression, state, archetype_id, sets) {
         Ok(true) => PickGate::Open,
-        Ok(false) => PickGate::Closed,
+        Ok(false) => match coh_data::requires_met_with_set(
+            &expression,
+            state,
+            set_id,
+            siblings,
+            archetype_id,
+            sets,
+        ) {
+            Ok(true) => PickGate::NeedsEarlier,
+            Ok(false) => PickGate::Closed,
+            Err(error) => PickGate::Unreadable(error.to_string()),
+        },
         Err(error) => PickGate::Unreadable(error.to_string()),
+    }
+}
+
+/// Why a power the build holds is out of order, when it is: its prerequisite is not held at a
+/// lower pick level (Tough at 20 with Boxing at 30, or with no Boxing or Kick at all). `None`
+/// when it is in order, when it has no prerequisite, and for an auto-granted power, which has
+/// no pick level to be out of order at.
+///
+/// Free-form lets a build go out of order and marks it (GP6), on the power's card and its row
+/// in the power list. An unreadable `requires` is not reported here: the row already shows
+/// that fault, and a guess about order on top of it would be noise.
+pub fn out_of_order_reason(
+    database: &Db,
+    state: &coh_data::CharacterState,
+    set_id: &str,
+    power: &coh_data::SelectedPower,
+) -> Option<String> {
+    if power.level == 0 {
+        return None;
+    }
+    let def = resolve_power_def(database, set_id, &power.internal_name)?;
+    let tokens = coh_data::granted_powers::requires(def)?;
+    let in_order = coh_data::requires_met_in_order(
+        &tokens,
+        state,
+        power.level,
+        state.archetype.id.as_deref(),
+        &database.set_paths,
+    )
+    .ok()?;
+    if in_order {
+        return None;
+    }
+    let display_name = |ident: &str| {
+        database
+            .pool_powers
+            .iter()
+            .find(|p| p.power.ident() == ident)
+            .map_or_else(|| ident.replace('_', " "), |p| p.power.name.clone())
+    };
+    Some(format!(
+        "Out of order: {} needs {} picked before level {}",
+        def.name,
+        prerequisite_phrase(&tokens, display_name),
+        power.level
+    ))
+}
+
+/// The powers a `requires` expression names, as a phrase for a tooltip. An expression that is
+/// only a choice between powers reads as that choice ("Boxing or Kick"); anything with more
+/// structure (Weave wants two of three) names the powers it draws on ("enough of Boxing, Kick
+/// and Tough") rather than pretending to restate the rule.
+fn prerequisite_phrase<S: AsRef<str>>(
+    tokens: &[S],
+    display_name: impl Fn(&str) -> String,
+) -> String {
+    // A power path reads `Category.Set.Power`; operators, `$` variables and `@` literals do not.
+    let is_power_path = |token: &str| {
+        token.split('.').count() == 3
+            && !token.starts_with(['$', '@'])
+            && token.chars().next().is_some_and(char::is_alphabetic)
+    };
+    let mut names: Vec<String> = Vec::new();
+    let mut only_choice = true;
+    for token in tokens.iter().map(AsRef::as_ref) {
+        if is_power_path(token) {
+            let name = display_name(token.rsplit('.').next().unwrap_or(token));
+            if !names.contains(&name) {
+                names.push(name);
+            }
+        } else if token != "||" {
+            only_choice = false;
+        }
+    }
+    let list = |joiner: &str| match names.as_slice() {
+        [] => String::new(),
+        [one] => one.clone(),
+        [rest @ .., last] => format!("{} {joiner} {last}", rest.join(", ")),
+    };
+    match (names.is_empty(), only_choice) {
+        (true, _) => "its prerequisite".to_string(),
+        (false, true) => list("or"),
+        (false, false) => format!("enough of {}", list("and")),
     }
 }
 
@@ -1568,24 +1672,33 @@ fn AvailablePowersGroup(
     // it is the panel's own: seeing WHY a power is out of reach is how a build gets planned
     // toward it, and "you already have it" is a reason like any other. Only a granted power is
     // absent, because it is not a pick at all and no amount of planning buys it.
-    let rows: Vec<(coh_data::Power, PickGate, Option<u8>)> =
-        powers_of_set(&database, &set_id, origin)
-            .into_iter()
-            .map(|power| {
-                let gate = pick_gate(
-                    &power,
-                    &build.read(),
-                    archetype_id.as_deref(),
-                    &database.set_paths,
-                );
-                let picked_at = picked_levels
-                    .iter()
-                    .find(|(name, _)| name == power.ident())
-                    .map(|(_, level)| *level);
-                (power, gate, picked_at)
-            })
-            .filter(|(_, gate, _)| *gate != PickGate::Granted)
-            .collect();
+    let set_powers = powers_of_set(&database, &set_id, origin);
+    let idents: Vec<&str> = set_powers.iter().map(coh_data::Power::ident).collect();
+    let rows: Vec<(coh_data::Power, PickGate, Option<u8>)> = set_powers
+        .iter()
+        .cloned()
+        .map(|power| {
+            let siblings: Vec<&str> = idents
+                .iter()
+                .copied()
+                .filter(|i| *i != power.ident())
+                .collect();
+            let gate = pick_gate(
+                &power,
+                &set_id,
+                &siblings,
+                &build.read(),
+                archetype_id.as_deref(),
+                &database.set_paths,
+            );
+            let picked_at = picked_levels
+                .iter()
+                .find(|(name, _)| name == power.ident())
+                .map(|(_, level)| *level);
+            (power, gate, picked_at)
+        })
+        .filter(|(_, gate, _)| *gate != PickGate::Granted)
+        .collect();
     // The count says how much of the set the build holds. It used to be how many rows were
     // still takeable, which was the same sentence as the list's own length; now that the list
     // is the whole set, the length says that and the count has to say something else.
@@ -1736,6 +1849,8 @@ struct RowInputs<'a> {
     pick_level: Option<u8>,
     /// The level a Level Up-mode build would have to reach first.
     level_gated_pick: Option<u8>,
+    /// Level Up mode refuses a [`PickGate::NeedsEarlier`] power; free-form takes it.
+    level_up_mode: bool,
 }
 
 /// What a click on an available row does.
@@ -1771,6 +1886,7 @@ fn row_verdict(inputs: RowInputs<'_>) -> (RowAction, String) {
         gate,
         pick_level,
         level_gated_pick,
+        level_up_mode,
     } = inputs;
     // Picked leads. A held power's set-level blocker and its own prerequisite are both answers
     // to a question nobody is asking any more, and a row saying "needs prerequisites" about a
@@ -1797,12 +1913,24 @@ fn row_verdict(inputs: RowInputs<'_>) -> (RowAction, String) {
     // The same three conditions the row has always had to meet to be bought, now naming the
     // level they agree on rather than answering yes: the handler needs the pick level, and
     // resolving it here is what keeps the row from re-deciding it a second way.
+    //
+    // A power that only wants an earlier pick from its own set is free-form's to take: the
+    // build is planned out of order and flagged, not refused.
+    let early_ok = !level_up_mode;
     let action = match (gate, pick_level, level_gated_pick) {
         (PickGate::Open, Some(level), None) => RowAction::Pick(level),
+        (PickGate::NeedsEarlier, Some(level), None) if early_ok => RowAction::Pick(level),
         _ => RowAction::Refused,
     };
     let title = match (gate, pick_level, level_gated_pick) {
         (PickGate::Closed, _, _) => {
+            format!("{power_name} needs prerequisites this build hasn't taken yet")
+        }
+        (PickGate::NeedsEarlier, Some(level), None) if early_ok => format!(
+            "{power_name} needs an earlier pick from its set — takes the level {level} pick; \
+             add the prerequisite before it"
+        ),
+        (PickGate::NeedsEarlier, _, _) if !early_ok => {
             format!("{power_name} needs prerequisites this build hasn't taken yet")
         }
         (_, _, Some(level)) => format!(
@@ -1843,8 +1971,8 @@ fn AvailablePowerRow(
     /// The floor the owning set puts under this power's unlock level (pools unlock as a
     /// whole before any power in them does).
     unlock_floor: u8,
-    /// The build's current level — a power unlocking above it is still pickable (you plan the
-    /// whole build ahead), so this only tints the badge.
+    /// The build's current level — Level Up mode refuses picks above it, and every mode dims
+    /// against it once no pick is left empty.
     current_level: u8,
     /// The pick levels the build has already spent, for resolving this row's own pick level.
     taken_levels: Vec<u8>,
@@ -1888,19 +2016,27 @@ fn AvailablePowerRow(
     // or above the power's unlock level. `None` means the build has no such pick left, so the
     // row disables: a picked power carries the level the game granted it, never a substituted
     // one (a dataset with no schedule yields `None` too — fail loud, like the slot budget).
+    let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+    let target_slot = use_context::<crate::level_control::TargetSlot>();
+    // …or the empty slot clicked in the by-level grid, when this power can legally fill it.
+    let target = target_slot.steering(level_up_mode());
     let pick_level = database
         .leveling_schedule
         .as_ref()
-        .and_then(|schedule| schedule.next_pick_level(&taken_levels, unlock_level));
+        .and_then(|schedule| schedule.pick_level_toward(&taken_levels, unlock_level, target));
 
-    // A power that unlocks above the build's current level is still pickable — you plan the
-    // whole build ahead of time — so `locked` only tints the badge to say "not in-game yet",
-    // it never disables the row. At the default level 50 nothing is locked.
-    let locked = unlock_level > current_level;
+    // A power that unlocks above the level being picked for is still pickable — you plan the
+    // whole build ahead of time — so `locked` dims the row to say "not at this pick yet", it
+    // never disables it. Free-form reads the working level (the next empty pick), so a fresh
+    // level-50 build dims everything past level 1 and the dimming follows the picks up.
+    let working_level = database.leveling_schedule.as_ref().and_then(|schedule| {
+        crate::level_control::working_level_of(schedule, &taken_levels, target)
+    });
+    let locked = unlock_level
+        > crate::level_control::reach_level(level_up_mode(), working_level, current_level);
 
     // …unless level-up mode is on, where planning ahead is exactly what the mode exists to
     // prevent.
-    let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
     let level_gated_pick =
         crate::level_control::pick_beyond_level(level_up_mode(), pick_level, current_level);
 
@@ -1912,6 +2048,7 @@ fn AvailablePowerRow(
         gate: &gate,
         pick_level,
         level_gated_pick,
+        level_up_mode: level_up_mode(),
     });
 
     // An unreadable prerequisite is its own state: the row shows the fault and refuses the
@@ -1954,15 +2091,30 @@ fn AvailablePowerRow(
         &gate,
     ) {
         (true, _, _, _) => "power-row is-picked",
+        (_, true, _, PickGate::NeedsEarlier) => "power-row is-needs-earlier",
         (_, true, true, _) => "power-row is-locked",
         (_, true, false, _) => "power-row",
-        (_, false, _, PickGate::Closed) => "power-row is-gated",
+        (_, false, _, PickGate::Closed | PickGate::NeedsEarlier) => "power-row is-gated",
         _ => "power-row is-unpickable",
     };
     let row_class = if info_locked {
         format!("{row_class} is-info-locked")
     } else {
         row_class.to_string()
+    };
+    // A held power out of order (GP6) reads red and italic here, as Mids draws it, and its
+    // tooltip says what is missing in place of the give-back hint.
+    let out_of_order = picked_at.and_then(|_| {
+        let build = session.build.read();
+        let held = build
+            .all_selected()
+            .find(|held| held.internal_name == power_internal && held.level > 0)?
+            .clone();
+        out_of_order_reason(&database, &build, &set_id, &held)
+    });
+    let (row_class, title) = match out_of_order {
+        Some(reason) => (format!("{row_class} is-out-of-order"), reason),
+        None => (row_class, title),
     };
     rsx! {
         button {
@@ -1984,12 +2136,17 @@ fn AvailablePowerRow(
                     let power_internal = power_internal.clone();
                     let database = database.clone();
                     match action {
-                        RowAction::Pick(level) => session.commit(move |state| {
-                            add_power(state, &set_id, &power_internal, level, branch_role);
-                            // The pick may be another power's grant gate; the grant lands in
-                            // the same edit, so one user action is one undo step.
-                            crate::granted_powers::sync(state, &database);
-                        }),
+                        RowAction::Pick(level) => {
+                            session.commit(move |state| {
+                                add_power(state, &set_id, &power_internal, level, branch_role);
+                                // The pick may be another power's grant gate; the grant lands
+                                // in the same edit, so one user action is one undo step.
+                                crate::granted_powers::sync(state, &database);
+                            });
+                            // A clicked slot steers one pick, then the earliest empty slot
+                            // leads again.
+                            target_slot.clear();
+                        }
                         // Addressed by THIS ROW'S set, not by the name alone: `internalName`
                         // collides across archetypes (Build_Up appears ×64), so a name-only
                         // removal is a removal from whichever bucket matches first. The row
@@ -2523,6 +2680,9 @@ pub fn PickedPowerCard(
     } else {
         "picked-power-card"
     };
+    // Held without its prerequisite at a lower level (GP6): a small mark after the name, its
+    // tooltip naming what is missing. It clears on the render after the build is reordered.
+    let out_of_order = out_of_order_reason(&database, &session.build.read(), &powerset_id, &power);
 
     rsx! {
         div { class: card_class,
@@ -2562,6 +2722,14 @@ pub fn PickedPowerCard(
                     span { class: "power-level", "L{power.level}" }
                 }
                 span { class: "power-name", "{power_def.map(|p| p.name.as_str()).unwrap_or(&power_id)}" }
+                if let Some(reason) = out_of_order.clone() {
+                    span {
+                        class: "power-order-mark",
+                        title: "{reason}",
+                        "aria-label": "{reason}",
+                        "!"
+                    }
+                }
 
                 // ON/OFF pill — rendered only for powers that buff the caster (beta
                 // `shouldShowToggle`). The real checkbox stays for accessibility and the
@@ -5500,4 +5668,81 @@ fn remove_slot_at(
         power.slots.remove(index);
     }
     slot_levels::forget_removed_slot(state, category, power_internal_name, index);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn verdict(gate: &PickGate, level_up_mode: bool) -> RowAction {
+        row_verdict(RowInputs {
+            power_name: "Tough",
+            unlock_level: 14,
+            picked_at: None,
+            set_blocked: None,
+            gate,
+            pick_level: Some(14),
+            level_gated_pick: None,
+            level_up_mode,
+        })
+        .0
+    }
+
+    #[test]
+    fn free_form_takes_a_power_that_needs_an_earlier_pick() {
+        assert_eq!(verdict(&PickGate::NeedsEarlier, false), RowAction::Pick(14));
+    }
+
+    #[test]
+    fn level_up_mode_refuses_a_power_that_needs_an_earlier_pick() {
+        assert_eq!(verdict(&PickGate::NeedsEarlier, true), RowAction::Refused);
+    }
+
+    #[test]
+    fn a_closed_gate_is_refused_in_both_modes() {
+        assert_eq!(verdict(&PickGate::Closed, false), RowAction::Refused);
+        assert_eq!(verdict(&PickGate::Closed, true), RowAction::Refused);
+    }
+
+    fn phrase(tokens: &[&str]) -> String {
+        prerequisite_phrase(tokens, |ident| ident.replace('_', " "))
+    }
+
+    /// Homecoming's Tough: a choice between two powers reads as that choice.
+    #[test]
+    fn a_choice_of_powers_reads_as_a_choice() {
+        assert_eq!(
+            phrase(&["Pool.Fighting.Boxing", "Pool.Fighting.Kick", "||"]),
+            "Boxing or Kick"
+        );
+    }
+
+    /// Homecoming's Weave wants two of three. The phrase names them without claiming any one
+    /// of them is enough.
+    #[test]
+    fn a_structured_rule_names_its_powers_without_restating_it() {
+        let weave = [
+            "Pool.Fighting.Boxing",
+            "Pool.Fighting.Kick",
+            "&&",
+            "Pool.Fighting.Boxing",
+            "Pool.Fighting.Tough",
+            "&&",
+            "||",
+            "Pool.Fighting.Kick",
+            "Pool.Fighting.Tough",
+            "&&",
+            "||",
+        ];
+        assert_eq!(phrase(&weave), "enough of Boxing, Kick and Tough");
+    }
+
+    /// An expression naming no power (an archetype or level rule) says only that it has one.
+    #[test]
+    fn a_rule_naming_no_power_falls_back_to_its_prerequisite() {
+        assert_eq!(
+            phrase(&["$archtype", "@Class_Peacebringer", "==", "!"]),
+            "its prerequisite"
+        );
+    }
 }

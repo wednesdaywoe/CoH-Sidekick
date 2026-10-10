@@ -29,7 +29,7 @@
 //! the binary does and the build stores it the way the display does, and nothing in a
 //! `CharacterState` can bridge those two.
 
-use crate::character::{CharacterState, SelectedPower};
+use crate::character::{CharacterState, PoolSelection, SelectedPower};
 
 /// What an evaluation is missing when it cannot answer. Returned rather than defaulted, so
 /// an expression this evaluator does not understand shows as a visibly ungated row instead
@@ -115,6 +115,95 @@ pub fn requires_met<S: AsRef<str>>(
             depth,
         }),
     }
+}
+
+/// Evaluate a HELD power's `requires` against the build as it stood when that power was taken.
+///
+/// [`requires_met`] asks whether the build owns the prerequisite at all, which is the right
+/// question for a power about to be picked. For one already in the build the game asked it at
+/// `pick_level`, so a prerequisite counts only if it was picked strictly below that level —
+/// Boxing at 30 does not open Tough at 20. Everything picked at or above `pick_level` is
+/// dropped, the power itself included, and `level char>` reads `pick_level`.
+///
+/// A `pick_level` of 0 is an auto-granted power with no pick of its own, so the whole build
+/// is the honest answer and it is evaluated unchanged.
+pub fn requires_met_in_order<S: AsRef<str>>(
+    tokens: &[S],
+    state: &CharacterState,
+    pick_level: u8,
+    archetype_id: Option<&str>,
+    sets: &SetPaths,
+) -> Result<bool, RequiresError> {
+    if pick_level == 0 {
+        return requires_met(tokens, state, archetype_id, sets);
+    }
+    requires_met(tokens, &build_before(state, pick_level), archetype_id, sets)
+}
+
+/// Would this power's `requires` pass if the build also held every other power in its set?
+///
+/// Separates the two things a closed gate can mean. Tough without Boxing or Kick opens once
+/// an earlier pick from its own set is added, so a free-form build may take it now and be told
+/// what it still needs. A mutual-exclusion lock or an archetype gate stays shut however many
+/// siblings are added, and stays refused. Adding powers can also close a gate (a sibling one
+/// excludes), so a `false` here is the conservative answer: the power stays refused, as it was.
+///
+/// `siblings` are the internal names of the set's powers, the power itself excluded. They are
+/// added to the bucket the set's path names, so the category counts (`Epic ownPowerNum?`)
+/// read them where the game would.
+pub fn requires_met_with_set<S: AsRef<str>>(
+    tokens: &[S],
+    state: &CharacterState,
+    set_id: &str,
+    siblings: &[&str],
+    archetype_id: Option<&str>,
+    sets: &SetPaths,
+) -> Result<bool, RequiresError> {
+    let mut with_set = state.clone();
+    let picks = siblings
+        .iter()
+        .map(|ident| SelectedPower::picked(*ident, set_id, 1));
+    let category = sets.of(set_id).and_then(|path| path.split('.').next());
+    let held_as = |id: &Option<String>| id.as_deref().map(normalize) == Some(normalize(set_id));
+    if held_as(&with_set.primary.id) {
+        with_set.primary.powers.extend(picks);
+    } else if held_as(&with_set.secondary.id) {
+        with_set.secondary.powers.extend(picks);
+    } else if category == Some("epic") {
+        let epic = with_set.epic_pool.get_or_insert_with(|| PoolSelection {
+            id: set_id.to_string(),
+            name: String::new(),
+            powers: Vec::new(),
+        });
+        epic.powers.extend(picks);
+    } else if let Some(pool) = with_set
+        .pools
+        .iter_mut()
+        .find(|pool| normalize(&pool.id) == normalize(set_id))
+    {
+        pool.powers.extend(picks);
+    } else {
+        with_set.pools.push(PoolSelection {
+            id: set_id.to_string(),
+            name: String::new(),
+            powers: picks.collect(),
+        });
+    }
+    requires_met(tokens, &with_set, archetype_id, sets)
+}
+
+/// The build with every pick at or above `level` removed. Auto-granted picks (level 0) and the
+/// inherents list stay: neither was taken at a pick level, so neither can be out of order.
+fn build_before(state: &CharacterState, level: u8) -> CharacterState {
+    let mut before = state.clone();
+    let earlier = |power: &SelectedPower| power.level < level;
+    before.primary.powers.retain(earlier);
+    before.secondary.powers.retain(earlier);
+    for pool in before.pools.iter_mut().chain(before.epic_pool.iter_mut()) {
+        pool.powers.retain(earlier);
+    }
+    before.level = level;
+    before
 }
 
 fn apply_token(

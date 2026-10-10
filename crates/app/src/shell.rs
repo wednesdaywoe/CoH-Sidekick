@@ -452,6 +452,11 @@ pub fn Shell() -> Element {
     // character (see `level_up_store`).
     let level_up_mode = use_signal(|| false);
     use_context_provider(|| crate::level_control::LevelUpMode(level_up_mode));
+    // The empty pick slot clicked in the by-level grid, steering the next pick there. Lifted
+    // here because the grid sets it and the header, the available rows and the pool picker read
+    // it.
+    let target_slot = use_signal(|| Option::<u8>::None);
+    use_context_provider(|| crate::level_control::TargetSlot(target_slot));
     // Whether each slot's level is drawn under it — an Options preference, on by default.
     let show_slot_levels = use_signal(|| true);
     use_context_provider(|| panels::powers::ShowSlotLevels(show_slot_levels));

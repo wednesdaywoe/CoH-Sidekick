@@ -323,7 +323,20 @@ pub fn PowersByLevel(database: Db) -> Element {
     };
 
     let picked: Vec<SelectedPower> = session.build.read().picked_powers().cloned().collect();
+    // The slot the next pick goes to (the clicked one, or the earliest empty), drawn as the
+    // current cell — free-form only, where empty cells are clickable to move it.
+    let mut target_slot = use_context::<crate::level_control::TargetSlot>().0;
+    let taken_levels: Vec<u8> = picked.iter().map(|power| power.level).collect();
+    let working_level = (!level_up_mode())
+        .then(|| crate::level_control::working_level_of(schedule, &taken_levels, target_slot()))
+        .flatten();
     let (cells, unplaced) = deal_picks(&schedule.pick_levels(), picked);
+    // Level 1 holds two picks; only the first empty one is the current cell.
+    let working_cell = working_level.and_then(|level| {
+        cells
+            .iter()
+            .position(|cell| cell.power.is_none() && cell.level == level)
+    });
     // Ceil-divide so the last column is the short one, never an extra column of one.
     let per_column = cells.len().div_ceil(COLUMNS).max(1);
 
@@ -387,10 +400,37 @@ pub fn PowersByLevel(database: Db) -> Element {
                                                 }
                                             },
                                         }
-                                    } else {
+                                    } else if level_up_mode() {
                                         div { class: "power-pick--empty",
                                             span { class: "power-level", "L{cell.level}" }
                                             span { class: "power-pick-hint", "Unspent pick" }
+                                        }
+                                    } else {
+                                        // Free-form: a click aims the next pick at this slot
+                                        // (Mids' behaviour). Clicking the aimed slot again lets
+                                        // go, back to the earliest empty one.
+                                        button {
+                                            class: if working_cell == Some(index) {
+                                                "power-pick--empty is-working"
+                                            } else {
+                                                "power-pick--empty"
+                                            },
+                                            title: if working_cell == Some(index) {
+                                                "The next power you take goes here, if it can be taken at level {cell.level}"
+                                            } else {
+                                                "Click to put the next power you take at level {cell.level}"
+                                            },
+                                            onclick: {
+                                                let level = cell.level;
+                                                move |_| {
+                                                    let aimed = target_slot() == Some(level);
+                                                    target_slot.set((!aimed).then_some(level));
+                                                }
+                                            },
+                                            span { class: "power-level", "L{cell.level}" }
+                                            span { class: "power-pick-hint",
+                                                if working_cell == Some(index) { "Next pick" } else { "Unspent pick" }
+                                            }
                                         }
                                     }
                                 }

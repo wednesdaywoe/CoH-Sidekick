@@ -40,9 +40,77 @@ pub(crate) const MIN_LEVEL: u8 = 1;
 #[derive(Clone, Copy)]
 pub struct LevelUpMode(pub Signal<bool>);
 
+/// The empty pick slot the user clicked in the by-level grid, when they did: the next pick is
+/// steered there (Mids' behaviour) and the working level reads it. UI state, not build state,
+/// so it is never saved and adds no undo step. Cleared by the pick it steered.
+#[derive(Clone, Copy)]
+pub struct TargetSlot(pub Signal<Option<u8>>);
+
+impl TargetSlot {
+    /// The clicked slot, when it steers picks. Level Up mode walks the character's own level,
+    /// so a click there steers nothing.
+    pub fn steering(self, level_up_mode: bool) -> Option<u8> {
+        if level_up_mode {
+            None
+        } else {
+            (self.0)()
+        }
+    }
+
+    /// Forget the clicked slot once a pick has been made, so the working level returns to the
+    /// earliest empty one.
+    pub fn clear(self) {
+        let mut slot = self.0;
+        if slot.peek().is_some() {
+            slot.set(None);
+        }
+    }
+}
+
+/// The level the guided free-form planner is working at: the clicked empty slot while one is
+/// held and still empty, otherwise the earliest pick slot the build has not filled. `None` once
+/// every pick the schedule grants is taken.
+///
+/// It is shown beside the character's level, never written to it — totals and the slot budget
+/// keep reading the level the user set.
+pub fn working_level(
+    schedule: &coh_data::LevelingSchedule,
+    build: &coh_data::CharacterState,
+    target: Option<u8>,
+) -> Option<u8> {
+    let taken_levels: Vec<u8> = build.picked_powers().map(|power| power.level).collect();
+    working_level_of(schedule, &taken_levels, target)
+}
+
+/// [`working_level`] from the pick levels already spent, for callers that hold those already.
+pub fn working_level_of(
+    schedule: &coh_data::LevelingSchedule,
+    taken_levels: &[u8],
+    target: Option<u8>,
+) -> Option<u8> {
+    // The rows' own rule with no unlock floor, so this is the pick a level-1 power would take.
+    schedule.pick_level_toward(taken_levels, MIN_LEVEL, target)
+}
+
+/// The level a power list dims against: a power unlocking above it reads as out of reach, but
+/// stays pickable.
+///
+/// Free-form guides by the working level — the pick being made next — so at working level 4
+/// the level-32 nuke reads as out of reach even on a level-50 build. Once every pick is taken
+/// there is no next pick, and the character's level answers instead. Level Up mode walks the
+/// character's own level, so that is the one it reads.
+pub fn reach_level(level_up_mode: bool, working_level: Option<u8>, character_level: u8) -> u8 {
+    match (level_up_mode, working_level) {
+        (false, Some(working)) => working,
+        _ => character_level,
+    }
+}
+
 #[component]
 pub fn LevelControl(database: Option<Db>) -> Element {
     let session = use_context::<BuildSession>();
+    let level_up_mode = use_context::<LevelUpMode>().0;
+    let target_slot = use_context::<TargetSlot>().0;
     let level = session.build.read().level;
     // The level under the thumb mid-drag. `None` between gestures, so the committed level is
     // what shows; set on `oninput` and cleared by the `onchange` that commits it.
@@ -66,6 +134,12 @@ pub fn LevelControl(database: Option<Db>) -> Element {
     };
 
     let shown = dragging().unwrap_or(level);
+    // Level Up mode walks the character's own level, so a second number would only repeat it.
+    let working = database
+        .leveling_schedule
+        .as_ref()
+        .filter(|_| !level_up_mode())
+        .and_then(|schedule| working_level(schedule, &session.build.read(), target_slot()));
 
     rsx! {
         div { class: "level-control",
@@ -83,6 +157,16 @@ pub fn LevelControl(database: Option<Db>) -> Element {
                     "−"
                 }
                 span { class: "level-control__value mono", "{shown}" }
+                if let Some(working) = working {
+                    span {
+                        class: "level-control__working mono",
+                        title: "Working level {working}: your next power pick fills the level \
+                                {working} slot, and powers you couldn't take by then are dimmed. \
+                                A power that unlocks later takes the first free slot at or above \
+                                its unlock level.",
+                        "({working})"
+                    }
+                }
                 button {
                     class: "step",
                     r#type: "button",
@@ -163,9 +247,8 @@ pub fn LevelUpControl(database: Option<Db>) -> Element {
 
     // Every derived number, read before the markup so the borrow of the build ends here (the
     // click handlers below commit to it).
-    let (level, progress, progression_target, next_pick) = {
+    let (level, progress, progression_target) = {
         let build = session.build.read();
-        let taken_levels: Vec<u8> = build.picked_powers().map(|power| power.level).collect();
         (
             build.level,
             coh_data::level_progress(schedule, &build),
@@ -173,9 +256,6 @@ pub fn LevelUpControl(database: Option<Db>) -> Element {
                 build.picked_powers().count(),
                 coh_data::placed_budget_slots(&build),
             ),
-            // The rows' own rule with no unlock floor, so this is the pick a level-1 power would
-            // take — the badge every Available row would wear if nothing held it back.
-            schedule.next_pick_level(&taken_levels, MIN_LEVEL),
         )
     };
 
@@ -230,7 +310,6 @@ pub fn LevelUpControl(database: Option<Db>) -> Element {
                 span { class: "level-up__glyph", "⇗" }
                 span { class: "level-up__label", "Level Up" }
             }
-            NextPickReadout { next_pick: next_pick }
         };
     }
 
@@ -282,33 +361,6 @@ pub fn LevelUpControl(database: Option<Db>) -> Element {
                 }
             }
         }
-    }
-}
-
-/// The level the next power pick lands at, beside Level Up while the mode is off.
-///
-/// An Available row's badge is the power's unlock level, so the slot a pick will fill was only
-/// readable from a row's hover text, and players kept hovering a low-level power to find it.
-/// With the mode on this stays hidden: the cluster already says what the level still owes.
-#[component]
-fn NextPickReadout(next_pick: Option<u8>) -> Element {
-    match next_pick {
-        Some(level) => rsx! {
-            span {
-                class: "next-pick",
-                title: "Your next power pick fills the level {level} slot. A power that unlocks \
-                        later takes the first free slot at or above its unlock level.",
-                span { class: "next-pick__label", "Next pick" }
-                span { class: "next-pick__value mono", "Lvl {level}" }
-            }
-        },
-        None => rsx! {
-            span {
-                class: "next-pick is-done",
-                title: "Every power pick the schedule grants is taken.",
-                "All picks made"
-            }
-        },
     }
 }
 
@@ -372,4 +424,27 @@ fn set_level(session: BuildSession, database: &Db, next: u8) {
         crate::inherents::sync(state, &database);
         crate::granted_powers::sync(state, &database);
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::reach_level;
+
+    /// Free-form dims by the next empty pick, not by the level the user set.
+    #[test]
+    fn free_form_dims_against_the_working_level() {
+        assert_eq!(reach_level(false, Some(4), 50), 4);
+    }
+
+    /// With every pick taken there is no next pick, so the character's level answers.
+    #[test]
+    fn a_full_build_dims_against_the_character_level() {
+        assert_eq!(reach_level(false, None, 50), 50);
+    }
+
+    /// Level Up mode walks the character's own level, whatever the picks say.
+    #[test]
+    fn level_up_mode_dims_against_the_character_level() {
+        assert_eq!(reach_level(true, Some(4), 28), 28);
+    }
 }
