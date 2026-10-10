@@ -78,11 +78,17 @@ Decisions (2026-10-10, user-chosen):
       Geyser took it at 26; in the pool picker Boxing and Kick (4) were bright, the 14s dimmed.
       The plan named Archery; Water Blast stood in, the same check on a set a fixture holds.
       verify: fn:reach_level
-- [ ] **GP5** — an empty cell in the by-level grid (`PowersByLevel`) can be clicked. The click
+- [x] **GP5** — an empty cell in the by-level grid (`PowersByLevel`) can be clicked. The click
       sets the working level to that cell's level and highlights the cell. The next pick fills that cell
       if the power is legal there, otherwise the earliest legal empty slot.
-      done when: a placement test shows a level-2 power goes into the clicked level-24 slot
-      rather than the earliest empty one, and a level-32 power clicked into slot 24 goes to 32.
+      Done 2026-10-10. Placement is `LevelingSchedule::pick_level_toward`; the clicked slot is
+      `level_control::TargetSlot`, UI state cleared by the next pick from either picker.
+      Clicking the aimed cell again lets go. The working slot is highlighted as "Next pick"
+      even before any click (Claude's call — the grid then always says where the next power
+      goes). Level Up mode keeps the cells plain and ignores the target. Q/A on the web build:
+      aimed L24 → `50 (24)`; Aqua Bolt landed at 24 and the control returned to `50 (4)`;
+      aimed L18, Geyser landed at 26; the second click on L20 let go; Pixel 7 tap aimed L24.
+      verify: fn:pick_level_toward, fn:TargetSlot, file:crates/coh_data/tests/working_level.rs
 - [ ] **GP6** — a power held without its prerequisite at an earlier level (GP1) is marked on its
       grid card and shown red italic in the power list. The tooltip names what is missing
       ("needs Boxing or Kick at an earlier level"). Both clear once the build is back in order.  @unchecked

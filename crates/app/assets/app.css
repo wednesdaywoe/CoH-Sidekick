@@ -1757,6 +1757,20 @@
   color: var(--text-faint);
 }
 .power-pick-hint { font-size: 11px; font-style: italic; }
+/* Free-form makes the placeholder a button: a click aims the next pick at it. The aimed slot —
+   the clicked one, or the earliest empty — is the current cell, drawn in the action colour so
+   the grid says where the next power will go before anything is taken. */
+button.power-pick--empty {
+  width: 100%; background: none; font: inherit; text-align: left; cursor: pointer;
+}
+/* Mouse only: on touch a tapped cell would keep the hover look after the tap. */
+@media (hover: hover) {
+  button.power-pick--empty:hover { border-color: var(--action-hover); color: var(--text-dim); }
+}
+.power-pick--empty.is-working {
+  border-style: solid; border-color: var(--action-active); color: var(--action-active);
+  background: color-mix(in srgb, var(--action-active) 10%, transparent);
+}
 
 /* Moving a pick (by-level only): the level badge is the handle. Mid-drag the source cell fades,
    every cell a drop would be legal on wears a dashed outline, the one under the pointer fills,

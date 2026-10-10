@@ -46,3 +46,37 @@ fn a_full_build_has_no_working_level() {
     let schedule = homecoming_schedule();
     assert_eq!(working(&schedule, &schedule.pick_levels()), None);
 }
+
+// ---- a clicked empty slot steers the next pick (GP5) -----------------------------------------
+
+/// A level-2 power, with slot 24 clicked, goes into 24 rather than the earliest empty slot.
+#[test]
+fn a_clicked_slot_takes_a_power_that_fits_it() {
+    let schedule = homecoming_schedule();
+    assert_eq!(schedule.pick_level_toward(&[1, 1], 2, Some(24)), Some(24));
+}
+
+/// A level-32 power cannot go into slot 24, so it falls back to the earliest slot it can fill.
+#[test]
+fn a_clicked_slot_below_the_power_falls_back_to_its_earliest_slot() {
+    let schedule = homecoming_schedule();
+    assert_eq!(schedule.pick_level_toward(&[1, 1], 32, Some(24)), Some(32));
+}
+
+/// A clicked slot that has since been filled steers nothing.
+#[test]
+fn a_filled_clicked_slot_falls_back_to_the_earliest_slot() {
+    let schedule = homecoming_schedule();
+    assert_eq!(
+        schedule.pick_level_toward(&[1, 1, 24], 2, Some(24)),
+        Some(2)
+    );
+}
+
+/// Level 1's second pick is still open after one level-1 power, so a click on it holds.
+#[test]
+fn a_clicked_level_one_slot_counts_both_picks() {
+    let schedule = homecoming_schedule();
+    assert_eq!(schedule.pick_level_toward(&[1, 2], 1, Some(1)), Some(1));
+    assert_eq!(schedule.pick_level_toward(&[1, 1, 2], 1, Some(1)), Some(4));
+}

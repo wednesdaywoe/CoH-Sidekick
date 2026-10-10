@@ -1933,21 +1933,22 @@ fn AvailablePowerRow(
     // or above the power's unlock level. `None` means the build has no such pick left, so the
     // row disables: a picked power carries the level the game granted it, never a substituted
     // one (a dataset with no schedule yields `None` too — fail loud, like the slot budget).
+    let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+    let target_slot = use_context::<crate::level_control::TargetSlot>();
+    // …or the empty slot clicked in the by-level grid, when this power can legally fill it.
+    let target = target_slot.steering(level_up_mode());
     let pick_level = database
         .leveling_schedule
         .as_ref()
-        .and_then(|schedule| schedule.next_pick_level(&taken_levels, unlock_level));
-
-    let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+        .and_then(|schedule| schedule.pick_level_toward(&taken_levels, unlock_level, target));
 
     // A power that unlocks above the level being picked for is still pickable — you plan the
     // whole build ahead of time — so `locked` dims the row to say "not at this pick yet", it
     // never disables it. Free-form reads the working level (the next empty pick), so a fresh
     // level-50 build dims everything past level 1 and the dimming follows the picks up.
-    let working_level = database
-        .leveling_schedule
-        .as_ref()
-        .and_then(|schedule| crate::level_control::working_level_of(schedule, &taken_levels));
+    let working_level = database.leveling_schedule.as_ref().and_then(|schedule| {
+        crate::level_control::working_level_of(schedule, &taken_levels, target)
+    });
     let locked = unlock_level
         > crate::level_control::reach_level(level_up_mode(), working_level, current_level);
 
@@ -2038,12 +2039,17 @@ fn AvailablePowerRow(
                     let power_internal = power_internal.clone();
                     let database = database.clone();
                     match action {
-                        RowAction::Pick(level) => session.commit(move |state| {
-                            add_power(state, &set_id, &power_internal, level, branch_role);
-                            // The pick may be another power's grant gate; the grant lands in
-                            // the same edit, so one user action is one undo step.
-                            crate::granted_powers::sync(state, &database);
-                        }),
+                        RowAction::Pick(level) => {
+                            session.commit(move |state| {
+                                add_power(state, &set_id, &power_internal, level, branch_role);
+                                // The pick may be another power's grant gate; the grant lands
+                                // in the same edit, so one user action is one undo step.
+                                crate::granted_powers::sync(state, &database);
+                            });
+                            // A clicked slot steers one pick, then the earliest empty slot
+                            // leads again.
+                            target_slot.clear();
+                        }
                         // Addressed by THIS ROW'S set, not by the name alone: `internalName`
                         // collides across archetypes (Build_Up appears ×64), so a name-only
                         // removal is a removal from whichever bucket matches first. The row

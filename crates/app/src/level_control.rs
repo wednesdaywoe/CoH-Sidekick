@@ -40,23 +40,56 @@ pub(crate) const MIN_LEVEL: u8 = 1;
 #[derive(Clone, Copy)]
 pub struct LevelUpMode(pub Signal<bool>);
 
-/// The level the guided free-form planner is working at: the earliest pick slot the build has
-/// not filled. `None` once every pick the schedule grants is taken.
+/// The empty pick slot the user clicked in the by-level grid, when they did: the next pick is
+/// steered there (Mids' behaviour) and the working level reads it. UI state, not build state,
+/// so it is never saved and adds no undo step. Cleared by the pick it steered.
+#[derive(Clone, Copy)]
+pub struct TargetSlot(pub Signal<Option<u8>>);
+
+impl TargetSlot {
+    /// The clicked slot, when it steers picks. Level Up mode walks the character's own level,
+    /// so a click there steers nothing.
+    pub fn steering(self, level_up_mode: bool) -> Option<u8> {
+        if level_up_mode {
+            None
+        } else {
+            (self.0)()
+        }
+    }
+
+    /// Forget the clicked slot once a pick has been made, so the working level returns to the
+    /// earliest empty one.
+    pub fn clear(self) {
+        let mut slot = self.0;
+        if slot.peek().is_some() {
+            slot.set(None);
+        }
+    }
+}
+
+/// The level the guided free-form planner is working at: the clicked empty slot while one is
+/// held and still empty, otherwise the earliest pick slot the build has not filled. `None` once
+/// every pick the schedule grants is taken.
 ///
 /// It is shown beside the character's level, never written to it — totals and the slot budget
 /// keep reading the level the user set.
 pub fn working_level(
     schedule: &coh_data::LevelingSchedule,
     build: &coh_data::CharacterState,
+    target: Option<u8>,
 ) -> Option<u8> {
     let taken_levels: Vec<u8> = build.picked_powers().map(|power| power.level).collect();
-    working_level_of(schedule, &taken_levels)
+    working_level_of(schedule, &taken_levels, target)
 }
 
 /// [`working_level`] from the pick levels already spent, for callers that hold those already.
-pub fn working_level_of(schedule: &coh_data::LevelingSchedule, taken_levels: &[u8]) -> Option<u8> {
+pub fn working_level_of(
+    schedule: &coh_data::LevelingSchedule,
+    taken_levels: &[u8],
+    target: Option<u8>,
+) -> Option<u8> {
     // The rows' own rule with no unlock floor, so this is the pick a level-1 power would take.
-    schedule.next_pick_level(taken_levels, MIN_LEVEL)
+    schedule.pick_level_toward(taken_levels, MIN_LEVEL, target)
 }
 
 /// The level a power list dims against: a power unlocking above it reads as out of reach, but
@@ -77,6 +110,7 @@ pub fn reach_level(level_up_mode: bool, working_level: Option<u8>, character_lev
 pub fn LevelControl(database: Option<Db>) -> Element {
     let session = use_context::<BuildSession>();
     let level_up_mode = use_context::<LevelUpMode>().0;
+    let target_slot = use_context::<TargetSlot>().0;
     let level = session.build.read().level;
     // The level under the thumb mid-drag. `None` between gestures, so the committed level is
     // what shows; set on `oninput` and cleared by the `onchange` that commits it.
@@ -105,7 +139,7 @@ pub fn LevelControl(database: Option<Db>) -> Element {
         .leveling_schedule
         .as_ref()
         .filter(|_| !level_up_mode())
-        .and_then(|schedule| working_level(schedule, &session.build.read()));
+        .and_then(|schedule| working_level(schedule, &session.build.read(), target_slot()));
 
     rsx! {
         div { class: "level-control",

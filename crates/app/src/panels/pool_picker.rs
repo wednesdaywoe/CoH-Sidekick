@@ -371,6 +371,7 @@ fn PoolPickerModal(database: Db, mode: PoolPickerMode, on_close: EventHandler<()
     });
 
     let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+    let target_slot = use_context::<crate::level_control::TargetSlot>();
     // A click on a power row takes it when it can be taken, and otherwise leaves it in the
     // preview, where the pane says why not. Same verdict as the Take button: both read
     // `take_check`.
@@ -385,6 +386,7 @@ fn PoolPickerModal(database: Db, mode: PoolPickerMode, on_close: EventHandler<()
                 &set_id,
                 &ident,
                 level_up_mode(),
+                target_slot.steering(level_up_mode()),
             );
             let Some(TakeCheck {
                 pool_name,
@@ -403,6 +405,7 @@ fn PoolPickerModal(database: Db, mode: PoolPickerMode, on_close: EventHandler<()
                 ident,
                 pool_name,
                 level,
+                target_slot,
             );
             on_close.call(());
         }
@@ -578,6 +581,7 @@ fn take_check(
     set_id: &str,
     power_ident: &str,
     level_up_mode: bool,
+    target: Option<u8>,
 ) -> Option<TakeCheck> {
     let power = resolve_power_def(database, set_id, power_ident)?;
     let set_powers = powers_of_set(database, set_id, mode.origin());
@@ -618,7 +622,7 @@ fn take_check(
     let pick_level = database
         .leveling_schedule
         .as_ref()
-        .and_then(|schedule| schedule.next_pick_level(&taken_levels, unlock_level));
+        .and_then(|schedule| schedule.pick_level_toward(&taken_levels, unlock_level, target));
 
     let pool_name = database
         .pool_catalog
@@ -666,12 +670,15 @@ fn take_power(
     power_ident: String,
     pool_name: String,
     level: u8,
+    target_slot: crate::level_control::TargetSlot,
 ) {
     session.commit(move |state| {
         mode.add_to(state, &set_id, &pool_name);
         add_power(state, &set_id, &power_ident, level, None);
         crate::granted_powers::sync(state, &database);
     });
+    // A clicked slot steers one pick, as on the Available rows.
+    target_slot.clear();
 }
 
 /// The commit control under the preview: takes the power (and its pool), and — for a pool the
@@ -686,6 +693,7 @@ fn PoolPickerCommit(
 ) -> Element {
     let session = use_context::<BuildSession>();
     let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+    let target_slot = use_context::<crate::level_control::TargetSlot>();
 
     let Some(check) = take_check(
         &database,
@@ -694,6 +702,7 @@ fn PoolPickerCommit(
         &set_id,
         &power_ident,
         level_up_mode(),
+        target_slot.steering(level_up_mode()),
     ) else {
         return rsx! {};
     };
@@ -737,6 +746,7 @@ fn PoolPickerCommit(
                                 power_ident.clone(),
                                 pool_name.clone(),
                                 level,
+                                target_slot,
                             );
                             on_committed.call(());
                         }
@@ -769,12 +779,13 @@ fn PoolRow(
     // The level the pool's powers dim against, by the Available rows' own rule, so a power
     // reads as out of reach here exactly when it will on the rail it lands in.
     let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+    let target_slot = use_context::<crate::level_control::TargetSlot>();
+    let target_slot = move || target_slot.steering(level_up_mode());
     let reach_level = {
         let build = session.build.read();
-        let working_level = database
-            .leveling_schedule
-            .as_ref()
-            .and_then(|schedule| crate::level_control::working_level(schedule, &build));
+        let working_level = database.leveling_schedule.as_ref().and_then(|schedule| {
+            crate::level_control::working_level(schedule, &build, target_slot())
+        });
         crate::level_control::reach_level(level_up_mode(), working_level, build.level)
     };
 
