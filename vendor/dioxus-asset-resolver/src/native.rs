@@ -64,9 +64,7 @@ fn resolve_asset_path_from_filesystem(path: &str) -> Option<PathBuf> {
     // The rule below inverts the upstream one: a request resolves inside an allowed root or it
     // does not resolve. Containment is checked AFTER canonicalisation, so `..` and symlinks are
     // answered by the same test rather than by a spelling rule that has to anticipate them.
-    let decoded = percent_encoding::percent_decode_str(path)
-        .decode_utf8()
-        .ok()?;
+    let decoded = percent_encoding::percent_decode_str(path).decode_utf8().ok()?;
     let uri_path = PathBuf::from(decoded.as_ref());
     let relative = uri_path.strip_prefix("/").unwrap_or(&uri_path);
 
@@ -84,8 +82,7 @@ fn resolve_asset_path_from_filesystem(path: &str) -> Option<PathBuf> {
     //    served it because it existed; here it is served only if it lands inside a root.
     // 2. The path joined onto each root, which is the bundled case - `/assets/app.css` against
     //    the bundle's `assets/` dir.
-    let candidates =
-        std::iter::once(uri_path.clone()).chain(roots.iter().map(|r| r.join(relative)));
+    let candidates = std::iter::once(uri_path.clone()).chain(roots.iter().map(|r| r.join(relative)));
 
     for candidate in candidates {
         let Ok(candidate) = candidate.canonicalize() else {
