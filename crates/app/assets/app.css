@@ -245,12 +245,19 @@
    run to x=1255 and the brand is 196px beside them, so the header wrapped below ~1470px — and a
    wrapped row puts Help alone at the left edge of row two, where its leftward panel ran off the
    page. Two steps, cheapest first:
-     - below 1500px the brand keeps its mark and hides its words (read by a screen reader still,
+     - below 1600px the brand keeps its mark and hides its words (read by a screen reader still,
        the `.sr-only` way — `display: none` would drop the heading from the page's outline),
        which brings the row down to ~1300px;
-     - below 1320px the level slider goes, as it already does on a phone, which brings it to
-       ~1200px. The steppers stay, so level is still one click a step. */
-@media (max-width: 1499px) {
+     - below 1400px the level slider goes, as it already does on a phone, which brings it to
+       ~1200px. The steppers stay, so level is still one click a step.
+   The "Next pick" readout beside Level Up (2026-10-07) arrived after those measurements and
+   added ~90px, so at 1200px the row ran 77px past the window and pushed Help and the brand
+   off the right edge (found 2026-10-10 by `audit:grid-viewport`). It goes at the second step
+   with the slider: it restates what the Powers panel's next empty pick already shows, and the
+   steppers and Level Up — the controls — keep their seats. Both steps moved up 100px with
+   it, re-measured 2026-10-10 on an empty build: the row needs ~1390px with the brand's words
+   hidden and ~1555px with them shown. */
+@media (max-width: 1599px) {
   .brand h1, .brand .brand-tag {
     position: absolute;
     width: 1px; height: 1px;
@@ -261,8 +268,9 @@
     border: 0;
   }
 }
-@media (max-width: 1319px) {
+@media (max-width: 1399px) {
   .shell-header .level-control .level-control__slider { display: none; }
+  .shell-header .next-pick { display: none; }
 }
 /* The two steps above were sized against an empty build, whose identity chip reads "New build"
    at 94px. A named build's chip runs to its 34ch cap (~250px), and "Scrapper · Titan Weapons /
