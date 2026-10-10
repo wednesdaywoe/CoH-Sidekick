@@ -117,6 +117,43 @@ pub fn requires_met<S: AsRef<str>>(
     }
 }
 
+/// Evaluate a HELD power's `requires` against the build as it stood when that power was taken.
+///
+/// [`requires_met`] asks whether the build owns the prerequisite at all, which is the right
+/// question for a power about to be picked. For one already in the build the game asked it at
+/// `pick_level`, so a prerequisite counts only if it was picked strictly below that level —
+/// Boxing at 30 does not open Tough at 20. Everything picked at or above `pick_level` is
+/// dropped, the power itself included, and `level char>` reads `pick_level`.
+///
+/// A `pick_level` of 0 is an auto-granted power with no pick of its own, so the whole build
+/// is the honest answer and it is evaluated unchanged.
+pub fn requires_met_in_order<S: AsRef<str>>(
+    tokens: &[S],
+    state: &CharacterState,
+    pick_level: u8,
+    archetype_id: Option<&str>,
+    sets: &SetPaths,
+) -> Result<bool, RequiresError> {
+    if pick_level == 0 {
+        return requires_met(tokens, state, archetype_id, sets);
+    }
+    requires_met(tokens, &build_before(state, pick_level), archetype_id, sets)
+}
+
+/// The build with every pick at or above `level` removed. Auto-granted picks (level 0) and the
+/// inherents list stay: neither was taken at a pick level, so neither can be out of order.
+fn build_before(state: &CharacterState, level: u8) -> CharacterState {
+    let mut before = state.clone();
+    let earlier = |power: &SelectedPower| power.level < level;
+    before.primary.powers.retain(earlier);
+    before.secondary.powers.retain(earlier);
+    for pool in before.pools.iter_mut().chain(before.epic_pool.iter_mut()) {
+        pool.powers.retain(earlier);
+    }
+    before.level = level;
+    before
+}
+
 fn apply_token(
     token: &str,
     expression: &str,

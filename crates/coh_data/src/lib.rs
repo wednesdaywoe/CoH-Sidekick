@@ -116,7 +116,9 @@ pub use leveling_schedule::{
 pub use mbd::{MbdEnhancement, MbdFile, MbdPowerEntry, MbdSlotEntry};
 pub use mids_names::MidsNames;
 pub use mids_uids::{MidsFamily, MidsSetPiece, MidsUidPrefix, MidsUids};
-pub use pick_rules::{requires_met, set_gate, RequiresError, SetGate, SetPaths};
+pub use pick_rules::{
+    requires_met, requires_met_in_order, set_gate, RequiresError, SetGate, SetPaths,
+};
 pub use pools::{PoolCatalog, PoolDef};
 pub use power::{targets_name_foe, MechanicType, Power, Powerset};
 pub use proc_data::{ProcData, ProcDatabase, ProcEffect, ProcType};

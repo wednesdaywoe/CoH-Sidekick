@@ -43,12 +43,13 @@ Decisions (2026-10-10, user-chosen):
 
 ## Active
 
-- [ ] **GP1** — an order-aware prerequisite check in `coh_data::pick_rules`: for a held power,
+- [x] **GP1** — an order-aware prerequisite check in `coh_data::pick_rules`: for a held power,
       the prerequisite counts only if it is held at a strictly lower pick level. Today
       `requires_met` counts ownership at any level.
-      done when: unit tests show Tough at 20 with Boxing at 30 is flagged, Tough at 20 with Kick
-      at 18 is clear, and Tough with neither is flagged. These guard the level comparison, which
-      nobody would catch by looking at one build.
+      Done 2026-10-10 as `requires_met_in_order`, which evaluates the power's own `requires`
+      against the build with every pick at or above its level removed. Mutation-checked: with
+      the old any-level behaviour, two of the four tests fail.
+      verify: fn:requires_met_in_order, file:crates/coh_data/tests/prerequisite_order.rs
 - [ ] **GP2** — with Level Up mode off, a power whose gate is `PickGate::Closed` is pickable and
       lands at `next_pick_level`. With Level Up mode on it is still refused.
       done when: `row_verdict` tests cover both modes for a closed gate.
