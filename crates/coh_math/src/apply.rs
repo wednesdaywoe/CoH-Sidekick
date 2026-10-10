@@ -232,11 +232,25 @@ fn target_type(p: &Power) -> Option<&str> {
     p.extra.get("targetType").and_then(|v| v.as_str())
 }
 
+/// Aimed at an ally, and nothing it lands on is the caster.
+///
+/// `targetType` is the aim, not the recipients. An area burst centred on the ally reaches the
+/// caster standing inside it when `targetsAffected` lists `Self`: Vengeance (aimed at a
+/// `Dead Teammate`, "grant you and your teammates"), and Thunderspy's Alkaloid and O2 Boost
+/// ("you will be healed if you are close enough to the target"). Reading the aim alone dropped
+/// Vengeance's whole buff from the caster's totals (report 2026-10-09).
+///
+/// Only the `AoE` area counts. Electrical Affinity's circuits are `Chain` powers that list
+/// `Self` too, but for their self-anchored `Grant_Power` Static row; the chain itself jumps
+/// between allies, and crediting it would hand the caster Energizing Circuit's +125% recharge.
 fn is_ally_only(p: &Power) -> bool {
-    target_type(p).is_some_and(|t| {
+    let aimed_at_ally = target_type(p).is_some_and(|t| {
         let t = t.to_ascii_lowercase();
         ALLY_ONLY_TARGET_TYPES.contains(&t.as_str())
-    })
+    });
+    let burst_reaches_caster =
+        p.affects_caster() && p.extra.get("effectArea").and_then(|v| v.as_str()) == Some("AoE");
+    aimed_at_ally && !burst_reaches_caster
 }
 
 /// A Self-targeted power — the gate the beta's `rangeBuff` block applies
