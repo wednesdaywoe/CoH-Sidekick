@@ -89,11 +89,18 @@ Decisions (2026-10-10, user-chosen):
       aimed L24 → `50 (24)`; Aqua Bolt landed at 24 and the control returned to `50 (4)`;
       aimed L18, Geyser landed at 26; the second click on L20 let go; Pixel 7 tap aimed L24.
       verify: fn:pick_level_toward, fn:TargetSlot, file:crates/coh_data/tests/working_level.rs
-- [ ] **GP6** — a power held without its prerequisite at an earlier level (GP1) is marked on its
+- [x] **GP6** — a power held without its prerequisite at an earlier level (GP1) is marked on its
       grid card and shown red italic in the power list. The tooltip names what is missing
-      ("needs Boxing or Kick at an earlier level"). Both clear once the build is back in order.  @unchecked
-      done when: in the app, I take Tough before Boxing and see both marks; I add Kick at a lower
-      level and both clear; I move Kick above Tough and they return.
+      ("needs Boxing or Kick at an earlier level"). Both clear once the build is back in order.
+      Done 2026-10-10 as `powers::out_of_order_reason`, worded by `prerequisite_phrase`: a
+      choice reads "Boxing or Kick", a richer rule (Weave's two of three) reads "enough of
+      Boxing, Kick and Tough" rather than restating it. The card mark is a small red `!` after
+      the name, on the card both Powers layouts share. Shown in either mode: a loaded build can
+      be out of order with Level Up on. Q/A on the web build: Tough alone at 14 showed both
+      marks, tooltip "Out of order: Tough needs Boxing or Kick picked before level 14"; Kick
+      added at 4 cleared both; Kick given back and re-taken into the clicked L20 slot brought
+      both back.
+      verify: fn:out_of_order_reason, fn:prerequisite_phrase
 - [ ] **GP7** — Q/A pass in the web build with screenshots (`qa-check` skill), Level Up mode off,
       covering: a level-1 build picked in order, an out-of-level pick, a slot click, the Tough
       case, and Level Up mode still refusing Tough.  @unchecked
