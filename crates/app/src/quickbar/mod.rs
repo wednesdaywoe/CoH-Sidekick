@@ -342,7 +342,7 @@ fn DashboardEntry() -> Element {
     }
 }
 
-/// The Display menu's Reset layout row, split out for the same reason [`ReorderEntry`] is:
+/// The Display menu's Reset to default row, split out for the same reason [`ReorderEntry`] is:
 /// raising the confirm closes the menu on the way in, and that needs [`PopoverOpen`], which
 /// only exists around the Popover's children.
 #[component]
@@ -354,18 +354,18 @@ fn ResetLayoutEntry(mut reset_confirm_open: Signal<bool>) -> Element {
             button {
                 class: "quickbar-action",
                 r#type: "button",
-                title: "Restore the default panel arrangement",
+                title: "Put panels, dashboards and the quickbar back the way a new install has them",
                 onclick: move |_| {
                     menu_open.set(false);
                     reset_confirm_open.set(true);
                 },
-                "Reset layout"
+                "Reset to default"
             }
         }
     }
 }
 
-/// The confirm behind the Display menu's Reset layout row, mounted at the shell root like
+/// The confirm behind the Display menu's Reset to default row, mounted at the shell root like
 /// every other overlay: a `fixed` backdrop is contained by the grid's `transform`ed
 /// surfaces, so it cannot render inside the menu (see [`crate::modal`]).
 ///
@@ -377,24 +377,21 @@ pub fn ResetLayoutConfirm(
     mut open: Signal<bool>,
     layout: Signal<Vec<GridItem>>,
     mobile_order: Signal<MobileOrder>,
+    pins: Signal<Vec<QuickBarItem>>,
 ) -> Element {
     let grid_columns = use_context::<crate::grid::view::GridColumns>().0;
     let dashboards = use_context::<crate::panels::dashboards::DashboardConfig>().0;
-    let roster = crate::panels::dashboards::surfaces(&dashboards.read());
     if !open() {
         return rsx! {};
     }
     rsx! {
         crate::confirm::ConfirmModal {
-            title: "Reset layout".to_string(),
-            message: "Restore the default panel arrangement on both the desktop grid and the mobile stack? It is saved over your current arrangement, and the layout has no undo.".to_string(),
+            title: "Reset to default".to_string(),
+            message: "Put the display back the way a new install has it? Panel positions on the desktop grid and the mobile stack, the dashboard panels and the stats in them, and the quickbar pins all return to their defaults. Dashboards you made are removed. Your builds are not touched, and this has no undo.".to_string(),
             confirm_label: "Reset".to_string(),
-            on_confirm: {
-                let roster = roster.clone();
-                move |_| {
-                    open.set(false);
-                    reset_arrangement(layout, mobile_order, grid_columns, roster.clone())
-                }
+            on_confirm: move |_| {
+                open.set(false);
+                reset_to_default(layout, mobile_order, grid_columns, dashboards, pins)
             },
             on_cancel: move |_| open.set(false),
         }
@@ -424,16 +421,28 @@ fn ReorderEntry(mut reorder_open: Signal<bool>) -> Element {
     }
 }
 
-/// Restore both layouts to their defaults, through the same hand the loose Reset button used
-/// to reach (moved to the Display menu in HM5, behind a confirm since the layout is
-/// irreversible): window-fitted desktop defaults and the default mobile order, persisted so
-/// the reset survives a reload the way a drag does.
-fn reset_arrangement(
+/// Restore what a new install shows: the default dashboards, the default quickbar pins, and
+/// both layouts rebuilt around them — window-fitted desktop defaults and the default mobile
+/// order — all persisted so the reset survives a reload the way a drag does.
+///
+/// The dashboards are reset with the layout, not left alone, because the layout is built
+/// around them: rebuilding the arrangement from the user's own roster gave back their panels,
+/// their names and their stats in default positions, which is a tidy version of the state the
+/// user was trying to leave (found 2026-10-10). The stat config's own persist effect in the
+/// shell writes the reset roster.
+fn reset_to_default(
     mut layout: Signal<Vec<GridItem>>,
     mut order: Signal<MobileOrder>,
     mut grid_columns: Signal<u32>,
-    roster: Vec<PanelKind>,
+    mut dashboards: Signal<crate::panels::dashboards::Dashboards>,
+    mut pins: Signal<Vec<QuickBarItem>>,
 ) {
+    let defaults = crate::panels::dashboards::Dashboards::defaults();
+    let roster = crate::panels::dashboards::surfaces(&defaults);
+    dashboards.set(defaults);
+    let default_pins = model::default_pins();
+    crate::layout_store::persist_quickbar(&default_pins);
+    pins.set(default_pins);
     dioxus::prelude::spawn(async move {
         let space = crate::layout_store::measure_grid_space().await;
         let config = match space {

@@ -12,7 +12,7 @@
 //! HM, and it is done: HM1 landed the ☰ menu,
 //! HM2 moved Dataset into identity, HM3 renamed Combat to Build Settings with a derived drift
 //! summary and inline toggles, and HM4/HM5 split the quickbar's old More roster into the Tools
-//! and Display menus on this row — which is why Reset layout and Reorder now fold into Display
+//! and Display menus on this row — which is why Reset to default and Reorder now fold into Display
 //! rather than sitting as loose buttons here.
 
 use crate::build_bar::BuildBar;
@@ -180,7 +180,7 @@ pub fn Shell() -> Element {
     // Reorder entry and the reorder overlay it drives (HM5). Local to the shell, like the
     // other popover open flags.
     let reorder_open = use_signal(|| false);
-    // The confirm behind the Display menu's Reset layout row: the one destructive act in the
+    // The confirm behind the Display menu's Reset to default row: the one destructive act in the
     // app with no Ctrl+Z behind it, so it asks rather than commits (AC2). Local to the shell,
     // like the other overlay open flags.
     let reset_confirm_open = use_signal(|| false);
@@ -1034,13 +1034,14 @@ pub fn Shell() -> Element {
         // the row, like every other overlay in the shell.
         reorder_menu::ReorderMenu { open: reorder_open, mobile_order, layout: desktop_layout }
 
-        // The Reset layout confirm, beside the reorder overlay it replaced as the menu's
+        // The Reset to default confirm, beside the reorder overlay it replaced as the menu's
         // arrangement act: mounted here rather than in the header, like every other overlay
         // in the shell (a `fixed` backdrop would be contained by a grid surface's `transform`).
         crate::quickbar::ResetLayoutConfirm {
             open: reset_confirm_open,
             layout: desktop_layout,
             mobile_order,
+            pins: quickbar_pins,
         }
 
         crate::quickbar::Quickbar {

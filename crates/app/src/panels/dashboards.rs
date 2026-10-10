@@ -324,7 +324,7 @@ impl Dashboards {
     // (`MobileOrder`, reordered by `reorder_menu` from the phone nav's Display menu, dashboards
     // included); and this roster's order is what [`surfaces`] reports, which sets the DEFAULT
     // mobile order and the order dashboards are listed in menus. Its biggest reader is Reset
-    // layout (`quickbar::reset_arrangement`), which rebuilds both layouts from `surfaces` -- it
+    // to default (`quickbar::reset_to_default`), which rebuilds both layouts from `surfaces` -- it
     // only reads, and was unaffected by the deletion. `move_to_index` itself is live and shared
     // with `mobile_order` and the stats organizer's drag.
     //
