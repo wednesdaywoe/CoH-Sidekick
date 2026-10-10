@@ -39,14 +39,32 @@ are written up in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
-## Commands
+## Running the app
 
-Build:
+The app is built and launched with `dx`, the Dioxus command-line tool
+(`cargo install dioxus-cli`). Run these from `crates/app/`.
+
+While developing — builds, launches, and reloads when the code changes:
 
 ```bash
-cargo build -p app --features desktop             # desktop
-dx build --package app --platform web --release   # web
+dx serve --platform web       # web app, at the address dx prints
+dx serve --platform desktop   # desktop app, in its own window
 ```
+
+A build you can run on its own (the output paths are from the repository root):
+
+```bash
+dx build --platform linux    # desktop → target/dx/Sidekick/debug/linux/app/Sidekick
+dx build --platform web      # web     → target/dx/Sidekick/debug/web/public (serve the folder)
+```
+
+Use `--platform macos` or `--platform windows` on those systems, and add `--release` for an
+optimised build. Don't launch the binary `cargo build` leaves in `target/debug/`: it is not
+bundled with the stylesheet and images, so it opens unstyled.
+
+---
+
+## Commands
 
 Rebuild the data:
 
