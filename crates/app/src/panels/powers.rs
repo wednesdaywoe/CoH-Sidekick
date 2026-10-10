@@ -1888,8 +1888,8 @@ fn AvailablePowerRow(
     /// The floor the owning set puts under this power's unlock level (pools unlock as a
     /// whole before any power in them does).
     unlock_floor: u8,
-    /// The build's current level — a power unlocking above it is still pickable (you plan the
-    /// whole build ahead), so this only tints the badge.
+    /// The build's current level — Level Up mode refuses picks above it, and every mode dims
+    /// against it once no pick is left empty.
     current_level: u8,
     /// The pick levels the build has already spent, for resolving this row's own pick level.
     taken_levels: Vec<u8>,
@@ -1938,14 +1938,21 @@ fn AvailablePowerRow(
         .as_ref()
         .and_then(|schedule| schedule.next_pick_level(&taken_levels, unlock_level));
 
-    // A power that unlocks above the build's current level is still pickable — you plan the
-    // whole build ahead of time — so `locked` only tints the badge to say "not in-game yet",
-    // it never disables the row. At the default level 50 nothing is locked.
-    let locked = unlock_level > current_level;
+    let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+
+    // A power that unlocks above the level being picked for is still pickable — you plan the
+    // whole build ahead of time — so `locked` dims the row to say "not at this pick yet", it
+    // never disables it. Free-form reads the working level (the next empty pick), so a fresh
+    // level-50 build dims everything past level 1 and the dimming follows the picks up.
+    let working_level = database
+        .leveling_schedule
+        .as_ref()
+        .and_then(|schedule| crate::level_control::working_level_of(schedule, &taken_levels));
+    let locked = unlock_level
+        > crate::level_control::reach_level(level_up_mode(), working_level, current_level);
 
     // …unless level-up mode is on, where planning ahead is exactly what the mode exists to
     // prevent.
-    let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
     let level_gated_pick =
         crate::level_control::pick_beyond_level(level_up_mode(), pick_level, current_level);
 

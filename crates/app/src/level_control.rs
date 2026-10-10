@@ -50,8 +50,27 @@ pub fn working_level(
     build: &coh_data::CharacterState,
 ) -> Option<u8> {
     let taken_levels: Vec<u8> = build.picked_powers().map(|power| power.level).collect();
+    working_level_of(schedule, &taken_levels)
+}
+
+/// [`working_level`] from the pick levels already spent, for callers that hold those already.
+pub fn working_level_of(schedule: &coh_data::LevelingSchedule, taken_levels: &[u8]) -> Option<u8> {
     // The rows' own rule with no unlock floor, so this is the pick a level-1 power would take.
-    schedule.next_pick_level(&taken_levels, MIN_LEVEL)
+    schedule.next_pick_level(taken_levels, MIN_LEVEL)
+}
+
+/// The level a power list dims against: a power unlocking above it reads as out of reach, but
+/// stays pickable.
+///
+/// Free-form guides by the working level — the pick being made next — so at working level 4
+/// the level-32 nuke reads as out of reach even on a level-50 build. Once every pick is taken
+/// there is no next pick, and the character's level answers instead. Level Up mode walks the
+/// character's own level, so that is the one it reads.
+pub fn reach_level(level_up_mode: bool, working_level: Option<u8>, character_level: u8) -> u8 {
+    match (level_up_mode, working_level) {
+        (false, Some(working)) => working,
+        _ => character_level,
+    }
 }
 
 #[component]
@@ -371,4 +390,27 @@ fn set_level(session: BuildSession, database: &Db, next: u8) {
         crate::inherents::sync(state, &database);
         crate::granted_powers::sync(state, &database);
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::reach_level;
+
+    /// Free-form dims by the next empty pick, not by the level the user set.
+    #[test]
+    fn free_form_dims_against_the_working_level() {
+        assert_eq!(reach_level(false, Some(4), 50), 4);
+    }
+
+    /// With every pick taken there is no next pick, so the character's level answers.
+    #[test]
+    fn a_full_build_dims_against_the_character_level() {
+        assert_eq!(reach_level(false, None, 50), 50);
+    }
+
+    /// Level Up mode walks the character's own level, whatever the picks say.
+    #[test]
+    fn level_up_mode_dims_against_the_character_level() {
+        assert_eq!(reach_level(true, Some(4), 28), 28);
+    }
 }

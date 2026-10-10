@@ -68,10 +68,16 @@ Decisions (2026-10-10, user-chosen):
       after taking Tough, `28` with Level Up mode on; Charnel (all picks filled) read `50`; the
       Pixel 7 phone bar read `28 (30)` and fit.
       verify: fn:working_level, file:crates/coh_data/tests/working_level.rs
-- [ ] **GP4** — power-list rows that unlock above the working level are dimmed as a whole row,
-      not just the badge tint `is-locked` gives today, and stay clickable.  @unchecked
-      done when: in the app at working level 4, I can tell at a glance which Archery and pool powers are
-      out of reach, and clicking one still takes it.
+- [x] **GP4** — power-list rows that unlock above the working level are dimmed as a whole row,
+      not just the badge tint `is-locked` gives today, and stay clickable.
+      Done 2026-10-10 via `level_control::reach_level` (working level in free-form, the
+      character's level in Level Up mode or once every pick is filled), read by the Available
+      rows and the pool picker's rows alike. Hover lifts a dimmed row to full ink. Q/A on the
+      web build with Tzarina's first three picks at level 50: the control read `50 (4)`; Water
+      Blast and Cold Domination rows at 2 and 4 were bright, 6 and up dimmed; clicking the dimmed
+      Geyser took it at 26; in the pool picker Boxing and Kick (4) were bright, the 14s dimmed.
+      The plan named Archery; Water Blast stood in, the same check on a set a fixture holds.
+      verify: fn:reach_level
 - [ ] **GP5** — an empty cell in the by-level grid (`PowersByLevel`) can be clicked. The click
       sets the working level to that cell's level and highlights the cell. The next pick fills that cell
       if the power is legal there, otherwise the earliest legal empty slot.

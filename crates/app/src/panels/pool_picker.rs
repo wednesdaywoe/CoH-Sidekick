@@ -766,6 +766,17 @@ fn PoolRow(
 ) -> Element {
     let session = use_context::<BuildSession>();
     let blocked = entry.blocked_reason();
+    // The level the pool's powers dim against, by the Available rows' own rule, so a power
+    // reads as out of reach here exactly when it will on the rail it lands in.
+    let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
+    let reach_level = {
+        let build = session.build.read();
+        let working_level = database
+            .leveling_schedule
+            .as_ref()
+            .and_then(|schedule| crate::level_control::working_level(schedule, &build));
+        crate::level_control::reach_level(level_up_mode(), working_level, build.level)
+    };
 
     let mut classes = vec!["pool-row", mode.accent_class()];
     if is_expanded {
@@ -825,6 +836,7 @@ fn PoolRow(
                                 power: power.clone(),
                                 gate: gate.clone(),
                                 unlock_floor: entry.unlock_floor,
+                                reach_level,
                                 is_previewing: previewing.as_ref().is_some_and(|(set, ident)| {
                                     set == &entry.id && ident == power.ident()
                                 }),
@@ -890,6 +902,9 @@ fn PoolPowerRow(
     power: coh_data::Power,
     gate: PickGate,
     unlock_floor: u8,
+    /// The level being picked for ([`crate::level_control::reach_level`]): an open power
+    /// unlocking above it dims, and stays takeable.
+    reach_level: u8,
     is_previewing: bool,
     on_preview: EventHandler<()>,
     on_take: EventHandler<()>,
@@ -912,7 +927,11 @@ fn PoolPowerRow(
     // a build gets planned toward it — so only the styling and the title differ.
     let (state_class, title) = match &gate {
         PickGate::Open => (
-            "",
+            if unlock_level > reach_level {
+                " is-locked"
+            } else {
+                ""
+            },
             format!("{power_name} — unlocks at level {unlock_level}"),
         ),
         PickGate::Closed => (
