@@ -101,10 +101,16 @@ Decisions (2026-10-10, user-chosen):
       added at 4 cleared both; Kick given back and re-taken into the clicked L20 slot brought
       both back.
       verify: fn:out_of_order_reason, fn:prerequisite_phrase
-- [ ] **GP7** — Q/A pass in the web build with screenshots (`qa-check` skill), Level Up mode off,
+- [x] **GP7** — Q/A pass in the web build with screenshots (`qa-check` skill), Level Up mode off,
       covering: a level-1 build picked in order, an out-of-level pick, a slot click, the Tough
-      case, and Level Up mode still refusing Tough.  @unchecked
-      done when: the screenshots show each case behaving as above.
+      case, and Level Up mode still refusing Tough.
+      Done 2026-10-10 on `main` after the merge, Tzarina's two level-1 picks as the start:
+      in order, the control read `50 (2)` → `(4)` → `(6)` → `(8)` and the dimming followed;
+      Geyser (dimmed) landed at 26 with the control held at `(8)`; aiming L24 read `50 (24)`
+      and Aqua Bolt landed there, back to `(8)`; Tough alone was marked, Kick at 8 cleared it,
+      Kick moved to 28 brought it back; Level Up mode refused Tough. The pass found the pool
+      picker's row still drawn as free-form's "take it early" in Level Up mode, fixed to read
+      as refused there. Console clean.
 
 ## Out of scope
 

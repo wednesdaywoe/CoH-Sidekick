@@ -924,6 +924,7 @@ fn PoolPowerRow(
     // `is_previewing` itself: a tap's synthetic mouseenter previews the row first, and the
     // re-render lands before the click does.
     let mut preview_only = use_signal(|| false);
+    let level_up_mode = use_context::<crate::level_control::LevelUpMode>().0;
     let power_name = power.name.clone();
     let unlock_level = power.unlock_level().max(unlock_floor);
 
@@ -946,6 +947,12 @@ fn PoolPowerRow(
             format!("{power_name} — unlocks at level {unlock_level}"),
         ),
         PickGate::Closed => (
+            " is-gated",
+            format!("{power_name} needs prerequisites this build hasn't taken yet"),
+        ),
+        // Free-form takes it and flags the build; Level Up mode refuses it, so there it reads
+        // as refused, the way the Available rail's row does in the same mode.
+        PickGate::NeedsEarlier if level_up_mode() => (
             " is-gated",
             format!("{power_name} needs prerequisites this build hasn't taken yet"),
         ),
