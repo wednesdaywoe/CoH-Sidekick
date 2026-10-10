@@ -117,7 +117,8 @@ pub use mbd::{MbdEnhancement, MbdFile, MbdPowerEntry, MbdSlotEntry};
 pub use mids_names::MidsNames;
 pub use mids_uids::{MidsFamily, MidsSetPiece, MidsUidPrefix, MidsUids};
 pub use pick_rules::{
-    requires_met, requires_met_in_order, set_gate, RequiresError, SetGate, SetPaths,
+    requires_met, requires_met_in_order, requires_met_with_set, set_gate, RequiresError, SetGate,
+    SetPaths,
 };
 pub use pools::{PoolCatalog, PoolDef};
 pub use power::{targets_name_foe, MechanicType, Power, Powerset};

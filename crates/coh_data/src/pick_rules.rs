@@ -29,7 +29,7 @@
 //! the binary does and the build stores it the way the display does, and nothing in a
 //! `CharacterState` can bridge those two.
 
-use crate::character::{CharacterState, SelectedPower};
+use crate::character::{CharacterState, PoolSelection, SelectedPower};
 
 /// What an evaluation is missing when it cannot answer. Returned rather than defaulted, so
 /// an expression this evaluator does not understand shows as a visibly ungated row instead
@@ -138,6 +138,58 @@ pub fn requires_met_in_order<S: AsRef<str>>(
         return requires_met(tokens, state, archetype_id, sets);
     }
     requires_met(tokens, &build_before(state, pick_level), archetype_id, sets)
+}
+
+/// Would this power's `requires` pass if the build also held every other power in its set?
+///
+/// Separates the two things a closed gate can mean. Tough without Boxing or Kick opens once
+/// an earlier pick from its own set is added, so a free-form build may take it now and be told
+/// what it still needs. A mutual-exclusion lock or an archetype gate stays shut however many
+/// siblings are added, and stays refused. Adding powers can also close a gate (a sibling one
+/// excludes), so a `false` here is the conservative answer: the power stays refused, as it was.
+///
+/// `siblings` are the internal names of the set's powers, the power itself excluded. They are
+/// added to the bucket the set's path names, so the category counts (`Epic ownPowerNum?`)
+/// read them where the game would.
+pub fn requires_met_with_set<S: AsRef<str>>(
+    tokens: &[S],
+    state: &CharacterState,
+    set_id: &str,
+    siblings: &[&str],
+    archetype_id: Option<&str>,
+    sets: &SetPaths,
+) -> Result<bool, RequiresError> {
+    let mut with_set = state.clone();
+    let picks = siblings
+        .iter()
+        .map(|ident| SelectedPower::picked(*ident, set_id, 1));
+    let category = sets.of(set_id).and_then(|path| path.split('.').next());
+    let held_as = |id: &Option<String>| id.as_deref().map(normalize) == Some(normalize(set_id));
+    if held_as(&with_set.primary.id) {
+        with_set.primary.powers.extend(picks);
+    } else if held_as(&with_set.secondary.id) {
+        with_set.secondary.powers.extend(picks);
+    } else if category == Some("epic") {
+        let epic = with_set.epic_pool.get_or_insert_with(|| PoolSelection {
+            id: set_id.to_string(),
+            name: String::new(),
+            powers: Vec::new(),
+        });
+        epic.powers.extend(picks);
+    } else if let Some(pool) = with_set
+        .pools
+        .iter_mut()
+        .find(|pool| normalize(&pool.id) == normalize(set_id))
+    {
+        pool.powers.extend(picks);
+    } else {
+        with_set.pools.push(PoolSelection {
+            id: set_id.to_string(),
+            name: String::new(),
+            powers: picks.collect(),
+        });
+    }
+    requires_met(tokens, &with_set, archetype_id, sets)
 }
 
 /// The build with every pick at or above `level` removed. Auto-granted picks (level 0) and the

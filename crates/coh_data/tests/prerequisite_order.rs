@@ -9,7 +9,8 @@
 //! re-export that rewrites the gate moves this test with it.
 
 use coh_data::{
-    requires_met_in_order, CharacterState, DatasetId, PoolSelection, PowerDatabase, SelectedPower,
+    requires_met, requires_met_in_order, requires_met_with_set, CharacterState, DatasetId,
+    PoolSelection, PowerDatabase, SelectedPower,
 };
 use std::path::PathBuf;
 
@@ -20,14 +21,45 @@ fn homecoming() -> PowerDatabase {
     PowerDatabase::from_gz_bytes(&bytes).unwrap_or_else(|e| panic!("load homecoming: {e}"))
 }
 
-fn fighting_requires(db: &PowerDatabase, ident: &str) -> Vec<Box<str>> {
+fn pool_requires(db: &PowerDatabase, pool: &str, ident: &str) -> Vec<Box<str>> {
     let power = db
         .pool_powers
         .iter()
-        .find(|p| p.set_id == "fighting" && p.power.ident() == ident)
-        .unwrap_or_else(|| panic!("homecoming has no Fighting {ident}"));
+        .find(|p| p.set_id == pool && p.power.ident() == ident)
+        .unwrap_or_else(|| panic!("homecoming has no {pool} {ident}"));
     coh_data::granted_powers::requires(&power.power)
-        .unwrap_or_else(|| panic!("Fighting {ident} carries no requires"))
+        .unwrap_or_else(|| panic!("{pool} {ident} carries no requires"))
+}
+
+fn fighting_requires(db: &PowerDatabase, ident: &str) -> Vec<Box<str>> {
+    pool_requires(db, "fighting", ident)
+}
+
+/// The pool's other powers, as `requires_met_with_set` takes them.
+fn siblings<'a>(db: &'a PowerDatabase, pool: &str, ident: &str) -> Vec<&'a str> {
+    db.pool_powers
+        .iter()
+        .filter(|p| p.set_id == pool && p.power.ident() != ident)
+        .map(|p| p.power.ident())
+        .collect()
+}
+
+/// Closed now, but would it open with the rest of its pool held?
+fn opens_with_set(db: &PowerDatabase, pool: &str, ident: &str, state: &CharacterState) -> bool {
+    let tokens = pool_requires(db, pool, ident);
+    assert!(
+        !requires_met(&tokens, state, state.archetype.id.as_deref(), &db.set_paths).unwrap(),
+        "{pool} {ident} should be closed on this build to begin with"
+    );
+    requires_met_with_set(
+        &tokens,
+        state,
+        pool,
+        &siblings(db, pool, ident),
+        state.archetype.id.as_deref(),
+        &db.set_paths,
+    )
+    .expect("pool gates evaluate")
 }
 
 /// A level-50 build holding only Fighting pool picks, at the given levels.
@@ -85,4 +117,39 @@ fn weave_counts_only_the_picks_below_it() {
     assert!(!in_order(&db, "Weave", 22, &split));
     let both_before = with_fighting(&[("Boxing", 10), ("Tough", 20), ("Weave", 22)]);
     assert!(in_order(&db, "Weave", 22, &both_before));
+}
+
+// ---- which closed gates a free-form build may take early (GP2) -------------------------------
+
+/// Tough is closed only for want of an earlier Fighting pick, so it may be taken and flagged.
+#[test]
+fn tough_opens_once_its_pool_is_held() {
+    let db = homecoming();
+    assert!(opens_with_set(
+        &db,
+        "fighting",
+        "Tough",
+        &with_fighting(&[])
+    ));
+}
+
+/// Jetpack is closed to a Peacebringer by archetype. No pick order opens it.
+#[test]
+fn an_archetype_lock_stays_closed() {
+    let db = homecoming();
+    let mut build = CharacterState::empty(DatasetId::Homecoming);
+    build.archetype.id = Some("peacebringer".into());
+    assert!(!opens_with_set(&db, "gadgetry", "Jetpack", &build));
+}
+
+/// The pool's Quick is closed to a build holding the inherent Swift. Holding more of the
+/// Fitness pool does not change that.
+#[test]
+fn an_exclusion_stays_closed() {
+    let db = homecoming();
+    let mut build = CharacterState::empty(DatasetId::Homecoming);
+    build
+        .inherents
+        .push(SelectedPower::picked("Swift", "Inherent.Fitness", 0));
+    assert!(!opens_with_set(&db, "fitness", "Quick", &build));
 }

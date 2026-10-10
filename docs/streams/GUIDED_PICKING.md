@@ -50,9 +50,14 @@ Decisions (2026-10-10, user-chosen):
       against the build with every pick at or above its level removed. Mutation-checked: with
       the old any-level behaviour, two of the four tests fail.
       verify: fn:requires_met_in_order, file:crates/coh_data/tests/prerequisite_order.rs
-- [ ] **GP2** — with Level Up mode off, a power whose gate is `PickGate::Closed` is pickable and
+- [x] **GP2** — with Level Up mode off, a power whose gate is `PickGate::Closed` is pickable and
       lands at `next_pick_level`. With Level Up mode on it is still refused.
-      done when: `row_verdict` tests cover both modes for a closed gate.
+      Done 2026-10-10. Narrowed on the way: only a gate that an earlier pick from the power's
+      own set would open (`PickGate::NeedsEarlier`, via `requires_met_with_set`) is let through.
+      Exclusion locks and archetype gates stay `Closed` and refused in both modes — reordering
+      can never fix those. Q/A on the web build: Tzarina (Homecoming) took Tough with no
+      Boxing or Kick and it landed at L30; with Level Up mode on, Tough was refused.
+      verify: fn:requires_met_with_set, fn:row_verdict, fn:commit_blocker
 - [ ] **GP3** — a working level, computed as the earliest empty pick slot (or the clicked slot,
       GP5), shown in the level control as `50 (14)` when Level Up mode is off and a pick is
       still empty. `CharacterState::level` is never changed by it.

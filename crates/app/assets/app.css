@@ -1994,6 +1994,14 @@
 }
 .power-row.is-gated:hover { border-color: var(--seam); background: var(--surface-raised); color: var(--text-dim); }
 
+/* Needs an earlier pick: closed only because nothing from its own set is taken below it (Tough
+   before Boxing or Kick). Free-form takes it anyway and flags the build, so it reads as out of
+   reach like a gated row but keeps the pointer — the click works. */
+.power-row.is-needs-earlier {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
 /* Picked: the build already holds this power. It keeps its row because the rail shows a
    POWERSET, not a shopping list — a set you have taken six powers out of should still read as
    the set it is, and a list that only ever shrinks cannot say what a set offers.
