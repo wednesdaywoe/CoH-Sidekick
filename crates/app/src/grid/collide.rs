@@ -19,7 +19,7 @@
 //! around with a mouse. That is a statement of what is missing, not a plan: the
 //! gap is named so the next person picks it up deliberately.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use super::model::{GridConfig, GridItem, PanelKind, BAND_SEED_ROWS};
 
@@ -259,6 +259,41 @@ pub fn fit_item(items: &mut [GridItem], panel: PanelKind, rows: u32) -> bool {
     resolve_collisions(items, panel, &mut moved);
     compact(items);
     true
+}
+
+/// The height every content-fitted surface should be drawn at: its own measured rows, raised
+/// to the tallest measurement among the fitted surfaces that share its top edge.
+///
+/// A row of readouts is one strip, not four boxes of their own heights. Fitted to themselves,
+/// the default top row came out three, one, six and five rows tall, and since every surface
+/// floats up until it meets something, each build column under that row rose to a different
+/// depth — Power Pools wedged under the one-line Defense panel, Powers held down by Resistance.
+/// Giving the row one height gives it one bottom edge, and the columns one line to start on.
+///
+/// Only visible, unfolded surfaces with a measurement take part. A folded surface is one row
+/// by choice and stays that way; its stale measurement must not hold its neighbours open.
+/// Surfaces with no measurement yet are left out until their first one lands.
+pub fn shared_row_heights(
+    items: &[GridItem],
+    measured: &HashMap<PanelKind, u32>,
+) -> Vec<(PanelKind, u32)> {
+    let fitted: Vec<(&GridItem, u32)> = items
+        .iter()
+        .filter(|item| item.panel.fits_content() && !item.hidden && !item.collapsed)
+        .filter_map(|item| measured.get(&item.panel).map(|rows| (item, *rows)))
+        .collect();
+    fitted
+        .iter()
+        .map(|(item, _)| {
+            let row = fitted
+                .iter()
+                .filter(|(other, _)| other.y == item.y)
+                .map(|(_, rows)| *rows)
+                .max()
+                .unwrap_or(0);
+            (item.panel, row)
+        })
+        .collect()
 }
 
 /// Whether a deserialized layout is structurally sound: every surface present
@@ -564,5 +599,60 @@ mod tests {
 
         let added = item(&after, PanelKind::Dashboard(DashboardId(2)));
         assert!(added.y > item(&before, PanelKind::Dashboard(DashboardId(1))).y);
+    }
+
+    // ---- a row of readouts shares one height ------------------------------------------------
+
+    /// The default's top row, fitted to measured heights of 3, 1, 6 and 5 rows.
+    fn default_with_band(measured: [u32; 4]) -> Vec<GridItem> {
+        let mut items = GridItem::default_layout_for(12, 20, &crate::grid::model::DEFAULT_SURFACES);
+        let rows: HashMap<PanelKind, u32> = dashboards(1..=4).into_iter().zip(measured).collect();
+        for (panel, h) in shared_row_heights(&items, &rows) {
+            fit_item(&mut items, panel, h);
+        }
+        items
+    }
+
+    /// The shipped bug: each build column rose to the depth of whichever readout sat above it,
+    /// so Power Pools started under the one-line Defense panel. Sharing the row's height puts
+    /// all three columns on one line, under the tallest readout.
+    #[test]
+    fn the_build_columns_start_on_one_line_under_a_ragged_band() {
+        let items = default_with_band([3, 1, 6, 5]);
+        let tops: Vec<u32> = [PanelKind::Available, PanelKind::Pools, PanelKind::Powers]
+            .iter()
+            .map(|panel| item(&items, *panel).y)
+            .collect();
+        assert_eq!(tops, vec![6, 6, 6]);
+        for panel in dashboards(1..=4) {
+            assert_eq!(item(&items, panel).h, 6, "{panel:?}");
+        }
+    }
+
+    /// Readouts at different heights are different rows, and keep their own heights.
+    #[test]
+    fn readouts_on_different_rows_keep_their_own_heights() {
+        let [a, b] = [
+            PanelKind::Dashboard(DashboardId(1)),
+            PanelKind::Dashboard(DashboardId(2)),
+        ];
+        let items = vec![GridItem::new(a, 0, 0, 3, 3), GridItem::new(b, 0, 3, 3, 3)];
+        let rows = HashMap::from([(a, 2), (b, 5)]);
+        assert_eq!(shared_row_heights(&items, &rows), vec![(a, 2), (b, 5)]);
+    }
+
+    /// A folded readout is one row by choice. It neither takes the row's height nor lends its
+    /// stale measurement to its neighbours.
+    #[test]
+    fn a_folded_readout_stays_out_of_its_row() {
+        let [a, b] = [
+            PanelKind::Dashboard(DashboardId(1)),
+            PanelKind::Dashboard(DashboardId(2)),
+        ];
+        let mut folded = GridItem::new(b, 3, 0, 3, 3);
+        folded.collapsed = true;
+        let items = vec![GridItem::new(a, 0, 0, 3, 3), folded];
+        let rows = HashMap::from([(a, 2), (b, 9)]);
+        assert_eq!(shared_row_heights(&items, &rows), vec![(a, 2)]);
     }
 }

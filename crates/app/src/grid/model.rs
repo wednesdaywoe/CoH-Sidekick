@@ -463,27 +463,30 @@ pub fn column_rows_for(available_px: f64, config: &GridConfig) -> u32 {
     extent.saturating_sub(COLUMN_START_ROW).max(MIN_COLUMN_ROWS)
 }
 
-/// The tallest authored surface's height in rows — the statistic the height re-fit compares to
-/// decide whether a layout still answers the room it has.
+/// The rectangles the app authored, in a fixed order — what the height re-fit compares to
+/// decide whether the live layout already answers the room it has.
 ///
-/// Fitted surfaces are excluded because their heights are MEASURED and land a frame after the
-/// layout that seeded them, so a key that counted them would see its own fit as a change.
-/// Hidden ones are excluded because they are not drawn and set no extent.
+/// Every surface's whole cell, except the height of one that fits its content: that is
+/// MEASURED and lands a frame after the layout that seeded it, so a key that counted it would
+/// see its own fit as a change. Hidden surfaces count with their flag, because where they wait
+/// is authored too.
 ///
-/// **It is a proxy, and both sides of the comparison must go through it.** The number is not the
-/// column height: `default_layout_sized` authors Info [`COLUMN_START_ROW`] rows taller than its
-/// siblings, so the key exceeds the column height by 3 at the twelve-column step, and the
-/// narrow default's split column makes it a different relation again. Comparing this against a
-/// bare `column_rows_for` answer therefore reads "already fitted" whenever the layout is short
-/// by exactly that offset — which is a window shrunk and grown back to where it was. Measured
-/// 2026-09-26 as 134px of dead window at a height that left 26px on the way down, and the three
-/// rows between those two numbers are this offset.
-pub fn tallest_authored_rows(items: &[GridItem]) -> Option<u32> {
-    items
+/// It replaced a single-number key, the tallest authored surface's height, which was a proxy
+/// twice over. First it stood in for the column height and differed from it by Info's head
+/// start, which left 134px of dead window under a regrown layout (2026-09-26). Then it could
+/// not see the columns move at all: re-seating them under a measured top row ([`fit_band`])
+/// leaves Info, the tallest, exactly as tall, so the overflowing layout read as already fitted
+/// (2026-10-10).
+pub fn authored_shape(items: &[GridItem]) -> Vec<(String, u32, u32, u32, Option<u32>, bool)> {
+    let mut shape: Vec<_> = items
         .iter()
-        .filter(|item| !item.hidden && !item.panel.fits_content())
-        .map(|item| item.h)
-        .max()
+        .map(|item| {
+            let h = (!item.panel.fits_content()).then_some(item.h);
+            (item.panel.slug(), item.x, item.y, item.w, h, item.hidden)
+        })
+        .collect();
+    shape.sort();
+    shape
 }
 
 /// The narrowest a column may draw before the grid stops honouring its column count.
@@ -816,6 +819,35 @@ impl GridItem {
     }
 }
 
+/// Re-seat an authored default under a top row that measured `band_rows` tall instead of the
+/// [`COLUMN_START_ROW`] it was authored for.
+///
+/// The default is authored before anything has been measured, so it guesses the band's height.
+/// The readouts then fit their content and share their row's height
+/// ([`shared_row_heights`](crate::grid::collide::shared_row_heights)), which pushes every
+/// column under them down by the difference — past the bottom of the window, and out of line
+/// with Info, which starts at the top. So each surface that starts on the column row moves down
+/// by that difference and gives up the same rows, keeping the bottom edge it was authored with.
+/// A surface stacked lower in its column (the narrow default's pools) already ends where it
+/// should and is left alone, and so are the band, Info and anything off the grid.
+///
+/// A column is never shortened under its own minimum height. A window short enough to need
+/// that gets a page scrollbar, which is the floor [`MIN_COLUMN_ROWS`] already sets.
+pub fn fit_band(items: &mut [GridItem], band_rows: u32) {
+    for item in items.iter_mut() {
+        if item.hidden {
+            continue;
+        }
+        if item.panel.fits_content() && item.y == 0 {
+            item.h = band_rows;
+        } else if item.y == COLUMN_START_ROW {
+            let bottom = item.y + item.h;
+            item.y = band_rows;
+            item.h = bottom.saturating_sub(band_rows).max(item.min_height);
+        }
+    }
+}
+
 /// The pools' share of a `tall`-row left column: two fifths of it, never under
 /// [`POOLS_MIN_ROWS`].
 ///
@@ -995,7 +1027,7 @@ mod tests {
     }
 
     /// The height re-fit exactly as `GridContainer`'s effect makes it: build the layout the room
-    /// pays for, then adopt it unless [`tallest_authored_rows`] says the live one already is it.
+    /// pays for, then adopt it unless [`authored_shape`] says the live one already is it.
     ///
     /// `popped.reapply` is the one line of the effect this leaves out, and it is a no-op with
     /// nothing popped out — which is the state the browser gate drives and the state a fresh
@@ -1003,7 +1035,7 @@ mod tests {
     fn refit(state: &mut Vec<GridItem>, room: f64, config: &GridConfig, roster: &[PanelKind]) {
         let rows = column_rows_for(room, config);
         let candidate = GridItem::default_layout_for(config.columns, rows, roster);
-        if tallest_authored_rows(state) == tallest_authored_rows(&candidate) {
+        if authored_shape(state) == authored_shape(&candidate) {
             return;
         }
         *state = candidate;
@@ -1155,19 +1187,24 @@ mod tests {
 
     /// What the re-fit's key counts, and what it must not. A fitted surface's height is measured
     /// a frame after the layout that seeded it, so counting one would make the fit see its own
-    /// result as a change; a hidden surface is not drawn and sets no extent.
+    /// result as a change; a column that moved is a different layout even when no height did.
     #[test]
-    fn the_fit_key_reads_past_the_band_and_the_hidden() {
-        let tall = GridItem::new(PanelKind::Powers, 0, 0, 2, 12);
-        let taller_but_fitted = GridItem::new(PanelKind::Dashboard(DashboardId(1)), 2, 0, 2, 30);
-        let taller_but_hidden = GridItem::new(PanelKind::Info, 4, 0, 2, 40).off_grid();
-
+    fn the_fit_key_reads_past_measured_heights_but_not_moves() {
+        let powers = GridItem::new(PanelKind::Powers, 0, 3, 2, 12);
+        let band = GridItem::new(PanelKind::Dashboard(DashboardId(1)), 2, 0, 2, 3);
+        let mut band_fitted = band;
+        band_fitted.h = 7;
         assert_eq!(
-            tallest_authored_rows(&[tall, taller_but_fitted, taller_but_hidden]),
-            Some(12)
+            authored_shape(&[powers, band]),
+            authored_shape(&[powers, band_fitted])
         );
-        assert_eq!(tallest_authored_rows(&[]), None);
-        assert_eq!(tallest_authored_rows(&[taller_but_hidden]), None);
+
+        let mut powers_moved = powers;
+        powers_moved.y = 6;
+        assert_ne!(
+            authored_shape(&[powers, band]),
+            authored_shape(&[powers_moved, band])
+        );
     }
 
     /// The gate [`GridItem::default_layout`]'s own doc has cited since it was written, and which
@@ -1236,6 +1273,39 @@ mod tests {
                 "{room}px of room answered fewer rows than less room did"
             );
             last = rows;
+        }
+    }
+
+    /// A top row that measured six rows tall instead of the three the default guessed. The
+    /// columns start under it and keep their bottoms, level with Info's, at both column steps.
+    #[test]
+    fn a_measured_band_reseats_the_columns_without_moving_their_bottoms() {
+        for columns in COLUMN_STEPS {
+            let authored = GridItem::default_layout_for(columns, 20, &DEFAULT_SURFACES);
+            let mut fitted = authored.clone();
+            fit_band(&mut fitted, 6);
+            for (before, after) in authored.iter().zip(&fitted) {
+                if before.hidden || before.panel.fits_content() {
+                    continue;
+                }
+                assert_eq!(
+                    before.y + before.h,
+                    after.y + after.h,
+                    "{:?} at {columns}",
+                    before.panel
+                );
+                if before.y == COLUMN_START_ROW {
+                    assert_eq!(after.y, 6, "{:?} at {columns}", before.panel);
+                }
+            }
+            assert!(
+                crate::grid::collide::validate_layout(
+                    &fitted,
+                    &GridConfig::for_columns(columns),
+                    &DEFAULT_SURFACES
+                ),
+                "re-seated layout overlaps at {columns}"
+            );
         }
     }
 }

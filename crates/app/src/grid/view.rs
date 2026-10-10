@@ -13,8 +13,11 @@
 //! on commit, never per frame.
 
 use dioxus::prelude::*;
+use std::collections::HashMap;
 
-use super::collide::{clamp_resize, fit_item, move_item, place_item, resize_item, toggle_collapse};
+use super::collide::{
+    clamp_resize, fit_item, move_item, place_item, resize_item, shared_row_heights, toggle_collapse,
+};
 use super::math::{container_height, item_to_px, px_to_cell, px_to_span, rows_for_px};
 use super::model::{GridConfig, GridItem, PanelKind};
 use crate::panels;
@@ -340,6 +343,45 @@ pub fn GridContainer(
 
     let height = use_memo(move || container_height(&state.read(), &config()));
 
+    // Content-fitted surfaces report their measured heights here, and this one effect applies
+    // them, so a row of readouts can share the height of its tallest (`shared_row_heights`).
+    //
+    // Read REACTIVELY on both, so this re-runs whenever the layout is written by anyone. That
+    // makes the fit self-repairing, and it has to be: a measurement is discarded by any write
+    // that re-authors a surface's height (the mount future lands an authored default AFTER the
+    // first measurement), and nothing re-fires a resize observer for a box whose content did
+    // not change. It converges rather than looping: a write changes a height, the re-run finds
+    // every height already at its target, and returns without taking the borrow.
+    //
+    // A measurement is a fact about this viewport's width, not about the layout, so none of
+    // this is persisted — the stored `h` stays whatever the last real gesture left.
+    let fit_rows = use_signal(HashMap::<PanelKind, u32>::new);
+    use_effect(move || {
+        let targets = shared_row_heights(&state.read(), &fit_rows.read());
+        let stale: Vec<(PanelKind, u32)> = {
+            let live = state.peek();
+            targets
+                .into_iter()
+                .filter(|(panel, rows)| {
+                    live.iter()
+                        .any(|item| item.panel == *panel && item.h != *rows)
+                })
+                .collect()
+        };
+        if stale.is_empty() {
+            return;
+        }
+        // Through the live vector, never clone-mutate-set: several surfaces re-fit in one tick
+        // when a dashboard's stat set changes, and a clone taken before a sibling's commit
+        // would write back over it.
+        let mut state = state;
+        state.with_mut(|items| {
+            for (panel, rows) in stale {
+                fit_item(items, panel, rows);
+            }
+        });
+    });
+
     // Crossing a column-count boundary re-answers the layout, because a layout is cells and
     // the same cells are a different arrangement at a different count. The saved layout for
     // the count being entered wins; failing that, the default authored FOR that count
@@ -387,16 +429,12 @@ pub fn GridContainer(
     // Only while the layout is the app's own — the moment the user arranges anything it is
     // theirs, and re-fitting would re-author over every hide and every drag.
     //
-    // Keyed on the tallest non-fitted surface rather than on the whole layout, because the
-    // band's heights are measured and land a frame later: comparing layouts would see its own
-    // fit as a difference and re-author forever.
-    //
-    // The key is compared against the SAME key over the layout that would be authored, never
-    // against `column_rows_for`'s answer directly. [`tallest_authored_rows`] is a proxy for the
-    // column height and not the column height itself, and comparing a proxy against the thing
-    // it stands for is what left 134px of dead window under a regrown layout. Building the
-    // candidate first also means the roster, the column count and
-    // the pop-out reapply are all inputs to the decision rather than things done after it.
+    // Keyed on every authored rectangle with measured heights left out
+    // ([`crate::grid::model::authored_shape`]), because the band's heights are measured and
+    // land a frame later: comparing whole layouts would see its own fit as a difference and
+    // re-author forever. Building the candidate first also means the roster, the column count,
+    // the pop-out reapply and the band's measured height are all inputs to the decision rather
+    // than things done after it.
     use_effect(move || {
         let room = available();
         let config = config();
@@ -411,8 +449,27 @@ pub fn GridContainer(
         // after: a popped-out surface is hidden, the key skips hidden surfaces, and a candidate
         // keyed before the reapply would disagree with the live layout over a pop-out alone.
         popped.reapply(&mut items);
-        if crate::grid::model::tallest_authored_rows(&state.peek())
-            == crate::grid::model::tallest_authored_rows(&items)
+        // Seat the columns under the top row as it actually measured, rather than the height
+        // the default guessed for it. Tracked, so the default is re-seated when the readouts'
+        // first measurement lands and whenever their content changes height.
+        let band_rows = {
+            let measured = fit_rows.read();
+            items
+                .iter()
+                .filter(|item| item.panel.fits_content() && item.y == 0 && !item.hidden)
+                .filter_map(|item| measured.get(&item.panel).copied())
+                .max()
+        };
+        if let Some(band_rows) = band_rows {
+            crate::grid::model::fit_band(&mut items, band_rows);
+        }
+        // Compared on every authored rectangle, not on one height standing in for them: a
+        // re-seat moves the columns while Info, the tallest surface, keeps its height, so a
+        // tallest-surface key would see no change and keep the overflowing layout. Fitted
+        // heights are left out, because they are measured and land a frame after the layout
+        // that seeded them, so counting them would see the fit itself as a change.
+        if crate::grid::model::authored_shape(&state.peek())
+            == crate::grid::model::authored_shape(&items)
         {
             return;
         }
@@ -592,6 +649,7 @@ pub fn GridContainer(
                         keyboard,
                         announce,
                         state,
+                        fit_rows,
                         database: database.clone(),
                         selection,
                     }
@@ -639,6 +697,9 @@ fn GridSurface(
     keyboard: Signal<Option<KeyboardMove>>,
     announce: Signal<String>,
     state: Signal<Vec<GridItem>>,
+    /// Every fitted surface's measured content height, in rows — written by each surface,
+    /// applied by the container.
+    fit_rows: Signal<HashMap<PanelKind, u32>>,
     database: Db,
     selection: Signal<Selection>,
 ) -> Element {
@@ -690,45 +751,24 @@ fn GridSurface(
         if content <= 0.0 {
             return;
         }
-        let rows = rows_for_px(content + SURFACE_BORDER_PX, &config);
-        let mut state = state;
-        // The surface's LIVE rectangle, never the `item` prop. This closure is built once, on
-        // first render, so anything read off a captured `item` is frozen at what it was then —
-        // which is why `panel` is the only field held above.
-        //
-        // Read REACTIVELY rather than peeked, so this effect re-runs when the layout is written
-        // by anyone. That makes the fit self-repairing, and it has to be: a measurement is
-        // discarded by any write that re-authors the surface's height, and nothing re-fires a
-        // resize observer for a box whose content did not change. The mount future is exactly
-        // such a write — it lands an authored default AFTER the first measurement has been
-        // committed — so with a peek here the surface keeps the authored seed forever and
-        // clips whatever the seed was too short for.
-        //
-        // It converges rather than looping: the write below changes the height, the re-run
-        // measures the same content, and `live.h == rows` returns before taking the borrow
-        // again. A sibling displaced by the compaction re-runs too and returns on the same
-        // check, since its own height did not change.
-        let Some(live) = state.read().iter().copied().find(|i| i.panel == panel) else {
-            return;
-        };
-        // A folded surface draws no body and wears a tighter header, while `h` still means the
-        // height it unfolds to — so nothing measurable right now describes the number being
-        // written. Wait for the unfold, which resizes both boxes and re-runs this.
-        //
-        // And skip a measurement that agrees with the height already stored, which is the
-        // common case by far: taking the mutable borrow anyway would mark the whole layout
-        // dirty and re-render every surface for nothing.
-        if live.collapsed || live.h == rows {
+        // A folded surface draws no body and wears a tighter header, so nothing measurable
+        // right now describes the height it unfolds to. Its unfold resizes both boxes and
+        // re-runs this.
+        if state
+            .peek()
+            .iter()
+            .any(|item| item.panel == panel && item.collapsed)
+        {
             return;
         }
-        // The write goes through the live vector, never through clone-mutate-set. A whole
-        // column of surfaces re-fits in one tick when the dashboard's stat set changes, and
-        // a clone taken before a sibling's commit writes back over it — which showed up as
-        // exactly one surface in the column keeping a height a row short of its content,
-        // clipped and with no scrollbar left to reach what it lost.
-        state.with_mut(|items| {
-            fit_item(items, panel, rows);
-        });
+        let rows = rows_for_px(content + SURFACE_BORDER_PX, &config);
+        // Reported, not applied. The grid sets the height (see `shared_row_heights` and the
+        // container's fit effect), because a surface in a row of readouts is drawn at the row's
+        // height rather than its own. Skipping an unchanged report keeps the map from churning.
+        let mut fit_rows = fit_rows;
+        if fit_rows.peek().get(&panel) != Some(&rows) {
+            fit_rows.write().insert(panel, rows);
+        }
     });
 
     // This surface's live rectangle: its committed cell, unless it is the one being
