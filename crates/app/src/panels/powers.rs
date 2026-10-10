@@ -1468,6 +1468,19 @@ pub enum PickGate {
     Unreadable(String),
 }
 
+/// The set's powers this build could ever own ([`coh_data::reachable_in_set`]) — the only
+/// honest `siblings` for [`pick_gate`]. The whole set would count an archetype-locked opener
+/// toward a later power's "owns an earlier pick", and open every archetype's epic pools.
+pub fn reachable_idents(
+    set_powers: &[coh_data::Power],
+    set_id: &str,
+    state: &coh_data::CharacterState,
+    sets: &coh_data::SetPaths,
+) -> Vec<String> {
+    let powers: Vec<&coh_data::Power> = set_powers.iter().collect();
+    coh_data::reachable_in_set(&powers, set_id, state, state.archetype.id.as_deref(), sets)
+}
+
 /// Read a power's `requires` against the build (see [`coh_data::pick_rules`]). This is the
 /// whole of the prerequisite logic: intra-set prior-pick counts, mutual-exclusion locks and
 /// archetype gates all live in that one expression, per power, per fork.
@@ -1673,14 +1686,14 @@ fn AvailablePowersGroup(
     // toward it, and "you already have it" is a reason like any other. Only a granted power is
     // absent, because it is not a pick at all and no amount of planning buys it.
     let set_powers = powers_of_set(&database, &set_id, origin);
-    let idents: Vec<&str> = set_powers.iter().map(coh_data::Power::ident).collect();
+    let idents = reachable_idents(&set_powers, &set_id, &build.read(), &database.set_paths);
     let rows: Vec<(coh_data::Power, PickGate, Option<u8>)> = set_powers
         .iter()
         .cloned()
         .map(|power| {
             let siblings: Vec<&str> = idents
                 .iter()
-                .copied()
+                .map(String::as_str)
                 .filter(|i| *i != power.ident())
                 .collect();
             let gate = pick_gate(

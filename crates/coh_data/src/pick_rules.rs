@@ -192,6 +192,46 @@ pub fn requires_met_with_set<S: AsRef<str>>(
     requires_met(tokens, &with_set, archetype_id, sets)
 }
 
+/// The powers of one set this build could ever own: each either passes its `requires` now or
+/// passes it once the set's other reachable powers are added. These, and only these, are the
+/// honest `siblings` for [`requires_met_with_set`].
+///
+/// Feeding it the whole set instead counts powers the build can never take. Every epic pool
+/// shows why: its first powers carry the archetype gate (`$archetype @Class_Blaster ==`) and
+/// its later ones only `Epic ownPowerNum? 0 >`, so the archetype-locked openers satisfied the
+/// count for every archetype and each archetype's copy of every mastery read as reachable.
+///
+/// Grown to a fixpoint, since a power reached in one round can open another. An unreadable
+/// `requires` never joins: its row shows the fault, and an unread gate must not open others.
+pub fn reachable_in_set(
+    powers: &[&crate::Power],
+    set_id: &str,
+    state: &CharacterState,
+    archetype_id: Option<&str>,
+    sets: &SetPaths,
+) -> Vec<String> {
+    let mut reachable: Vec<String> = Vec::new();
+    loop {
+        let before = reachable.len();
+        for power in powers {
+            let ident = power.ident();
+            if reachable.iter().any(|r| r == ident) {
+                continue;
+            }
+            let tokens = crate::granted_powers::requires(power).unwrap_or_default();
+            let siblings: Vec<&str> = reachable.iter().map(String::as_str).collect();
+            if requires_met_with_set(&tokens, state, set_id, &siblings, archetype_id, sets)
+                == Ok(true)
+            {
+                reachable.push(ident.to_string());
+            }
+        }
+        if reachable.len() == before {
+            return reachable;
+        }
+    }
+}
+
 /// The build with every pick at or above `level` removed. Auto-granted picks (level 0) and the
 /// inherents list stay: neither was taken at a pick level, so neither can be out of order.
 fn build_before(state: &CharacterState, level: u8) -> CharacterState {

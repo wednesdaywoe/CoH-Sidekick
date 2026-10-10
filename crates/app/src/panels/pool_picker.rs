@@ -35,8 +35,8 @@ use crate::build_session::BuildSession;
 use crate::modal::{Modal, ModalSize};
 use crate::panels::info::PowerViewCard;
 use crate::panels::powers::{
-    add_pool, add_power, pick_gate, powers_of_set, set_epic_pool, set_unlock_floor, PickGate,
-    SetOrigin,
+    add_pool, add_power, pick_gate, powers_of_set, reachable_idents, set_epic_pool,
+    set_unlock_floor, PickGate, SetOrigin,
 };
 use crate::panels::stats::BuildTotals;
 use crate::shell::Db;
@@ -260,6 +260,26 @@ fn aggregate_set_gate(
     .map_err(|error| error.to_string())
 }
 
+/// The build a power's `requires` is read against when taking it from this aggregate.
+///
+/// A build holds one epic pool, and taking from another replaces it ([`set_epic_pool`]), so
+/// for an unheld epic the current one's powers are gone by the time the pick lands. Left in,
+/// they satisfied every other epic's `Epic ownPowerNum? 0 >` and opened every archetype's
+/// copy of every mastery to a build that already held one.
+fn gate_state(
+    mode: PoolPickerMode,
+    held: bool,
+    state: &coh_data::CharacterState,
+) -> std::borrow::Cow<'_, coh_data::CharacterState> {
+    if mode == PoolPickerMode::Epic && !held && state.epic_pool.is_some() {
+        let mut switched = state.clone();
+        switched.epic_pool = None;
+        std::borrow::Cow::Owned(switched)
+    } else {
+        std::borrow::Cow::Borrowed(state)
+    }
+}
+
 /// One row per aggregate in the catalog this mode browses, each carrying what the build can
 /// still do with it. Pure over `(database, mode, state)`, and outside the component so the
 /// two claims that make the list correct are gradeable: a held aggregate keeps its row, and a
@@ -291,21 +311,22 @@ fn pool_entries(
         .iter()
         .map(|pool| {
             let catalogued = powers_of_set(database, &pool.id, mode.origin());
-            let idents: Vec<&str> = catalogued.iter().map(coh_data::Power::ident).collect();
+            let gated = gate_state(mode, holds(&pool.id), state);
+            let idents = reachable_idents(&catalogued, &pool.id, &gated, &database.set_paths);
             let powers: Vec<(coh_data::Power, PickGate)> = catalogued
                 .iter()
                 .filter(|power| !picked.contains(&power.ident()))
                 .map(|power| {
                     let siblings: Vec<&str> = idents
                         .iter()
-                        .copied()
+                        .map(String::as_str)
                         .filter(|i| *i != power.ident())
                         .collect();
                     let gate = pick_gate(
                         power,
                         &pool.id,
                         &siblings,
-                        state,
+                        &gated,
                         archetype_id.as_deref(),
                         &database.set_paths,
                     );
@@ -585,24 +606,26 @@ fn take_check(
 ) -> Option<TakeCheck> {
     let power = resolve_power_def(database, set_id, power_ident)?;
     let set_powers = powers_of_set(database, set_id, mode.origin());
-    let siblings: Vec<&str> = set_powers
+    let already_held = match mode {
+        PoolPickerMode::Pool => state.pools.iter().any(|pool| pool.id == set_id),
+        PoolPickerMode::Epic => state.epic_pool.as_ref().is_some_and(|e| e.id == set_id),
+    };
+    let gated = gate_state(mode, already_held, state);
+    let reachable = reachable_idents(&set_powers, set_id, &gated, &database.set_paths);
+    let siblings: Vec<&str> = reachable
         .iter()
-        .map(coh_data::Power::ident)
+        .map(String::as_str)
         .filter(|i| *i != power_ident)
         .collect();
     let gate = pick_gate(
         power,
         set_id,
         &siblings,
-        state,
+        &gated,
         state.archetype.id.as_deref(),
         &database.set_paths,
     );
     let taken_levels: Vec<u8> = state.picked_powers().map(|p| p.level).collect();
-    let already_held = match mode {
-        PoolPickerMode::Pool => state.pools.iter().any(|pool| pool.id == set_id),
-        PoolPickerMode::Epic => state.epic_pool.as_ref().is_some_and(|e| e.id == set_id),
-    };
     // Taking a power out of an unheld pool BUYS that pool, so the pool's own gate has to
     // pass before the pick can — the game orders it the same way
     // (`character_net_server.c:1185` buys the set first, and only if it is allowed).
