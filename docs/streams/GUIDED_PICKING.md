@@ -58,13 +58,16 @@ Decisions (2026-10-10, user-chosen):
       can never fix those. Q/A on the web build: Tzarina (Homecoming) took Tough with no
       Boxing or Kick and it landed at L30; with Level Up mode on, Tough was refused.
       verify: fn:requires_met_with_set, fn:row_verdict, fn:commit_blocker
-- [ ] **GP3** — a working level, computed as the earliest empty pick slot (or the clicked slot,
+- [x] **GP3** — a working level, computed as the earliest empty pick slot (or the clicked slot,
       GP5), shown in the level control as `50 (14)` when Level Up mode is off and a pick is
       still empty. `CharacterState::level` is never changed by it.
-      done when: a test of the computing function covers "next empty slot", "a gap left behind
-      by an out-of-level pick" (third pick is a level 32 power → working level 2), and "all picks
-      filled → none"; and in the app the control reads `50 (2)` after that third pick and the
-      totals do not change.
+      Done 2026-10-10 as `level_control::working_level`. It replaces the old "Next pick Lvl N"
+      readout beside Level Up and the phone bar's "Next" chip, which showed the same number by
+      the same rule (decision 2026-10-10, Claude's call — one number in one place). The clicked
+      slot override arrives with GP5. Q/A on the web build: Tzarina read `28 (30)`, `28 (32)`
+      after taking Tough, `28` with Level Up mode on; Charnel (all picks filled) read `50`; the
+      Pixel 7 phone bar read `28 (30)` and fit.
+      verify: fn:working_level, file:crates/coh_data/tests/working_level.rs
 - [ ] **GP4** — power-list rows that unlock above the working level are dimmed as a whole row,
       not just the badge tint `is-locked` gives today, and stay clickable.  @unchecked
       done when: in the app at working level 4, I can tell at a glance which Archery and pool powers are

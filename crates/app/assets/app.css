@@ -225,6 +225,13 @@
   color: var(--action-active-core);
 }
 .level-control__slider input[type="range"] { width: 96px; max-width: 96px; }
+/* The working level: the pick slot the guided planner is filling next, in brackets after the
+   character's level. Secondary to it, so dimmer and lighter. */
+.level-control__working {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
 /* A dataset with no leveling schedule has no range to offer. The seat still draws, reading
    an em dash — a control that vanished would be indistinguishable from one that was never
    there, and the level is still whatever the build holds. */
@@ -337,20 +344,6 @@
   .level-up__label { display: none; }
 }
 
-/* The level the next power pick fills, beside Level Up while the mode is off. A statement, not
-   a control, so it has no frame: the number is set in the readout's own active color. */
-.next-pick {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 12px;
-  font-family: var(--font-chrome);
-  color: var(--text-faint);
-  white-space: nowrap;
-}
-.next-pick__label { font-weight: 600; letter-spacing: 0.02em; }
-.next-pick__value { color: var(--action-active); font-variant-numeric: tabular-nums; }
-/* Not in the phone bar: it already wraps to two rows, its own Pwr counter speaks for picks, and
-   a third row would come out of the space the build scrolls in. */
-.build-bar .next-pick { display: none; }
 
 /* ---- header popovers (build identity, combat, options) ----
    Anchored to their trigger, which is safe ONLY because the header sits outside the free
